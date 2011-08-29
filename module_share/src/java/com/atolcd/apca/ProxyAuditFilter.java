@@ -1,16 +1,11 @@
 package com.atolcd.apca;
 
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
+
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,12 +19,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.httpclient.URIException;
-import org.apache.commons.io.IOUtils;
-import org.hamcrest.core.Is;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.extensions.surf.FrameworkUtil;
 import org.springframework.extensions.surf.RequestContext;
 import org.springframework.extensions.surf.RequestContextUtil;
@@ -43,7 +36,6 @@ import org.springframework.extensions.surf.util.I18NUtil;
 import org.springframework.extensions.webscripts.connector.Connector;
 import org.springframework.extensions.webscripts.connector.ConnectorContext;
 import org.springframework.extensions.webscripts.connector.HttpMethod;
-import org.springframework.extensions.webscripts.connector.Response;
 import org.springframework.extensions.webscripts.connector.User;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -62,18 +54,20 @@ public class ProxyAuditFilter implements Filter {
 	private ApplicationContext getApplicationContext() {
 		return WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
 	}
-			
+
 	@Override
 	public void doFilter(ServletRequest sReq, ServletResponse sRes,
 			FilterChain chain) throws IOException, ServletException {
-      
+
 		// Get the HTTP request/response/session
 		HttpServletRequest request = (HttpServletRequest) sReq;
-		// HttpServletResponse response = (HttpServletResponse) sRes;
-		
+		//HttpServletResponse response = (HttpServletResponse) sRes;
+		RequestWrapper requestWrapper = new RequestWrapper(request);
+
+		// System.out.println("Requested : " + request.getRequestURL().toString());
 		// initialize a new request context
 		RequestContext context = ThreadLocalRequestContext.getRequestContext();
-		
+
 		if (context == null) {
 			try {
 				// perform a "silent" init - i.e. no user creation or remote connections
@@ -90,100 +84,135 @@ public class ProxyAuditFilter implements Filter {
 			}
 		}
 		User user = context.getUser();
-		
-		System.out.println("Request : " + request.getRequestURL().toString());
-		System.out.println("QueryString : " + request.getQueryString());
-		
-		if(user != null){	
-			System.out.println("Request : " + request.getRequestURL().toString());
-			System.out.println("QueryString : " + request.getQueryString());
-			System.out.println("Method : " + request.getMethod());
-			System.out.println("Content type = " + request.getContentType());
-			
-			
-			int size = request.getContentLength();
-			if(size > 0){
-				System.out.println("ref : " + request.getHeader("referer"));
-				System.out.println("Lenght : " + request.getContentLength());
-				String tmp = request.getContentType().split(";")[0];
-				if(tmp.equals("application/json")){
+		String requestURL = request.getRequestURL().toString();
 
-					StringWriter writer=new StringWriter();
+		if(user != null){
+			try{
+				//Création de l'auditSample
+				JSONObject auditSample = new JSONObject();
+				auditSample.put("id","0");
+				auditSample.put("auditUserId", user.getId());
+				auditSample.put("auditSite", "");
+				auditSample.put("auditAppName", "");
+				auditSample.put("auditActionName", "");
+				auditSample.put("auditObject", "");
+				auditSample.put("auditTime", Long.toString(System.currentTimeMillis()));
 
-					//BufferedInputStream is = new BufferedInputStream(request.getInputStream());
-					// InputStreamReader streamReader=new InputStreamReader(is);
-					//le buffer permet le readline
-					//BufferedReader buffer=new BufferedReader(streamReader);
-					//String dze = IOUtils.toString(request.getInputStream());
-					//System.out.println(dze);
-					
-					/*InputStream bs = new BufferedInputStream(sReq.getInputStream());
-					bs.mark(0);
-					byte[] b = new byte[size];
-					bs.read(b);
-					bs.reset();*/
+				//Ajout de documents - Possibilité de filtrer les suppressions (method : delete)
+				//Ne se déclenche pas pour les replies/comments ?! Que pour les docs ?!
+				if(requestURL.endsWith("/activity") && request.getMethod().toLowerCase().equals("post")){
 
-					//request.getReader()
-					/*String line="";
-					while ( null!=(line=buffer.readLine())){
-					 writer.write(line); 
+					String type = request.getContentType().split(";")[0];
+					if(type.equals("application/json")){
+						//Get JSON Object
+						JSONObject activityFeed = new JSONObject(requestWrapper.getStringContent());
+						//Mise à jour de l'auditSample à insérer
+						if(activityFeed.has("nodeRef")){
+							auditSample.put("auditAppName",activityFeed.getString("page"));
+							auditSample.put("auditSite", activityFeed.getString("site"));
+							auditSample.put("auditActionName", activityFeed.getString("type"));
+							auditSample.put("auditObject", activityFeed.getString("nodeRef")); //filename also available
+						}
+						else if(activityFeed.has("fileCount")){
+							//Plusieurs docs d'un coup. On ne récupère pas les nodeRefs.
+							auditSample.put("auditAppName",activityFeed.getString("page"));
+							auditSample.put("auditSite", activityFeed.getString("site"));
+							auditSample.put("auditActionName", activityFeed.getString("type"));
+
+							int fileCount = activityFeed.getInt("fileCount");
+							for(int i=0;i<fileCount;i++){
+								remoteCall(request,auditSample);
+							}
+						}
+						//Remote call for DB
+						remoteCall(request,auditSample);
 					}
-					
-					// Sortie finale dans le String
-					System.out.println("Content : " + writer.toString());
-					System.out.println(request.getInputStream().available());*/
+
 
 				}
+				else if(requestURL.endsWith("/comments") || requestURL.endsWith("/replies")){
+					//Comments & replies
+					String[] urlTokens = request.getHeader("referer").toString().split("/");
+					HashMap<String, String> auditData = this.getUrlData(urlTokens);
+
+					auditSample.put("auditSite", auditData.get("site"));
+					auditSample.put("auditAppName", auditData.get("module"));
+					auditSample.put("auditActionName", "comments");
+					auditSample.put("auditObject", getNodeRefFromUrl(requestURL));
+					// Ancienne méthode pour récupérer le postId - NodeRef Maintenant
+					// auditSample.put("auditObject",
+					//		getUrlParameters(urlTokens[urlTokens.length-1]).get("postId"));
+
+					//Remote call for DB
+					remoteCall(request,auditSample);
+				}
+			} catch (JSONException e) {
+				System.out.println("JSON Error during a remote call ...");
+				e.printStackTrace();
 			}
 		}
-
-		chain.doFilter(sReq, sRes);
-		
+		chain.doFilter(requestWrapper, sRes);
 	}
 
-
-	@SuppressWarnings("unused")
-	private void remoteCall(HttpServletRequest request, ApcaAuditEntry entry) throws JSONException, URIException, UnsupportedEncodingException {
+	private void remoteCall(HttpServletRequest request, JSONObject auditSample) throws JSONException, URIException, UnsupportedEncodingException {
 		Connector connector;
 		try {
-			connector = FrameworkUtil.getConnector(request.getSession(true), entry.getAuditUserId(), AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
-			
-			// parameters = null, on passe par le inputstream.
+			connector = FrameworkUtil.getConnector(request.getSession(true), auditSample.getString("auditUserId"), AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
+
 			// Le webscript est appelé avec l'audit converti en JSON.
 			ConnectorContext postContext = new ConnectorContext(null,buildDefaultHeaders());
 			postContext.setMethod(HttpMethod.POST);
 			postContext.setContentType("text/plain;charset=UTF-8");
-			InputStream in = new ByteArrayInputStream(entry.toJSON().getBytes("UTF-8"));
-			
+			InputStream in = new ByteArrayInputStream(auditSample.toString().getBytes("UTF-8"));
+
 			//Appel au webscript
-			Response resp = connector.call("/db/connect",postContext,in);
-			
-			System.out.println("Response : " + resp.toString());
+			connector.call("/db/insert",postContext,in);
+
+			//System.out.println("Response : " + resp.toString());
 
 		} catch (ConnectorServiceException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
+	 * @param url
+	 * @return nodeRef
+	 */
+	public String getNodeRefFromUrl(String url){
+		String nodeRef="";
+		String[] urlTokens = url.split("/");
+		nodeRef = urlTokens[urlTokens.length - 4] + "://"
+				+ urlTokens[urlTokens.length - 3] + "/"
+				+ urlTokens[urlTokens.length - 2] ;
+
+		return nodeRef;
+	}
+
+	/**
+	 * @deprecated
 	 * @param url
 	 * @return
 	 */
-	public HashMap<String, String> getAuditData(HttpServletRequest request, String requestURL){
-		HashMap<String, String> auditData = new HashMap<String, String>();
-		
-		String[] urlTokens = requestURL.split("/");
-	
-		HashMap<String, String> urlData = getUrlData(urlTokens);
-		auditData.putAll(urlData);
-		
-		auditData.put("object", "");
-		return auditData;	
+	public HashMap<String, String> getUrlParameters(String queryString){
+		HashMap<String, String> urlParameters = new HashMap<String, String>();
+		queryString = queryString.substring(queryString.indexOf('?')+1);
+		String[] urlTokens = queryString.split("&");
+		for(String token:urlTokens){
+			String[] parameter = token.split("=");
+			if(parameter.length>1){
+				urlParameters.put(parameter[0], parameter[1]);
+			}
+			else{
+				urlParameters.put(parameter[0], "");
+			}
+		}
+		return urlParameters;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param url
 	 * @return
 	 */
@@ -192,7 +221,7 @@ public class ProxyAuditFilter implements Filter {
 		urlData.put("module","");
 		urlData.put("action","");
 		urlData.put("site", "");
-		
+
 		boolean siteFlag = false;
 		for(int i=0;i<urlTokens.length;i++){
 			if(urlTokens[i].equals("site") && !siteFlag){
@@ -211,18 +240,19 @@ public class ProxyAuditFilter implements Filter {
 			}
 		}
 		return urlData;
-	}	
+	}
 
    /**
     * Helper to build a map of the default headers for script requests - we send over
     * the current users locale so it can be respected by any appropriate REST APIs.
-    *  
+    *
     * @return map of headers
-    */  
+    */
     private static Map<String, String> buildDefaultHeaders()
     {
         Map<String, String> headers = new HashMap<String, String>(1, 1.0f);
 	    headers.put("Accept-Language", I18NUtil.getLocale().toString().replace('_', '-'));
         return headers;
     }
+
 }

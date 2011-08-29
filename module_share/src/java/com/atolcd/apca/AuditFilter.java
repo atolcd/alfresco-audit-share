@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.httpclient.URIException;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.FrameworkUtil;
@@ -34,7 +35,6 @@ import org.springframework.extensions.surf.util.I18NUtil;
 import org.springframework.extensions.webscripts.connector.Connector;
 import org.springframework.extensions.webscripts.connector.ConnectorContext;
 import org.springframework.extensions.webscripts.connector.HttpMethod;
-import org.springframework.extensions.webscripts.connector.Response;
 import org.springframework.extensions.webscripts.connector.User;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -50,7 +50,7 @@ public class AuditFilter implements Filter {
 	@Override
 	public void init(FilterConfig args) throws ServletException {
 		this.servletContext = args.getServletContext();
-		
+
 		this.moduleIds = new HashMap<String, String>();
 		this.moduleIds.put("wiki", "title");
 		this.moduleIds.put("blog", "postId");
@@ -66,18 +66,18 @@ public class AuditFilter implements Filter {
 	private ApplicationContext getApplicationContext() {
 		return WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
 	}
-			
+
 	@Override
 	public void doFilter(ServletRequest sReq, ServletResponse sRes,
 			FilterChain chain) throws IOException, ServletException {
-      
+
 		// Get the HTTP request/response/session
 		HttpServletRequest request = (HttpServletRequest) sReq;
 		// HttpServletResponse response = (HttpServletResponse) sRes;
 
 		// initialize a new request context
 		RequestContext context = ThreadLocalRequestContext.getRequestContext();
-		
+
 		if (context == null) {
 			try {
 				// perform a "silent" init - i.e. no user creation or remote connections
@@ -94,60 +94,82 @@ public class AuditFilter implements Filter {
 			}
 		}
 		User user = context.getUser();
-		
-		if(user != null){	
-			String ref = request.getHeader("referer");
-			String requestURL = request.getRequestURL().toString();
-			if(requestURL != null)
-			{		
-				if(requestURL.endsWith("/dologin") && (ref != null)){
-					requestURL = ref;
+		String requestURI = request.getRequestURI();
+		if(user != null && requestURI !=null){
+			try{
+				//Préparation du JSON à envoyer.
+				JSONObject auditSample = new JSONObject();
+				auditSample.put("id","0");
+				auditSample.put("auditUserId", user.getId());
+
+				/*if(requestURI.endsWith("/dashboard")){
+						auditSample.put("auditSite", "");
+						auditSample.put("auditAppName", "dashboard");
+						auditSample.put("auditActionName","");
+						auditSample.put("auditObject", "");
+						auditSample.put("auditTime", Long.toString(System.currentTimeMillis()));
+						//Remote call for DB
+						remoteCall(request,auditSample);
+				}*/
+				if(requestURI.startsWith("/share/page/console/")){
+						/*String[] urlTokens = requestURI.split("/");
+						auditSample.put("auditSite", "");
+						auditSample.put("auditAppName", "console");
+						auditSample.put("auditActionName",urlTokens[urlTokens.length-1]);
+						auditSample.put("auditObject", "");
+						auditSample.put("auditTime", Long.toString(System.currentTimeMillis()));
+
+						//Remote call for DB
+						remoteCall(request,auditSample);*/
 				}
-				
-				HashMap<String, String> auditData = getAuditData(request, requestURL);
-				ApcaAuditEntry auditSample = new ApcaAuditEntry();
-				auditSample.setAuditUserId(user.getId());
-				auditSample.setAuditSite(auditData.get("site"));
-				auditSample.setAuditAppName(auditData.get("module"));
-				auditSample.setAuditActionName(auditData.get("action"));
-				auditSample.setAuditObject(auditData.get("object"));
-				auditSample.setAuditTime(System.currentTimeMillis());
-				
-				//Remote call for DB
-				try {
-					remoteCall(request,auditSample);
-				} catch (JSONException e) {
-					System.out.println("Error during a remote call ...");
-					e.printStackTrace();
-				}
-				
-		    }
+				else
+				{
+					String ref = request.getHeader("referer");
+					if(requestURI.endsWith("/dologin") && (ref != null)){
+						requestURI = ref;
+					}
+						HashMap<String, String> auditData = getAuditData(request, requestURI);
+						//TODO Check for other actions to audit if null
+						if((auditData.get("module").length() >0) && (auditData.get("site").length() > 0))
+						{
+							auditSample.put("auditSite", auditData.get("site"));
+							auditSample.put("auditAppName", auditData.get("module"));
+							auditSample.put("auditActionName",auditData.get("action"));
+							auditSample.put("auditObject", auditData.get("object"));
+							auditSample.put("auditTime", Long.toString(System.currentTimeMillis()));
+
+							//Remote call for DB
+							remoteCall(request,auditSample);
+						}
+			    }
+			}catch(Exception e){
+				System.out.println(" Error while auditing data in AuditFilter");
+			}
 		}
 		chain.doFilter(sReq, sRes);
 	}
 
-
-	private void remoteCall(HttpServletRequest request, ApcaAuditEntry entry) throws JSONException, URIException, UnsupportedEncodingException {
+	private void remoteCall(HttpServletRequest request, JSONObject auditSample) throws JSONException, URIException, UnsupportedEncodingException {
 		Connector connector;
 		try {
-			connector = FrameworkUtil.getConnector(request.getSession(true), entry.getAuditUserId(), AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
+			connector = FrameworkUtil.getConnector(request.getSession(true), auditSample.getString("auditUserId"), AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
 
 			// En get
 			// String query ="/db/connect?entry=" + entry.toJSON();
 			// Response resp = connector.call(URIUtil.encodeQuery(query));
-			
+
 			// parameters = null, on passe par le inputstream.
 			// Le webscript est appelé avec l'audit converti en JSON.
 			ConnectorContext postContext = new ConnectorContext(null,buildDefaultHeaders());
 			postContext.setMethod(HttpMethod.POST);
 			postContext.setContentType("text/plain;charset=UTF-8");
-			InputStream in = new ByteArrayInputStream(entry.toJSON().getBytes("UTF-8"));
-			
-			//Appel au webscript
-			Response resp = connector.call("/db/connect",postContext,in);
-			
-			System.out.println("Response : " + resp.toString());
-			/*if (resp.getStatus().getCode() == Status.STATUS_OK) {
+			InputStream in = new ByteArrayInputStream(auditSample.toString().getBytes("UTF-8"));
+
+			//Appel au webscript - Response resp =
+			connector.call("/db/insert",postContext,in);
+
+			/*System.out.println("Response : " + resp.toString());
+			if (resp.getStatus().getCode() == Status.STATUS_OK) {
 				try {
 					JSONObject json = new JSONObject(resp.getResponse());
 					if (json.has("firstName")) {
@@ -161,25 +183,19 @@ public class AuditFilter implements Filter {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param url
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public HashMap<String, String> getAuditData(HttpServletRequest request, String requestURL){
-		//HashMap<String, String[]> parameters = (HashMap<String, String[]>)request.getParameterMap();
 		HashMap<String, String> auditData = new HashMap<String, String>();
-		
 		String[] urlTokens = requestURL.split("/");
-		
-		//# pour les anchors dans les discussions - # non passé ?
-		//String[] parametersTokens = (splittedUrl.length == 2) ? splittedUrl[1].split("[#&]") : null;
-		
+
 		HashMap<String, String> urlData = getUrlData(urlTokens);
 		auditData.putAll(urlData);
-		
+
 		try {
 			//On récupère l'identifiant de l'objet consulté à partir de son module
 			//En cas de null, on catch et on met une chaîne vide.
@@ -194,11 +210,11 @@ public class AuditFilter implements Filter {
 		catch(Exception e){
 			auditData.put("object", "");
 		}
-		return auditData;	
+		return auditData;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param url
 	 * @return
 	 */
@@ -207,7 +223,7 @@ public class AuditFilter implements Filter {
 		urlData.put("module","");
 		urlData.put("action","");
 		urlData.put("site", "");
-		
+
 		boolean siteFlag = false;
 		for(int i=0;i<urlTokens.length;i++){
 			if(urlTokens[i].equals("site") && !siteFlag){
@@ -216,24 +232,38 @@ public class AuditFilter implements Filter {
 			else if(siteFlag && (urlData.get("site").equals(""))){
 				urlData.put("site", urlTokens[i]);
 				String[] splittedModuleAction = urlTokens[i+1].split("-");
-				urlData.put("module", splittedModuleAction[0]);
+				//test pour site-members & site-groups
+				if(splittedModuleAction[0].equals("site")){
+					urlData.put("module", "members");
+				}
+				else {
+					urlData.put("module", splittedModuleAction[0]);
+				}
+
+				//Test d'action (module-action; wiki-create par exemple)
 				if(splittedModuleAction.length > 1){
 					urlData.put("action", splittedModuleAction[1]);
 				}
 				else if (splittedModuleAction.length == 1) {
-					urlData.put("action", "");
+					if(urlData.get("module").endsWith("library")){
+						urlData.put("module", "document");
+						urlData.put("action", "library");
+					}
+					else {
+						urlData.put("action", "");
+					}
 				}
 			}
 		}
 		return urlData;
-	}	
+	}
 
    /**
     * Helper to build a map of the default headers for script requests - we send over
     * the current users locale so it can be respected by any appropriate REST APIs.
-    *  
+    *
     * @return map of headers
-    */  
+    */
     private static Map<String, String> buildDefaultHeaders()
     {
         Map<String, String> headers = new HashMap<String, String>(1, 1.0f);
