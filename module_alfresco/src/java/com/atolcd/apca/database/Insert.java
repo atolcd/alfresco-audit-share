@@ -1,4 +1,4 @@
-package com.atolcd.apca;
+package com.atolcd.apca.database;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -14,7 +14,9 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.orm.ibatis.SqlMapClientTemplate;
 import org.springframework.util.Assert;
 
-public class DbConnect extends DeclarativeWebScript implements InitializingBean {
+import com.atolcd.apca.ApcaAuditEntry;
+
+public class Insert extends DeclarativeWebScript implements InitializingBean {
 	//SqlMapClientTemplate for ibatis calls
 	private SqlMapClientTemplate sqlMapClientTemplate;
 
@@ -50,34 +52,13 @@ public class DbConnect extends DeclarativeWebScript implements InitializingBean 
 		}
 		return model;
 		} catch (Exception e){
-			//status.setCode(500,"Internal server error in [Apca-DbConnect] executeImpl");
-			throw new WebScriptException("[Apca-DbConnect] Error in executeImpl function");
+			throw new WebScriptException("[Apca-DbInsert] Error in executeImpl function");
 		}
 	}
 
-	/**
-	 * @useless
-	 *
-	 * @param l long Id de l'enregistrement à modifier
-	 * @throws SQLException
-	 * @throws JSONException
-	 */
-	public void update(long l) throws SQLException, JSONException{
-		ApcaAuditEntry auditSample = this.select(l);
-		auditSample.setAuditAppName("Forum");
-		sqlMapClientTemplate.update("alfresco.apca.audit.updateById", auditSample);
-		System.out.println("Update by JSON ok : " + auditSample.toJSON());
-	}
 
 	public void insert(ApcaAuditEntry auditSample)throws SQLException, JSONException{
-		//TODO Vérification des valeurs qui vont être ajoutée
 		sqlMapClientTemplate.insert("alfresco.apca.audit.insertEntry", auditSample);
-		System.out.println("Insert by JSON ok : " + auditSample.toJSON());
-	}
-
-	public ApcaAuditEntry select(long l) throws SQLException, JSONException{
-		ApcaAuditEntry auditSample = (ApcaAuditEntry) sqlMapClientTemplate.queryForObject("alfresco.apca.audit.selectById",l);
-		System.out.println("Select by JSON ok : " + auditSample.toJSON());
-		return auditSample;
+		System.out.println("Insert ok : " + auditSample.toJSON());
 	}
 }

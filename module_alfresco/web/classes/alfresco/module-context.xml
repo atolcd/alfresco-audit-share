@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+
+<!--
+   Core and helper beans for the module-loading components.
+-->
+<beans >
+
+   <!-- The ModuleService implementation -->
+   <bean id="moduleService" class="org.alfresco.repo.module.ModuleServiceImpl">
+      <!-- Uses ModuleComponentHelper which requires the ServiceRegistry -->
+      <property name="serviceRegistry" ref="ServiceRegistry" />
+      <property name="descriptorService" ref="DescriptorService" />
+      <property name="registryService" ref="RegistryService" />
+      <property name="tenantAdminService" ref="tenantAdminService" />
+   </bean>
+
+   <!-- Parent bean for beans derived from AbstractModuleComponent -->
+   <bean id="module.baseComponent" abstract="true" init-method="init">
+      <property name="serviceRegistry" ref="ServiceRegistry" />
+      <property name="authenticationComponent" ref="AuthenticationComponent" />
+      <property name="moduleService" ref="ModuleService" />
+      <property name="tenantAdminService" ref="tenantAdminService" />
+   </bean>
+
+   
+       <!-- Bean for Audit Queries -->
+    <bean id="webscript.com.atolcd.apca.dbconnect.post" class="com.atolcd.apca.DbConnect" parent="webscript">
+      <property name="sqlMapClientTemplate" ref="auditApcaSqlMapClientTemplate"/>
+    </bean>
+    
+    <bean id="webscript.com.atolcd.apca.database.insert.post" class="com.atolcd.apca.database.Insert" parent="webscript">
+      <property name="sqlMapClientTemplate" ref="auditApcaSqlMapClientTemplate"/>
+    </bean>
+    
+    <bean id="webscript.com.atolcd.apca.database.select.get" class="com.atolcd.apca.database.Select" parent="webscript">
+      <property name="sqlMapClientTemplate" ref="auditApcaSqlMapClientTemplate"/>
+    </bean>
+    
+    <bean id="webscript.com.atolcd.apca.database.update.post" class="com.atolcd.apca.database.Update" parent="webscript">
+      <property name="sqlMapClientTemplate" ref="auditApcaSqlMapClientTemplate"/>
+    </bean>
+    
+   <!-- Import of installed modules -->
+   <import resource="classpath*:alfresco/module/*/module-context.xml"/>    
+   <import resource="classpath*:alfresco/module/*/module-uninstall-context.xml"/>
+
+</beans>
