@@ -1,0 +1,6 @@
+<webscript>
+  <shortname>Console d'audit pour l'APCA</shortname>
+  <description>Console d'audit</description>
+  <url>/components/console/apca-audit</url>
+  <family>admin-console</family>
+</webscript>

@@ -24,6 +24,12 @@ public class Select extends DeclarativeWebScript implements InitializingBean {
 	//SqlMapClientTemplate for ibatis calls
 	private SqlMapClientTemplate sqlMapClientTemplate;
 
+	private static final String SELECT_ACTION = "alfresco.apca.audit.selectActions";
+	private static final String SELECT_COMMENT = "alfresco.apca.audit.selectComments";
+	private static final String SELECT_FILE = "alfresco.apca.audit.selectFileActions";
+	private static final String SELECT_MODULE = "alfresco.apca.audit.selectModules";
+	private static final String SELECT_MODULE_VIEW = "alfresco.apca.audit.selectModuleViews";
+
 
 	public void setSqlMapClientTemplate(SqlMapClientTemplate sqlMapClientTemplate){
 		this.sqlMapClientTemplate = sqlMapClientTemplate;
@@ -36,7 +42,7 @@ public class Select extends DeclarativeWebScript implements InitializingBean {
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache){
 		try{
-		// Map that will be passed to the template
+		// Map passé au template.
 		Map<String, Object> model = new HashMap<String, Object>();
 
 		// Check for the sqlMapClientTemplate Bean
@@ -45,40 +51,66 @@ public class Select extends DeclarativeWebScript implements InitializingBean {
 			//String jsonArg = req.getContent().getContent();
 
 			String type = req.getParameter("type");
+			// Inutile ?
 			if(type.equals("all")){
 				model.put("results", selectAll());
 			}
 			else if(type.equals("module")) {
 				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
-				model.put("views", selectByModuleWithStats(params));
+				model.put("views", select(params,SELECT_MODULE));
 			}
-			else if(type.equals("action")){
+			else if(type.equals("action")) {
 				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
-				model.put("views", selectByActionWithStats(params));
+				model.put("views", select(params,SELECT_ACTION));
 			}
-			else if(type.equals("module-views")){
+			else if(type.equals("module-views")) {
 				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
-				model.put("views", selectByModulesViews(params));
+				model.put("views", select(params,SELECT_MODULE_VIEW));
 			}
-			else if(type.equals("action-views")){
+			else if(type.equals("file")) {
 				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
-				model.put("views", selectByActionsViews(params));
+				model.put("views",select(params,SELECT_FILE));
 			}
-			else if(type.equals("by-month")){
+			else if(type.equals("comment")) {
 				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
-				model.put("dates", selectByMonth(params));
+				model.put("views",select(params,SELECT_COMMENT));
 			}
-			else if(type.equals("by-day")){
+			else if(type.equals("module-by-month") || type.equals("module-by-week") ||
+					type.equals("module-by-day") )
+			{
 				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
-				model.put("dates", selectByDay(params));
+				//type = type.substring(7, type.length());
+				model.put("slicedDates", params.getSlicedDates());
+				model.put("dates", selectByDate(params,SELECT_MODULE));
 			}
-
+			else if(type.equals("action-by-month") || type.equals("action-by-week") ||
+					type.equals("action-by-day") )
+			{
+				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
+				//type = type.substring(7, type.length());
+				model.put("slicedDates", params.getSlicedDates());
+				model.put("dates", selectByDate(params,SELECT_ACTION));
+			}
+			else if(type.equals("file-by-month") || type.equals("file-by-week") ||
+					type.equals("file-by-day")) {
+				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
+				//type = type.substring(7, type.length());
+				model.put("slicedDates", params.getSlicedDates());
+				model.put("dates",selectByDate(params,SELECT_FILE));
+			}
+			else if(type.equals("comment-by-month") || type.equals("comment-by-week") ||
+					type.equals("comment-by-day")) {
+				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
+				//type = type.substring(7, type.length());
+				model.put("slicedDates", params.getSlicedDates());
+				model.put("dates",selectByDate(params,SELECT_COMMENT));
+			}
+			model.put("type", type);
 		}
 		return model;
 		} catch (Exception e){
 			e.printStackTrace();
 			throw new WebScriptException("[Apca-DbSelect] Error in executeImpl function");
-
 		}
 	}
 
@@ -105,85 +137,29 @@ public class Select extends DeclarativeWebScript implements InitializingBean {
 		return auditSamples;
 	}
 
-	/**
-	 *
-	 * @return
-	 * @throws SQLException
-	 * @throws JSONException
-	 */
 	@SuppressWarnings("unchecked")
-	public List<ApcaAuditCount> selectByModuleWithStats(ApcaAuditQueryParameters params) throws SQLException, JSONException
-	{
+	public List<ApcaAuditCount> select(ApcaAuditQueryParameters params, String query){
 		List<ApcaAuditCount> auditCount = new ArrayList<ApcaAuditCount>();
-		auditCount = sqlMapClientTemplate.queryForList("alfresco.apca.audit.selectByModuleWithStats",params);
-		System.out.println("Performing selectByModuleWithStats() ... ");
-		return auditCount;
-	}
-
-	/**
-	 *
-	 * @return
-	 * @throws SQLException
-	 * @throws JSONException
-	 */
-	@SuppressWarnings("unchecked")
-	public List<ApcaAuditCount> selectByActionWithStats(ApcaAuditQueryParameters params) throws SQLException, JSONException
-	{
-		List<ApcaAuditCount> auditCount = new ArrayList<ApcaAuditCount>();
-		auditCount = sqlMapClientTemplate.queryForList("alfresco.apca.audit.selectByActionWithStats",params);
-		System.out.println("Performing selectByActionWithStats() ... ");
+		auditCount = sqlMapClientTemplate.queryForList(query,params);
+		System.out.println("Performing " + query + " ... ");
 		return auditCount;
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<ApcaAuditCount> selectByModulesViews(ApcaAuditQueryParameters params)
-	{
-		List<ApcaAuditCount> auditCount = new ArrayList<ApcaAuditCount>();
-		auditCount = sqlMapClientTemplate.queryForList("alfresco.apca.audit.selectByModulesViews",params);
-		System.out.println("Performing selectByModuleViews() ... ");
-		return auditCount;
-	}
-
-	@SuppressWarnings("unchecked")
-	public List<ApcaAuditCount> selectByActionsViews(ApcaAuditQueryParameters params)
-	{
-		List<ApcaAuditCount> auditCount = new ArrayList<ApcaAuditCount>();
-		auditCount = sqlMapClientTemplate.queryForList("alfresco.apca.audit.selectByActionsViews",params);
-		System.out.println("Performing selectByActionsViews() ... ");
-		return auditCount;
-	}
-
-	@SuppressWarnings("unchecked")
-	public List<List<ApcaAuditCount>> selectByMonth(ApcaAuditQueryParameters params)
-	{
+	public List<List<ApcaAuditCount>> selectByDate(ApcaAuditQueryParameters params, String query){
 		String[] dates = params.getSlicedDates().split(",");
 		List<List<ApcaAuditCount>> auditCount= new ArrayList<List<ApcaAuditCount>>();
 		for(int i=0 ; i < dates.length - 1 ; i++){
 			params.setDateFrom(dates[i]);
 			params.setDateTo(dates[i+1]);
 			List<ApcaAuditCount> auditSample = new ArrayList<ApcaAuditCount>();
-			auditSample = sqlMapClientTemplate.queryForList("alfresco.apca.audit.selectByMonth",params);
+			auditSample = sqlMapClientTemplate.queryForList(query,params);
 			auditCount.add(auditSample);
 		}
-		System.out.println("Performing selectByMonth() ... ");
+		System.out.println("Performing " + query + " ... ");
 		return auditCount;
 	}
 
-	@SuppressWarnings("unchecked")
-	public List<List<ApcaAuditCount>> selectByDay(ApcaAuditQueryParameters params)
-	{
-		String[] dates = params.getSlicedDates().split(",");
-		List<List<ApcaAuditCount>> auditCount= new ArrayList<List<ApcaAuditCount>>();
-		for(int i=0 ; i < dates.length - 1 ; i++){
-			params.setDateFrom(dates[i]);
-			params.setDateTo(dates[i+1]);
-			List<ApcaAuditCount> auditSample = new ArrayList<ApcaAuditCount>();
-			auditSample = sqlMapClientTemplate.queryForList("alfresco.apca.audit.selectByDay",params);
-			auditCount.add(auditSample);
-		}
-		System.out.println("Performing selectByDay() ... ");
-		return auditCount;
-	}
 	public ApcaAuditQueryParameters buildParametersFromRequest(WebScriptRequest req)
 	{
 		try{

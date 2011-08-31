@@ -118,7 +118,7 @@
       </isGreaterThan>
     </sql>
 
-    <!-- Snippet de dates-->
+    <!-- Snippet de consultation-->
     <sql id="view_snippet">
       where
         audit_action_name = "page"
@@ -135,6 +135,39 @@
       <include refid="time_snippet"/>
     </sql>
 
+    <!-- Snippet commentaires / réponses -->
+    <sql id="comment_snippet">
+      where
+        audit_action_name = "comments"
+      or
+        audit_action_name = ""
+      <isNotNull prepend="and" property="siteId">
+          audit_site = #siteId#
+      </isNotNull>
+      <isNotNull prepend="and" property="auditAppName">
+          audit_site = #auditAppName#
+      </isNotNull>
+      <include refid="time_snippet"/>
+    </sql>
+    
+    <!-- Snippet d'opération sur fichiers -->
+    <sql id="file_snippet">
+      where
+        audit_action_name = "files-deleted"
+      or
+        audit_action_name = "files-added"
+      or
+        audit_action_name = "file-deleted"
+      or
+        audit_action_name = "file-added"
+      <isNotNull prepend="and" property="siteId">
+          audit_site = #siteId#
+      </isNotNull>
+      <isNotNull prepend="and" property="auditAppName">
+          audit_site = #auditAppName#
+      </isNotNull>
+      <include refid="time_snippet" />
+    </sql>
     <!--                -->
     <!-- Statements     -->
     <!--                -->
@@ -159,8 +192,9 @@
         apca_audit_entry
     </select>
 
+
     <!-- Get stats about module -->
-    <select id="selectByModuleWithStats" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
+    <select id="selectModules" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
       select
         audit_app_name as audit_target, count(*) as audit_count
       from
@@ -170,7 +204,7 @@
     </select>
 
     <!-- Get stats about module views-->
-    <select id="selectByModulesViews" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
+    <select id="selectModuleViews" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
       select
         audit_app_name as audit_target, count(*) as audit_count
       from
@@ -181,7 +215,7 @@
     </select>
 
     <!-- Get stats about action -->
-    <select id="selectByActionWithStats" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
+    <select id="selectActions" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
       select
         audit_action_name as audit_target, count(*) as audit_count
       from
@@ -190,34 +224,24 @@
       group by audit_target
     </select>
 
-    <!-- Get stats about actions views-->
-    <select id="selectByActionsViews" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
+
+    <!-- Get modules with comments & replies -->
+    <select id="selectComments" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
       select
-        audit_action_name as audit_target, count(*) as audit_count
+        audit_app_name as audit_target, count(*) as audit_count
       from
         apca_audit_entry
-
-      <include refid="select_auditViewEntriesWhereSnippet"/>
+      <include refid="comment_snippet" />
       group by audit_target
     </select>
-
-    <!-- Get stats about actions views-->
-    <select id="selectByMonth" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
+    
+    <!-- Get files activities -->
+    <select id="selectFileActions" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
       select
         audit_action_name as audit_target, count(*) as audit_count
       from
         apca_audit_entry
-      <include refid="select_auditViewEntriesWhereSnippet"/>
-      group by audit_target
-    </select>
-
-    <!-- Get stats about actions views-->
-    <select id="selectByDay" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
-      select
-        audit_action_name as audit_target, count(*) as audit_count
-      from
-        apca_audit_entry
-      <include refid="select_auditViewEntriesWhereSnippet"/>
+      <include refid="file_snippet" />
       group by audit_target
     </select>
 

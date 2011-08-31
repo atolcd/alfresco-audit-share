@@ -250,7 +250,8 @@ public class AuditFilter implements Filter {
 						urlData.put("action", "library");
 					}
 					else {
-						urlData.put("action", "");
+						//On suppose que c'est une consultation
+						urlData.put("action", "view");
 					}
 				}
 			}
