@@ -50,7 +50,8 @@ public class AuditFilter implements Filter {
 	@Override
 	public void init(FilterConfig args) throws ServletException {
 		this.servletContext = args.getServletContext();
-
+		//"Tableau" module -> paramètres
+		// Utilisé pour lire les paramètres d'audit
 		this.moduleIds = new HashMap<String, String>();
 		this.moduleIds.put("wiki", "title");
 		this.moduleIds.put("blog", "postId");
@@ -102,15 +103,7 @@ public class AuditFilter implements Filter {
 				auditSample.put("id","0");
 				auditSample.put("auditUserId", user.getId());
 
-				/*if(requestURI.endsWith("/dashboard")){
-						auditSample.put("auditSite", "");
-						auditSample.put("auditAppName", "dashboard");
-						auditSample.put("auditActionName","");
-						auditSample.put("auditObject", "");
-						auditSample.put("auditTime", Long.toString(System.currentTimeMillis()));
-						//Remote call for DB
-						remoteCall(request,auditSample);
-				}*/
+				//Audit de la console ??
 				if(requestURI.startsWith("/share/page/console/")){
 						/*String[] urlTokens = requestURI.split("/");
 						auditSample.put("auditSite", "");
@@ -185,9 +178,10 @@ public class AuditFilter implements Filter {
 	}
 
 	/**
-	 *
-	 * @param url
-	 * @return
+	 * Découpe l'url, analyse les morceaux, puis analyse les paramètres
+	 * @param request HttpServletRequest
+	 * @param requestURL String
+	 * @return HashMap
 	 */
 	public HashMap<String, String> getAuditData(HttpServletRequest request, String requestURL){
 		HashMap<String, String> auditData = new HashMap<String, String>();
@@ -197,11 +191,18 @@ public class AuditFilter implements Filter {
 		auditData.putAll(urlData);
 
 		try {
-			//On récupère l'identifiant de l'objet consulté à partir de son module
+			//On récupère l'identifiant de l'<<objet>> consulté à partir de son module
 			//En cas de null, on catch et on met une chaîne vide.
 			String obj = request.getParameter(this.moduleIds.get(urlData.get("module")));
 			if(obj != null){
-				auditData.put("object", obj);
+				//On déplace le paramètre dans l'action pour faciliter les requêtes
+				if(auditData.get("module").equals("calendar")){
+					auditData.put("action", obj);
+					auditData.put("object", "");
+				}
+				else {
+					auditData.put("object", obj);
+				}
 			}
 			else{
 				auditData.put("object", "");
@@ -214,9 +215,9 @@ public class AuditFilter implements Filter {
 	}
 
 	/**
-	 *
-	 * @param url
-	 * @return
+	 * Parse l'url découpée afin d'en tirer les informations d'audit
+	 * @param urlTokens String[]
+	 * @return HashMap
 	 */
 	public HashMap<String, String> getUrlData(String[] urlTokens){
 		HashMap<String, String> urlData = new HashMap<String, String>();
@@ -229,6 +230,8 @@ public class AuditFilter implements Filter {
 			if(urlTokens[i].equals("site") && !siteFlag){
 				siteFlag=true;
 			}
+			//On trouve le token "site" dans l'url, le prochain token est
+			//le nom du site
 			else if(siteFlag && (urlData.get("site").equals(""))){
 				urlData.put("site", urlTokens[i]);
 				String[] splittedModuleAction = urlTokens[i+1].split("-");
@@ -259,17 +262,16 @@ public class AuditFilter implements Filter {
 		return urlData;
 	}
 
-   /**
-    * Helper to build a map of the default headers for script requests - we send over
-    * the current users locale so it can be respected by any appropriate REST APIs.
-    *
-    * @return map of headers
-    */
-    private static Map<String, String> buildDefaultHeaders()
-    {
-        Map<String, String> headers = new HashMap<String, String>(1, 1.0f);
-	    headers.put("Accept-Language", I18NUtil.getLocale().toString().replace('_', '-'));
-        return headers;
-    }
-
+ /**
+  * Helper to build a map of the default headers for script requests - we send over
+  * the current users locale so it can be respected by any appropriate REST APIs.
+  *
+  * @return map of headers
+  */
+  private static Map<String, String> buildDefaultHeaders()
+  {
+      Map<String, String> headers = new HashMap<String, String>(1, 1.0f);
+    headers.put("Accept-Language", I18NUtil.getLocale().toString().replace('_', '-'));
+      return headers;
+  }
 }

@@ -12,10 +12,29 @@
   return JSON.stringify(jsonChart);
 };
 
+//Faire une colorisation Custom ?
 function buildColorArray(param){
-  var color_array= ["#0077BF","#EC9304","#7CBC28","#EE1C2F"];
-  if(param.totalResults % 4 == 1) {
-    color_array.splice(3,3);
+  //"#46B549" vert foncé
+  var color_list= ["#0077BF","#EC9304","#7CBC28","#EE1C2F",];
+  var color_array = [];
+  /*if(param.totalResults % 5 == 1) {
+    if(param.totalResults % 4 == 1) {
+      color_array.splice(3,3);
+    }
+    else {
+      color_array.splice(4,4);
+    }
+  }*/
+  //OFC applique les couleurs les unes après les autres. Possibilité de 
+  // redondance entre la première et la dernière ....
+  for(var i = 0, ii= param.totalResults ;i < ii; i++){
+    if((i == param.totalResults - 1) && (i%color_list.length == 0)){
+      color_array.push(color_list[1]);
+    } 
+    else
+    {
+      color_array.push(color_list[i%color_list.length]);
+    }
   }
   
   return color_array;
@@ -27,7 +46,7 @@ function buildTitle(param){
     title = "Aucun audit n'a été trouvé";
   }
   else {
-    title = getMessage("label.graph."+param.type);
+    title = getMessage(param.type,"graph.title.");
   }
   
   return title;
@@ -43,9 +62,9 @@ function buildPieChart(params) {
   {
     "title":{
       "text": buildTitle(params),
-      "style":"{font-size: 30px;}"
+      "style":"{font-size: 16px; color:#526A53; font-family: Arial,sans-serif; font-weight: bold; text-align: center;}"
     },
-
+    "bg_colour": "#FFFFFF",
     "elements":[
       {
         "type":      "pie",
@@ -65,7 +84,12 @@ function buildPieChart(params) {
 function buildPieChartArray(param) {
   var pie_array=[]; 
   for(var i=0, total=param.totalResults; i<total; i++){
-    pie_array[i] = {"value": param.items[i].count, "tip":param.items[i].count, "label":param.items[i].target};
+    pie_array[i] = 
+    {
+      "value": param.items[i].count, 
+      "tip":param.items[i].count, 
+      "label": getMessage(param.items[i].target,"graph.label.")
+    };
   }
   
   return pie_array;
@@ -83,11 +107,11 @@ function buildBarChart(params) {
     {
       "title":{
         "text":  buildTitle(params),
-        "style": "{font-size: 20px; color:#0000ff; font-family: Verdana; text-align: center;}"
+        "style":"{font-size: 16px; color:#526A53; font-family: Arial,sans-serif; font-weight: bold; text-align: center;}"
       },
 
       "y_legend":{
-        "text": "Values",
+        "text": buildText(params),
         "style": "{color: #736AFF; font-size: 12px;}"
       },
 
@@ -98,7 +122,7 @@ function buildBarChart(params) {
         "tick_height":10,
         "colour":"#5FAB34",
         "grid_colour":"#00ff00",
-        "labels": {"labels" : buildBarChartXLabels(params)}//["January","February","March","April","May","June","July","August","Spetember"]
+        "labels": buildXAxisLabels(params)
        },
 
       "y_axis":{
@@ -155,12 +179,17 @@ function buildBarChartElements(pItems) {
         values.push(undefined);
       }
       else {
-        values.push({"top": treatedElements[key][i],"tip": key + " : #val#"});
+        values.push(
+          {
+            "top": treatedElements[key][i],
+            "tip": getMessage(key,"graph.label.") + " : #val#"
+          }
+        );
       }
     }
     elements.push({
-      "type": "bar_filled",
-      "alpha": 0.4,
+      "type": "bar_glass", //bar_filled
+      "alpha": 0.7,
       "colour": get_random_color(),
       "text": key,
       "font-size": 10,
@@ -171,10 +200,25 @@ function buildBarChartElements(pItems) {
   return elements;
 }
 
+
+function buildXAxisLabels(params) {
+  var steps = params.totalResults >= 20 ? Math.round(params.totalResults/10) : 1;
+  var rotationAngle = params.totalResults > 5 ? "-45" : "0";
+  var labelConfiguration =
+  {
+    "labels" : buildBarChartXLabels(params),
+    "steps": steps,
+    "rotate": rotationAngle
+  }
+
+  return labelConfiguration;
+}
+
 function buildBarChartXLabels(params) {
   var labels = [];
- 
-  if(params.type == "by-month") {
+  //On récupère l'information de découpage dans le type : Month / week / day
+  var timeType = params.type.split("-").reverse()[0];
+  if(timeType == "month") {
     var slicedDates = params.slicedDates.split(",");
     for(var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
     
@@ -182,7 +226,7 @@ function buildBarChartXLabels(params) {
       //TODO Translate month number to String Month
     }
   }
-  else if(params.type == "by-day") {
+  else if(timeType == "day") {
     var slicedDates = params.slicedDates.split(",");
     for(var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
       var d = new Date(parseInt(slicedDates[i],10));
@@ -190,20 +234,37 @@ function buildBarChartXLabels(params) {
       //TODO Translate month number to String Month
     }
   }
-  else if(params.type == "by-week"){
+  else if(timeType == "week"){
     var slicedDates = params.slicedDates.split(",");
     for(var i = 0, ii = slicedDates.length - 1; i < ii; i++) { 
       var from = new Date(parseInt(slicedDates[i],10));
       var to = new Date(parseInt(slicedDates[i+1],10));
       
       from = "Du lundi " + from.getDate().toString() + "/" + (from.getMonth() + 1).toString() + "/" + from.getFullYear().toString();
-      to = " au samedi " + to.getDate().toString() + "/" + (to.getMonth() + 1).toString() + "/" + to.getFullYear().toString();
+      to = "<br> au samedi " + to.getDate().toString() + "/" + (to.getMonth() + 1).toString() + "/" + to.getFullYear().toString();
       labels.push(from + to);
     }
   }
   return labels;
 }
 
+function buildText(params) {
+  var res = "", type = params.type;
+  if(type.search("view") >= 0) {
+    res = getMessage("graph.ylabel.view");
+  }
+  else if(type.search("comment") >= 0) {
+    res = getMessage("graph.ylabel.comment");
+  }
+  else if(type.search("file") >= 0) {
+    res = getMessage("graph.ylabel.file");
+  }
+  else if(type.search("action") >= 0) {
+    res = getMessage("graph.ylabel.action");
+  }
+  
+  return res;
+}
 
 function get_random_color() {
     var letters = '0123456789ABCDEF'.split('');
@@ -215,10 +276,12 @@ function get_random_color() {
 }
 
 function getMonth(month){
-  return getMessage("label.month." + month);
+  return getMessage(month,"label.month.");
 }
 
-function getMessage(messageId){
-  // null, this ?
-  return Alfresco.util.message.call(null, messageId, "Alfresco.ConsoleAudit", Array.prototype.slice.call(arguments).slice(1));
+function getMessage(messageId,prefix){
+  var msg = (!!prefix) ? prefix + messageId : messageId;
+  var res = Alfresco.util.message.call(null,msg, "Alfresco.ConsoleAudit", Array.prototype.slice.call(arguments).slice(1));
+  res = (res.search("graph.label") == 0) ? messageId : res;
+  return res;
 }

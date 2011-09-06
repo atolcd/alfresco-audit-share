@@ -98,6 +98,10 @@ public class ProxyAuditFilter implements Filter {
 				auditSample.put("auditObject", "");
 				auditSample.put("auditTime", Long.toString(System.currentTimeMillis()));
 
+				System.out.println();
+				System.out.println(requestWrapper.getRequestURI());
+				System.out.println(requestWrapper.getStringContent());
+				System.out.println();
 				//Ajout de documents - Possibilité de filtrer les suppressions (method : delete)
 				//Ne se déclenche pas pour les replies/comments ?! Que pour les docs ?!
 				if(requestURL.endsWith("/activity") && request.getMethod().toLowerCase().equals("post")){
@@ -111,7 +115,7 @@ public class ProxyAuditFilter implements Filter {
 							auditSample.put("auditAppName",activityFeed.getString("page"));
 							auditSample.put("auditSite", activityFeed.getString("site"));
 							auditSample.put("auditActionName", activityFeed.getString("type"));
-							auditSample.put("auditObject", activityFeed.getString("nodeRef")); //filename also available
+							auditSample.put("auditObject", activityFeed.getString("nodeRef")); // Ou fileName ?
 						}
 						else if(activityFeed.has("fileCount")){
 							//Plusieurs docs d'un coup. On ne récupère pas les nodeRefs.
@@ -123,6 +127,18 @@ public class ProxyAuditFilter implements Filter {
 							for(int i=0;i<fileCount;i++){
 								remoteCall(request,auditSample);
 							}
+						}
+						
+						//Uniformisation des noms
+						if(auditSample.get("auditAppName").equals("documentlibrary")){
+							auditSample.put("auditAppName", "document");
+						}
+						
+						if(auditSample.get("auditActionName").toString().endsWith("added")){
+							auditSample.put("auditActionName","file-added");
+						}
+						else if(auditSample.get("auditActionName").toString().endsWith("deleted")){
+							auditSample.put("auditActionName", "file-deleted");
 						}
 						//Remote call for DB
 						remoteCall(request,auditSample);

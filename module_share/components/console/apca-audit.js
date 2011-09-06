@@ -78,9 +78,11 @@
          onLoad: function onLoad()
          {
             // Buttons - Check ?
-            parent.widgets.searchButton = Alfresco.util.createYUIButton(parent, "search-button", parent.onSearch);//Success
-            parent.widgets.graphButton = Alfresco.util.createYUIButton(parent, "graph-button", parent.onGraphClick);
+            parent.widgets.searchButton = Alfresco.util.createYUIButton(parent, "search-button", parent.onSearch);
+            parent.widgets.exportButton = Alfresco.util.createYUIButton(parent, "export-button", parent.onExport);
 
+            parent.widgets.exportButton.set("disabled",true);  
+  
             parent.widgets.moduleCriteriaButton = new YAHOO.widget.Button("module-criteria", {
               type: "menu",
 	            menu: "module-criteria-select" });
@@ -112,30 +114,36 @@
 
             //Handler des click-icônes
             var onIconFromClick = function(e){
-              var visible = Dom.getStyle(parent.widgets.startCalendar.id,'display');
-              if(visible=="none") {
+              var endCalendarVisible = Dom.getStyle(parent.widgets.endCalendar.id,'display');
+              var startCalendarVisible = Dom.getStyle(parent.widgets.startCalendar.id,'display');
+              if(startCalendarVisible=="none") {
                 Dom.setStyle(parent.widgets.startCalendar.id, 'top', parseInt(e.clientY,10)+"px");
                 Dom.setStyle(parent.widgets.startCalendar.id, 'left', parseInt(e.clientX,10)+"px");
                 parent.widgets.startCalendar.show();
-                startCalendarIsVisible = true;
               }
               else {
                 parent.widgets.startCalendar.hide();
-                startCalendarIsVisible = false;
+              }
+              //Au cas où le second calendrier est toujours ouvert
+              if(endCalendarVisible == "block"){
+                parent.widgets.endCalendar.hide();
               }
             };
 
             var onIconToClick = function(e){
-              var visible = Dom.getStyle(parent.widgets.endCalendar.id,'display');
-              if(visible=="none") {
+              var endCalendarVisible = Dom.getStyle(parent.widgets.endCalendar.id,'display');
+              var startCalendarVisible = Dom.getStyle(parent.widgets.startCalendar.id,'display');
+              if(endCalendarVisible=="none") {
                 Dom.setStyle(parent.widgets.endCalendar.id, 'top', parseInt(e.clientY,10)+"px");
                 Dom.setStyle(parent.widgets.endCalendar.id, 'left', parseInt(e.clientX,10)+"px");
                 parent.widgets.endCalendar.show();
-                endCalendarIsVisible = true;
               }
               else {
                 parent.widgets.endCalendar.hide();
-                endCalendarIsVisible = false;
+              }
+              //Au cas où le second calendrier est toujours ouvert
+              if(startCalendarVisible == "block"){
+                parent.widgets.startCalendar.hide();
               }
             };
             Event.addListener("icon-from","click",onIconFromClick);
@@ -163,7 +171,7 @@
 
             //Check plus loin pour response Schema ?
             // DataTable and DataSource setup
-            parent.widgets.dataSource = new YAHOO.util.DataSource(Alfresco.constants.PROXY_URI + "db/select",
+            /*parent.widgets.dataSource = new YAHOO.util.DataSource(Alfresco.constants.PROXY_URI + "db/select",
             {
                responseType: YAHOO.util.DataSource.TYPE_JSON,
                responseSchema:
@@ -178,7 +186,7 @@
             });
 
             // Setup the main datatable
-            this._setupDataTable();
+            this._setupDataTable();*/
         },
 
         setSiteMenu: function setSiteMenu(){
@@ -189,9 +197,11 @@
              {
                 fn: function(res){
                   var siteMenu=[];
-                  siteMenu[0]={text:this._msg("label.menu.all"), value:""};
+                  siteMenu[0]={text:this._msg("label.menu.site") + this._msg("label.menu.all"), value:""};
+                  //Valeur avec "/" pour être sur que ça ne soit pas déjà un site existant
+                  siteMenu[1]={text:this._msg("label.menu.site") + this._msg("label.menu.amongSites"), value:"/all"};
                   for(var i=0, ii = res.json.items.length;i<ii;i++) {
-                    siteMenu[i+1]={ text: res.json.items[i].name, value: res.json.items[i].name};
+                    siteMenu[i+2]={ text: this._msg("label.menu.site") + res.json.items[i].name, value: res.json.items[i].name};
                   }
 
                   this.widgets.siteCriteriaButton = new YAHOO.widget.Button("site-criteria", {
@@ -202,6 +212,7 @@
                   var onSiteMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
                     var sText = p_aArgs[1].cfg.getProperty("text");
                     me.widgets.siteCriteriaButton.set("label", sText);
+                    me.widgets.siteCriteriaButton.value = p_aArgs[1].value;
                   };
                   this.widgets.siteCriteriaButton.getMenu().subscribe("click",onSiteMenuItemClick);
                 },
@@ -212,9 +223,7 @@
           });
         },
 
-        onUpdate: function onUpdate(){
-
-
+        /*onUpdate: function onUpdate(){
           var me = this;
 
           // Don't display any message
@@ -258,7 +267,7 @@
             failure: failureHandler,
             scope: parent
          });
-        },
+        },*/
 
        /**
         * Setup the YUI DataTable with custom renderers.
@@ -377,7 +386,12 @@
 
    YAHOO.extend(Alfresco.ConsoleAudit, Alfresco.ConsoleTool,
    {
-
+  
+      /**
+       * Cache-Résultat de la dernière requête exécutée
+       * Utilisé pour l'export CSV
+       */
+      lastRequest: null,
       /**
        * Fired by YUILoaderHelper when required component script files have
        * been loaded into the browser.
@@ -407,30 +421,49 @@
          //Composants créé, on ajoute des listeners sur les menus.
          var me = this;
           var onModulesMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
+
+            me.widgets.moduleCriteriaButton.value = p_aArgs[1].value;
             var sText = p_aArgs[1].cfg.getProperty("text");
             me.widgets.moduleCriteriaButton.set("label", sText);
           };
           this.widgets.moduleCriteriaButton.getMenu().subscribe("click",onModulesMenuItemClick);
 
           var onActionsMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
+            me.widgets.actionCriteriaButton.value = p_aArgs[1].value;
             var sText = p_aArgs[1].cfg.getProperty("text");
             me.widgets.actionCriteriaButton.set("label", sText);
           };
           this.widgets.actionCriteriaButton.getMenu().subscribe("click",onActionsMenuItemClick);
 
           var onDateMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
+            me.widgets.dateCriteriaButton.value = p_aArgs[1].value;
             var sText = p_aArgs[1].cfg.getProperty("text");
             me.widgets.dateCriteriaButton.set("label", sText);
           };
           this.widgets.dateCriteriaButton.getMenu().subscribe("click",onDateMenuItemClick);
 
-
           //
           this.widgets.startCalendar.render();
           this.widgets.endCalendar.render();
-
       },
 
+      
+      onExport: function ConsoleAudit_onExport()
+      {
+        if(this.lastRequest) {
+        
+          url = "http://localhost:8080/share/proxy/alfresco/db/test";
+          window.open(url);
+          
+          
+         /* var elemIF = document.createElement("iframe");
+            elemIF.src = url;
+            elemIF.style.display = "none";
+            document.body.appendChild(elemIF);*/
+
+        }
+      },
+      
       /**
        * @method
        * @param
@@ -440,36 +473,41 @@
       {
         //Récupération des variables de l'UI
         var from = this.convertDate(Dom.get("input-date-from").value), to = this.convertDate(Dom.get("input-date-to").value),
-          action = this.getMenuValue(this.widgets.actionCriteriaButton.getMenu()),
-          module = this.getMenuValue(this.widgets.moduleCriteriaButton.getMenu()),
-          dates = this.getMenuValue(this.widgets.dateCriteriaButton.getMenu()),
-          site = this.getMenuValue(this.widgets.siteCriteriaButton.getMenu()),
+          action = this.convertMenuValue(this.widgets.actionCriteriaButton.value),
+          module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
+          dates = this.convertMenuValue(this.widgets.dateCriteriaButton.value),
+          site = this.convertMenuValue(this.widgets.siteCriteriaButton.value),
           tsArray = [];
+
         // Crétion du tableau d'intervalle de dates
         if(dates) {
           tsArray = this.buildTimeStampArray(from,to,dates);
-          //Si seulement un intervalle, on supprime le tableau et on mets à jours les dates from/to
+          from = tsArray[0];
+          to = tsArray[tsArray.length-1];
+          Dom.get("input-date-from").value = this.convertTimeStamp(from,false);
+          Dom.get("input-date-to").value = this.convertTimeStamp(to,true);
+          //Si seulement un intervalle, on supprime le tableau et on met à jour les dates from/to
+          // -> Affichage camembert
           if(tsArray.length==2) {
-            from = tsArray[0];
-            to = tsArray[1];
-            Dom.get("input-date-from").value = this.convertTimeStamp(from,false);
-            Dom.get("input-date-to").value = this.convertTimeStamp(to,true);
             tsArray=[];
             dates=null;
           }
         }
-        
+
         //Recupération du type de requête
-        var type = this.getRequestType(action,module,dates);
+        var type = this.getRequestType(action,module,site,dates);
+        
+        //Mise à jour du paramètre site si "/all". La requête ne doit pas filtrer de site
+        site = (site == "/all") ? null : site;
         
         //Test sur les valeurs de dates
         if(to > 0 && from > to){
           alert(this._msg("error.date.greater"));
-        } 
+        }
         else {
           // Création des paramètres et exécution de la requête
           var params = this.buildParams(from,to,action,module,site,tsArray.toString(),type);
-          
+
           var url = Alfresco.constants.PROXY_URI + "db/select" + params;
           Alfresco.util.Ajax.jsonGet(
           {
@@ -483,40 +521,8 @@
              execScripts: true
           });
         }
-        // Problème de focus avec le bouton et flash ? 
+        // Problème de focus avec le bouton et flash ?
         this.widgets.searchButton.blur();
-      },
-
-      /**
-       * @useless
-       *
-       */
-      onSearchSuccess : function ConsoleAudit_onSearchSuccess(res)
-      {
-        this.panels[0].onUpdate();
-
-      },
-
-      /**
-       * @useless
-       *
-       */
-      onGraphClick: function ConsoleAudit_onGraphClick()
-      {
-        //Build url before
-        var url = Alfresco.constants.PROXY_URI + "db/select?type=module";
-        Alfresco.util.Ajax.jsonGet(
-        {
-           url: url,
-           successCallback:
-           {
-              fn: this.displayGraph,
-              scope: this
-           },
-           failureMessage: this._msg("Query error"),
-           execScripts: true
-        });
-        this.widgets.graphButton.blur();
       },
 
       /**
@@ -526,19 +532,28 @@
        */
       displayGraph: function ConsoleAudit_displayGraph(response) {
         if(!!response.json) {
-          // Pourquoi "id" ?? GetFlashData défini dans get_data.js
+          this.widgets.exportButton.set("disabled",false);
+          this.lastRequest = response.json;
+          //GetFlashData défini dans get_data.js
           var flashvars = {"get-data":"getFlashData","id":JSON.stringify(response.json)};
           var params = {};
           var attributes = {wmode: "Opaque",salign: "l",AllowScriptAccess:"always"};
-
-          //Better path to swf ?
-          swfobject.embedSWF("/share/open-flash-chart.swf", this.id + "-chart", "80%", "500", "9.0.0","expressInstall.swf",flashvars,params,attributes);
-          /*tmp = findSWF(this.id + "-chart");
-          var x = tmp.load(JSON.stringify(chart2));*/
+          //Chemin à changer vers swf ?
+          swfobject.embedSWF("/share/open-flash-chart.swf", this.id + "-chart", "75%", "400", "9.0.0","expressInstall.swf",flashvars,params,attributes);
+          
         }
         else {
+          var chartTag = Dom.get(this.id + "-chart").tagName.toLowerCase();
+          //On remove le SWF courant. Le conteneur étant détruit, il faut le recréer ...
+          if(chartTag == "embed" || chartTag == "object") { 
+            swfobject.removeSWF(this.id + "-chart");
+            var newChartDiv = new YAHOO.util.Element(document.createElement("div"));//this.id + "-chart"
+            newChartDiv.set("id",this.id + "-chart");
+            newChartDiv.appendTo(this.id + "-chart-container");
+          }
           Dom.get(this.id + "-chart").innerHTML = this._msg("message.no_results");
         }
+        this.widgets.searchButton.blur();
       },
 
       /**
@@ -556,7 +571,7 @@
         }
         return res;
       },
-  
+
       /**
        * @method convertTimeStamp
        * @param ts Timestamp unix
@@ -569,27 +584,24 @@
         if(exclude) {
           d.setDate(d.getDate() - 1 );
         }
-        
-        var month = (d.getMonth()+1).toString(), 
+
+        var month = (d.getMonth()+1).toString(),
             day = d.getDate().toString(),
             year = d.getFullYear().toString();
-        
+
         return day + "/" + month + "/" + year;
       },
+      
       /**
-       * @method getMenuValue
-       * @param menu YAHOO.widget.Menu dont on souhaite récupérer la sélection
-       * @return string Valeur courante du menu
+       * Transforme les valeurs en cas de "" ou de undefined 
+       * @method convertMenuValue
+       * @param val String Valeur du bouton 
+       * @return string Valeur "convertie"
        */
-      getMenuValue: function ConsoleAudit_getMenuValue(menu)
-      {
+      convertMenuValue : function ConsoleAudit_convertMenuValue(val){
         var res = null;
-        if(menu.activeItem!==null)
-        {
-          var item = menu.activeItem.value;
-          //Passage à null si l'option "Tous" est choisie pour que le paramètre soit
-          //ignoré lors de la construction de la requête sql par iBatis
-          res = (item !== "" && item !=="all") ? menu.activeItem.value: null;
+        if(val !== undefined && val !== "") {
+          res = val;
         }
         return res;
       },
@@ -602,22 +614,39 @@
        *
        * @return string Type de requête à effectuer
        *
-       * TODO : Rajouter les options de date
        */
-      getRequestType: function ConsoleAudit_getRequestType(action, module, dates) {
+      getRequestType: function ConsoleAudit_getRequestType(action, module, site, dates) {
         var type = "module";
         var date = dates ? dates : "";
 
         switch(action)
         {
           case "views":
-            type = "module" + date;
+            if(site == "/all") {
+              type = "sites_view" + date;
+            }
+            else
+            {
+              type = "module-views" + date;
+            }
           break;
           case "comment":
-            type = "comment" + date
+            if(site == "/all") {
+              type = "sites_comment" + date;
+            }
+            else
+            {
+              type = "comment" + date
+            }
           break;
           case "file":
-            type = "file" + date;
+            if(site == "/all") {
+              type = "sites_file" + date;
+            }
+            else
+            {
+              type = "file" + date;
+            }
           break;
           case null:
             type = "action" + date;
@@ -679,7 +708,7 @@
        */
       buildTimeStampArray: function ConsoleAudit_buildTimeStampArray(pFrom, pTo, type){
         var tsArray = [], from=null, to=null;
-        
+
         //Utilisation de la date courante dans si les dates sont mal saisies
         // -> Audit sur mois/semaine/jour courant
         if(pFrom == 0 && pTo == 0) {
@@ -709,23 +738,23 @@
           to = new Date(pTo);
         }
         var res = "";
-        //TODO Si To n'est pas selectionné, on ne selectionne qu'une seul mois/jour
 
-        // Créé les intervalles allant du mois de départ au mois d'arrivée.
+        // Créé les intervalles allant du mois de départ au mois d'arrivée INCLUS
         if(type == "-by-month") {
           tsArray.push(from.setDate(1));
           var next = new Date(from);
           next.setDate(1);
           next.setMonth(next.getMonth()+1);
-          var hasNext = (to.getTime() > next.getTime());
+          // >=
+          var hasNext = (to.getTime() >= next.getTime());
           while(hasNext){
             tsArray.push(next.getTime());
             next.setMonth(next.getMonth()+1);
-            hasNext = (to.getTime() > next.getTime());
+            hasNext = (to.getTime() >= next.getTime());
           }
           tsArray.push(next.getTime());
         }
-        // Selectionne par semaine suivant from et to.  
+        // Selectionne par semaine suivant from et to.
         // Les semaines de "from" et "to" sont INCLUSES
         else if(type == "-by-week") {
           /**
@@ -744,19 +773,21 @@
             tsArray.push(to.getTime());
           */
           //On utilise la date de départ pour récupérer tous les jours de la semaine
-          var next = new Date(from),
+          var next = null,
               currentDay = from.getDay()
               hasNext = false;
           //Début de semaine
           from.setDate(from.getDate() - (currentDay - 1));
+          next = new Date(from);
           tsArray.push(from.getTime());
+
           //Semaine suivante, on test au cas où on dépasse.
           next.setDate(from.getDate() + 7);
           hasNext = (to.getTime() >= next.getTime());
           while(hasNext){
             tsArray.push(next.getTime());
             next.setDate(next.getDate() + 7);
-            hasNext = (to.getTime() > next.getTime());
+            hasNext = (to.getTime() >= next.getTime());
           }
           tsArray.push(next.getTime());
         }
@@ -789,7 +820,7 @@
       {
         this.refreshUIState({"Time": new Date().getTime()});
       },
-      
+
        //Traduction des messages
       _msg: function ConsoleAudit__msg(messageId)
       {
