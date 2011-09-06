@@ -1,0 +1,7 @@
+<webscript>
+  <shortname>Liste de site</shortname>
+  <description>Liste tous les sites existants</description>
+  <url>/apca/site/list-site</url>
+  <format default="json">argument</format>
+  <authentication>admin</authentication>
+</webscript>

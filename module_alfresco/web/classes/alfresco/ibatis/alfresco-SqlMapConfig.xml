@@ -41,6 +41,8 @@
     <sqlMap resource="alfresco/ibatis/#resource.dialect#/permissions-insert-SqlMap.xml"/>
     <sqlMap resource="alfresco/ibatis/#resource.dialect#/usage-common-SqlMap.xml"/>
     <sqlMap resource="alfresco/ibatis/#resource.dialect#/usage-insert-SqlMap.xml"/>
+    <sqlMap resource="alfresco/ibatis/#resource.dialect#/apca-audit-concat-SqlMap.xml"/>
     <sqlMap resource="alfresco/ibatis/#resource.dialect#/apca-audit-common-SqlMap.xml"/>
     <sqlMap resource="alfresco/ibatis/#resource.dialect#/apca-audit-insert-SqlMap.xml"/>
+
 </sqlMapConfig>

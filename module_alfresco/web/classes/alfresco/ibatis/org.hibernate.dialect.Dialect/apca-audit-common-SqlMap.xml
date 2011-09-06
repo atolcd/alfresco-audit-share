@@ -144,8 +144,8 @@
       <isNotNull prepend="and" property="siteId">
           audit_site = #siteId#
       </isNotNull>
-      <isNotNull prepend="and" property="auditAppName">
-          audit_site = #auditAppName#
+      <isNotNull prepend="and" property="appName">
+          audit_site = #appName#
       </isNotNull>
       <include refid="time_snippet"/>
     </sql>
@@ -163,11 +163,12 @@
       <isNotNull prepend="and" property="siteId">
           audit_site = #siteId#
       </isNotNull>
-      <isNotNull prepend="and" property="auditAppName">
-          audit_site = #auditAppName#
+      <isNotNull prepend="and" property="appName">
+          audit_site = #appName#
       </isNotNull>
       <include refid="time_snippet" />
     </sql>
+    
     <!--                -->
     <!-- Statements     -->
     <!--                -->
@@ -245,6 +246,38 @@
       group by audit_target
     </select>
 
+    
+    <!-- Get audit wihtin several sites -->
+    <select id="selectViewsBySite" parametersClass="ApcaAuditQueryParameters" resultMap="resuls_ApcaAuditCount">
+      select
+        audit_site_name as audit_target, count(*) as audit_count
+      from
+        apca_audit_entry
+      <include refid="view_snippet" />
+      group by audit_target
+    </select>
+    
+    <!-- Get audit wihtin several sites -->
+    <select id="selectFilesBySite" parametersClass="ApcaAuditQueryParameters" resultMap="resuls_ApcaAuditCount">
+      select
+        audit_site_name as audit_target, count(*) as audit_count
+      from
+        apca_audit_entry
+      <include refid="file_snippet" />
+      group by audit_target
+    </select>
+
+    <!-- Get audit wihtin several sites -->
+    <select id="selectCommentsBySite" parametersClass="ApcaAuditQueryParameters" resultMap="resuls_ApcaAuditCount">
+      select
+        audit_site_name as audit_target, count(*) as audit_count
+      from
+        apca_audit_entry
+      <include refid="comment_snippet" />
+      group by audit_target
+    </select>
+    
+    
     <!-- Optimistic update of the audit application -->
     <update id="updateById" parameterClass="ApcaAuditEntry">
         update

@@ -29,6 +29,10 @@ public class Select extends DeclarativeWebScript implements InitializingBean {
 	private static final String SELECT_FILE = "alfresco.apca.audit.selectFileActions";
 	private static final String SELECT_MODULE = "alfresco.apca.audit.selectModules";
 	private static final String SELECT_MODULE_VIEW = "alfresco.apca.audit.selectModuleViews";
+	//Requête entre sites
+	private static final String SELECT_SITES_VIEW = "alfresco.apca.audit.selectViewsBySite";
+	private static final String SELECT_SITES_FILE = "alfresco.apca.audit.selectFilesBySite";
+	private static final String SELECT_SITES_COMMENT = "alfresco.apca.audit.selectCommentsBySite";
 
 
 	public void setSqlMapClientTemplate(SqlMapClientTemplate sqlMapClientTemplate){
@@ -75,35 +79,68 @@ public class Select extends DeclarativeWebScript implements InitializingBean {
 				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
 				model.put("views",select(params,SELECT_COMMENT));
 			}
+			else if(type.equals("sites_view")){
+				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
+				model.put("views",select(params,SELECT_SITES_VIEW));
+			}
+			else if(type.equals("sites_comment")){
+				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
+				model.put("views",select(params,SELECT_SITES_COMMENT));
+			}
+			else if(type.equals("sites_file")){
+				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
+				model.put("views",select(params,SELECT_SITES_FILE));
+			}
 			else if(type.equals("module-by-month") || type.equals("module-by-week") ||
 					type.equals("module-by-day") )
 			{
 				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
-				//type = type.substring(7, type.length());
 				model.put("slicedDates", params.getSlicedDates());
 				model.put("dates", selectByDate(params,SELECT_MODULE));
+			}
+			else if(type.equals("module-views-by-month") || type.equals("module-views-by-week") ||
+					type.equals("module-views-by-day") )
+			{
+				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
+				model.put("slicedDates", params.getSlicedDates());
+				model.put("dates", selectByDate(params,SELECT_MODULE_VIEW));
 			}
 			else if(type.equals("action-by-month") || type.equals("action-by-week") ||
 					type.equals("action-by-day") )
 			{
 				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
-				//type = type.substring(7, type.length());
 				model.put("slicedDates", params.getSlicedDates());
 				model.put("dates", selectByDate(params,SELECT_ACTION));
 			}
 			else if(type.equals("file-by-month") || type.equals("file-by-week") ||
 					type.equals("file-by-day")) {
 				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
-				//type = type.substring(7, type.length());
 				model.put("slicedDates", params.getSlicedDates());
 				model.put("dates",selectByDate(params,SELECT_FILE));
 			}
 			else if(type.equals("comment-by-month") || type.equals("comment-by-week") ||
 					type.equals("comment-by-day")) {
 				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
-				//type = type.substring(7, type.length());
 				model.put("slicedDates", params.getSlicedDates());
 				model.put("dates",selectByDate(params,SELECT_COMMENT));
+			}
+			else if(type.equals("sites_view-by-month") || type.equals("sites_view-by-week") ||
+					type.equals("sites_view-by-day")) {
+				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
+				model.put("slicedDates", params.getSlicedDates());
+				model.put("dates",selectByDate(params,SELECT_SITES_VIEW));
+			}
+			else if(type.equals("sites_comment-by-month") || type.equals("sites_comment-by-week") ||
+					type.equals("sites_comment-by-day")) {
+				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
+				model.put("slicedDates", params.getSlicedDates());
+				model.put("dates",selectByDate(params,SELECT_SITES_COMMENT));
+			}
+			else if(type.equals("sites_file-by-month") || type.equals("sites_file-by-week") ||
+					type.equals("sites_file-by-day")) {
+				ApcaAuditQueryParameters params = buildParametersFromRequest(req);
+				model.put("slicedDates", params.getSlicedDates());
+				model.put("dates",selectByDate(params,SELECT_SITES_FILE));
 			}
 			model.put("type", type);
 		}
