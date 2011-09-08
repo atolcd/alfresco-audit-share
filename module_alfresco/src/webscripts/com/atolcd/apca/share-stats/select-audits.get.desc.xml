@@ -1,0 +1,7 @@
+﻿<webscript>
+  <shortname>Select stats</shortname>
+  <description>Select stats for Share console</description>
+  <url>/share-stats/select-audits</url>
+  <format default="json"/>
+  <authentication>admin</authentication>
+</webscript>

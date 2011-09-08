@@ -1,0 +1,7 @@
+﻿<webscript>
+  <shortname>Share stats insertion</shortname>
+  <description>Insert stats into the database</description>
+  <url>/share-stats/insert-audit</url>
+  <format default="json"/>
+  <authentication>user</authentication>
+</webscript>

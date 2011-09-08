@@ -1,11 +1,12 @@
-package com.atolcd.apca.database;
+package com.atolcd.apca.web.scripts.shareStats;
 
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
@@ -17,11 +18,13 @@ import org.springframework.util.Assert;
 
 import com.atolcd.apca.ApcaAuditEntry;
 
-public class Update extends DeclarativeWebScript implements InitializingBean {
+public class InsertAuditPost extends DeclarativeWebScript implements InitializingBean {
+	private static final String INSERT_ENTRY = "alfresco.apca.audit.insertEntry";
 	//SqlMapClientTemplate for ibatis calls
 	private SqlMapClientTemplate sqlMapClientTemplate;
-	
-	
+
+	private static final Log logger = LogFactory.getLog(InsertAuditPost.class);
+
 	public void setSqlMapClientTemplate(SqlMapClientTemplate sqlMapClientTemplate){
 		this.sqlMapClientTemplate = sqlMapClientTemplate;
 	}
@@ -35,42 +38,32 @@ public class Update extends DeclarativeWebScript implements InitializingBean {
 		try{
 		// Map that will be passed to the template
 		Map<String, Object> model = new HashMap<String, Object>();
-		
+
 		// Check for the sqlMapClientTemplate Bean
 		if(this.sqlMapClientTemplate != null){
 			//Get the input content given into the request.
 			String jsonArg = req.getContent().getContent();
-			
-			if(jsonArg.length() >0 ){
-			    //TODO Select the good entries.
-				JSONObject obj = new JSONObject(jsonArg);
-				update(obj.getString("site"));
+
+			if(!jsonArg.isEmpty()){
+				//Fill an auditSample from the request content and insert it
+				ApcaAuditEntry auditSample = new ApcaAuditEntry(jsonArg);
+				insert(auditSample);
+				model.put("success", true);
+			}
+			else{
+				model.put("success", false);
 			}
 		}
 		return model;
 		} catch (Exception e){
-			throw new WebScriptException("[Apca-DbSelect] Error in executeImpl function");
+			throw new WebScriptException("[Apca-DbInsert] Error in executeImpl function");
 		}
 	}
-	
-	
-	/**
-	 * 
-	 * @param l long Id de l'enregistrement à modifier
-	 * @throws SQLException
-	 * @throws JSONException
-	 */
-	public void update(String site) throws SQLException, JSONException{
-    
-		ApcaAuditEntry auditSample = this.selectEntriesToUpdate();
-		auditSample.setAuditSite(site);
-		sqlMapClientTemplate.update("alfresco.apca.audit.updateBySite", auditSample);	
+
+
+	public void insert(ApcaAuditEntry auditSample)throws SQLException, JSONException{
+		sqlMapClientTemplate.insert(INSERT_ENTRY, auditSample);
+		logger.info("Insert ok : " + auditSample.toJSON());
+
 	}
-  
-  public ApcaAuditEntry selectEntriesToUpdate() throws SQLException{
-    //TODO
-    ApcaAuditEntry auditSample = new ApcaAuditEntry();
-    
-    return auditSample;
-  }
 }

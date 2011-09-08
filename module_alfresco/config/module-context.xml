@@ -16,15 +16,11 @@
   </bean>
 
   <!-- Webscripts - Audit Queries -->
-  <bean id="webscript.com.atolcd.apca.database.insert.post" class="com.atolcd.apca.database.Insert" parent="webscript">
+  <bean id="webscript.com.atolcd.apca.share-stats.insert-audit.post" class="com.atolcd.apca.web.scripts.shareStats.InsertAuditPost" parent="webscript">
     <property name="sqlMapClientTemplate" ref="auditApcaSqlMapClientTemplate"/>
   </bean>
 
-  <bean id="webscript.com.atolcd.apca.database.select.get" class="com.atolcd.apca.database.Select" parent="webscript">
-    <property name="sqlMapClientTemplate" ref="auditApcaSqlMapClientTemplate"/>
-  </bean>
-
-  <bean id="webscript.com.atolcd.apca.database.update.post" class="com.atolcd.apca.database.Update" parent="webscript">
+  <bean id="webscript.com.atolcd.apca.share-stats.select-audits.get" class="com.atolcd.apca.web.scripts.shareStats.SelectAuditsGet" parent="webscript">
     <property name="sqlMapClientTemplate" ref="auditApcaSqlMapClientTemplate"/>
   </bean>
 
