@@ -1,5 +1,7 @@
 ﻿function getFlashData(param){  
   var params = JSON.parse(param), jsonChart = null;
+  
+  //Plus rapide que recherche de "motif" by-week ?
   var size = params.type.split("-").length;
   // if(params.type === "by-month" || params.type === "by-week" || params.type === "by-day") {
   if(size > 2) {
@@ -17,14 +19,6 @@ function buildColorArray(param){
   //"#46B549" vert foncé
   var color_list= ["#0077BF","#EC9304","#7CBC28","#EE1C2F",];
   var color_array = [];
-  /*if(param.totalResults % 5 == 1) {
-    if(param.totalResults % 4 == 1) {
-      color_array.splice(3,3);
-    }
-    else {
-      color_array.splice(4,4);
-    }
-  }*/
   //OFC applique les couleurs les unes après les autres. Possibilité de 
   // redondance entre la première et la dernière ....
   for(var i = 0, ii= param.totalResults ;i < ii; i++){

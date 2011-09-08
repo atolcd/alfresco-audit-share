@@ -44,12 +44,11 @@
                   <option value="">${msg("label.menu.action")}${msg("label.menu.all")}</option>
                   <option value="views">${msg("label.menu.action")}${msg("label.views")}</option>
                   <option value="comment">${msg("label.menu.action")}${msg("label.comments")}</option>
-                  <!--option value="added-files">${msg("label.menu.action")}${msg("label.added-files")}</option-->
-                  <!--option value="deleted-files">${msg("label.menu.action")}${msg("label.deleted-files")}</option-->
                   <option value="file">${msg("label.menu.action")}${msg("label.files")}</option>
                 </select>
                 <span class="vb"> | </span>
                 <input type="button" id="site-criteria" name="${el}-site-criteria-button" value="${msg("label.menu.site")}${msg("label.menu.all")}">
+                 
               </div>
             </div>
           </div>

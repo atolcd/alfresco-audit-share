@@ -192,7 +192,7 @@
         setSiteMenu: function setSiteMenu(){
           Alfresco.util.Ajax.jsonGet(
           {
-             url: Alfresco.constants.PROXY_URI + "apca/site/list-site",
+             url: Alfresco.constants.PROXY_URI + "apca/site/list-sites",
              successCallback:
              {
                 fn: function(res){
@@ -200,8 +200,8 @@
                   siteMenu[0]={text:this._msg("label.menu.site") + this._msg("label.menu.all"), value:""};
                   //Valeur avec "/" pour être sur que ça ne soit pas déjà un site existant
                   siteMenu[1]={text:this._msg("label.menu.site") + this._msg("label.menu.amongSites"), value:"/all"};
-                  for(var i=0, ii = res.json.items.length;i<ii;i++) {
-                    siteMenu[i+2]={ text: this._msg("label.menu.site") + res.json.items[i].name, value: res.json.items[i].name};
+                  for(var i=0, ii = res.json.length;i<ii;i++) {
+                    siteMenu[i+2]={ text: this._msg("label.menu.site") + res.json[i].title, value: res.json[i].name};
                   }
 
                   this.widgets.siteCriteriaButton = new YAHOO.widget.Button("site-criteria", {
@@ -445,6 +445,8 @@
           //
           this.widgets.startCalendar.render();
           this.widgets.endCalendar.render();
+          
+          //this.initMultiSelect();
       },
 
       
@@ -508,7 +510,7 @@
           // Création des paramètres et exécution de la requête
           var params = this.buildParams(from,to,action,module,site,tsArray.toString(),type);
 
-          var url = Alfresco.constants.PROXY_URI + "db/select" + params;
+          var url = Alfresco.constants.PROXY_URI + "share-stats/select-audits" + params;
           Alfresco.util.Ajax.jsonGet(
           {
              url: url,
@@ -825,7 +827,17 @@
       _msg: function ConsoleAudit__msg(messageId)
       {
          return Alfresco.util.message.call(this, messageId, "Alfresco.ConsoleAudit", Array.prototype.slice.call(arguments).slice(1));
-      }
+      },
+      /*
+      initMultiSelect: function ConsoleAudit_initMultiSelect()
+      {
+        a$.NO_SELECTION	= 'No selection';		// TEXT for 'No selection' when nothing selected
+        a$.SELECTED		= 'Options selected';	// TEXT for 'XX Options selected' when over 1 selected
+        a$.SELECT_ALL	= 'Select All';			// TEXT for 'Select All' for checkboxes
+        a$.SelectAllMin	= 6;					// minimum number of options needed to show 'Select All'
+        a$.WhenToUse	= 'class';				// class | multiple | all : for how to make selects become multiselects
+        a$.msSeparator	= '|';					// separator for values (can be multiple characters)
+      }*/
 
    });
 })();
