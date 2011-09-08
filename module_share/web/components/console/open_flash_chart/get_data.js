@@ -1,4 +1,4 @@
-﻿function getFlashData(param){  
+function getFlashData(param){  
   var params = JSON.parse(param), jsonChart = null;
   
   //Plus rapide que recherche de "motif" by-week ?

@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<project name="AMP Build File" default="prepare-package-amp" basedir=".">
+  <property name="module.id" value="apca-audit-filter-module-share"/>
+
+  <!-- Path to the SDK -->
+  <property name="alfresco.lib.dir" value="../../alfresco-enterprise-sdk-3.4.2/lib"/>
+
+  <property name="project.dir" value="."/>
+  <property name="dist.dir" value="${project.dir}/dist"/>
+  <property name="amp.file" value="${dist.dir}/${module.id}.amp"/>
+  <property name="web.dir" value="${project.dir}/web" />
+  <property name="build.dir" value="${project.dir}/build"/>
+  <property name="source.dir" value="${project.dir}/src" />
+  <property name="jar.file" value="${build.dir}/${module.id}.jar"/>
+
+  <path id="yuicompressor.classpath">
+    <fileset dir="lib">
+      <include name="yuicompressor-2.4.2.jar"/>
+      <include name="yui-compressor-ant-task-0.5.jar"/>
+    </fileset>
+  </path>
+
+  <taskdef name="yuicompress" classname="net.noha.tools.ant.yuicompressor.tasks.YuiCompressorTask">
+    <classpath>
+      <path refid="yuicompressor.classpath"/>
+    </classpath>
+  </taskdef>
+
+  <!-- Nettoyage des fichiers -min.js -->
+  <target name="clean.js.minify">
+    <delete includeemptydirs="true">
+      <fileset dir="${web.dir}" includes="**/*-min.js" />
+    </delete>
+  </target>
+
+  <!-- Make Dirs -->
+  <target name="mkdirs" depends="clean">
+    <mkdir dir="${build.dir}" />
+    <mkdir dir="${dist.dir}" />
+  </target>
+
+  <!-- Clean -->
+  <target name="clean">
+    <delete dir="${dist.dir}" />
+    <delete dir="${build.dir}/classes" />
+    <delete dir="${build.dir}" />
+  </target>
+
+  <!-- Path -->
+  <path id="class.path">
+    <dirset dir="${build.dir}" />
+    <fileset dir="${alfresco.lib.dir}" includes="**/*.jar"/>
+  </path>
+
+  <!-- Compile -->
+  <target name="compile" depends="mkdirs">
+    <mkdir dir="${build.dir}/classes" />
+    <javac debug="on" classpathref="class.path" srcdir="${source.dir}/java" destdir="${build.dir}/classes" />
+  </target>
+
+  <!-- Package JAR -->
+  <target name="package-jar" depends="compile">
+    <jar destfile="${jar.file}" >
+      <fileset dir="${build.dir}/classes" excludes="**/*Test*" includes="**/*.class" />
+    </jar>
+  </target>
+
+  <!-- Package AMP for Share -->
+  <target name="prepare-package-amp" depends="package-jar, add-web-to-package-amp, add-config-to-package-amp" description="Package the Module for Share" >
+    <zip destfile="${amp.file}" update="true">
+      <fileset dir="${project.dir}/" includes="*.properties" />
+      <zipfileset dir="${project.dir}/lib" prefix="WEB-INF/lib" />
+      <zipfileset file="${jar.file}" prefix="WEB-INF/lib" />
+    </zip>
+  </target>
+
+  <!-- Web -->
+  <target name="add-web-to-package-amp">
+    <!-- Minify JS -->
+    <yuicompress fromdir="${web.dir}" todir="${web.dir}" excludes="**/*-min.js" warn="yuicompress.warn">
+      <include name="**/*.js" />
+    </yuicompress>
+
+    <zip destfile="${amp.file}" update="true">
+      <zipfileset dir="${web.dir}" prefix="web" />
+    </zip>
+
+    <!-- Clean -->
+    <antcall target="clean.js.minify" />
+  </target>
+
+  <!-- Config (Webscripts, Site data, Messages, ...)  -->
+  <target name="add-config-to-package-amp">
+    <zip destfile="${amp.file}" update="true">
+      <zipfileset dir="${project.dir}/config" prefix="WEB-INF/classes/alfresco" excludes="web.xml" />
+      <zipfileset file="${project.dir}/config/web.xml" prefix="WEB-INF" />
+    </zip>
+  </target>
+</project>
