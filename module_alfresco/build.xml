@@ -1,13 +1,14 @@
 <?xml version="1.0"?>
-<project name="AMP Build File" default="package-jar" basedir=".">
+<project name="AMP Build File" default="prepare-package-amp" basedir=".">
   <property name="module.id" value="apca-audit-module-alfresco"/>
   
   <!-- Path to the SDK -->
-  <property name="alfresco.lib.dir" value="C:\Documents and Settings\ani\Mes documents\Installer\alfresco-enterprise-sdk-3.4.2\lib"/>
+  <property name="alfresco.lib.dir" value="../../alfresco-enterprise-sdk-3.4.2/lib"/>
 
   <property name="project.dir" value="."/>
   <property name="dist.dir" value="${project.dir}/dist"/>
-
+  <property name="amp.file" value="${dist.dir}/${module.id}.amp"/>
+  <property name="config.dir" value="${project.dir}/config" />
   <property name="build.dir" value="${project.dir}/build"/>
   <property name="source.dir" value="${project.dir}/src" />
   <property name="jar.file" value="${build.dir}/${module.id}.jar"/>
@@ -44,6 +45,22 @@
     <jar destfile="${jar.file}" >
       <fileset dir="${build.dir}/classes" excludes="**/*Test*" includes="**/*.class" />
     </jar>
+  </target>
+ 
+  <!-- Add Webscripts -->
+  <target name="add-webscripts-to-package">
+    <zip destfile="${amp.file}" update="true">
+      <zipfileset dir="${source.dir}/webscripts" prefix="config/alfresco/extension/templates/webscripts" />
+    </zip>
+  </target>
+
+  <!-- Package AMP for Alfresco-->
+  <target name="prepare-package-amp" depends="package-jar, add-webscripts-to-package" description="Package the Module for Alfresco" >
+    <zip destfile="${amp.file}" update="true">
+      <zipfileset file="${project.dir}/*.properties" />
+      <zipfileset file="${jar.file}" prefix="lib" />
+      <zipfileset dir="${config.dir}" prefix="config/alfresco/module/${module.id}" />
+    </zip>
   </target>
 
 </project>

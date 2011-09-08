@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMapConfig
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+    <settings
+            useStatementNamespaces="true"
+            forceMultipleResultSetSupport="false"
+            lazyLoadingEnabled="false"
+            enhancementEnabled="false"
+            maxTransactions="500"
+            maxSessions="500"
+    />
+
+    <sqlMap resource="alfresco/module/apca-audit-module-alfresco/ibatis/#resource.dialect#/apca-audit-concat-SqlMap.xml"/>
+    <sqlMap resource="alfresco/module/apca-audit-module-alfresco/ibatis/#resource.dialect#/apca-audit-common-SqlMap.xml"/>
+    <sqlMap resource="alfresco/module/apca-audit-module-alfresco/ibatis/#resource.dialect#/apca-audit-insert-SqlMap.xml"/>
+</sqlMapConfig>

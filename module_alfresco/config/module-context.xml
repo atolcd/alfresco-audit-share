@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING/DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+  <!-- iBatis config for Alfresco (using common datasource) -->
+  <bean id="apcaAlfrescoSqlMapClient" class="org.alfresco.ibatis.HierarchicalSqlMapClientFactoryBean">
+      <property name="dataSource" ref="dataSource"/>
+      <property name="resourceLoader" ref="dialectResourceLoader" />
+      <property name="useTransactionAwareDataSource" value="false" />
+      <property name="configLocation">
+          <value>classpath:alfresco/module/apca-audit-module-alfresco/ibatis/share-stats-SqlMapConfig.xml</value>
+      </property>
+  </bean>
+
+  <bean id="auditApcaSqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+      <property name="sqlMapClient" ref="apcaAlfrescoSqlMapClient"/>
+  </bean>
+
+  <!-- Webscripts - Audit Queries -->
+  <bean id="webscript.com.atolcd.apca.database.insert.post" class="com.atolcd.apca.database.Insert" parent="webscript">
+    <property name="sqlMapClientTemplate" ref="auditApcaSqlMapClientTemplate"/>
+  </bean>
+
+  <bean id="webscript.com.atolcd.apca.database.select.get" class="com.atolcd.apca.database.Select" parent="webscript">
+    <property name="sqlMapClientTemplate" ref="auditApcaSqlMapClientTemplate"/>
+  </bean>
+
+  <bean id="webscript.com.atolcd.apca.database.update.post" class="com.atolcd.apca.database.Update" parent="webscript">
+    <property name="sqlMapClientTemplate" ref="auditApcaSqlMapClientTemplate"/>
+  </bean>
+
+  <!-- Patch de création de la table d'audit en base -->
+  <bean id="patch.db-V3.4-APCA-ExtraTables" class="com.atolcd.apca.repo.patch.SchemaUpgradeScriptPatch" parent="module.baseComponent" >
+    <property name="moduleId" value="apca-audit-module-alfresco" />
+    <property name="name" value="Création des tables d'audit concernant les statistiques des sites Share" />
+    <property name="description" value="" />
+    <property name="executeOnceOnly" value="true" />
+
+    <property name="dataSource">
+      <ref bean="dataSource"/>
+    </property>
+    <property name="localSessionFactory">
+      <ref bean="&amp;sessionFactory"></ref>
+    </property>
+    <property name="dialect">
+      <ref bean="dialect" />
+    </property>
+    <property name="globalProperties">
+      <ref bean="global-properties" />
+    </property>
+    <property name="scriptUrl">
+      <value>classpath:alfresco/module/apca-audit-module-alfresco/dbscripts/create/${db.script.dialect}/AlfrescoCreate-ApcaAuditTables.sql</value>
+    </property>
+  </bean>
+</beans>
