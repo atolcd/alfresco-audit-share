@@ -121,11 +121,29 @@
     <!-- Snippet de consultation-->
     <sql id="view_snippet">
       where
+      (
         audit_action_name = "page"
       or
         audit_action_name = "view"
       or
+        audit_action_name = "library"
+      or
+        audit_action_name = "postlist"
+      or
+        audit_action_name = "postview"
+      or
+        audit_action_name = "lists"
+      or
+        audit_action_name = "topiclist"
+      or
+        audit_action_name = "topicview"
+      or
+        audit_action_name = "library"
+      or
+        audit_action_name = "calendar"
+      or
         audit_action_name = ""
+      )
       <isNotNull prepend="and" property="siteId">
           audit_site = #siteId#
       </isNotNull>
@@ -139,36 +157,31 @@
     <sql id="comment_snippet">
       where
         audit_action_name = "comments"
-      or
-        audit_action_name = ""
       <isNotNull prepend="and" property="siteId">
           audit_site = #siteId#
       </isNotNull>
       <isNotNull prepend="and" property="appName">
-          audit_site = #appName#
-      </isNotNull>
-      <include refid="time_snippet"/>
-    </sql>
-    
-    <!-- Snippet d'opération sur fichiers -->
-    <sql id="file_snippet">
-      where
-        audit_action_name = "files-deleted"
-      or
-        audit_action_name = "files-added"
-      or
-        audit_action_name = "file-deleted"
-      or
-        audit_action_name = "file-added"
-      <isNotNull prepend="and" property="siteId">
-          audit_site = #siteId#
-      </isNotNull>
-      <isNotNull prepend="and" property="appName">
-          audit_site = #appName#
+          audit_app_name = #appName#
       </isNotNull>
       <include refid="time_snippet" />
     </sql>
-    
+
+    <!-- Snippet d'opération sur fichiers -->
+    <sql id="file_snippet">
+      where
+      (
+        audit_action_name = "file-deleted"
+      or
+        audit_action_name = "file-added"
+      )
+      <isNotNull prepend="and" property="siteId">
+          audit_site = #siteId#
+      </isNotNull>
+      <isNotNull prepend="and" property="appName">
+          audit_app_name = #appName#
+      </isNotNull>
+    </sql>
+
     <!--                -->
     <!-- Statements     -->
     <!--                -->
@@ -212,15 +225,13 @@
         apca_audit_entry
 
       <include refid="view_snippet"/>
+      <include refid="time_snippet" />
       group by audit_target
     </select>
 
     <!-- Get stats about action -->
     <select id="selectActions" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
-      select
-        audit_action_name as audit_target, count(*) as audit_count
-      from
-        apca_audit_entry
+      <include refid="select_concat_actions"/>
       <include refid="select_auditViewEntriesWhereSnippet"/>
       group by audit_target
     </select>
@@ -228,56 +239,55 @@
 
     <!-- Get modules with comments & replies -->
     <select id="selectComments" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
-      select
-        audit_app_name as audit_target, count(*) as audit_count
-      from
-        apca_audit_entry
+      <include refid="select_concat_actions"/>
       <include refid="comment_snippet" />
-      group by audit_target
-    </select>
-    
-    <!-- Get files activities -->
-    <select id="selectFileActions" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
-      select
-        audit_action_name as audit_target, count(*) as audit_count
-      from
-        apca_audit_entry
-      <include refid="file_snippet" />
+
       group by audit_target
     </select>
 
-    
+    <!-- Get files activities -->
+    <select id="selectFileActions" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
+      <include refid="select_concat_actions"/>
+      <include refid="file_snippet" />
+      <include refid="time_snippet" />
+      group by audit_target
+    </select>
+
+
     <!-- Get audit wihtin several sites -->
-    <select id="selectViewsBySite" parametersClass="ApcaAuditQueryParameters" resultMap="resuls_ApcaAuditCount">
+    <select id="selectViewsBySite" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
       select
-        audit_site_name as audit_target, count(*) as audit_count
+        audit_site as audit_target, count(*) as audit_count
       from
         apca_audit_entry
       <include refid="view_snippet" />
-      group by audit_target
-    </select>
-    
-    <!-- Get audit wihtin several sites -->
-    <select id="selectFilesBySite" parametersClass="ApcaAuditQueryParameters" resultMap="resuls_ApcaAuditCount">
-      select
-        audit_site_name as audit_target, count(*) as audit_count
-      from
-        apca_audit_entry
-      <include refid="file_snippet" />
+      <include refid="time_snippet" />
       group by audit_target
     </select>
 
     <!-- Get audit wihtin several sites -->
-    <select id="selectCommentsBySite" parametersClass="ApcaAuditQueryParameters" resultMap="resuls_ApcaAuditCount">
+    <select id="selectFilesBySite" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
       select
-        audit_site_name as audit_target, count(*) as audit_count
+        audit_site as audit_target, count(*) as audit_count
+      from
+        apca_audit_entry
+      <include refid="file_snippet" />
+      <include refid="time_snippet" />
+      group by audit_target
+    </select>
+
+    <!-- Get audit wihtin several sites -->
+    <select id="selectCommentsBySite" parameterClass="ApcaAuditQueryParameters" resultMap="results_ApcaAuditCount">
+      select
+        audit_site as audit_target, count(*) as audit_count
       from
         apca_audit_entry
       <include refid="comment_snippet" />
+      <include refid="time_snippet" />
       group by audit_target
     </select>
-    
-    
+
+
     <!-- Optimistic update of the audit application -->
     <update id="updateById" parameterClass="ApcaAuditEntry">
         update
