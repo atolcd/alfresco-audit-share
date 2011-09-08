@@ -541,7 +541,7 @@
           var params = {};
           var attributes = {wmode: "Opaque",salign: "l",AllowScriptAccess:"always"};
           //Chemin à changer vers swf ?
-          swfobject.embedSWF("/share/open-flash-chart.swf", this.id + "-chart", "75%", "400", "9.0.0","expressInstall.swf",flashvars,params,attributes);
+          swfobject.embedSWF("/share/components/console/open_flash_chart/open-flash-chart.swf", this.id + "-chart", "75%", "400", "9.0.0","expressInstall.swf",flashvars,params,attributes);
           
         }
         else {
