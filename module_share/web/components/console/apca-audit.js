@@ -452,18 +452,28 @@
       
       onExport: function ConsoleAudit_onExport()
       {
-        if(this.lastRequest) {
-        
-          url = "http://localhost:8080/share/proxy/alfresco/db/test";
-          window.open(url);
+       /* if(this.lastRequest) {
+          var csv = "";
+          for(var i = 0, ii = this.lastRequest.totalResults; i < ii; i++){
+            csv += this.lastRequest.items[i].count.toString() + ",";
+            csv += this.lastRequest.items[i].target + "\n";
+          }
+          console.log(csv);
           
-          
-         /* var elemIF = document.createElement("iframe");
-            elemIF.src = url;
-            elemIF.style.display = "none";
-            document.body.appendChild(elemIF);*/
-
-        }
+          var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits?csv="+csv;//JSON.stringify(this.lastRequest);
+          Alfresco.util.Ajax.request(
+          {
+             url: url,
+             method: Alfresco.util.Ajax.GET,
+             successCallback:
+             {
+                // fn: this.displayGraph,
+                // scope: this
+             },
+             failureMessage: this._msg("Query error"),
+             execScripts: true
+          });
+        }*/
       },
       
       /**
@@ -534,7 +544,7 @@
        */
       displayGraph: function ConsoleAudit_displayGraph(response) {
         if(!!response.json) {
-          this.widgets.exportButton.set("disabled",false);
+          //this.widgets.exportButton.set("disabled",false);
           this.lastRequest = response.json;
           //GetFlashData défini dans get_data.js
           var flashvars = {"get-data":"getFlashData","id":JSON.stringify(response.json)};

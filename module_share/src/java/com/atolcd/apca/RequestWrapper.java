@@ -40,7 +40,8 @@ public class RequestWrapper extends HttpServletRequestWrapper {
 	        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(stringRequest.getBytes());
 	        //cf javadoc.
 	        inputStream = new ServletInputStream() {
-	            public int read ()
+	            @Override
+				public int read ()
 	                throws IOException {
 	            	try{
 	            		return byteArrayInputStream.read();

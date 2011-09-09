@@ -37,6 +37,7 @@ import org.springframework.extensions.webscripts.connector.HttpMethod;
 import org.springframework.extensions.webscripts.connector.User;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+
 @SuppressWarnings("deprecation")
 public class ProxyAuditFilter implements Filter {
 	private ServletContext servletContext;
@@ -124,8 +125,7 @@ public class ProxyAuditFilter implements Filter {
 								requestWrapper.getStringContent());
 						// Mise à jour de l'auditSample à insérer
 						if (activityFeed.has("nodeRef")) {
-							auditSample.put("auditAppName",
-									activityFeed.getString("page"));
+							auditSample.put("auditAppName","document");
 							auditSample.put("auditSite",
 									activityFeed.getString("site"));
 							auditSample.put("auditActionName",
@@ -137,8 +137,7 @@ public class ProxyAuditFilter implements Filter {
 						} else if (activityFeed.has("fileCount")) {
 							// Plusieurs docs d'un coup. On ne récupère pas les
 							// nodeRefs.
-							auditSample.put("auditAppName",
-									activityFeed.getString("page"));
+							auditSample.put("auditAppName","document");
 							auditSample.put("auditSite",
 									activityFeed.getString("site"));
 							auditSample.put("auditActionName",
