@@ -20,16 +20,50 @@ import javax.servlet.http.HttpServletRequestWrapper;
  * C'est un objet de cette classe qui est envoyé dans le doFilter ensuite.
  */
 public class RequestWrapper extends HttpServletRequestWrapper {
-	private final String stringRequest;
+	private String stringRequest;
+	
 	public RequestWrapper(HttpServletRequest request) {
 		super(request);
+		this.stringRequest="";
+	}
 
-		
-        StringBuilder stringBuilder = new StringBuilder();
+    /**
+     * Surchage de la méthode getInputStream(). Retourne un nouvel inputStream
+     * créé à partir de stringRequest, plutôt que de renvoyer l'inputStream
+     * courant, qui pourrait déjà avoir été lu.
+     */
+    @Override
+    public ServletInputStream getInputStream ()
+        throws IOException {
+    	ServletInputStream inputStream;
+    	if(!this.stringRequest.isEmpty()){
+	        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(stringRequest.getBytes());
+	        //cf javadoc.
+	        inputStream = new ServletInputStream() {
+	            public int read ()
+	                throws IOException {
+	            	try{
+	            		return byteArrayInputStream.read();
+	            	}
+	            	catch(Exception e){
+	            		e.printStackTrace();
+	            		return 0;
+	            	}
+	            }
+	        };
+    	}
+    	else 
+    		inputStream = this.getRequest().getInputStream();
+    	
+        return inputStream;
+    }
+    
+    public void buildStringContent(){
+		StringBuilder stringBuilder = new StringBuilder();
         BufferedReader bufferedReader = null;
         try {
         	//Première lecture de la requête
-            InputStream inputStream = request.getInputStream();
+            InputStream inputStream = this.getRequest().getInputStream();
             if (inputStream != null) {
                 bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                 char[] charBuffer = new char[128];
@@ -52,36 +86,14 @@ public class RequestWrapper extends HttpServletRequestWrapper {
             }
         }
         //On conserve la requête sous forme de String
-        stringRequest = stringBuilder.toString();
-	}
-
-    /**
-     * Surchage de la méthode getInputStream(). Retourne un nouvel inputStream
-     * créé à partir de stringRequest, plutôt que de renvoyer l'inputStream
-     * courant, qui pourrait déjà avoir été lu.
-     */
-    @Override
-    public ServletInputStream getInputStream ()
-        throws IOException {
+        this.stringRequest = stringBuilder.toString();	
     	
-        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(stringRequest.getBytes());
-        //cf javadoc.
-        ServletInputStream inputStream = new ServletInputStream() {
-            public int read ()
-                throws IOException {
-            	try{
-            		return byteArrayInputStream.read();
-            	}
-            	catch(Exception e){
-            		System.out.println("Erreur :<");
-            		return 0;
-            	}
-            }
-        };
-        return inputStream;
     }
     
     public String getStringContent(){
+    	if(this.stringRequest.isEmpty()){
+    		this.buildStringContent();
+    	}
     	return this.stringRequest;
     }
 }
