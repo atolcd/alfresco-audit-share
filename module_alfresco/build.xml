@@ -1,11 +1,13 @@
 <?xml version="1.0"?>
 <project name="AMP Build File" default="prepare-package-amp" basedir=".">
-  <property name="module.id" value="apca-audit-module-alfresco"/>
+  <property name="module.id" value="share-stats-module-alfresco"/>
   
   <!-- Path to the SDK -->
   <property name="alfresco.lib.dir" value="../../alfresco-enterprise-sdk-3.4.2/lib"/>
+  
 
   <property name="project.dir" value="."/>
+  <property name="csv.file" value="${project.dir}/lib/javacsv.jar"/>
   <property name="dist.dir" value="${project.dir}/dist"/>
   <property name="amp.file" value="${dist.dir}/${module.id}.amp"/>
   <property name="config.dir" value="${project.dir}/config" />
@@ -32,6 +34,7 @@
   <path id="class.path">
     <dirset dir="${build.dir}" />
     <fileset dir="${alfresco.lib.dir}" includes="**/*.jar"/>
+    <fileset dir="${project.dir}/lib" includes="**/*.jar"/>
   </path>
 
   <!-- Compile -->
@@ -59,6 +62,7 @@
     <zip destfile="${amp.file}" update="true">
       <zipfileset file="${project.dir}/*.properties" />
       <zipfileset file="${jar.file}" prefix="lib" />
+      <zipfileset file="${csv.file}" prefix="lib" />
       <zipfileset dir="${config.dir}" prefix="config/alfresco/module/${module.id}" />
     </zip>
   </target>

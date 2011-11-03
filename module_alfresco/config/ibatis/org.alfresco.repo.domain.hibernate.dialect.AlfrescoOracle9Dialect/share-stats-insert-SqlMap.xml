@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="alfresco.atolcd.audit">
+    <insert id="insertEntry" parameterClass="AtolAuditEntry" >
+    
+        <selectKey resultClass="long" keyProperty="id" type="pre">
+            select share_stats_audit_entry_seq.nextval as value from dual
+        </selectKey>
+        
+        insert into share_stats_audit_entry (id,audit_user_id, audit_site, audit_app_name, audit_action_name, audit_object, audit_time)
+        values (#id#,#auditUserId#,#auditSite#,#auditAppName#,#auditActionName#,#auditObject#,#auditTime#)
+    </insert>   
+</sqlMap>

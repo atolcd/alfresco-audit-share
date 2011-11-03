@@ -2,31 +2,46 @@
 <!DOCTYPE beans PUBLIC "-//SPRING/DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
   <!-- iBatis config for Alfresco (using common datasource) -->
-  <bean id="apcaAlfrescoSqlMapClient" class="org.alfresco.ibatis.HierarchicalSqlMapClientFactoryBean">
+  <bean id="shareStatsAlfrescoSqlMapClient" class="org.alfresco.ibatis.HierarchicalSqlMapClientFactoryBean">
       <property name="dataSource" ref="dataSource"/>
       <property name="resourceLoader" ref="dialectResourceLoader" />
       <property name="useTransactionAwareDataSource" value="false" />
       <property name="configLocation">
-          <value>classpath:alfresco/module/apca-audit-module-alfresco/ibatis/share-stats-SqlMapConfig.xml</value>
+          <value>classpath:alfresco/module/share-stats-module-alfresco/ibatis/share-stats-SqlMapConfig.xml</value>
       </property>
   </bean>
 
-  <bean id="auditApcaSqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
-      <property name="sqlMapClient" ref="apcaAlfrescoSqlMapClient"/>
+  <bean id="alfrescoShareStatsResourceBundles" class="org.alfresco.i18n.ResourceBundleBootstrapComponent">
+    <property name="resourceBundles">
+      <list>
+        <value>alfresco.module.share-stats-module-alfresco.messages.share-stats</value>
+      </list>
+    </property>
+  </bean>
+  
+  <bean id="shareStatsQueriesSqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+      <property name="sqlMapClient" ref="shareStatsAlfrescoSqlMapClient"/>
   </bean>
 
   <!-- Webscripts - Audit Queries -->
-  <bean id="webscript.com.atolcd.apca.share-stats.insert-audit.post" class="com.atolcd.apca.web.scripts.shareStats.InsertAuditPost" parent="webscript">
-    <property name="sqlMapClientTemplate" ref="auditApcaSqlMapClientTemplate"/>
+  <bean id="webscript.com.atolcd.alfresco.share-stats.insert-audit.post" class="com.atolcd.alfresco.web.scripts.shareStats.InsertAuditPost" parent="webscript">
+    <property name="sqlMapClientTemplate" ref="shareStatsQueriesSqlMapClientTemplate"/>
+    <property name="siteService" ref="SiteService" />
   </bean>
 
-  <bean id="webscript.com.atolcd.apca.share-stats.select-audits.get" class="com.atolcd.apca.web.scripts.shareStats.SelectAuditsGet" parent="webscript">
-    <property name="sqlMapClientTemplate" ref="auditApcaSqlMapClientTemplate"/>
+  <bean id="webscript.com.atolcd.alfresco.share-stats.select-audits.get" class="com.atolcd.alfresco.web.scripts.shareStats.SelectAuditsGet" parent="webscript">
+    <property name="sqlMapClientTemplate" ref="shareStatsQueriesSqlMapClientTemplate"/>
   </bean>
 
+  
+  <bean id="webscript.com.atolcd.alfresco.share-stats.export-audits.get" class="com.atolcd.alfresco.web.scripts.shareStats.AuditExportGet" parent="webscript">
+    <property name="wsSelectAudits">
+      <ref bean="webscript.com.atolcd.alfresco.share-stats.select-audits.get" />
+    </property>
+  </bean>
   <!-- Patch de création de la table d'audit en base -->
-  <bean id="patch.db-V3.4-APCA-ExtraTables" class="com.atolcd.apca.repo.patch.SchemaUpgradeScriptPatch" parent="module.baseComponent" >
-    <property name="moduleId" value="apca-audit-module-alfresco" />
+  <bean id="patch.db-V3.4-ShareStats-ExtraTables" class="com.atolcd.alfresco.repo.patch.SchemaUpgradeScriptPatch" parent="module.baseComponent" >
+    <property name="moduleId" value="share-stats-module-alfresco" />
     <property name="name" value="Création des tables d'audit concernant les statistiques des sites Share" />
     <property name="description" value="" />
     <property name="executeOnceOnly" value="true" />
@@ -44,7 +59,7 @@
       <ref bean="global-properties" />
     </property>
     <property name="scriptUrl">
-      <value>classpath:alfresco/module/apca-audit-module-alfresco/dbscripts/create/${db.script.dialect}/AlfrescoCreate-ApcaAuditTables.sql</value>
+      <value>classpath:alfresco/module/share-stats-module-alfresco/dbscripts/create/${db.script.dialect}/AlfrescoCreate-ShareStatsAuditTables.sql</value>
     </property>
   </bean>
 </beans>

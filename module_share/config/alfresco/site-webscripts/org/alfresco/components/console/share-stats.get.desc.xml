@@ -1,0 +1,6 @@
+<webscript>
+  <shortname>Console d'audit pour Share</shortname>
+  <description>Console d'audit</description>
+  <url>/components/console/share-stats</url>
+  <family>admin-console</family>
+</webscript>

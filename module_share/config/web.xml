@@ -18,36 +18,36 @@
    </context-param>
 
    
-  <!-- apca filter -->
+  <!-- Audit filter -->
   <filter>
-    <description>Filtre général APCA pour l'audit</description>
-    <filter-name>ApcaFilter</filter-name>
-    <filter-class>com.atolcd.apca.AuditFilter</filter-class>
+    <description>Filtre général pour l'audit</description>
+    <filter-name>AuditFilter</filter-name>
+    <filter-class>com.atolcd.alfresco.AuditFilter</filter-class>
   </filter> 
   
   <filter-mapping>
-    <filter-name>ApcaFilter</filter-name>
+    <filter-name>AuditFilter</filter-name>
     <url-pattern>/page/*</url-pattern>
   </filter-mapping>
   
   <filter-mapping>
-    <filter-name>ApcaFilter</filter-name>
+    <filter-name>AuditFilter</filter-name>
     <url-pattern>/p/*</url-pattern>
   </filter-mapping>
   
 
   <filter>
-    <description>Filtre APCA pour l'audit (proxy)</description>
-    <filter-name>ApcaDetailsFilter</filter-name>
-    <filter-class>com.atolcd.apca.ProxyAuditFilter</filter-class>
+    <description>Filtre pour l'audit (proxy)</description>
+    <filter-name>ProxyAuditFilter</filter-name>
+    <filter-class>com.atolcd.alfresco.ProxyAuditFilter</filter-class>
   </filter> 
   
   <filter-mapping>
-    <filter-name>ApcaDetailsFilter</filter-name>
+    <filter-name>ProxyAuditFilter</filter-name>
     <url-pattern>/proxy/*</url-pattern>
   </filter-mapping>
   
-  <!-- apca filter -->
+  <!-- Audit filter -->
    
    
    <filter>

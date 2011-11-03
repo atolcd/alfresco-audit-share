@@ -1,0 +1,1 @@
+package com.atolcd.alfresco;public class AuditCount {	private int count;	private String target;	public int getCount() {		return count;	}	public void setCount(int count) {		this.count = count;	}	public String getTarget() {		return target;	}	public void setTarget(String target) {		this.target = target;	}}

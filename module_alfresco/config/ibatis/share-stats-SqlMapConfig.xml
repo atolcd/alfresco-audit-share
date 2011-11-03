@@ -14,7 +14,7 @@
             maxSessions="500"
     />
 
-    <sqlMap resource="alfresco/module/apca-audit-module-alfresco/ibatis/#resource.dialect#/apca-audit-concat-SqlMap.xml"/>
-    <sqlMap resource="alfresco/module/apca-audit-module-alfresco/ibatis/#resource.dialect#/apca-audit-common-SqlMap.xml"/>
-    <sqlMap resource="alfresco/module/apca-audit-module-alfresco/ibatis/#resource.dialect#/apca-audit-insert-SqlMap.xml"/>
+    <sqlMap resource="alfresco/module/share-stats-module-alfresco/ibatis/#resource.dialect#/share-stats-concat-SqlMap.xml"/>
+    <sqlMap resource="alfresco/module/share-stats-module-alfresco/ibatis/#resource.dialect#/share-stats-common-SqlMap.xml"/>
+    <sqlMap resource="alfresco/module/share-stats-module-alfresco/ibatis/#resource.dialect#/share-stats-insert-SqlMap.xml"/>
 </sqlMapConfig>
