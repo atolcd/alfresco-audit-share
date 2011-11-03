@@ -12,40 +12,39 @@
     </#list>
   ]
 </#macro>
-{
-  <#if results?exists>
-    <#if results?size !=0>
+<#if results?exists>
+  <#if results?size !=0>
   <#-- Template "all" -->
-
+  {
     "totalResults": ${results?size?c},
     "items":
     [
-      <#list results as result>
-        {
-          "id": ${result.id},
-          "auditUserId": "${result.auditUserId}",
-          "auditAppName": "${result.auditAppName}",
-          "auditActionName": "${result.auditActionName}",
-          "auditSite": "${result.auditSite}",
-          "auditObject": "${result.auditObject}",
-          "auditTime": "${result.auditTime}"
-        }<#if result_has_next>,</#if>
-     </#list>
-    ]
-
-    </#if>
-  <#-- Template statistiques simple -->
-  <#elseif views?exists>
-    <#if views?size !=0>
-  
+    <#list results as result>
+      {
+        "id": ${result.id},
+        "auditUserId": "${result.auditUserId}",
+        "auditAppName": "${result.auditAppName}",
+        "auditActionName": "${result.auditActionName}",
+        "auditSite": "${result.auditSite}",
+        "auditObject": "${result.auditObject}",
+        "auditTime": "${result.auditTime}"
+      }<#if result_has_next>,</#if>
+   </#list>
+  ]
+  }
+  </#if>
+<#-- Template statistiques simple -->
+<#elseif views?exists>
+  <#if views?size !=0>
+  {
     "type": "${type}",
     <@auditCount auditItems=views />
-  
-    </#if>
-  <#-- Template statistiques par dates -->
-  <#elseif dates?exists>
-    <#if dates?size !=0>
-  
+  }
+  </#if>
+<#-- Template statistiques par dates -->
+<#elseif dates?exists>
+  <#if dates?size !=0>
+  {
     "totalResults": ${dates?size?c},
     "type": "${type}",
     "slicedDates" : "${slicedDates}",
@@ -57,8 +56,7 @@
       }<#if date_has_next>,</#if>
       </#list>
     ]
-  
-    </#if>
+  }
   </#if>
-}
+</#if>
 </#escape>
