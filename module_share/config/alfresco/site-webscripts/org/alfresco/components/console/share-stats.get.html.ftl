@@ -43,9 +43,9 @@
             </select>
 
             <!-- ${msg("label.auditActionName")} -->
-            <input type="button" class="criterias-button" id="action-criteria" name="${el}-action-criteria-button" value="${msg("label.menu.action")}${msg("label.menu.all")}">
+            <input type="button" class="criterias-button" id="action-criteria" name="${el}-action-criteria-button" value="${msg("label.menu.action")}${msg("label.menu.none")}">
             <select id="action-criteria-select" name="${el}-action-criteria-select">
-              <option value="">${msg("label.menu.action")}${msg("label.menu.all")}</option>
+              <option value="">${msg("label.menu.action")}${msg("label.menu.none")}</option>
               <option value="views">${msg("label.menu.action")}${msg("label.views")}</option>
               <option value="comment">${msg("label.menu.action")}${msg("label.comments")}</option>
               <option value="file">${msg("label.menu.action")}${msg("label.files")}</option>

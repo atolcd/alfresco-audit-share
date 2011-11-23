@@ -11,6 +11,7 @@
     <!--                -->
 
     <typeAlias alias="AtolAuditEntry" type="com.atolcd.alfresco.AuditEntry"/>
+    <typeAlias alias="AtolCsvExportEntry" type="com.atolcd.alfresco.CsvExportEntry"/>
     <typeAlias alias="AtolAuditCount" type="com.atolcd.alfresco.AuditCount"/>
     <typeAlias alias="AtolAuditQueryParameters" type="com.atolcd.alfresco.AuditQueryParameters"/>
 
@@ -37,20 +38,18 @@
       <result property="auditTime" column="audit_time" jdbcType="BIGINT" javaType="long"/>
     </resultMap>
 
-    <resultMap id="results_AtolAuditEntry" class="AtolAuditEntry">
-      <result property="id" column="id" jdbcType="BIGINT" javaType="long"/>
-      <result property="auditUserId" column="audit_user_id" jdbcType="VARCHAR" javaType="java.lang.String"/>
+    <resultMap id="results_AtolCsvExportEntry" class="AtolCsvExportEntry">
       <result property="auditSite" column="audit_site" jdbcType="VARCHAR" javaType="java.lang.String"/>
       <result property="auditAppName" column="audit_app_name" jdbcType="VARCHAR" javaType="java.lang.String"/>
       <result property="auditActionName" column="audit_action_name" jdbcType="VARCHAR" javaType="java.lang.String"/>
-      <result property="auditObject" column="audit_object" jdbcType="VARCHAR" javaType="java.lang.String"/>
-      <result property="auditTime" column="audit_time" jdbcType="BIGINT" javaType="long"/>
+      <result property="count" column="audit_count" jdbcType="BIGINT" javaType="int"/>
     </resultMap>
 
     <resultMap id="results_AtolAuditCount" class="AtolAuditCount">
       <result property="count" column="audit_count" jdbcType="BIGINT" javaType="int"/>
       <result property="target" column="audit_target" jdbcType="VARCHAR" javaType="java.lang.String"/>
     </resultMap>
+    
     <!--                -->
     <!-- SQL Snippets   -->
     <!--                -->
@@ -178,15 +177,19 @@
 
     <!-- Get all audit records -->
 
-    <select id="selectAll" resultMap="results_AtolAuditEntry">
+    <select id="selectAll" resultMap="results_AtolCsvExportEntry">
       select
-        *
+        audit_site,
+        count(*) as audit_count,     
+        audit_app_name, 
+        audit_action_name
       from
         share_stats_audit_entry
       <include refid="select_AuditEntriesWhereSnippet"/>
+      group by audit_site, audit_app_name, audit_action_name
+      order by audit_site, audit_app_name, audit_action_name
     </select>
-
-
+    
     <!-- Get stats about module -->
     <select id="selectModules" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       select

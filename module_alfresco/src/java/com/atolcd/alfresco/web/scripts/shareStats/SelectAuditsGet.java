@@ -36,6 +36,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 	private static final String SELECT_SITES_VIEW = "alfresco.atolcd.audit.selectViewsBySite";
 	private static final String SELECT_SITES_FILE = "alfresco.atolcd.audit.selectFilesBySite";
 	private static final String SELECT_SITES_COMMENT = "alfresco.atolcd.audit.selectCommentsBySite";
+
 	// logger
 	private static final Log logger = LogFactory.getLog(SelectAuditsGet.class);
 
@@ -72,7 +73,13 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 	public void checkForQuery(Map<String, Object> model, AuditQueryParameters params, String type) throws SQLException, JSONException {
 		switch (queryType.valueOf(type)) {
 		case all:
-			model.put("results", selectAll(params));
+			if(params.getSlicedDates() != null){
+				model.put("slicedDates", params.getSlicedDates());
+				model.put("results", selectAllByDate(params));
+			}
+			else {
+				model.put("results", selectAll(params));
+			}
 			break;
 		case module:
 			model.put("views", select(params, SELECT_MODULE));
@@ -212,6 +219,22 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 		return auditSamples;
 	}
 
+	@SuppressWarnings("unchecked")
+	public List<List<AuditEntry>> selectAllByDate(AuditQueryParameters params) throws SQLException, JSONException {
+		List<List<AuditEntry>> auditSamples = new ArrayList<List<AuditEntry>>();
+		String[] dates = params.getSlicedDates().split(",");
+		
+		for (int i = 0; i < dates.length - 1; i++) {
+			params.setDateFrom(dates[i]);
+			params.setDateTo(dates[i + 1]);
+			List<AuditEntry> auditSample = new ArrayList<AuditEntry>();
+			auditSample = sqlMapClientTemplate.queryForList(SELECT_ALL, params);
+			auditSamples.add(auditSample);
+		}
+		logger.info("Performing selectAllByDate() ... ");
+		return auditSamples;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public List<AuditCount> select(AuditQueryParameters params, String query) {
 		List<AuditCount> auditCount = new ArrayList<AuditCount>();

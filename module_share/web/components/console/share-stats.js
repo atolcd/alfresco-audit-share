@@ -78,12 +78,14 @@
 
         parent.widgets.moduleCriteriaButton = new YAHOO.widget.Button("module-criteria", {
           type: "split",
-          menu: "module-criteria-select"
+          menu: "module-criteria-select",
+          lazyloadmenu: false
         });
 
         parent.widgets.actionCriteriaButton = new YAHOO.widget.Button("action-criteria", {
           type: "split",
-          menu: "action-criteria-select"
+          menu: "action-criteria-select",
+          lazyloadmenu: false
         });
 
         parent.widgets.dateCriteriaButton = new YAHOO.widget.Button("date-criteria", {
@@ -93,7 +95,8 @@
 
         parent.widgets.siteCriteriaButton = new YAHOO.widget.Button("site-criteria", {
           type: "split",
-          menu: "site-criteria-select"
+          menu: "site-criteria-select",
+          lazyloadmenu: false
         });
 
         parent.widgets.startCalendar = new YAHOO.widget.Calendar("calendar-date-from", "calendar-date-from", {
@@ -113,10 +116,10 @@
         //Handler des click-icônes
         var onIconFromClick = function (e) {
             var endCalendarVisible = Dom.getStyle(parent.widgets.endCalendar.id, 'display'),
-                startCalendarVisible = Dom.getStyle(parent.widgets.startCalendar.id, 'display');
+              startCalendarVisible = Dom.getStyle(parent.widgets.startCalendar.id, 'display');
             if (startCalendarVisible == "none") {
-              Dom.setStyle(parent.widgets.startCalendar.id, 'top', parseInt(e.clientY - 150, 10) + "px");
-              Dom.setStyle(parent.widgets.startCalendar.id, 'left', parseInt(e.clientX, 10) + "px");
+              Dom.setStyle(parent.widgets.startCalendar.id, 'top', parseInt(e.layerY - 150, 10) + "px");
+              Dom.setStyle(parent.widgets.startCalendar.id, 'left', parseInt(e.layerX, 10) + "px");
               parent.widgets.startCalendar.show();
             } else {
               parent.widgets.startCalendar.hide();
@@ -129,10 +132,10 @@
 
         var onIconToClick = function (e) {
             var endCalendarVisible = Dom.getStyle(parent.widgets.endCalendar.id, 'display'),
-                startCalendarVisible = Dom.getStyle(parent.widgets.startCalendar.id, 'display');
+              startCalendarVisible = Dom.getStyle(parent.widgets.startCalendar.id, 'display');
             if (endCalendarVisible == "none") {
-              Dom.setStyle(parent.widgets.endCalendar.id, 'top', parseInt(e.clientY - 150, 10) + "px");
-              Dom.setStyle(parent.widgets.endCalendar.id, 'left', parseInt(e.clientX, 10) + "px");
+              Dom.setStyle(parent.widgets.endCalendar.id, 'top', parseInt(e.layerY - 150, 10) + "px");
+              Dom.setStyle(parent.widgets.endCalendar.id, 'left', parseInt(e.layerX, 10) + "px");
               parent.widgets.endCalendar.show();
             } else {
               parent.widgets.endCalendar.hide();
@@ -148,20 +151,20 @@
         //Handler de la selection des dates
         var onStartCalendarSelect = function (type, args, obj) {
             var dates = args[0],
-                date = dates[0],
-                year = date[0],
-                month = date[1],
-                day = date[2];
+              date = dates[0],
+              year = date[0],
+              month = date[1],
+              day = date[2];
             Dom.get("input-date-from").value = day + '/' + month + '/' + year;
             this.hide();
           };
 
         var onEndCalendarSelect = function (type, args, obj) {
             var dates = args[0],
-                date = dates[0],
-                year = date[0],
-                month = date[1],
-                day = date[2];
+              date = dates[0],
+              year = date[0],
+              month = date[1],
+              day = date[2];
             Dom.get("input-date-to").value = day + '/' + month + '/' + year;
             this.hide();
           };
@@ -191,7 +194,7 @@
             },
             scope: parent
           },
-          failureMessage: parent._msg("error.list-site"),
+          failureMessage: parent._msg("label.popup.error.list-site"),
           execScripts: true
         });
       }
@@ -262,36 +265,172 @@
       //Composants créé, on ajoute des listeners sur les menus.
       var me = this;
       var onModulesMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
-          me.widgets.moduleCriteriaButton.value = p_aArgs[1].value;
-          var sText = p_aArgs[1].cfg.getProperty("text");
-          me.widgets.moduleCriteriaButton.set("label", sText);
+          var sText = p_aArgs[1].cfg.getProperty("text"),
+            value = p_aArgs[1].value,
+            disabled = p_aArgs[1].cfg.getProperty("disabled"),
+            displayPopup = false;
+
+          if (!disabled) {
+            me.widgets.moduleCriteriaButton.value = p_aArgs[1].value;
+            me.widgets.moduleCriteriaButton.set("label", sText);
+            //Vérification que les choix concordent bien
+            var menuItems = me.widgets.actionCriteriaButton.getMenu().getItems(),
+              menuItem = null;
+            if (value != "" && value != "document") {
+              for (var i = 0, ii = menuItems.length; i < ii; i++) {
+                menuItem = menuItems[i];
+
+                if (menuItem.value == "file") {
+                  if(!menuItem.cfg.getProperty("disabled")){
+                    menuItem.cfg.setProperty("disabled", true);
+                    displayPopup = true;
+                  }
+                  menuItem.unsubscribe("click", onModulesMenuItemClick);
+                  if (me.widgets.actionCriteriaButton.value == "file") {
+                    me.widgets.actionCriteriaButton.value = "";
+                    me.widgets.actionCriteriaButton.set("label", me._msg("label.menu.action") + me._msg("label.menu.none"));
+                  }
+                } else if (menuItem.value == "comment") {
+                  if (value != "wiki" && value != "blog" && value != "discussions" && value != "links") {
+                    if(!menuItem.cfg.getProperty("disabled")){
+                      menuItem.cfg.setProperty("disabled", true);
+                      displayPopup = true;
+                    }
+                    if (me.widgets.actionCriteriaButton.value == "comment") {
+                      me.widgets.actionCriteriaButton.value = "";
+                      me.widgets.actionCriteriaButton.set("label", me._msg("label.menu.action") + me._msg("label.menu.none"));
+                    }
+                  }
+                } else if (menuItem.value != "") {
+                  // On ignore le menu "tous"
+                  menuItem.cfg.setProperty("disabled", false);
+                }
+              }
+            } else {
+              for (var i = 0, ii = menuItems.length; i < ii; i++) {
+                menuItem = menuItems[i];
+                if (menuItem.cfg.getProperty("disabled") && menuItem.value != "") {
+                  menuItem.cfg.setProperty("disabled", false);
+                }
+              }
+            }
+            me.widgets.moduleCriteriaButton.getMenu().hide();
+          } else {
+            me.widgets.moduleCriteriaButton.getMenu().show();
+          }
+          if(displayPopup){
+            Alfresco.util.PopupManager.displayMessage({
+              title:me._msg("label.popup.warning.title"),
+              text:me._msg("label.popup.warning.modules-click")
+            });
+          }
         };
       this.widgets.moduleCriteriaButton.getMenu().subscribe("click", onModulesMenuItemClick);
 
       var onActionsMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
-          me.widgets.actionCriteriaButton.value = p_aArgs[1].value;
-          var sText = p_aArgs[1].cfg.getProperty("text");
-          me.widgets.actionCriteriaButton.set("label", sText);
+          var sText = p_aArgs[1].cfg.getProperty("text"),
+            value = p_aArgs[1].value,
+            disabled = p_aArgs[1].cfg.getProperty("disabled"),
+            displayPopup = false;
+
+          if (!disabled) {
+            me.widgets.actionCriteriaButton.value = p_aArgs[1].value;
+            me.widgets.actionCriteriaButton.set("label", sText);
+
+            //Vérification que les choix concordent bien
+            var menuItems = me.widgets.moduleCriteriaButton.getMenu().getItems(),
+              menuItem = null;
+            if (value == "comment" || value == "file") {
+              moduleValue = me.widgets.moduleCriteriaButton.value;
+              for (var i = 0, ii = menuItems.length; i < ii; i++) {
+                menuItem = menuItems[i];
+                if (menuItem.value != "" && ((value == "file" && menuItem.value != "document") || (value == "comment" && menuItem.value != "document" && menuItem.value != "blog" && menuItem.value != "wiki" && menuItem.value != "discussions" && menuItem.value != "links"))) {
+                  if (!menuItem.cfg.getProperty("disabled")) {
+                    menuItem.cfg.setProperty("disabled", true);
+                    displayPopup = true;
+                  }
+                  //Le module sélectionné ne convient pas
+                  if ((value == "file" && moduleValue != "document") || (value == "comment" && moduleValue != "document" && moduleValue != "blog" && moduleValue != "wiki" && moduleValue != "discussions" && moduleValue != "links")) {
+                    me.widgets.moduleCriteriaButton.value = "";
+                    me.widgets.moduleCriteriaButton.set("label", me._msg("label.menu.module") + me._msg("label.menu.all"));
+                  }
+                } else {
+                  if (menuItem.cfg.getProperty("disabled")) {
+                    menuItem.cfg.setProperty("disabled", false);
+                  }
+                }
+              }
+            } else {
+              for (var i = 0, ii = menuItems.length; i < ii; i++) {
+                menuItem = menuItems[i];
+                if (menuItem.cfg.getProperty("disabled")) {
+                  menuItem.cfg.setProperty("disabled", false);
+                }
+              }
+            }
+            me.widgets.actionCriteriaButton.getMenu().hide();
+          } else {
+            me.widgets.actionCriteriaButton.getMenu().show();
+          }
+
+          if(displayPopup){
+            Alfresco.util.PopupManager.displayMessage({
+              title: me._msg("label.popup.warning.title"),
+              text:me._msg("label.popup.warning.actions-click")
+            });
+          }
         };
+
       this.widgets.actionCriteriaButton.getMenu().subscribe("click", onActionsMenuItemClick);
 
       var onDateMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
-          me.widgets.dateCriteriaButton.value = p_aArgs[1].value;
-          var sText = p_aArgs[1].cfg.getProperty("text");
+          var sText = p_aArgs[1].cfg.getProperty("text"),
+              value = p_aArgs[1].value;
+
+          me.widgets.dateCriteriaButton.value = value;
           me.widgets.dateCriteriaButton.set("label", sText);
         };
       this.widgets.dateCriteriaButton.getMenu().subscribe("click", onDateMenuItemClick);
 
       var onSiteMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
-          var sText = p_aArgs[1].cfg.getProperty("text");
+          var sText = p_aArgs[1].cfg.getProperty("text"),
+            siteValue = p_aArgs[1].value;
+            disabled = p_aArgs[1].cfg.getProperty("disabled");
+
           me.widgets.siteCriteriaButton.set("label", sText);
-
-          var siteValue = p_aArgs[1].value;
           me.widgets.siteCriteriaButton.value = siteValue;
+          //Vérification que les choix concordent bien
+          var menuItems = me.widgets.actionCriteriaButton.getMenu().getItems();
 
-          //Event pour afficher la liste des sites
-          if (siteValue === "/compare" && !me.widgets.siteCriteriaButton.get("disabled") && me.selectedSites.length < 2) {
-            me.siteDialog.show();
+          if (siteValue === "/compare") {
+            //Affichage la liste des sites
+            var displaySiteDialog = function(){
+              if (!me.widgets.siteCriteriaButton.get("disabled") && me.selectedSites.length < 2) {
+                me.siteDialog.show();
+              }
+            }
+           
+            if (!menuItems[0].cfg.getProperty("disabled")) {
+              menuItems[0].cfg.setProperty("disabled", true);
+            }
+            if (!me.widgets.actionCriteriaButton.value) {
+              me.widgets.actionCriteriaButton.value = "views";
+              me.widgets.actionCriteriaButton.set("label", me._msg("label.menu.module") + me._msg("label.views"));
+              
+              //Pop-up de warning
+              Alfresco.util.PopupManager.displayPrompt({
+                text: me._msg("label.popup.warning.filter"),
+                title: me._msg("label.popup.warning.title"),
+                buttons : [{"text":me._msg("button.ok"),handler:function(){this.hide();displaySiteDialog();},selected:true}]
+              }); 
+            } else {
+              displaySiteDialog();
+            }
+            
+          } else {
+            if (menuItems[0].cfg.getProperty("disabled")) {
+              menuItems[0].cfg.setProperty("disabled", false);
+            }
           }
         };
       this.widgets.siteCriteriaButton.getMenu().subscribe("click", onSiteMenuItemClick);
@@ -523,9 +662,15 @@
 
       //Test sur les valeurs de dates
       if (to > 0 && from > to) {
-        alert(this._msg("error.date.greater"));
-      } else if (this.selectedSites.length <= 1 && type.indexOf("sites") == 0) {
-        alert(this._msg("error.site.null"));
+        Alfresco.util.PopupManager.displayPrompt({
+          text : this._msg("label.popup.error.date.greater"),
+          title : this._msg("label.popup.error.title")
+        });
+      } else if (this.selectedSites.length < 1 && type.indexOf("sites") == 0) {
+        Alfresco.util.PopupManager.displayPrompt({
+          text : this._msg("label.popup.error.site"),
+          title : this._msg("label.popup.error.title")
+        });
       } else {
         // Création des paramètres et exécution de la requête
         this.lastRequest.params = this.buildParams(from, to, action, module, site, sites, tsArray.toString(), type);
@@ -553,21 +698,19 @@
       var swf = Dom.get(this.id + "-chart"),
         chartTag = swf.tagName.toLowerCase();
 
-      if ( !! response.json) {
+      if (response.json) {
         this.widgets.exportButton.set("disabled", false);
 
-        this.lastRequest.data = response.json; //response.serverResponse.responseText;
-        this.lastRequest.from = this.convertDate(Dom.get("input-date-from").value);
-        this.lastRequest.to = this.convertDate(Dom.get("input-date-to").value);
         // console.log(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
-        if (chartTag == "embed" || chartTag == "object") {
-          swf.load(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
-        } else {
-          //Création variables et attribut - GetFlashData défini dans get_data.js
-          var flashvars = {
-            "get-data": "getFlashData",
-            "id": escape(YAHOO.lang.JSON.stringify(response.json))
-          },
+        if(this.countGraphItems(response.json) < 100) {
+          if (chartTag == "embed" || chartTag == "object") {
+            swf.load(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
+          } else {
+            //Création variables et attribut - GetFlashData défini dans get_data.js
+            var flashvars = {
+              "get-data": "getFlashData",
+              "id": escape(YAHOO.lang.JSON.stringify(response.json))
+            },
               params = {
                 wmode: "opaque"
               },
@@ -577,24 +720,64 @@
                 AllowScriptAccess: "always"
               };
 
-          //Création du graphique Flash.
-          swfobject.embedSWF(this.pathToSwf, this.id + "-chart", "90%", "450", "9.0.0", "expressInstall.swf", flashvars, params, attributes);
+            //Création du graphique Flash.
+            swfobject.embedSWF(this.pathToSwf, this.id + "-chart", "90%", "450", "9.0.0", "expressInstall.swf", flashvars, params, attributes);
+          }
+        } else {
+          this.removeGraph();
+          //Avertissement concernant le rendu
+          Dom.get("request-information").innerHTML = this._msg("warning.no-graph");
         }
       } else {
-        //On remove le SWF courant. Le conteneur étant détruit, il faut le recréer ...
-        if (chartTag == "embed" || chartTag == "object") {
-          swfobject.removeSWF(this.id + "-chart");
-          var newChartDiv = new YAHOO.util.Element(document.createElement("div"));
-          newChartDiv.set("id", this.id + "-chart");
-          newChartDiv.appendTo(this.id + "-chart-container");
-          this.widgets.exportButton.set("disabled", true);
-        }
+        //On remove le SWF courant.
+        this.removeGraph();
         Dom.get(this.id + "-chart").innerHTML = this._msg("message.no_results");
+        this.widgets.exportButton.set("disabled", true);
       }
       this.widgets.searchButton.blur();
     },
 
     /**
+     * @method removeGraph
+     * @return boolean
+     */
+    removeGraph: function ConsoleAudit_removeGraph(){
+      var swf = Dom.get(this.id + "-chart"),
+        chartTag = swf.tagName.toLowerCase(),
+        res = false;
+
+      if (chartTag == "embed" || chartTag == "object") {
+        swfobject.removeSWF(this.id + "-chart");
+        //Le conteneur étant détruit, il faut le recréer ...
+        var newChartDiv = new YAHOO.util.Element(document.createElement("div"));
+        newChartDiv.set("id", this.id + "-chart");
+        newChartDiv.appendTo(this.id + "-chart-container");
+        res = true;
+      }
+
+      return res;
+    },
+
+    /**
+     *
+     * @method countGraphItems
+     * @return integer
+     */
+    countGraphItems: function ConsoleAudit_countGraphItems(json){
+      var count = 0;
+      if(json.slicedDates){
+        var maxItems = 0, item;
+        for each(item in json.items){
+          maxItems = (item.totalResults > maxItems) ? item.totalResults : maxItems;
+        }
+        count = maxItems * json.totalResults;
+      } else {
+        count = json.totalResults;
+      }
+
+      return count;
+    },
+   /**
      * @method convertDate
      * @param d Date au format jj/mm/aaaa
      * @return integer Timestamp unix de la date
@@ -654,7 +837,7 @@
      */
     getRequestType: function ConsoleAudit_getRequestType(action, module, site, dates) {
       var type = "module",
-          date = dates ? dates : "";
+        date = dates ? dates : "";
 
       switch (action) {
       case "views":
@@ -791,9 +974,7 @@
       // Les semaines de "from" et "to" sont INCLUSES
       else if (type == "_by_week") {
         //On utilise la date de départ pour récupérer tous les jours de la semaine
-        next = null,
-        currentDay = from.getDay(),
-        hasNext = false;
+        next = null, currentDay = from.getDay(), hasNext = false;
         //Début de semaine
         from.setDate(from.getDate() - (currentDay - 1));
         next = new Date(from);
@@ -863,7 +1044,7 @@
 
       // Date labels for German locale
       cal.cfg.setProperty("MONTHS_SHORT", ["Jan", "Fev", "Mars", "Avr", "Mai", "Juin", "Juil", "Aout", "Sep", "Oct", "Nov", "Dec"]);
-      cal.cfg.setProperty("MONTHS_LONG", ["Janvier", "F\u00e9vrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "D\u00e9cembre"]);
+      cal.cfg.setProperty("MONTHS_LONG", ["Janvier", "F\u00e9vrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Ao\u00fbt", "Septembre", "Octobre", "Novembre", "D\u00e9cembre"]);
       cal.cfg.setProperty("WEEKDAYS_1CHAR", ["D", "L", "M", "M", "J", "V", "S"]);
       cal.cfg.setProperty("WEEKDAYS_SHORT", ["Di", "Lu", "Ma", "Me", "Je", "Ve", "Sa"]);
       cal.cfg.setProperty("WEEKDAYS_MEDIUM", ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]);

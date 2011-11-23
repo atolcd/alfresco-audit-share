@@ -84,6 +84,8 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
 			SiteInfo siteInfo = siteService.getSite(nodeRef);
 			if (siteInfo != null) {
 				auditSample.setAuditSite(siteInfo.getShortName());
+			} else {
+				auditSample.setAuditSite("");
 			}
 		}
 
