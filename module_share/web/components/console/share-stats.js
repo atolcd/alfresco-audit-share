@@ -766,8 +766,9 @@
     countGraphItems: function ConsoleAudit_countGraphItems(json){
       var count = 0;
       if(json.slicedDates){
-        var maxItems = 0, item;
-        for each(item in json.items){
+        var maxItems = 0, item, i;
+        for(i in json.items){
+          item = json.items[i];
           maxItems = (item.totalResults > maxItems) ? item.totalResults : maxItems;
         }
         count = maxItems * json.totalResults;
