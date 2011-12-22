@@ -2,7 +2,7 @@
   <shortname>Export audits</shortname>
   <description>Export d'audit au format CSV</description>
   <url>/share-stats/export-audits</url>
-  <format default="csv"/>
+  <format default="text"/>
   <authentication>admin</authentication>
   <transaction>required</transaction>
   <cache>

@@ -40,6 +40,17 @@
     </property>
     <property name="siteService" ref="SiteService" />
   </bean>
+	
+	<!-- JavaScript API -->
+  <bean id="shareStatsScript" parent="baseJavaScriptExtension" class="com.atolcd.alfresco.repo.jscript.ShareStats">
+    <property name="extensionName">
+      <value>sharestats</value>
+    </property>
+    <property name="wsSelectAudits">
+      <ref bean="webscript.com.atolcd.alfresco.share-stats.select-audits.get" />
+    </property>
+  </bean>
+	
   <!-- Patch de création de la table d'audit en base -->
   <bean id="patch.db-V3.4-ShareStats-ExtraTables" class="com.atolcd.alfresco.repo.patch.SchemaUpgradeScriptPatch" parent="module.baseComponent" >
     <property name="moduleId" value="share-stats-module-alfresco" />

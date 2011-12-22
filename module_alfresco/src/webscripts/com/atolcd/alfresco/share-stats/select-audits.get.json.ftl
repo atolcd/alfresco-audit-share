@@ -6,7 +6,7 @@
   [
     <#list auditItems as auditItem>
       {
-        "count": ${auditItem.count},
+        "count": ${auditItem.count?c},
         "target": "${auditItem.target}"
       }<#if auditItem_has_next>,</#if>
     </#list>

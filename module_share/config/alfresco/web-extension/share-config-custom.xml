@@ -1,18 +1,6 @@
 <alfresco-config>
    <!-- Global config section -->
    <config replace="true">
-      <flags>
-         <!--
-            Developer debugging setting to turn on DEBUG mode for client scripts in the browser
-         -->
-         <client-debug>false</client-debug>
-         <!--
-            LOGGING can always be toggled at runtime when in DEBUG mode (Ctrl, Ctrl, Shift, Shift).
-            This flag automatically activates logging on page load.
-         -->
-         <client-debug-autologging>false</client-debug-autologging>
-      </flags>
-
       <header>
          <app-items>
             <!-- defaults: icon="{id}.png" label="header.{id}.label" description="header.{id}.description" -->

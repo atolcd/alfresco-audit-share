@@ -37,6 +37,8 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 	private static final String SELECT_SITES_FILE = "alfresco.atolcd.audit.selectFilesBySite";
 	private static final String SELECT_SITES_COMMENT = "alfresco.atolcd.audit.selectCommentsBySite";
 
+	private static final String SELECT_POPULARITY = "alfresco.atolcd.audit.selectPopularity";
+	private static final String SELECT_POPULARITIES = "alfresco.atolcd.audit.selectPopularities";
 	// logger
 	private static final Log logger = LogFactory.getLog(SelectAuditsGet.class);
 
@@ -282,4 +284,17 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 		}
 	}
 
+	/**
+	 * Retourne le nombre de fois qu'un document a été consulté
+	 * @param nodeRef String représentant le nodeRef du document
+	 * @return int
+	 */
+	public int getDocumentPopularity(String nodeRef){
+	    int res = 0;
+	    Object o = sqlMapClientTemplate.queryForObject(SELECT_POPULARITY, nodeRef);
+	    if(o != null){
+	        res = (Integer)o;
+	    }
+	    return res;
+	}
 }

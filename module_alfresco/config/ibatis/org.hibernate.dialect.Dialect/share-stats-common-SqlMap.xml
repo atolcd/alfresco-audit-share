@@ -263,4 +263,19 @@
       <include refid="comment_snippet" />
       group by audit_target
     </select>
+		
+		<select id="selectPopularity" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+			select
+				count(*) as popularity
+			from
+				share_stats_audit_entry
+			where
+				audit_object = #nodeRef#
+			and
+				audit_app_name = "document"
+			and
+				audit_action_name = "details"
+			group by
+				audit_object
+		</select>
 </sqlMap>
