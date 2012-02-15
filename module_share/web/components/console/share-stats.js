@@ -21,8 +21,7 @@
  *
  * @namespace Alfresco
  * @class Alfresco.ConsoleAudit
- */
-(function () {
+ */ (function () {
   /**
    * YUI Library aliases
    */
@@ -264,12 +263,14 @@
 
       //Composants créé, on ajoute des listeners sur les menus.
       var me = this;
+      // Comportement du menu de filtre par Modules
       var onModulesMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
           var sText = p_aArgs[1].cfg.getProperty("text"),
             value = p_aArgs[1].value,
             disabled = p_aArgs[1].cfg.getProperty("disabled"),
             displayPopup = false;
 
+          //On vérifie que l'option du menu ne soit pas disabled pour ne pas déclencher d'évenements.
           if (!disabled) {
             me.widgets.moduleCriteriaButton.value = p_aArgs[1].value;
             me.widgets.moduleCriteriaButton.set("label", sText);
@@ -281,7 +282,7 @@
                 menuItem = menuItems[i];
 
                 if (menuItem.value == "file") {
-                  if(!menuItem.cfg.getProperty("disabled")){
+                  if (!menuItem.cfg.getProperty("disabled")) {
                     menuItem.cfg.setProperty("disabled", true);
                     displayPopup = true;
                   }
@@ -292,7 +293,7 @@
                   }
                 } else if (menuItem.value == "comment") {
                   if (value != "wiki" && value != "blog" && value != "discussions" && value != "links") {
-                    if(!menuItem.cfg.getProperty("disabled")){
+                    if (!menuItem.cfg.getProperty("disabled")) {
                       menuItem.cfg.setProperty("disabled", true);
                       displayPopup = true;
                     }
@@ -318,15 +319,16 @@
           } else {
             me.widgets.moduleCriteriaButton.getMenu().show();
           }
-          if(displayPopup){
+          if (displayPopup) {
             Alfresco.util.PopupManager.displayMessage({
-              title:me._msg("label.popup.warning.title"),
-              text:me._msg("label.popup.warning.modules-click")
+              title: me._msg("label.popup.warning.title"),
+              text: me._msg("label.popup.warning.modules-click")
             });
           }
         };
       this.widgets.moduleCriteriaButton.getMenu().subscribe("click", onModulesMenuItemClick);
 
+      // Comportement du menu de filtre par Actions
       var onActionsMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
           var sText = p_aArgs[1].cfg.getProperty("text"),
             value = p_aArgs[1].value,
@@ -373,61 +375,93 @@
             me.widgets.actionCriteriaButton.getMenu().show();
           }
 
-          if(displayPopup){
+          if (displayPopup) {
             Alfresco.util.PopupManager.displayMessage({
               title: me._msg("label.popup.warning.title"),
-              text:me._msg("label.popup.warning.actions-click")
+              text: me._msg("label.popup.warning.actions-click")
             });
           }
         };
-
       this.widgets.actionCriteriaButton.getMenu().subscribe("click", onActionsMenuItemClick);
 
+      //Comportement du menu "Dates"
       var onDateMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
           var sText = p_aArgs[1].cfg.getProperty("text"),
-              value = p_aArgs[1].value;
+            value = p_aArgs[1].value;
 
           me.widgets.dateCriteriaButton.value = value;
           me.widgets.dateCriteriaButton.set("label", sText);
         };
       this.widgets.dateCriteriaButton.getMenu().subscribe("click", onDateMenuItemClick);
 
+      //Comportement du menu "Sites"
       var onSiteMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
           var sText = p_aArgs[1].cfg.getProperty("text"),
             siteValue = p_aArgs[1].value;
-            disabled = p_aArgs[1].cfg.getProperty("disabled");
+          disabled = p_aArgs[1].cfg.getProperty("disabled");
 
           me.widgets.siteCriteriaButton.set("label", sText);
           me.widgets.siteCriteriaButton.value = siteValue;
           //Vérification que les choix concordent bien
           var menuItems = me.widgets.actionCriteriaButton.getMenu().getItems();
 
-          if (siteValue === "/compare") {
-            //Affichage la liste des sites
-            var displaySiteDialog = function(){
-              if (!me.widgets.siteCriteriaButton.get("disabled") && me.selectedSites.length < 2) {
+          //Fonction d'affichage la liste des sites
+          var displaySiteDialog = function (selectedSitesCount) {
+              if (!me.widgets.siteCriteriaButton.get("disabled") && me.selectedSites.length <= selectedSitesCount) {
                 me.siteDialog.show();
               }
             }
-           
+
+          if (siteValue === "/compare") {
+            //On grise la sélection "tous" des actions
             if (!menuItems[0].cfg.getProperty("disabled")) {
               menuItems[0].cfg.setProperty("disabled", true);
             }
+
+            // On dégrise le bouton de sélection des sites
+            if (me.widgets.siteButton.get("disabled")) {
+              me.widgets.siteButton.set("disabled", false);
+            }
+            me.widgets.siteButton.set("label", me._msg("button.choose"));
+
             if (!me.widgets.actionCriteriaButton.value) {
               me.widgets.actionCriteriaButton.value = "views";
               me.widgets.actionCriteriaButton.set("label", me._msg("label.menu.module") + me._msg("label.views"));
-              
+
               //Pop-up de warning
               Alfresco.util.PopupManager.displayPrompt({
                 text: me._msg("label.popup.warning.filter"),
                 title: me._msg("label.popup.warning.title"),
-                buttons : [{"text":me._msg("button.ok"),handler:function(){this.hide();displaySiteDialog();},selected:true}]
-              }); 
+                buttons: [{
+                  "text": me._msg("button.ok"),
+                  handler: function () {
+                    this.hide();
+                    displaySiteDialog(2);
+                  },
+                  isDefault: true
+                }]
+              });
             } else {
-              displaySiteDialog();
+              displaySiteDialog(2);
             }
-            
+
           } else {
+            // Sélection de tous les sites
+            if (siteValue === "all") {
+              // Griser le bouton choisir
+              me.widgets.siteButton.set("disabled", true);
+              if (me.selectedSites != []) {
+                me.cleanSiteDialog(me.siteDialog);
+                Dom.setStyle("choosen-sites-container", 'display', 'none');
+              }
+            } else if (siteValue === "one") {
+              // Dégriser
+              me.widgets.siteButton.set("label", me._msg("button.choose.one"));
+              me.widgets.siteButton.set("disabled", false);
+
+              //Affichage de la popup
+              displaySiteDialog(0);
+            }
             if (menuItems[0].cfg.getProperty("disabled")) {
               menuItems[0].cfg.setProperty("disabled", false);
             }
@@ -461,11 +495,7 @@
 
       //Config des boutons Ok-Clean
       var cleanDialog = function (e) {
-          for (var i = 0, ii = this.buttons.length; i < ii; i++) {
-            this.buttons[i].set("checked", false);
-          }
-          me.selectedSites = [];
-          this._aButtons[1].blur();
+          me.cleanSiteDialog(this);
         };
 
       var writeSelectedSites = function (e) {
@@ -492,7 +522,7 @@
 
       var myButtons = [{
         text: this.msg("button.ok"),
-        handler: writeSelectedSites
+        handler: writeSelectedSites,
       }, {
         text: this.msg("button.clean"),
         handler: cleanDialog
@@ -590,10 +620,21 @@
       this.siteDialog.pager.render();
 
       //Activation bouton + cache de l'icône de chargement
-      this.widgets.siteButton.set("disabled", false);
+      if (this.widgets.siteCriteriaButton.value && this.widgets.siteCriteriaButton.value !== "all") {
+        this.widgets.siteButton.set("disabled", false);
+      }
       this.widgets.siteButton.set("label", this._msg("button.choose"));
     },
 
+    cleanSiteDialog: function ConsoleAudit_cleanSiteDialog(scope) {
+      for (var i = 0, ii = scope.buttons.length; i < ii; i++) {
+        if (scope.buttons[i].get("checked")) {
+          scope.buttons[i].set("checked", false);
+        }
+      }
+      this.selectedSites = [];
+      scope._aButtons[1].blur();
+    },
     /**
      * @method onShowSites
      *
@@ -621,7 +662,8 @@
         action = this.convertMenuValue(this.widgets.actionCriteriaButton.value),
         module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
         dates = this.convertMenuValue(this.widgets.dateCriteriaButton.value),
-        site = this.convertMenuValue(this.widgets.siteCriteriaButton.value),
+        siteValue = this.convertMenuValue(this.widgets.siteCriteriaButton.value),
+        site = null,
         sites = "",
         type = "",
         tsArray = [];
@@ -655,7 +697,7 @@
       }
 
       //Recupération du type de requête
-      type = this.getRequestType(action, module, site, dates);
+      type = this.getRequestType(action, module, siteValue, dates);
 
       //Mise à jour du paramètre site si un seul site est choisi.
       site = (this.selectedSites.length == 1) ? this.selectedSites[0].shortName : null;
@@ -663,13 +705,22 @@
       //Test sur les valeurs de dates
       if (to > 0 && from > to) {
         Alfresco.util.PopupManager.displayPrompt({
-          text : this._msg("label.popup.error.date.greater"),
-          title : this._msg("label.popup.error.title")
+          text: this._msg("label.popup.error.date.greater"),
+          title: this._msg("label.popup.error.title")
         });
-      } else if (this.selectedSites.length < 1 && type.indexOf("sites") == 0) {
+      } else if (this.selectedSites.length < 2 && siteValue == "/compare" || this.selectedSites.length < 1 && siteValue == "one") {
+        var me = this;
         Alfresco.util.PopupManager.displayPrompt({
-          text : this._msg("label.popup.error.site"),
-          title : this._msg("label.popup.error.title")
+          text: this._msg("label.popup.error.site"),
+          title: this._msg("label.popup.error.title"),
+          buttons: [{
+            "text": me._msg("button.ok"),
+            handler: function () {
+              this.hide();
+              me.siteDialog.show();
+            },
+            isDefault: true
+          }]
         });
       } else {
         // Création des paramètres et exécution de la requête
@@ -702,7 +753,7 @@
         this.widgets.exportButton.set("disabled", false);
 
         // console.log(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
-        if(this.countGraphItems(response.json) < 100) {
+        if (this.countGraphItems(response.json) < 100) {
           if (chartTag == "embed" || chartTag == "object") {
             swf.load(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
           } else {
@@ -741,7 +792,7 @@
      * @method removeGraph
      * @return boolean
      */
-    removeGraph: function ConsoleAudit_removeGraph(){
+    removeGraph: function ConsoleAudit_removeGraph() {
       var swf = Dom.get(this.id + "-chart"),
         chartTag = swf.tagName.toLowerCase(),
         res = false;
@@ -763,11 +814,12 @@
      * @method countGraphItems
      * @return integer
      */
-    countGraphItems: function ConsoleAudit_countGraphItems(json){
+    countGraphItems: function ConsoleAudit_countGraphItems(json) {
       var count = 0;
-      if(json.slicedDates){
-        var maxItems = 0, item, i;
-        for(i in json.items){
+      if (json.slicedDates) {
+        var maxItems = 0,
+          item, i;
+        for (i in json.items) {
           item = json.items[i];
           maxItems = (item.totalResults > maxItems) ? item.totalResults : maxItems;
         }
@@ -778,7 +830,7 @@
 
       return count;
     },
-   /**
+    /**
      * @method convertDate
      * @param d Date au format jj/mm/aaaa
      * @return integer Timestamp unix de la date
@@ -873,7 +925,7 @@
       return type;
     },
 
-/**
+    /**
        * @method buildParams Construit une chaîne de caractère pour passer les arguments en GET
        * @param from Timestamp unix (string) de la date minimum
        * @param to Timestamp unix (string) de la date maximum

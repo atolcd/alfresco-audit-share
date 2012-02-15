@@ -51,9 +51,10 @@
               <option value="file">${msg("label.menu.action")}${msg("label.files")}</option>
             </select>
 
-            <input type="button" class="criterias-button" id="site-criteria" name="${el}-site-criteria-button" value="${msg("label.menu.site")}${msg("label.menu.all")}">
+            <input type="button" class="criterias-button" id="site-criteria" name="${el}-site-criteria-button" value="${msg("label.menu.site")}${msg("label.menu.site.all")}">
             <select id="site-criteria-select" name="${el}-site-criteria-select">
-              <option value="">${msg("label.menu.site")}${msg("label.menu.site.all")}</option>
+              <option value="all">${msg("label.menu.site")}${msg("label.menu.site.all")}</option>
+              <option value="one">${msg("label.menu.site")}${msg("label.menu.site.one")}</option>
               <option value="/compare">${msg("label.menu.site")}${msg("label.menu.compare")}</option>
             </select>
         
