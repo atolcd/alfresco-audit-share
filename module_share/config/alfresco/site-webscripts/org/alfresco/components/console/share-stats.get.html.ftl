@@ -95,6 +95,9 @@
               <option value="_by_week">${msg("label.menu.date")}${msg("label.byWeek")}</option>
               <option value="_by_day">${msg("label.menu.date")}${msg("label.byDay")}</option>
             </select>
+						
+						<span class="vb"> | </span>
+						<input type="button" id="${el}-reset-dates-button" value="${msg("label.menu.date.reset")}">
           </div>
           <div class="format-info">
             <span class="date-format">JJ/MM/AAAA</span>

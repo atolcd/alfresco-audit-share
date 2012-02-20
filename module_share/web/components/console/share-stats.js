@@ -71,6 +71,7 @@
         parent.widgets.searchButton = Alfresco.util.createYUIButton(parent, "search-button", parent.onSearch);
         parent.widgets.exportButton = Alfresco.util.createYUIButton(parent, "export-button", parent.onExport);
         parent.widgets.siteButton = Alfresco.util.createYUIButton(parent, "site-button", parent.onShowSites);
+        parent.widgets.resetButton = Alfresco.util.createYUIButton(parent, "reset-dates-button", parent.onResetDates);
 
         parent.widgets.exportButton.set("disabled", true);
         parent.widgets.siteButton.set("disabled", true);
@@ -97,6 +98,15 @@
           menu: "site-criteria-select",
           lazyloadmenu: false
         });
+
+				parent.widgets.resetButton.addClass("share-stats-button");
+				parent.widgets.siteButton.addClass("share-stats-button");
+				parent.widgets.exportButton.addClass("share-stats-button");
+				parent.widgets.searchButton.addClass("share-stats-button");
+				parent.widgets.moduleCriteriaButton.addClass("share-stats-button");
+				parent.widgets.actionCriteriaButton.addClass("share-stats-button");
+				parent.widgets.dateCriteriaButton.addClass("share-stats-button");
+				parent.widgets.siteCriteriaButton.addClass("share-stats-button");
 
         parent.widgets.startCalendar = new YAHOO.widget.Calendar("calendar-date-from", "calendar-date-from", {
           mindate: "1/1/2011",
@@ -642,6 +652,12 @@
     onShowSites: function ConsoleAudit_onShowSites() {
       this.siteDialog.show();
     },
+
+
+		onResetDates: function ConsoleAudit_onResetDates(){
+			Dom.get("input-date-from").value = "";
+			Dom.get("input-date-to").value = "";
+		},
 
     onExport: function ConsoleAudit_onExport() {
       if (this.lastRequest.params) {
