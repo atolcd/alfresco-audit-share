@@ -197,8 +197,8 @@ function buildBarChart(params) {
 function buildBarChartElements(params) {
   var elements = [],
     pItems = params.items,
-    pItemsLength = pItems.length;
-  isSiteRequest = (params.type.search("sites") == 0) ? true : false;
+    pItemsLength = pItems.length,
+    isSiteRequest = (params.type.search("sites") == 0) ? true : false;
 
   var treatedElements = [];
   //Boucle sur les éléments par date
@@ -232,7 +232,7 @@ function buildBarChartElements(params) {
   for (key in treatedElements) {
     var values = [],
       value_obj = {};
-    label = isSiteRequest ? getSiteTitle(key) : getMessage(key, "graph.label.");
+    label = isSiteRequest ? getSiteTitle(key,params.currentSites) : getMessage(key, "graph.label.");
 
     //Vérification des valeurs non remplies
     for (var j = 0; j < pItemsLength; j++) {
@@ -361,13 +361,13 @@ function get_random_color() {
  * @param shortName Identifiant du site
  */
 
-function getSiteTitle(shortName) {
-  //Variable de retour. ShortName par défaut.
-  var res = shortName;
-  for (var i = 0, ii = GLOBALS_sites.length; i < ii; i++) {
-    var tmpName = GLOBALS_sites[i].name;
-    if (tmpName == shortName) {
+function getSiteTitle(shortName,sites) {
+  var res = shortName, i = 0, ii = sites.lenght, currentSite;
+  for (; i < ii; i++) {
+    var currentSite = sites[i];
+    if (currentSite.name == shortName) {
       res = GLOBALS_sites[i].title;
+      break;
     }
   }
   return res;

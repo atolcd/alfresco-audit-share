@@ -24,8 +24,9 @@
     </div>
     <div class="yui-g separator">
       <div class="yui-u first">
-        <div id="criterias" class="criterias">
-
+      
+        <span id="criterias" class="criterias">
+        
           <input type="button" class="criterias-button" id="module-criteria" name="${el}-module-criteria-button" value="${msg("label.menu.module")}${msg("label.wiki")}">
           <select id="module-criteria-select" name="${el}-module-criteria-select">
             <option value="wiki">${msg("label.menu.module")}${msg("label.wiki")}</option>
@@ -43,15 +44,13 @@
             <option value="updated">${msg("label.menu.action")}${msg("label.updated")}</option>
           </select>
 
-          <span class="yui-button yui-push-button criterias-button" id="${el}-site-button">
-            <span class="first-child"><button>${msg("button.choose")}</button></span>
+        </span>
+        
+        <span class="utility-buttons">
+          <span class="yui-button yui-push-button criterias-button" id="${el}-export-button">
+            <span class="first-child"><button>${msg("button.export")}</button></span>
           </span>
-
-
-          <div id="choosen-sites-container">
-            ${msg("label.choosen-site")} <span id="choosen-sites"></span>
-          </div>
-        </div>
+        </span>
       </div>
       <div class="yui-u dates-filter">
         <span id="by-days">
@@ -71,15 +70,18 @@
         </span>
       </div>
     </div>
+    
     <div class="separator">
       <span id="by-previous">
         <a href="#">${msg("label.previous")}</a>
       </span>
-      <span class="vb"> | </span>
+
       <span id="by-next">
         <a href="#">${msg("label.next")}</a>
       </span>
     </div>
+    
+<#--
     <div class="yui-g separator">
       <div class="yui-u first">
         <div class="search-text">
@@ -88,18 +90,13 @@
                <span class="first-child"><button>${msg("button.search")}</button></span>
             </span>
             <span class="vb"> | </span>
-            <span class="yui-button yui-push-button" id="${el}-export-button">
-               <span class="first-child"><button>${msg("button.export")}</button></span>
-            </span>
-            <!-- Informations sur la requête -->
-            <div id="request-information">
-            </div>
+
           </div>
         </div>
       </div>
       <div class="yui-u align-right">&nbsp;</div>
     </div>
-
+-->
     <!-- div class="results" id="${el}-datatable"></div-->
     <div id="${el}-chart-container" class="chart-container">
       <div class="chart" id="${el}-chart"></div>

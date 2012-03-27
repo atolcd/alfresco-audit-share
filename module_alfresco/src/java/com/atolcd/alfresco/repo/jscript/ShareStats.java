@@ -19,8 +19,4 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
         // TODO Auto-generated method stub
         Assert.notNull(wsSelectAudits);
     }
-
-    public int getDocumentPopularity(String nodeRef) {
-        return wsSelectAudits.getDocumentPopularity(nodeRef);
-    }
 }
