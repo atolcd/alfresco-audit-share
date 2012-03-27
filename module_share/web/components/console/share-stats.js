@@ -21,7 +21,8 @@
  *
  * @namespace Alfresco
  * @class Alfresco.ConsoleAudit
- */ (function () {
+ */
+(function () {
   /**
    * YUI Library aliases
    */
@@ -71,7 +72,6 @@
         parent.widgets.searchButton = Alfresco.util.createYUIButton(parent, "search-button", parent.onSearch);
         parent.widgets.exportButton = Alfresco.util.createYUIButton(parent, "export-button", parent.onExport);
         parent.widgets.siteButton = Alfresco.util.createYUIButton(parent, "site-button", parent.onShowSites);
-        parent.widgets.resetButton = Alfresco.util.createYUIButton(parent, "reset-dates-button", parent.onResetDates);
 
         parent.widgets.exportButton.set("disabled", true);
         parent.widgets.siteButton.set("disabled", true);
@@ -88,98 +88,30 @@
           lazyloadmenu: false
         });
 
-        parent.widgets.dateCriteriaButton = new YAHOO.widget.Button("date-criteria", {
-          type: "split",
-          menu: "date-criteria-select"
-        });
+        //Par défaut
+        parent.widgets.moduleCriteriaButton.value = "wiki";
+        parent.widgets.actionCriteriaButton.value = "views";
 
-        parent.widgets.siteCriteriaButton = new YAHOO.widget.Button("site-criteria", {
-          type: "split",
-          menu: "site-criteria-select",
-          lazyloadmenu: false
-        });
+        //el, sType, fn, obj, overrideContext
+        Event.addListener("by-days", "click", parent.onChangeDateFilter, {
+          filter: "days"
+        }, parent);
+        Event.addListener("by-weeks", "click", parent.onChangeDateFilter, {
+          filter: "weeks"
+        }, parent);
+        Event.addListener("by-months", "click", parent.onChangeDateFilter, {
+          filter: "months"
+        }, parent);
+        Event.addListener("by-years", "click", parent.onChangeDateFilter, {
+          filter: "years"
+        }, parent);
 
-				parent.widgets.resetButton.addClass("share-stats-button");
-				parent.widgets.siteButton.addClass("share-stats-button");
-				parent.widgets.exportButton.addClass("share-stats-button");
-				parent.widgets.searchButton.addClass("share-stats-button");
-				parent.widgets.moduleCriteriaButton.addClass("share-stats-button");
-				parent.widgets.actionCriteriaButton.addClass("share-stats-button");
-				parent.widgets.dateCriteriaButton.addClass("share-stats-button");
-				parent.widgets.siteCriteriaButton.addClass("share-stats-button");
-
-        parent.widgets.startCalendar = new YAHOO.widget.Calendar("calendar-date-from", "calendar-date-from", {
-          mindate: "1/1/2011",
-          title: parent._msg("title.fromDate"),
-          close: true
-        });
-
-        parent.widgets.endCalendar = new YAHOO.widget.Calendar("calendar-date-to", "calendar-date-to", {
-          mindate: "1/1/2011",
-          title: parent._msg("title.toDate"),
-          close: true
-        });
-
-        parent.localizeCalendar(parent.widgets.startCalendar);
-        parent.localizeCalendar(parent.widgets.endCalendar);
-        //Handler des click-icônes
-        var onIconFromClick = function (e) {
-            var endCalendarVisible = Dom.getStyle(parent.widgets.endCalendar.id, 'display'),
-              startCalendarVisible = Dom.getStyle(parent.widgets.startCalendar.id, 'display');
-            if (startCalendarVisible == "none") {
-              Dom.setStyle(parent.widgets.startCalendar.id, 'top', parseInt(e.layerY - 150, 10) + "px");
-              Dom.setStyle(parent.widgets.startCalendar.id, 'left', parseInt(e.layerX, 10) + "px");
-              parent.widgets.startCalendar.show();
-            } else {
-              parent.widgets.startCalendar.hide();
-            }
-            //Au cas où le second calendrier est toujours ouvert
-            if (endCalendarVisible == "block") {
-              parent.widgets.endCalendar.hide();
-            }
-          };
-
-        var onIconToClick = function (e) {
-            var endCalendarVisible = Dom.getStyle(parent.widgets.endCalendar.id, 'display'),
-              startCalendarVisible = Dom.getStyle(parent.widgets.startCalendar.id, 'display');
-            if (endCalendarVisible == "none") {
-              Dom.setStyle(parent.widgets.endCalendar.id, 'top', parseInt(e.layerY - 150, 10) + "px");
-              Dom.setStyle(parent.widgets.endCalendar.id, 'left', parseInt(e.layerX, 10) + "px");
-              parent.widgets.endCalendar.show();
-            } else {
-              parent.widgets.endCalendar.hide();
-            }
-            //Au cas où le second calendrier est toujours ouvert
-            if (startCalendarVisible == "block") {
-              parent.widgets.startCalendar.hide();
-            }
-          };
-        Event.addListener("icon-from", "click", onIconFromClick);
-        Event.addListener("icon-to", "click", onIconToClick);
-
-        //Handler de la selection des dates
-        var onStartCalendarSelect = function (type, args, obj) {
-            var dates = args[0],
-              date = dates[0],
-              year = date[0],
-              month = date[1],
-              day = date[2];
-            Dom.get("input-date-from").value = day + '/' + month + '/' + year;
-            this.hide();
-          };
-
-        var onEndCalendarSelect = function (type, args, obj) {
-            var dates = args[0],
-              date = dates[0],
-              year = date[0],
-              month = date[1],
-              day = date[2];
-            Dom.get("input-date-to").value = day + '/' + month + '/' + year;
-            this.hide();
-          };
-        parent.widgets.startCalendar.selectEvent.subscribe(onStartCalendarSelect, parent.widgets.startCalendar, true);
-        parent.widgets.endCalendar.selectEvent.subscribe(onEndCalendarSelect, parent.widgets.endCalendar, true);
-
+        Event.addListener("by-previous", "click", parent.onChangeDateInterval, {
+          interval: "previous"
+        }, parent);
+        Event.addListener("by-next", "click", parent.onChangeDateInterval, {
+          interval: "next"
+        }, parent);
         //Tableau global pour les sites. Nécessaire pour l'appel à la fonction du embedSWF.
         GLOBALS_sites = [];
         this.createSiteDialog();
@@ -250,6 +182,19 @@
     pathToSwf: "/share/components/console/open_flash_chart/open-flash-chart.swf",
 
     /**
+     * @attribute endDatesArray
+     * Dates de référence utilisée pour les graphiques
+     * Date présente par défaut
+     */
+    endDatesArray: [],
+    /**
+     * @attribute currentDateFilter
+     * Filtre de date : days,weeks,months,years
+     * "days" par défaut
+     */
+    currentDateFilter: "weeks",
+
+    /**
      * Fired by YUILoaderHelper when required component script files have
      * been loaded into the browser.
      *
@@ -257,8 +202,6 @@
      */
     onComponentsLoaded: function ConsoleAudit_onComponentsLoaded() {
       Event.onContentReady(this.id, this.onReady, this, true);
-
-
     },
 
     /**
@@ -276,211 +219,33 @@
       // Comportement du menu de filtre par Modules
       var onModulesMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
           var sText = p_aArgs[1].cfg.getProperty("text"),
-            value = p_aArgs[1].value,
-            disabled = p_aArgs[1].cfg.getProperty("disabled"),
-            displayPopup = false;
+            value = p_aArgs[1].value;
 
-          //On vérifie que l'option du menu ne soit pas disabled pour ne pas déclencher d'évenements.
-          if (!disabled) {
-            me.widgets.moduleCriteriaButton.value = p_aArgs[1].value;
-            me.widgets.moduleCriteriaButton.set("label", sText);
-            //Vérification que les choix concordent bien
-            var menuItems = me.widgets.actionCriteriaButton.getMenu().getItems(),
-              menuItem = null;
-            if (value != "" && value != "document") {
-              for (var i = 0, ii = menuItems.length; i < ii; i++) {
-                menuItem = menuItems[i];
-
-                if (menuItem.value == "file") {
-                  if (!menuItem.cfg.getProperty("disabled")) {
-                    menuItem.cfg.setProperty("disabled", true);
-                    displayPopup = true;
-                  }
-                  menuItem.unsubscribe("click", onModulesMenuItemClick);
-                  if (me.widgets.actionCriteriaButton.value == "file") {
-                    me.widgets.actionCriteriaButton.value = "";
-                    me.widgets.actionCriteriaButton.set("label", me._msg("label.menu.action") + me._msg("label.menu.none"));
-                  }
-                } else if (menuItem.value == "comment") {
-                  if (value != "wiki" && value != "blog" && value != "discussions" && value != "links") {
-                    if (!menuItem.cfg.getProperty("disabled")) {
-                      menuItem.cfg.setProperty("disabled", true);
-                      displayPopup = true;
-                    }
-                    if (me.widgets.actionCriteriaButton.value == "comment") {
-                      me.widgets.actionCriteriaButton.value = "";
-                      me.widgets.actionCriteriaButton.set("label", me._msg("label.menu.action") + me._msg("label.menu.none"));
-                    }
-                  }
-                } else if (menuItem.value != "") {
-                  // On ignore le menu "tous"
-                  menuItem.cfg.setProperty("disabled", false);
-                }
-              }
-            } else {
-              for (var i = 0, ii = menuItems.length; i < ii; i++) {
-                menuItem = menuItems[i];
-                if (menuItem.cfg.getProperty("disabled") && menuItem.value != "") {
-                  menuItem.cfg.setProperty("disabled", false);
-                }
-              }
-            }
-            me.widgets.moduleCriteriaButton.getMenu().hide();
-          } else {
-            me.widgets.moduleCriteriaButton.getMenu().show();
-          }
-          if (displayPopup) {
-            Alfresco.util.PopupManager.displayMessage({
-              title: me._msg("label.popup.warning.title"),
-              text: me._msg("label.popup.warning.modules-click")
-            });
-          }
+          me.widgets.moduleCriteriaButton.value = value;
+          me.widgets.moduleCriteriaButton.set("label", sText);
         };
       this.widgets.moduleCriteriaButton.getMenu().subscribe("click", onModulesMenuItemClick);
 
       // Comportement du menu de filtre par Actions
       var onActionsMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
           var sText = p_aArgs[1].cfg.getProperty("text"),
-            value = p_aArgs[1].value,
-            disabled = p_aArgs[1].cfg.getProperty("disabled"),
-            displayPopup = false;
+            value = p_aArgs[1].value;
 
-          if (!disabled) {
-            me.widgets.actionCriteriaButton.value = p_aArgs[1].value;
-            me.widgets.actionCriteriaButton.set("label", sText);
-
-            //Vérification que les choix concordent bien
-            var menuItems = me.widgets.moduleCriteriaButton.getMenu().getItems(),
-              menuItem = null;
-            if (value == "comment" || value == "file") {
-              moduleValue = me.widgets.moduleCriteriaButton.value;
-              for (var i = 0, ii = menuItems.length; i < ii; i++) {
-                menuItem = menuItems[i];
-                if (menuItem.value != "" && ((value == "file" && menuItem.value != "document") || (value == "comment" && menuItem.value != "document" && menuItem.value != "blog" && menuItem.value != "wiki" && menuItem.value != "discussions" && menuItem.value != "links"))) {
-                  if (!menuItem.cfg.getProperty("disabled")) {
-                    menuItem.cfg.setProperty("disabled", true);
-                    displayPopup = true;
-                  }
-                  //Le module sélectionné ne convient pas
-                  if ((value == "file" && moduleValue != "document") || (value == "comment" && moduleValue != "document" && moduleValue != "blog" && moduleValue != "wiki" && moduleValue != "discussions" && moduleValue != "links")) {
-                    me.widgets.moduleCriteriaButton.value = "";
-                    me.widgets.moduleCriteriaButton.set("label", me._msg("label.menu.module") + me._msg("label.menu.all"));
-                  }
-                } else {
-                  if (menuItem.cfg.getProperty("disabled")) {
-                    menuItem.cfg.setProperty("disabled", false);
-                  }
-                }
-              }
-            } else {
-              for (var i = 0, ii = menuItems.length; i < ii; i++) {
-                menuItem = menuItems[i];
-                if (menuItem.cfg.getProperty("disabled")) {
-                  menuItem.cfg.setProperty("disabled", false);
-                }
-              }
-            }
-            me.widgets.actionCriteriaButton.getMenu().hide();
-          } else {
-            me.widgets.actionCriteriaButton.getMenu().show();
-          }
-
-          if (displayPopup) {
-            Alfresco.util.PopupManager.displayMessage({
-              title: me._msg("label.popup.warning.title"),
-              text: me._msg("label.popup.warning.actions-click")
-            });
-          }
+          me.widgets.actionCriteriaButton.value = value;
+          me.widgets.actionCriteriaButton.set("label", sText);
         };
       this.widgets.actionCriteriaButton.getMenu().subscribe("click", onActionsMenuItemClick);
 
-      //Comportement du menu "Dates"
-      var onDateMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
-          var sText = p_aArgs[1].cfg.getProperty("text"),
-            value = p_aArgs[1].value;
+      var currentDate = new Date();
+      currentDate.setMinutes(0);
+      currentDate.setHours(0);
+      currentDate.setMinutes(0);
+      currentDate.setSeconds(0);
 
-          me.widgets.dateCriteriaButton.value = value;
-          me.widgets.dateCriteriaButton.set("label", sText);
-        };
-      this.widgets.dateCriteriaButton.getMenu().subscribe("click", onDateMenuItemClick);
-
-      //Comportement du menu "Sites"
-      var onSiteMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
-          var sText = p_aArgs[1].cfg.getProperty("text"),
-            siteValue = p_aArgs[1].value;
-          disabled = p_aArgs[1].cfg.getProperty("disabled");
-
-          me.widgets.siteCriteriaButton.set("label", sText);
-          me.widgets.siteCriteriaButton.value = siteValue;
-          //Vérification que les choix concordent bien
-          var menuItems = me.widgets.actionCriteriaButton.getMenu().getItems();
-
-          //Fonction d'affichage la liste des sites
-          var displaySiteDialog = function (selectedSitesCount) {
-              if (!me.widgets.siteCriteriaButton.get("disabled") && me.selectedSites.length <= selectedSitesCount) {
-                me.siteDialog.show();
-              }
-            }
-
-          if (siteValue === "/compare") {
-            //On grise la sélection "tous" des actions
-            if (!menuItems[0].cfg.getProperty("disabled")) {
-              menuItems[0].cfg.setProperty("disabled", true);
-            }
-
-            // On dégrise le bouton de sélection des sites
-            if (me.widgets.siteButton.get("disabled")) {
-              me.widgets.siteButton.set("disabled", false);
-            }
-            me.widgets.siteButton.set("label", me._msg("button.choose"));
-
-            if (!me.widgets.actionCriteriaButton.value) {
-              me.widgets.actionCriteriaButton.value = "views";
-              me.widgets.actionCriteriaButton.set("label", me._msg("label.menu.module") + me._msg("label.views"));
-
-              //Pop-up de warning
-              Alfresco.util.PopupManager.displayPrompt({
-                text: me._msg("label.popup.warning.filter"),
-                title: me._msg("label.popup.warning.title"),
-                buttons: [{
-                  "text": me._msg("button.ok"),
-                  handler: function () {
-                    this.hide();
-                    displaySiteDialog(2);
-                  },
-                  isDefault: true
-                }]
-              });
-            } else {
-              displaySiteDialog(2);
-            }
-
-          } else {
-            // Sélection de tous les sites
-            if (siteValue === "all") {
-              // Griser le bouton choisir
-              me.widgets.siteButton.set("disabled", true);
-              if (me.selectedSites != []) {
-                me.cleanSiteDialog(me.siteDialog);
-                Dom.setStyle("choosen-sites-container", 'display', 'none');
-              }
-            } else if (siteValue === "one") {
-              // Dégriser
-              me.widgets.siteButton.set("label", me._msg("button.choose.one"));
-              me.widgets.siteButton.set("disabled", false);
-
-              //Affichage de la popup
-              displaySiteDialog(0);
-            }
-            if (menuItems[0].cfg.getProperty("disabled")) {
-              menuItems[0].cfg.setProperty("disabled", false);
-            }
-          }
-        };
-      this.widgets.siteCriteriaButton.getMenu().subscribe("click", onSiteMenuItemClick);
-
-      this.widgets.startCalendar.render();
-      this.widgets.endCalendar.render();
+      this.endDatesArray["days"] = currentDate; //this.currentEndDate
+      this.endDatesArray["weeks"] = currentDate; //this.endDatesArray[dateFilter]
+      this.endDatesArray["months"] = currentDate;
+      this.endDatesArray["years"] = currentDate;
     },
 
     /**
@@ -630,9 +395,9 @@
       this.siteDialog.pager.render();
 
       //Activation bouton + cache de l'icône de chargement
-      if (this.widgets.siteCriteriaButton.value && this.widgets.siteCriteriaButton.value !== "all") {
-        this.widgets.siteButton.set("disabled", false);
-      }
+
+      this.widgets.siteButton.set("disabled", false);
+
       this.widgets.siteButton.set("label", this._msg("button.choose"));
     },
 
@@ -653,12 +418,6 @@
       this.siteDialog.show();
     },
 
-
-		onResetDates: function ConsoleAudit_onResetDates(){
-			Dom.get("input-date-from").value = "";
-			Dom.get("input-date-to").value = "";
-		},
-
     onExport: function ConsoleAudit_onExport() {
       if (this.lastRequest.params) {
         var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + this.lastRequest.params; //?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data));//JSON.stringify
@@ -673,12 +432,9 @@
      */
     onSearch: function ConsoleAudit_onSearch() {
       //Récupération des variables de l'UI
-      var from = this.convertDate(Dom.get("input-date-from").value),
-        to = this.convertDate(Dom.get("input-date-to").value),
-        action = this.convertMenuValue(this.widgets.actionCriteriaButton.value),
+      var action = this.convertMenuValue(this.widgets.actionCriteriaButton.value),
         module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
-        dates = this.convertMenuValue(this.widgets.dateCriteriaButton.value),
-        siteValue = this.convertMenuValue(this.widgets.siteCriteriaButton.value),
+        dateFilter = this.currentDateFilter,
         site = null,
         sites = "",
         type = "",
@@ -691,18 +447,8 @@
         }
       }
       // Crétion du tableau d'intervalle de dates
-      if (dates) {
-        tsArray = this.buildTimeStampArray(from, to, dates);
-        from = tsArray[0];
-        to = tsArray[tsArray.length - 1];
-        Dom.get("input-date-from").value = this.convertTimeStamp(from, false);
-        Dom.get("input-date-to").value = this.convertTimeStamp(to, true);
-        //Si seulement un intervalle, on supprime le tableau et on met à jour les dates from/to
-        // -> Affichage camembert
-        if (tsArray.length == 2) {
-          tsArray = [];
-          dates = null;
-        }
+      if (dateFilter) {
+        tsArray = this.buildTimeStampArray();
       }
 
       //Avertissement concernant le rendu
@@ -713,18 +459,13 @@
       }
 
       //Recupération du type de requête
-      type = this.getRequestType(action, module, siteValue, dates);
+      type = action;
 
       //Mise à jour du paramètre site si un seul site est choisi.
       site = (this.selectedSites.length == 1) ? this.selectedSites[0].shortName : null;
 
       //Test sur les valeurs de dates
-      if (to > 0 && from > to) {
-        Alfresco.util.PopupManager.displayPrompt({
-          text: this._msg("label.popup.error.date.greater"),
-          title: this._msg("label.popup.error.title")
-        });
-      } else if (this.selectedSites.length < 2 && siteValue == "/compare" || this.selectedSites.length < 1 && siteValue == "one") {
+      if (this.selectedSites.length < 1) {
         var me = this;
         Alfresco.util.PopupManager.displayPrompt({
           text: this._msg("label.popup.error.site"),
@@ -740,7 +481,7 @@
         });
       } else {
         // Création des paramètres et exécution de la requête
-        this.lastRequest.params = this.buildParams(from, to, action, module, site, sites, tsArray.toString(), type);
+        this.lastRequest.params = this.buildParams(action, module, site, sites, tsArray.toString(), type);
 
         var url = Alfresco.constants.PROXY_URI + "share-stats/select-audits" + this.lastRequest.params;
         Alfresco.util.Ajax.jsonGet({
@@ -767,7 +508,7 @@
 
       if (response.json) {
         this.widgets.exportButton.set("disabled", false);
-
+        response.json.currentFilter = this.currentDateFilter;
         // console.log(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
         if (this.countGraphItems(response.json) < 100) {
           if (chartTag == "embed" || chartTag == "object") {
@@ -895,51 +636,6 @@
       return res;
     },
 
-    /**
-     * @method getRequestType Construit le paramètre type à partir différentes sélection du menu
-     * @param action Valeur de l'action selectionnée
-     * @param module Valeur du module selectionné
-     * @param dates Valeur de la recherche par date
-     *
-     * @return string Type de requête à effectuer
-     *
-     */
-    getRequestType: function ConsoleAudit_getRequestType(action, module, site, dates) {
-      var type = "module",
-        date = dates ? dates : "";
-
-      switch (action) {
-      case "views":
-        if (site == "/compare") {
-          type = "sitesview" + date;
-        } else {
-          type = "moduleviews" + date;
-        }
-        break;
-      case "comment":
-        if (site == "/compare") {
-          type = "sitescomment" + date;
-        } else {
-          type = "comment" + date
-        }
-        break;
-      case "file":
-        if (site == "/compare") {
-          type = "sitesfile" + date;
-        } else {
-          type = "file" + date;
-        }
-        break;
-      case null:
-        type = "action" + date;
-        break;
-      default:
-        type = "module" + date;
-        break;
-      }
-
-      return type;
-    },
 
     /**
        * @method buildParams Construit une chaîne de caractère pour passer les arguments en GET
@@ -952,19 +648,11 @@
 
        * @return string params argument à passer à la requête
        */
-    buildParams: function ConsoleAudit_buildParams(from, to, action, module, site, sites, dates, type) {
+    buildParams: function ConsoleAudit_buildParams(action, module, site, sites, dates, type) {
       var params = "?type=" + type;
 
       if (dates !== null && dates != "") {
         params += "&dates=" + dates;
-      } else {
-        if (from !== null && from > 0) {
-          params += "&from=" + from;
-        }
-
-        if (to !== null && to > 0) {
-          params += "&to=" + to;
-        }
       }
       // if(action !== null){
       // params += "&from="+action;
@@ -983,13 +671,13 @@
 
     /**
      * @method buildTimeStampArray Construit des intervalles de dates
-     * @param pFrom Date de départ du découpage
+     * @param nbInterval Nombre d'intervalle de découpage
      * @param pTo Date de fin du découpage
      * @param type Type de découpage (Mois/Jour/Semaine)
      *
      * @return array Tableau contenant les différents intervalles de dates
      */
-    buildTimeStampArray: function ConsoleAudit_buildTimeStampArray(pFrom, pTo, type) {
+    buildTimeStampArray: function ConsoleAudit_buildTimeStampArray(nbInterval) {
       var tsArray = [],
         from = null,
         to = null,
@@ -998,69 +686,54 @@
         hasNext = null,
         res = "";
 
-      //Utilisation de la date courante dans si les dates sont mal saisies
-      // -> Audit sur mois/semaine/jour courant
-      if (pFrom == 0 && pTo == 0) {
-        from = new Date();
-        from.setMinutes(0);
-        from.setHours(0);
-        from.setMinutes(0);
-        from.setSeconds(0);
-        from.setMilliseconds(0);
-        to = new Date();
-        to.setMinutes(0);
-        to.setHours(0);
-        to.setMinutes(0);
-        to.setSeconds(0);
-        to.setMilliseconds(0);
-      } else if (pFrom == 0) {
-        from = new Date(pTo);
-        to = new Date(pTo);
-      } else if (pTo == 0) {
-        from = new Date(pFrom);
-        to = new Date(pFrom);
-      } else {
-        from = new Date(pFrom);
-        to = new Date(pTo);
-      }
+      // Création de nouvelles dates à manipuler
+      to = new Date(this.endDatesArray[this.currentDateFilter].getTime());
+      from = new Date(this.endDatesArray[this.currentDateFilter].getTime());
 
       // Créé les intervalles allant du mois de départ au mois d'arrivée INCLUS
-      if (type == "_by_month") {
+      if (this.currentDateFilter == "months") {
         tsArray.push(from.setDate(1));
         next = new Date(from);
         next.setDate(1);
-        next.setMonth(next.getMonth() + 1);
+        next.setDate(next.getDate() + 3);
 
-        hasNext = (to.getTime() >= next.getTime());
+        // Date d'arrêt
+        to.setDate(1);
+        to.setMonth(to.getMonth() + 1);
+
+        hasNext = (to.getTime() > next.getTime());
         while (hasNext) {
           tsArray.push(next.getTime());
-          next.setMonth(next.getMonth() + 1);
-          hasNext = (to.getTime() >= next.getTime());
+          next.setDate(next.getDate() + 3);
+          hasNext = (to.getTime() > next.getTime());
         }
         tsArray.push(next.getTime());
       }
       // Selectionne par semaine suivant from et to.
       // Les semaines de "from" et "to" sont INCLUSES
-      else if (type == "_by_week") {
+      else if (this.currentDateFilter == "weeks") {
         //On utilise la date de départ pour récupérer tous les jours de la semaine
-        next = null, currentDay = from.getDay(), hasNext = false;
+        next = null, currentDay = to.getDay(), hasNext = false;
         //Début de semaine
-        from.setDate(from.getDate() - (currentDay - 1));
+        from.setDate(to.getDate() - (currentDay - 1));
         next = new Date(from);
         tsArray.push(from.getTime());
 
-        //Semaine suivante, on test au cas où on dépasse.
-        next.setDate(from.getDate() + 7);
-        hasNext = (to.getTime() >= next.getTime());
+        //Date d'arrêt
+        to.setDate(from.getDate() + 7);
+
+        next.setDate(from.getDate() + 1);
+        hasNext = (to.getTime() > next.getTime());
         while (hasNext) {
           tsArray.push(next.getTime());
-          next.setDate(next.getDate() + 7);
-          hasNext = (to.getTime() >= next.getTime());
+          next.setDate(next.getDate() + 1);
+          hasNext = (to.getTime() > next.getTime());
         }
+        //Semaine suivante, on test au cas où on dépasse.
         tsArray.push(next.getTime());
       }
       // Créé les intervalles allant du jour de départ au jour d'arrivée INCLUS
-      else if (type == "_by_day") {
+      else if (this.currentDateFilter == "days") {
         //On ajoute la date de départ
         tsArray.push(from.getTime());
 
@@ -1069,21 +742,83 @@
 
         //On récupère le jour suivant
         next = new Date(from);
-        next.setDate(next.getDate() + 1);
+        next.setHours(next.getHours() + 2);
 
         //On vérifie qu'il ne dépasse pas la date de fin, on boucle
         hasNext = (to > next);
         while (hasNext) {
           tsArray.push(next.getTime());
-          next.setDate(next.getDate() + 1);
+          next.setHours(next.getHours() + 2);
           hasNext = (to > next);
         }
         tsArray.push(to.getTime());
+      } else if (this.currentDateFilter == "years") {
+        // On se place au début de l'année
+        from.setDate(1);
+        from.setMonth(0);
+        tsArray.push(from.getTime());
+
+        to.setDate(1);
+        to.setMonth(0);
+        to.setFullYear(to.getFullYear() + 1);
+
+        next = new Date(from);
+        next.setMonth(next.getMonth() + 1);
+        hasNext = (to.getTime() > next.getTime());
+        while (hasNext) {
+          tsArray.push(next.getTime());
+          next.setMonth(next.getMonth() + 1);
+          hasNext = (to.getTime() > next.getTime());
+        }
+        tsArray.push(next.getTime());
       }
 
       return tsArray;
     },
 
+    onChangeDateFilter: function ConsoleAudit_OnChangeDateFilter(e, args) {
+      Dom.removeClass("by-" + this.currentDateFilter, "selected");
+      Dom.addClass(e.currentTarget, "selected");
+      this.currentDateFilter = args.filter;
+      this.onSearch();
+    },
+
+
+    // Args ?
+    onChangeDateInterval: function ConsoleAudit_OnChangeDateInterval(e, args) {
+      var coef = (args.interval == "next") ? 1 : -1,
+        currentDate = new Date(),
+        dateFilter = this.currentDateFilter,
+        newDate = new Date(this.endDatesArray[dateFilter]),
+        canNext = true;
+
+      switch (dateFilter) {
+      case "days":
+        newDate.setDate(this.endDatesArray[dateFilter].getDate() + (1 * coef));
+        canNext = (newDate > currentDate) ? false : true;
+        break;
+      case "weeks":
+        newDate.setDate(this.endDatesArray[dateFilter].getDate() + (7 * coef));
+        canNext = (newDate.getDay(0) > currentDate) ? false : true;
+        break;
+      case "months":
+        newDate.setMonth(this.endDatesArray[dateFilter].getMonth() + (1 * coef));
+        if (newDate.getFullYear() > currentDate.getFullYear() || (newDate.getMonth() >= currentDate.getMonth() && newDate.getFullYear() == currentDate.getFullYear())) {
+          canNext = false;
+        }
+        break;
+      case "years":
+        newDate.setFullYear(this.endDatesArray[dateFilter].getFullYear() + (1 * coef));
+        canNext = (newDate.getFullYear() > currentDate.getFullYear()) ? false : true;
+        break;
+      }
+
+      // On enregistre la nouvelle date
+      if (!coef || (coef && canNext)) {
+        this.endDatesArray[dateFilter] = newDate;
+      }
+      this.onSearch();
+    },
     onSearchClick: function ConsoleAudit_onSearchClick() {
       this.refreshUIState({
         "Time": new Date().getTime()
@@ -1094,33 +829,5 @@
     _msg: function ConsoleAudit__msg(messageId) {
       return Alfresco.util.message.call(this, messageId, "Alfresco.ConsoleAudit", Array.prototype.slice.call(arguments).slice(1));
     },
-
-    /**
-     * @method localizeCalendar
-     * @param cal Calendrier Yahoo à passer en fr
-     *
-     *
-     */
-    localizeCalendar: function ConsoleAudit_localizeCalendar(cal) {
-      cal.cfg.setProperty("DATE_FIELD_DELIMITER", "/");
-
-      cal.cfg.setProperty("MDY_DAY_POSITION", 1);
-      cal.cfg.setProperty("MDY_MONTH_POSITION", 2);
-      cal.cfg.setProperty("MDY_YEAR_POSITION", 3);
-
-      cal.cfg.setProperty("MD_DAY_POSITION", 1);
-      cal.cfg.setProperty("MD_MONTH_POSITION", 2);
-
-      // Date labels for German locale
-      cal.cfg.setProperty("MONTHS_SHORT", ["Jan", "Fev", "Mars", "Avr", "Mai", "Juin", "Juil", "Aout", "Sep", "Oct", "Nov", "Dec"]);
-      cal.cfg.setProperty("MONTHS_LONG", ["Janvier", "F\u00e9vrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Ao\u00fbt", "Septembre", "Octobre", "Novembre", "D\u00e9cembre"]);
-      cal.cfg.setProperty("WEEKDAYS_1CHAR", ["D", "L", "M", "M", "J", "V", "S"]);
-      cal.cfg.setProperty("WEEKDAYS_SHORT", ["Di", "Lu", "Ma", "Me", "Je", "Ve", "Sa"]);
-      cal.cfg.setProperty("WEEKDAYS_MEDIUM", ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]);
-      cal.cfg.setProperty("WEEKDAYS_LONG", ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"]);
-
-      // Start the week on a Monday (Sunday == 0)
-      cal.cfg.setProperty("START_WEEKDAY", 1);
-    }
   });
 })();

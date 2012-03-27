@@ -49,7 +49,7 @@
       <result property="count" column="audit_count" jdbcType="BIGINT" javaType="int"/>
       <result property="target" column="audit_target" jdbcType="VARCHAR" javaType="java.lang.String"/>
     </resultMap>
-    
+
     <!--                -->
     <!-- SQL Snippets   -->
     <!--                -->
@@ -116,50 +116,122 @@
 
     <!-- Snippet de consultation-->
     <sql id="view_snippet">
-      where
-      (
-        audit_action_name in
-          ("page","view","details","postlist","postview","lists","topiclist","topicview","members","groups")
-      or
-        <![CDATA[(audit_app_name = "calendar" and audit_action_name <> "create")]]>
-      or
-        <![CDATA[(audit_app_name = "search" and audit_action_name <> "query")]]>
-      )
-      <isNotNull prepend="and" property="appName">
+      <dynamic prepend="where">
+        <isNotNull prepend="and" property="appName">
           audit_app_name = #appName#
-      </isNotNull>
-      <include refid="time_snippet" />
-      <include refid="site_snippet"/>
+        </isNotNull>
+        <isEqual prepend="and" property="appName" compareValue="document">
+          (
+            audit_action_name = "details"
+          or
+            audit_action_name = "download"
+          )
+        </isEqual>
+        <isEqual prepend="and" property="appName" compareValue="wiki">
+          (
+            audit_action_name = "page"
+          or
+            audit_action_name = "view"
+          )
+        </isEqual>
+        <isEqual prepend="and" property="appName" compareValue="blog">
+          (
+            audit_action_name = "postview"
+          or
+            audit_action_name = "postlist"
+          )
+        </isEqual>
+        <isEqual prepend="and" property="appName" compareValue="discussions">
+          (
+            audit_action_name = "topicview"
+          or
+            audit_action_name = "topiclist"
+          )
+        </isEqual>
+        <include refid="time_snippet" />
+        <include refid="site_snippet"/>
+      </dynamic>
     </sql>
 
-    <!-- Snippet commentaires / réponses -->
-    <sql id="comment_snippet">
-      where
-        audit_action_name = "comments"
-      <isNotNull prepend="and" property="appName">
+
+    <!-- Snippet de création -->
+    <sql id="create_snippet">
+      <dynamic prepend="where">
+        <isNotNull prepend="and" property="appName">
           audit_app_name = #appName#
-      </isNotNull>
+        </isNotNull>
+        <isEqual prepend="and" property="appName" compareValue="document">
+          (
+            audit_action_name = "file-added"
+          or
+            audit_action_name = "create"
+          )
+        </isEqual>
+        <isEqual prepend="and" property="appName" compareValue="wiki">
+            audit_action_name = "create-post"
+        </isEqual>
+        <isEqual prepend="and" property="appName" compareValue="blog">
+            audit_action_name = "blog-create"
+        </isEqual>
+        <isEqual prepend="and" property="appName" compareValue="discussions">
+            audit_action_name = "discussions-create"
+        </isEqual>
       <include refid="time_snippet" />
       <include refid="site_snippet"/>
+      </dynamic>
     </sql>
 
-    <!-- Snippet d'opération sur fichiers -->
-    <sql id="file_snippet">
-      where
-      (
-        audit_action_name = "file-deleted"
-      or
-        audit_action_name = "file-added"
-      or
-        audit_action_name = "download"
-      )
-      <isNotNull prepend="and" property="appName">
+    <!-- Snippet de mise à jour -->
+    <sql id="update_snippet">
+      <dynamic prepend="where">
+        <isNotNull prepend="and" property="appName">
           audit_app_name = #appName#
-      </isNotNull>
+        </isNotNull>
+        <isEqual prepend="and" property="appName" compareValue="document">
+          (
+            audit_action_name = "update"
+          or
+            audit_action_name = "file-updated"
+          or
+            audit_action_name = "inline-edit"
+          )
+        </isEqual>
+        <isEqual prepend="and" property="appName" compareValue="wiki">
+          audit_action_name = "update-post"
+        </isEqual>
+        <isEqual prepend="and" property="appName" compareValue="blog">
+          audit_action_name = "blog-update"
+        </isEqual>
+        <isEqual prepend="and" property="appName" compareValue="discussions">
+          audit_action_name = "discussions-update"
+        </isEqual>
       <include refid="time_snippet" />
       <include refid="site_snippet"/>
+      </dynamic>
     </sql>
 
+    <!-- Snippet de suppression -->
+    <sql id="delete_snippet">
+      <dynamic prepend="where">
+        <isNotNull prepend="and" property="appName">
+          audit_app_name = #appName#
+        </isNotNull>
+        <isEqual prepend="and" property="appName" compareValue="document">
+            audit_action_name = "file-deleted"
+        </isEqual>
+        <isEqual prepend="and" property="appName" compareValue="wiki">
+            audit_action_name = "delete-post"
+        </isEqual>
+        <isEqual prepend="and" property="appName" compareValue="blog">
+            audit_action_name = "blog-deleted"
+        </isEqual>
+        <isEqual prepend="and" property="appName" compareValue="discussions">
+            audit_action_name = "discussions-deleted"
+        </isEqual>
+      <include refid="time_snippet" />
+      <include refid="site_snippet"/>
+      </dynamic>
+    </sql>
     <!--                -->
     <!-- Statements     -->
     <!--                -->
@@ -180,8 +252,8 @@
     <select id="selectAll" resultMap="results_AtolCsvExportEntry">
       select
         audit_site,
-        count(*) as audit_count,     
-        audit_app_name, 
+        count(*) as audit_count,
+        audit_app_name,
         audit_action_name
       from
         share_stats_audit_entry
@@ -189,93 +261,28 @@
       group by audit_site, audit_app_name, audit_action_name
       order by audit_site, audit_app_name, audit_action_name
     </select>
-    
-    <!-- Get stats about module -->
-    <select id="selectModules" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
-      select
-        audit_app_name as audit_target, count(*) as audit_count
-      from
-        share_stats_audit_entry
-      <include refid="select_AuditEntriesWhereSnippet"/>
-      group by audit_target
-    </select>
 
-    <!-- Get stats about module views-->
-    <select id="selectModuleViews" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
-      select
-        audit_app_name as audit_target, count(*) as audit_count
-      from
-        share_stats_audit_entry
-
+    <select id="selectByView" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+      <include refid="select_concat_actions"/>
       <include refid="view_snippet"/>
       group by audit_target
     </select>
 
-    <!-- Get stats about action -->
-    <select id="selectActions" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+    <select id="selectByUpdated" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="select_concat_actions"/>
-      <include refid="select_auditViewEntriesWhereSnippet"/>
+      <include refid="update_snippet"/>
       group by audit_target
     </select>
 
-
-    <!-- Get modules with comments & replies -->
-    <select id="selectComments" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+    <select id="selectByCreated" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="select_concat_actions"/>
-      <include refid="comment_snippet" />
+      <include refid="create_snippet"/>
       group by audit_target
     </select>
 
-    <!-- Get files activities -->
-    <select id="selectFileActions" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+    <select id="selectByDeleted" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="select_concat_actions"/>
-      <include refid="file_snippet" />
+      <include refid="delete_snippet"/>
       group by audit_target
     </select>
-
-
-    <!-- Get audit wihtin several sites -->
-    <select id="selectViewsBySite" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
-      select
-        audit_site as audit_target, count(*) as audit_count
-      from
-        share_stats_audit_entry
-      <include refid="view_snippet" />
-      group by audit_target
-    </select>
-
-    <!-- Get audit wihtin several sites -->
-    <select id="selectFilesBySite" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
-      select
-        audit_site as audit_target, count(*) as audit_count
-      from
-        share_stats_audit_entry
-      <include refid="file_snippet" />
-      group by audit_target
-    </select>
-
-    <!-- Get audit wihtin several sites -->
-    <select id="selectCommentsBySite" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
-      select
-        audit_site as audit_target, count(*) as audit_count
-      from
-        share_stats_audit_entry
-      <include refid="comment_snippet" />
-      group by audit_target
-    </select>
-		
-		<select id="selectPopularity" parameterClass="java.lang.String" resultClass="java.lang.Integer">
-			select
-				count(*) as popularity
-			from
-				share_stats_audit_entry
-			where
-				audit_object = #nodeRef#
-			and
-				audit_app_name = "document"
-			and
-				audit_action_name = "details"
-			group by
-				audit_object
-		</select>
 </sqlMap>

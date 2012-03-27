@@ -1,21 +1,14 @@
 function getFlashData(param) {
   var params = YAHOO.lang.JSON.parse(unescape(param)),
     jsonChart = null;
-  //Plus rapide que recherche de "motif" by-week ?
-  var size = params.type.split("_").length;
-  // if(params.type === "by-month" || params.type === "by-week" || params.type === "by-day") {
-  if (size > 2) {
-    jsonChart = buildBarChart(params);
-    // jsonChart = buildLineChart(params);
-  } else {
-    jsonChart = buildPieChart(params);
-  }
+
+  jsonChart = buildBarChart(params);
+  // jsonChart = buildLineChart(params);
+
   return YAHOO.lang.JSON.stringify(jsonChart);
 };
 
 //Faire une colorisation Custom ?
-
-
 function buildColorArray(param) {
   //"#46B549" vert foncé
   var color_list = ["#0077BF", "#EC9304", "#7CBC28", "#EE1C2F"];
@@ -47,41 +40,7 @@ function buildTitle(param) {
  * @param params JSON Parameters from query
  * @return JSON Pie Chart Data
  */
-
-function buildPieChart(params) {
-  var pie = {
-    "title": {
-      "text": buildTitle(params),
-      "style": "{font-size: 16px; color:#526A53; font-family: Arial,sans-serif; font-weight: bold; text-align: center;}"
-    },
-    "bg_colour": "#FFFFFF",
-    "elements": [{
-      "type": "pie",
-      "colours": buildColorArray(params),
-      "alpha": 0.6,
-      "gradient-fill": true,
-      "border": 2,
-      //"start-angle": 45,
-      "values": buildPieChartArray(params)
-    }]
-  }
-  return pie;
-}
-
-function buildPieChartArray(param) {
-  var pie_array = [],
-    isSiteRequest = (param.type.search("sites") == 0) ? true : false,
-    label = "";
-  for (var i = 0, total = param.totalResults; i < total; i++) {
-    label = isSiteRequest ? getSiteTitle(param.items[i].target) : getMessage(param.items[i].target, "graph.label.");
-    pie_array[i] = {
-      "value": param.items[i].count,
-      "tip": label + " : " + param.items[i].count,
-      "label": label
-    };
-  }
-  return pie_array;
-}
+/*
 
 function buildLineChart(params) {
   max = 0;
@@ -189,6 +148,7 @@ function buildLineChartElements(params) {
 
   return elements;
 }
+*/
 
 /**
  * @method buildBarChart
@@ -237,11 +197,12 @@ function buildBarChart(params) {
 function buildBarChartElements(params) {
   var elements = [],
     pItems = params.items,
-    isSiteRequest = (params.type.search("sites") == 0) ? true : false;
+    pItemsLength = pItems.length;
+  isSiteRequest = (params.type.search("sites") == 0) ? true : false;
 
   var treatedElements = [];
   //Boucle sur les éléments par date
-  for (var i = 0, ii = pItems.length; i < ii; i++) {
+  for (var i = 0; i < pItemsLength; i++) {
     var items = pItems[i];
     if (items.totalResults > 0) {
       //Boucles sur les différents éléments d'une date précise
@@ -266,31 +227,38 @@ function buildBarChartElements(params) {
     }
   }
 
+
   //Modifier values
   for (key in treatedElements) {
     var values = [],
-      label = isSiteRequest ? getSiteTitle(key) : getMessage(key, "graph.label.");
-    for (var i = 0, ii = treatedElements[key].length; i < ii; i++) {
-      if (treatedElements[key][i] == undefined) {
-        values.push(undefined); //null ?
-      } else {
-        values.push({
-          "top": treatedElements[key][i],
-          "tip": label + " : #val#"
-        });
+      value_obj = {};
+    label = isSiteRequest ? getSiteTitle(key) : getMessage(key, "graph.label.");
+
+    //Vérification des valeurs non remplies
+    for (var j = 0; j < pItemsLength; j++) {
+      if (!treatedElements[key][j]) {
+        treatedElements[key][j] = 0;
       }
     }
+
+    for (var i = 0, ii = treatedElements[key].length; i < ii; i++) {
+      value_obj = {};
+      value_obj.top = treatedElements[key][i];
+      if (treatedElements[key][i] > 0) {
+        value_obj.tip = label + " : #val#";
+      }
+      values.push(value_obj);
+    }
+    // TODO : Stacked
     elements.push({
       "type": "bar_glass",
-      //bar_filled
-      "alpha": 0.7,
+      //bar_filled"alpha": 0.7,
       "colour": get_random_color(),
       "text": label,
       "font-size": 10,
       "values": values
     });
   }
-
   return elements;
 }
 
@@ -308,21 +276,40 @@ function buildXAxisLabels(params) {
 }
 
 function buildBarChartXLabels(params) {
-  var labels = [];
-  //On récupère l'information de découpage dans le type : Month / week / day
-  var timeType = params.type.split("_").reverse()[0];
-  if (timeType == "month") {
-    var slicedDates = params.slicedDates.split(",");
+  var labels = [],
+    timeType = params.currentFilter,
+    slicedDates = params.slicedDates.split(",");
+
+  var padzero = function (n) {
+      return n < 10 ? '0' + n.toString() : n.toString();
+    };
+
+  switch (timeType) {
+  case "years":
     for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
       labels[i] = getMonth((new Date(parseInt(slicedDates[i], 10)).getMonth() + 1).toString());
     }
-  } else if (timeType == "day") {
-    var slicedDates = params.slicedDates.split(",");
+    break;
+  case "months":
     for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
       var d = new Date(parseInt(slicedDates[i], 10));
-      labels[i] = d.getDate().toString() + "/" + (d.getMonth() + 1).toString();
+      labels[i] = padzero(d.getDate()) + "/" + padzero(d.getMonth() + 1);
     }
-  } else if (timeType == "week") {
+    break;
+  case "weeks":
+    for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+      var d = new Date(parseInt(slicedDates[i], 10));
+      labels[i] = getDay(d.getDay()) + " " + padzero(d.getDate()) + "/" + padzero(d.getMonth() + 1);
+    }
+    break;
+  case "days":
+    for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+      var d = new Date(parseInt(slicedDates[i], 10));
+      labels[i] = padzero(d.getHours()) + "h00";
+    }
+    break;
+  }
+  /*else if (timeType == "weeks") {
     var slicedDates = params.slicedDates.split(",");
     for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
       var from = new Date(parseInt(slicedDates[i], 10));
@@ -335,7 +322,7 @@ function buildBarChartXLabels(params) {
       to = "<br> au samedi " + to.getDate().toString() + "/" + (to.getMonth() + 1).toString() + "/" + to.getFullYear().toString();
       labels.push(from + to);
     }
-  }
+  }*/
   return labels;
 }
 
@@ -395,6 +382,10 @@ function getMonth(month) {
   return getMessage(month, "label.month.");
 }
 
+function getDay(day) {
+  return getMessage(day, "label.day.");
+}
+
 /**
  * Retourne la traduction du message donné. Peut être prefixé.
  * @method getMessage
@@ -403,7 +394,7 @@ function getMonth(month) {
  */
 
 function getMessage(messageId, prefix) {
-  var msg = ( !! prefix) ? prefix + messageId : messageId;
+  var msg = (prefix) ? prefix + messageId : messageId;
   var res = Alfresco.util.message.call(null, msg, "Alfresco.ConsoleAudit", Array.prototype.slice.call(arguments).slice(1));
   res = (res.search("graph.label") == 0) ? messageId : res;
   return res;
