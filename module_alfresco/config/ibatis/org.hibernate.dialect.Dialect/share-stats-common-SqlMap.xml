@@ -14,6 +14,7 @@
     <typeAlias alias="AtolCsvExportEntry" type="com.atolcd.alfresco.CsvExportEntry"/>
     <typeAlias alias="AtolAuditCount" type="com.atolcd.alfresco.AuditCount"/>
     <typeAlias alias="AtolAuditQueryParameters" type="com.atolcd.alfresco.AuditQueryParameters"/>
+    <typeAlias alias="AtolAuditObjectPopularity" type="com.atolcd.alfresco.AtolAuditObjectPopularity"/>
 
 
     <!--                -->
@@ -48,6 +49,11 @@
     <resultMap id="results_AtolAuditCount" class="AtolAuditCount">
       <result property="count" column="audit_count" jdbcType="BIGINT" javaType="int"/>
       <result property="target" column="audit_target" jdbcType="VARCHAR" javaType="java.lang.String"/>
+    </resultMap>
+    
+    <resultMap id="results_AtolAuditObjectPopularity" class="AtolAuditObjectPopularity">
+      <result property="popularity" column="audit_popularity" jdbcType="BIGINT" javaType="int"/>
+      <result property="auditObject" column="audit_object" jdbcType="VARCHAR" javaType="java.lang.String"/>
     </resultMap>
 
     <!--                -->
@@ -284,5 +290,43 @@
       <include refid="select_concat_actions"/>
       <include refid="delete_snippet"/>
       group by audit_target
+    </select>
+    
+    <select id="selectByMostUpdated" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+      select
+        count(*) as audit_popularity, audit_object
+      from
+        share_stats_audit_entry
+      where
+        audit_app_name = 'document'
+      and
+      (
+          audit_action_name ='update'
+        or
+          audit_action_name ='file-updated'
+        or
+          audit_action_name ='inline-updated'
+      )
+      <include refid="site_snippet"/>
+      group by audit_object
+      order by audit_popularity DESC
+    </select>
+    
+    <select id="selectByMostViewed" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+      select
+        count(*) as audit_popularity, audit_object
+      from
+        share_stats_audit_entry
+      where
+        audit_app_name = 'document'
+      and
+      (
+          audit_action_name ='details'
+        or
+          audit_action_name ='download'
+      )
+      <include refid="site_snippet"/>
+      group by audit_object
+      order by audit_popularity DESC
     </select>
 </sqlMap>

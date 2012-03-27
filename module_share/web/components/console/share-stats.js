@@ -103,10 +103,10 @@
           filter: "years"
         }, parent);
 
-        Event.addListener("by-previous", "click", parent.onChangeDateInterval, {
+        Event.addListener("chart-prev", "click", parent.onChangeDateInterval, {
           coef: -1
         }, parent);
-        Event.addListener("by-next", "click", parent.onChangeDateInterval, {
+        Event.addListener("chart-next", "click", parent.onChangeDateInterval, {
           coef: 1
         }, parent);
         this.loadSites();

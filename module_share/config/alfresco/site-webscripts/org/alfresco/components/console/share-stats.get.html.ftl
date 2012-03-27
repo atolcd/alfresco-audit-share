@@ -71,16 +71,6 @@
       </div>
     </div>
     
-    <div class="separator">
-      <span id="by-previous">
-        <a href="#">${msg("label.previous")}</a>
-      </span>
-
-      <span id="by-next">
-        <a href="#">${msg("label.next")}</a>
-      </span>
-    </div>
-    
 <#--
     <div class="yui-g separator">
       <div class="yui-u first">
@@ -97,9 +87,18 @@
       <div class="yui-u align-right">&nbsp;</div>
     </div>
 -->
-    <!-- div class="results" id="${el}-datatable"></div-->
+    <div id="${el}-chart-body">
+    
+    <span id="chart-prev-wrapper">
+      <img class="img-arrow" id="chart-prev" title="" alt="" src="/share/components/console/img/prev.png">
+    </span>
+    <span id="chart-next-wrapper">
+      <img class="img-arrow" id="chart-next" title="" alt="" src="/share/components/console/img/next.png">
+    </span>
     <div id="${el}-chart-container" class="chart-container">
       <div class="chart" id="${el}-chart"></div>
+    </div>
+
     </div>
   </div>
 </div>
