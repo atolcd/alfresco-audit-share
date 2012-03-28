@@ -1,6 +1,6 @@
 package com.atolcd.alfresco;
 
-public class AtolAuditObjectPopularity {
+public class AuditObjectPopularity {
 	private int popularity;
 	private String auditObject;
 	
