@@ -2,153 +2,60 @@ function getFlashData(param) {
   var params = YAHOO.lang.JSON.parse(unescape(param)),
     jsonChart = null;
 
-  jsonChart = buildBarChart(params);
-  // jsonChart = buildLineChart(params);
+
+  switch (params.additionalsParams.chartType) {
+  case "vbar":
+    jsonChart = buildBarChart(params);
+    break;
+  case "hbar":
+    jsonChart = buildHBarChart(params);
+    break;
+  }
 
   return YAHOO.lang.JSON.stringify(jsonChart);
 };
 
-//Faire une colorisation Custom ?
-function buildColorArray(param) {
-  //"#46B549" vert foncé
-  var color_list = ["#0077BF", "#EC9304", "#7CBC28", "#EE1C2F"];
-  var color_array = [];
-  //OFC applique les couleurs les unes après les autres. Possibilité de
-  // redondance entre la première et la dernière ....
-  for (var i = 0, ii = param.totalResults; i < ii; i++) {
-    if ((i == param.totalResults - 1) && (i % color_list.length == 0)) {
-      color_array.push(color_list[1]);
-    } else {
-      color_array.push(color_list[i % color_list.length]);
-    }
+/**
+ * Retourn une couleur aléatoirement
+ * @method get_random_color
+ */
+
+function get_random_color() {
+  var letters = '0123456789ABCDEF'.split('');
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.round(Math.random() * 15)];
   }
-  return color_array;
+  return color;
 }
 
-function buildTitle(param) {
-  var title = null;
-  if (param.totalResults == 0 || param.totalResults == undefined) {
-    title = "Aucun audit n'a été trouvé";
-  } else {
-    title = getMessage(param.type, "graph.title.");
+function buildTitle(params) {
+  var title = getMessage(params.additionalsParams.type, "graph.title."),
+    timeType = params.currentFilter,
+    slicedDates = params.additionalsParams.tsString.split(","),
+    from, to;
+
+  var padzero = function (n) {
+      return n < 10 ? '0' + n.toString() : n.toString();
+    };
+
+  from = new Date(parseInt(slicedDates[0], 10));
+  switch (timeType) {
+  case "years":
+    title += getMessage(timeType, "graph.title.date.", from.getFullYear());
+    break;
+  case "months":
+    title += getMessage(timeType, "graph.title.date.", getMonth(from.getMonth()), from.getFullYear());
+    break;
+  case "weeks":
+    title += getMessage(timeType, "graph.title.date.", from.getWeekInYear(), from.getFullYear());
+    break;
+  case "days":
+    title += getMessage(timeType, "graph.title.date.", padzero(from.getDate()), padzero(from.getMonth() + 1), from.getFullYear());
+    break;
   }
   return title;
 }
-
-/**
- * @method buildPie
- * @param params JSON Parameters from query
- * @return JSON Pie Chart Data
- */
-/*
-
-function buildLineChart(params) {
-  max = 0;
-  var lines = {
-    "title": {
-      "text": buildTitle(params),
-      "style": "{font-size: 16px; color:#526A53; font-family: Arial,sans-serif; font-weight: bold; text-align: center;}"
-    },
-
-    "y_legend": {
-      "text": buildText(params),
-      "style": "{color: #736AFF; font-size: 12px;}"
-    },
-    "bg_colour": "#FFFFFF",
-
-    "elements": buildLineChartElements(params),
-
-    "x_axis": {
-      "stroke": 3,
-      "tick_height": 10,
-      "colour": "#5fab34",
-      "grid-colour": "#c0f0b0",
-      "labels": buildXAxisLabels(params)
-    },
-
-    "y_axis": {
-      "stroke": 3,
-      "steps": Math.floor(max / 10),
-      "tick_length": 3,
-      "colour": "#5fab34",
-      "grid-colour": "#ddf1d1",
-      "offset": 0,
-      "max": max + 2
-    }
-  };
-
-  return lines;
-}
-
-function buildLineChartElements(params) {
-  var elements = [],
-    pItems = params.items,
-    isSiteRequest = (params.type.search("sites") == 0) ? true : false;
-
-  var treatedElements = [];
-  //Boucle sur les éléments par date
-  for (var i = 0, ii = pItems.length; i < ii; i++) {
-    var items = pItems[i];
-    if (items.totalResults > 0) {
-      //Boucles sur les différents éléments d'une date précise
-      for (var j = 0, jj = items.totalResults; j < jj; j++) {
-        var target = (items.items[j].target == "") ? "view" : items.items[j].target;
-        var count = items.items[j].count;
-
-        //Test si l'élément a déjà été traité
-        if (treatedElements[target] == undefined) {
-          treatedElements[target] = [];
-          treatedElements[target][i] = count;
-          if (treatedElements[target][i] > max) {
-            max = treatedElements[target][i];
-          }
-        } else {
-          treatedElements[target][i] = count;
-          if (treatedElements[target][i] > max) {
-            max = treatedElements[target][i];
-          }
-        }
-      }
-    }
-  }
-  //Modifier values
-  for (key in treatedElements) {
-    var values = [],
-      label = isSiteRequest ? getSiteTitle(key) : getMessage(key, "graph.label.");
-
-    for (var i = 0; i < 7; i++) {
-      values[i] = 0;
-    }
-    for (var i = 0, ii = treatedElements[key].length; i < ii; i++) {
-      if (treatedElements[key][i] == undefined) {
-        // values.push(0);//null ?
-        values[i] = 0; //null ?
-      } else {
-        // values.push(
-        // treatedElements[key][i]
-        // {
-        // "top": treatedElements[key][i],
-        // "tip": label + " : #val#"
-        // }
-        // );
-        values[i] = treatedElements[key][i]; //null ?
-      }
-    }
-    elements.push({
-      "type": "line",
-      //bar_filled
-      "alpha": 0.7,
-      "colour": get_random_color(),
-      "text": label,
-      "tip": label + " : #val#",
-      "font-size": 10,
-      "values": values
-    });
-  }
-
-  return elements;
-}
-*/
 
 /**
  * @method buildBarChart
@@ -157,48 +64,46 @@ function buildLineChartElements(params) {
  */
 
 function buildBarChart(params) {
-  max = 0;
+  params.max = 0;
+  var x_labels = buildXAxisLabels(params);
   var bars = {
     "title": {
       "text": buildTitle(params),
-      "style": "{font-size: 16px; color:#526A53; font-family: Arial,sans-serif; font-weight: bold; text-align: center;}"
+      "style": "{font-size: 16px; color:#515D6B; font-family: Arial,sans-serif; font-weight: bold; text-align: center;}"
     },
 
-    "y_legend": {
-      "text": buildText(params),
-      "style": "{color: #736AFF; font-size: 12px;}"
-    },
     "bg_colour": "#FFFFFF",
 
-    "elements": buildBarChartElements(params),
+    "elements": buildBarChartElements(params, x_labels.labels),
 
     "x_axis": {
       "stroke": 3,
       "tick_height": 10,
       "colour": "#5fab34",
       "grid-colour": "#c0f0b0",
-      "labels": buildXAxisLabels(params)
+      "labels": x_labels
     },
 
     "y_axis": {
       "stroke": 3,
-      "steps": Math.floor(max / 10),
+      "steps": Math.floor(params.max / 10),
       "tick_length": 3,
       "colour": "#5fab34",
       "grid-colour": "#ddf1d1",
       "offset": 0,
-      "max": max + 2
+      "max": params.max + 2
     }
   };
 
   return bars;
 }
 
-function buildBarChartElements(params) {
+function buildBarChartElements(params, labels) {
   var elements = [],
     pItems = params.items,
     pItemsLength = pItems.length,
-    isSiteRequest = (params.type.search("sites") == 0) ? true : false;
+    max = 0;
+  //  isSiteRequest = (params.type.search("sites") == 0) ? true : false;
 
   var treatedElements = [];
   //Boucle sur les éléments par date
@@ -207,8 +112,8 @@ function buildBarChartElements(params) {
     if (items.totalResults > 0) {
       //Boucles sur les différents éléments d'une date précise
       for (var j = 0, jj = items.totalResults; j < jj; j++) {
-        var target = (items.items[j].target == "") ? "view" : items.items[j].target;
-        var count = items.items[j].count;
+        var target = items.items[j].target,
+          count = items.items[j].count;
 
         //Test si l'élément a déjà été traité
         if (treatedElements[target] == undefined) {
@@ -226,13 +131,19 @@ function buildBarChartElements(params) {
       }
     }
   }
+  //Mise à jour du maximum
+  params.max = max ? max : 8;
 
+  var type = "bar_glass",
+    color_list = ["#0077BF", "#EC9304", "#7CBC28", "#EE1C2F"],
+    color_idx = 0;
 
   //Modifier values
   for (key in treatedElements) {
     var values = [],
       value_obj = {};
-    label = isSiteRequest ? getSiteTitle(key,params.currentSites) : getMessage(key, "graph.label.");
+    // label = isSiteRequest ? getSiteTitle(key,params.currentSites) : getMessage(key, "graph.label.");
+    label = getMessage(key, "graph.label.");
 
     //Vérification des valeurs non remplies
     for (var j = 0; j < pItemsLength; j++) {
@@ -244,21 +155,21 @@ function buildBarChartElements(params) {
     for (var i = 0, ii = treatedElements[key].length; i < ii; i++) {
       value_obj = {};
       value_obj.top = treatedElements[key][i];
-      if (treatedElements[key][i] > 0) {
-        value_obj.tip = label + " : #val#";
-      }
+      value_obj.tip = label + " : #val#";
+      value_obj.tip += "\n" + labels[i];
       values.push(value_obj);
     }
     // TODO : Stacked
     elements.push({
-      "type": "bar_glass",
-      //bar_filled"alpha": 0.7,
-      "colour": get_random_color(),
+      "type": type,
+      "colour": color_list[color_idx],
       "text": label,
       "font-size": 10,
       "values": values
     });
+    color_idx++;
   }
+
   return elements;
 }
 
@@ -278,7 +189,7 @@ function buildXAxisLabels(params) {
 function buildBarChartXLabels(params) {
   var labels = [],
     timeType = params.currentFilter,
-    slicedDates = params.slicedDates.split(",");
+    slicedDates = params.additionalsParams.tsString.split(",");
 
   var padzero = function (n) {
       return n < 10 ? '0' + n.toString() : n.toString();
@@ -309,60 +220,21 @@ function buildBarChartXLabels(params) {
     }
     break;
   }
-  /*else if (timeType == "weeks") {
-    var slicedDates = params.slicedDates.split(",");
-    for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      var from = new Date(parseInt(slicedDates[i], 10));
-      var to = new Date(parseInt(slicedDates[i + 1], 10));
-
-      //Suppression du dimanche
-      to.setDate(to.getDate() - 2);
-
-      from = "Du lundi " + from.getDate().toString() + "/" + (from.getMonth() + 1).toString() + "/" + from.getFullYear().toString();
-      to = "<br> au samedi " + to.getDate().toString() + "/" + (to.getMonth() + 1).toString() + "/" + to.getFullYear().toString();
-      labels.push(from + to);
-    }
-  }*/
   return labels;
 }
 
-function buildText(params) {
-  var res = "",
-    type = params.type;
-  if (type.search("view") >= 0) {
-    res = getMessage("graph.ylabel.view");
-  } else if (type.search("comment") >= 0) {
-    res = getMessage("graph.ylabel.comment");
-  } else if (type.search("file") >= 0) {
-    res = getMessage("graph.ylabel.file");
-  } else if (type.search("action") >= 0) {
-    res = getMessage("graph.ylabel.action");
-  }
 
-  return res;
-}
-
-/**
- * Retourn une couleur aléatoirement
- * @method get_random_color
- */
-
-function get_random_color() {
-  var letters = '0123456789ABCDEF'.split('');
-  var color = '#';
-  for (var i = 0; i < 6; i++) {
-    color += letters[Math.round(Math.random() * 15)];
-  }
-  return color;
-}
 /**
  * Retourne le "joli" nom d'un site
  * @method getSiteTitle
  * @param shortName Identifiant du site
  */
 
-function getSiteTitle(shortName,sites) {
-  var res = shortName, i = 0, ii = sites.lenght, currentSite;
+function getSiteTitle(shortName, sites) {
+  var res = shortName,
+    i = 0,
+    ii = sites.lenght,
+    currentSite;
   for (; i < ii; i++) {
     var currentSite = sites[i];
     if (currentSite.name == shortName) {
@@ -395,7 +267,66 @@ function getDay(day) {
 
 function getMessage(messageId, prefix) {
   var msg = (prefix) ? prefix + messageId : messageId;
-  var res = Alfresco.util.message.call(null, msg, "Alfresco.ConsoleAudit", Array.prototype.slice.call(arguments).slice(1));
+  var res = Alfresco.util.message.call(null, msg, "Alfresco.ConsoleAudit", Array.prototype.slice.call(arguments).slice(2));
   res = (res.search("graph.label") == 0) ? messageId : res;
   return res;
+}
+
+
+
+function buildHBarChart(params) {
+  var y_labels = [],
+    max = 0;
+  if (params.items) {
+    max = params.items[0].popularity + 1;
+  }
+  var bars = {
+    "title": {
+      "text": getMessage(params.additionalsParams.type, "graph.label."),
+      "style": "{font-size: 16px; color:#515D6B; font-family: Arial,sans-serif; font-weight: bold; text-align: center;}"
+    },
+    "bg_colour": "#FFFFFF",
+    "elements": buildHBarChartElements(params, y_labels),
+    "x_axis": {
+      "colour": "#5fab34",
+      "grid-colour": "#c0f0b0",
+      "offset": false,
+      "max": max
+    },
+    "y_axis": {
+      "colour": "#5fab34",
+      "grid-colour": "#c0f0b0",
+      "offset": true,
+      "labels": y_labels
+    },
+    "tooltip_": {
+      "mouse": 0
+    }
+  };
+
+  return bars;
+}
+
+function buildHBarChartElements(params, labels) {
+  var elements = null,
+    values = [];
+  pItems = params.items, pItemsLength = pItems.length, i = 0;
+
+  for (; i < pItemsLength; i++) {
+    values.push({
+      "right": pItems[i].popularity,
+      "left": 0,
+      "colour": i ? "#0077BF" : "#EE1C2F"
+    });
+    labels.push(pItems[i].name);
+  }
+  elements = [{
+    "type": "hbar",
+    "tip": "#val#",
+    "colour": "#EC9304",
+    "text": "",
+    "font-size": 10,
+    "values": values
+  }];
+  return elements;
 }

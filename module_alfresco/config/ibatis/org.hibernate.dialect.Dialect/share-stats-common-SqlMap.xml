@@ -292,7 +292,7 @@
       group by audit_target
     </select>
     
-    <select id="selectByMostUpdated" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+    <select id="selectByMostUpdated" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditObjectPopularity">
       select
         count(*) as audit_popularity, audit_object
       from
@@ -305,14 +305,15 @@
         or
           audit_action_name ='file-updated'
         or
-          audit_action_name ='inline-updated'
+          audit_action_name ='inline-edit'
       )
       <include refid="site_snippet"/>
+      <include refid="time_snippet" />
       group by audit_object
       order by audit_popularity DESC
     </select>
     
-    <select id="selectByMostRead" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+    <select id="selectByMostRead" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditObjectPopularity">
       select
         count(*) as audit_popularity, audit_object
       from
@@ -326,6 +327,7 @@
           audit_action_name ='download'
       )
       <include refid="site_snippet"/>
+      <include refid="time_snippet" />
       group by audit_object
       order by audit_popularity DESC
     </select>

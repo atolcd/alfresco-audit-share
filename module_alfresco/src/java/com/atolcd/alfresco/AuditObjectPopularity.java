@@ -2,7 +2,12 @@ package com.atolcd.alfresco;
 
 public class AuditObjectPopularity {
 	private int popularity;
-	private String auditObject;
+	private String auditObject; //Valeur du champ audit_object en base
+	private String objectName;
+	
+	public AuditObjectPopularity(){
+		
+	}
 	
 	public int getPopularity() {
 		return popularity;
@@ -13,7 +18,16 @@ public class AuditObjectPopularity {
 	public String getAuditObject() {
 		return auditObject;
 	}
+	
 	public void setAuditObject(String auditObject) {
 		this.auditObject = auditObject;
 	}
+	
+	public String getObjectName() {
+		return objectName;
+	}
+	public void setObjectName(String objectName) {
+		this.objectName = objectName;
+	}
+	
 }

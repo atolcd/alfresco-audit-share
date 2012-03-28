@@ -79,7 +79,7 @@
           menu: "module-criteria-select",
           lazyloadmenu: false
         });
-        parent.widgets.moduleCriteriaButton.value = "wiki";
+        parent.widgets.moduleCriteriaButton.value = "document";
 
         parent.widgets.actionCriteriaButton = new YAHOO.widget.Button("action-criteria", {
           type: "split",
@@ -196,6 +196,12 @@
     sites: [],
 
     /**
+     * @attribute limit
+     * Limite de documents remontés par requête de popularité
+     */
+    limit: 5,
+
+    /**
      * Fired by YUILoaderHelper when required component script files have
      * been loaded into the browser.
      *
@@ -245,8 +251,8 @@
       currentDate.setMinutes(0);
       currentDate.setSeconds(0);
 
-      this.endDatesArray["days"] = currentDate; //this.currentEndDate
-      this.endDatesArray["weeks"] = currentDate; //this.endDatesArray[dateFilter]
+      this.endDatesArray["days"] = currentDate;
+      this.endDatesArray["weeks"] = currentDate;
       this.endDatesArray["months"] = currentDate;
       this.endDatesArray["years"] = currentDate;
     },
@@ -270,7 +276,7 @@
 
           me.widgets.siteButton.value = value;
           me.widgets.siteButton.set("label", sText);
-          me.onSearch();
+          me.execute();
         };
 
       menuButtons.push({
@@ -309,7 +315,7 @@
       this.widgets.siteButton.set("label", this._msg("label.menu.site.all"));
       this.widgets.siteButton.value = "";
 
-      this.onSearch();
+      this.execute();
     },
 
     onExport: function ConsoleAudit_onExport() {
@@ -330,20 +336,16 @@
         module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
         dateFilter = this.currentDateFilter,
         site = this.convertMenuValue(this.widgets.siteButton.value),
-        type = "",
-        tsArray = [];
+        type = action,
+        tsString = "";
 
       // Crétion du tableau d'intervalle de dates
       if (dateFilter) {
-        tsArray = this.buildTimeStampArray();
+        tsString = this.buildTimeStampArray().toString();
       }
 
-      //Recupération du type de requête
-      type = action;
-
-
       // Création des paramètres et exécution de la requête
-      this.lastRequest.params = this.buildParams(action, module, site, tsArray.toString(), type);
+      this.lastRequest.params = this.buildParams(module, site, tsString, type);
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-audits" + this.lastRequest.params;
       Alfresco.util.Ajax.jsonGet({
@@ -353,31 +355,76 @@
           scope: this
         },
         failureMessage: this._msg("label.popup.query.error"),
-        execScripts: true
+        execScripts: true,
+        additionalsParams: {
+          chartType: "vbar",
+          type: type,
+          tsString: tsString,
+          target: "chart",
+          height: "450",
+          width: "90%"
+        }
       });
 
       // Problème de focus avec le bouton et flash
       // this.widgets.searchButton.blur();
     },
 
+    getByPopularity: function ConsoleAudit_getByPopularity(type) {
+      var site = this.convertMenuValue(this.widgets.siteButton.value),
+        dateFilter = this.currentDateFilter,
+        tsArray = this.buildTimeStampArray(),
+        from = tsArray[0],
+        to = tsArray[tsArray.length - 1],
+        params = null;
+
+      // Création des paramètres et exécution de la requête
+      params = this.buildParams(null, site, null, type, from, to, this.limit);
+
+      var url = Alfresco.constants.PROXY_URI + "share-stats/select-audits" + params;
+      Alfresco.util.Ajax.jsonGet({
+        url: url,
+        successCallback: {
+          fn: this.displayGraph,
+          scope: this
+        },
+        failureMessage: this._msg("label.popup.query.error"),
+        execScripts: true,
+        additionalsParams: {
+          chartType: "hbar",
+          type: type,
+          target: type,
+          height: "200",
+          width: "100%",
+          from: from,
+          to: to
+        }
+      });
+
+    },
     /**
      * @method displayGraph Affiche le requête suite à une requête Ajax
      * @param response Réponse de la requête
      */
     displayGraph: function ConsoleAudit_displayGraph(response) {
-      var swf = Dom.get(this.id + "-chart"),
-        chartTag = swf.tagName.toLowerCase();
+      var additionalsParams, id, swf, chartTag;
+
+      additionalsParams = response.config.additionalsParams;
+      id = this.id + "-" + additionalsParams.target;
+      swf = Dom.get(id);
+      chartTag = swf.tagName.toLowerCase();
 
       if (response.json) {
         this.widgets.exportButton.set("disabled", false);
         response.json.currentFilter = this.currentDateFilter;
-        response.json.currentSites = this.sites;
+        response.json.additionalsParams = additionalsParams;
+        // response.json.currentSites = this.sites;
         // console.log(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
 
         if (chartTag == "embed" || chartTag == "object") {
           swf.load(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
         } else {
-          //Création variables et attribut - GetFlashData défini dans get_data.js
+          //Création variables et attribut - GetFlashData défini dans get_data.js - id : Variables json pour ofc.
           var flashvars = {
             "get-data": "getFlashData",
             "id": escape(YAHOO.lang.JSON.stringify(response.json))
@@ -392,13 +439,13 @@
             };
 
           //Création du graphique Flash.
-          swfobject.embedSWF(this.pathToSwf, this.id + "-chart", "90%", "450", "9.0.0", "expressInstall.swf", flashvars, params, attributes);
+          swfobject.embedSWF(this.pathToSwf, id, additionalsParams.width, additionalsParams.height, "9.0.0", "expressInstall.swf", flashvars, params, attributes);
         }
 
       } else {
         //On remove le SWF courant.
-        this.removeGraph();
-        Dom.get(this.id + "-chart").innerHTML = this._msg("message.no_results");
+        this.removeGraph(id);
+        Dom.get(id).innerHTML = this._msg("message.no_results");
         this.widgets.exportButton.set("disabled", true);
       }
       // this.widgets.searchButton.blur();
@@ -408,17 +455,17 @@
      * @method removeGraph
      * @return boolean
      */
-    removeGraph: function ConsoleAudit_removeGraph() {
-      var swf = Dom.get(this.id + "-chart"),
+    removeGraph: function ConsoleAudit_removeGraph(id) {
+      var swf = Dom.get(id),
         chartTag = swf.tagName.toLowerCase(),
         res = false;
 
       if (chartTag == "embed" || chartTag == "object") {
-        swfobject.removeSWF(this.id + "-chart");
+        swfobject.removeSWF(id);
         //Le conteneur étant détruit, il faut le recréer ...
         var newChartDiv = new YAHOO.util.Element(document.createElement("div"));
-        newChartDiv.set("id", this.id + "-chart");
-        newChartDiv.appendTo(this.id + "-chart-container");
+        newChartDiv.set("id", id);
+        newChartDiv.appendTo(id + "-container");
         res = true;
       }
 
@@ -507,22 +554,27 @@
 
        * @return string params argument à passer à la requête
        */
-    buildParams: function ConsoleAudit_buildParams(action, module, site, dates, type) {
+    buildParams: function ConsoleAudit_buildParams(module, site, dates, type, from, to, limit) {
       var params = "?type=" + type;
 
       if (dates !== null && dates != "") {
         params += "&dates=" + dates;
       }
-      // if(action !== null){
-      // params += "&from="+action;
-      // }
       if (module !== null) {
         params += "&module=" + module;
       }
       if (site !== null) {
         params += "&site=" + site;
       }
-
+      if (from) {
+        params += "&from=" + from;
+      }
+      if (to) {
+        params += "&to=" + to;
+      }
+      if (limit) {
+        params += "&limit=" + limit;
+      }
       return params;
     },
 
@@ -644,7 +696,7 @@
       Dom.removeClass("by-" + this.currentDateFilter, "selected");
       Dom.addClass("by-" + args.filter, "selected");
       this.currentDateFilter = args.filter;
-      this.onSearch();
+      this.execute();
     },
 
 
@@ -678,8 +730,15 @@
 
       this.endDatesArray[dateFilter] = newDate;
 
+      this.execute();
+    },
+
+    execute: function ConsoleAudit_execute() {
+      this.getByPopularity("mostupdated");
+      this.getByPopularity("mostread");
       this.onSearch();
     },
+
     onSearchClick: function ConsoleAudit_onSearchClick() {
       this.refreshUIState({
         "Time": new Date().getTime()
