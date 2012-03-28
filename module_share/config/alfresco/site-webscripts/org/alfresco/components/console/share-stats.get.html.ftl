@@ -38,7 +38,7 @@
           <!-- ${msg("label.auditActionName")} -->
           <input type="button" class="criterias-button" id="action-criteria" name="${el}-action-criteria-button" value="${msg("label.menu.action")}${msg("label.views")}">
           <select id="action-criteria-select" name="${el}-action-criteria-select">
-            <option value="views">${msg("label.menu.action")}${msg("label.views")}</option>
+            <option value="read">${msg("label.menu.action")}${msg("label.views")}</option>
             <option value="created">${msg("label.menu.action")}${msg("label.created")}</option>
             <option value="deleted">${msg("label.menu.action")}${msg("label.deleted")}</option>
             <option value="updated">${msg("label.menu.action")}${msg("label.updated")}</option>

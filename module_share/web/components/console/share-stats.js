@@ -86,7 +86,7 @@
           menu: "action-criteria-select",
           lazyloadmenu: false
         });
-        parent.widgets.actionCriteriaButton.value = "views";
+        parent.widgets.actionCriteriaButton.value = "read";
 
 
         //el, sType, fn, obj, overrideContext

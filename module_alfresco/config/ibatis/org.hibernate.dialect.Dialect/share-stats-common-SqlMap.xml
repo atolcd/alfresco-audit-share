@@ -121,7 +121,7 @@
 
 
     <!-- Snippet de consultation-->
-    <sql id="view_snippet">
+    <sql id="read_snippet">
       <dynamic prepend="where">
         <isNotNull prepend="and" property="appName">
           audit_app_name = #appName#
@@ -268,9 +268,9 @@
       order by audit_site, audit_app_name, audit_action_name
     </select>
 
-    <select id="selectByView" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+    <select id="selectByRead" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="select_concat_actions"/>
-      <include refid="view_snippet"/>
+      <include refid="read_snippet"/>
       group by audit_target
     </select>
 
@@ -312,7 +312,7 @@
       order by audit_popularity DESC
     </select>
     
-    <select id="selectByMostViewed" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+    <select id="selectByMostRead" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       select
         count(*) as audit_popularity, audit_object
       from

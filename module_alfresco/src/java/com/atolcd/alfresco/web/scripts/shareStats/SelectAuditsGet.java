@@ -78,7 +78,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
                 model.put("results", selectAll(params));
             }
             break;*/
-        case views:
+        case read:
             model.put("dates", selectByDate(params, SELECT_BY_VIEW));
             model.put("slicedDates", params.getSlicedDates());
             break;
