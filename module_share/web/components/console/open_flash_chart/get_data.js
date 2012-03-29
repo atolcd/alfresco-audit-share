@@ -35,11 +35,13 @@ function buildTitle(params) {
     slicedDates = params.additionalsParams.tsString.split(","),
     from, to;
 
+
   var padzero = function (n) {
       return n < 10 ? '0' + n.toString() : n.toString();
     };
 
   from = new Date(parseInt(slicedDates[0], 10));
+
   switch (timeType) {
   case "years":
     title += getMessage(timeType, "graph.title.date.", from.getFullYear());
@@ -48,10 +50,10 @@ function buildTitle(params) {
     title += getMessage(timeType, "graph.title.date.", getMonth(from.getMonth()), from.getFullYear());
     break;
   case "weeks":
-    title += getMessage(timeType, "graph.title.date.", from.getWeekInYear(), from.getFullYear());
+    title += getMessage(timeType, "graph.title.date.", from.getWeek(), from.getFullYear());
     break;
   case "days":
-    title += getMessage(timeType, "graph.title.date.", padzero(from.getDate()), padzero(from.getMonth() + 1), from.getFullYear());
+    title += getMessage(timeType, "graph.title.date.", padzero(from.getDate()), padzero(from.getMonth()), from.getFullYear());
     break;
   }
   return title;
@@ -198,7 +200,7 @@ function buildBarChartXLabels(params) {
   switch (timeType) {
   case "years":
     for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      labels[i] = getMonth((new Date(parseInt(slicedDates[i], 10)).getMonth() + 1).toString());
+      labels[i] = getMonth((new Date(parseInt(slicedDates[i], 10)).getMonth()).toString());
     }
     break;
   case "months":

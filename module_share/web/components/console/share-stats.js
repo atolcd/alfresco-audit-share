@@ -61,6 +61,12 @@
       AuditPanelHandler.superclass.constructor.call(this, "audit");
     };
 
+    // Surcharge de la classe Date. Récupère la semaine courante
+    Date.prototype.getWeek = function() {
+     var onejan = new Date(this.getFullYear(),0,1);
+     return Math.ceil((((this - onejan) / 86400000) + onejan.getDay()+1)/7);
+    };
+
     YAHOO.extend(AuditPanelHandler, Alfresco.ConsolePanelHandler, {
       /**
        * Called by the ConsolePanelHandler when this panel shall be loaded
