@@ -20,6 +20,19 @@ CREATE TABLE IF NOT EXISTS share_stats_audit_entry
    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
+
+CREATE TABLE IF NOT EXISTS share_stats_site_volumetry
+(
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  site_id varchar(255) NOT NULL,
+  site_size BIGINT UNSIGNED,
+  folder_count INT UNSIGNED,
+  file_count INT UNSIGNED,
+  at_time BIGINT NOT NULL,
+  INDEX idx_share_stats_site_vol_site (site_id),
+  PRIMARY KEY (id)
+) ENGINE=InnoDB;
+
 DELETE FROM alf_applied_patch WHERE id = 'patch.db-V3.4-ShareStats-ExtraTables';
 INSERT INTO alf_applied_patch
   (id, description, fixes_from_schema, fixes_to_schema, applied_to_schema, target_schema, applied_on_date, applied_to_server, was_executed, succeeded, report)

@@ -60,8 +60,8 @@
     <property name="extensionName">
       <value>sharestats</value>
     </property>
-    <property name="wsSelectAudits">
-      <ref bean="webscript.com.atolcd.alfresco.share-stats.select-audits.get" />
+    <property name="wsInsertAudits">
+      <ref bean="webscript.com.atolcd.alfresco.share-stats.insert-audit.post" />
     </property>
   </bean>
 	

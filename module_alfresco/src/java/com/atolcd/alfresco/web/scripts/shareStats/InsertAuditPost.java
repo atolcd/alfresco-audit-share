@@ -20,10 +20,12 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.orm.ibatis.SqlMapClientTemplate;
 import org.springframework.util.Assert;
 
+import com.atolcd.alfresco.AtolVolumetryEntry;
 import com.atolcd.alfresco.AuditEntry;
 
 public class InsertAuditPost extends DeclarativeWebScript implements InitializingBean {
     private static final String INSERT_ENTRY = "alfresco.atolcd.audit.insertEntry";
+    private static final String INSERT_VOLUMETRY = "alfresco.atolcd.audit.insertVolumetry";
     // SqlMapClientTemplate for ibatis calls
     private SqlMapClientTemplate sqlMapClientTemplate;
     private SiteService siteService;
@@ -91,5 +93,10 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
             }
         }
 
+    }
+    
+    public void insertVolumetry(AtolVolumetryEntry atolVolumetryEntry){
+    	sqlMapClientTemplate.insert(INSERT_VOLUMETRY, atolVolumetryEntry);
+        logger.info("Insert volumetrie ok ");
     }
 }

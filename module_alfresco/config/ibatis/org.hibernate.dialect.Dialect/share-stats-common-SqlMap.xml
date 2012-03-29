@@ -11,6 +11,7 @@
     <!--                -->
 
     <typeAlias alias="AtolAuditEntry" type="com.atolcd.alfresco.AuditEntry"/>
+    <typeAlias alias="AtolVolumetryEntry" type="com.atolcd.alfresco.AtolVolumetryEntry"/>
     <typeAlias alias="AtolCsvExportEntry" type="com.atolcd.alfresco.CsvExportEntry"/>
     <typeAlias alias="AtolAuditCount" type="com.atolcd.alfresco.AuditCount"/>
     <typeAlias alias="AtolAuditQueryParameters" type="com.atolcd.alfresco.AuditQueryParameters"/>
@@ -38,7 +39,7 @@
       <result property="auditObject" column="audit_object" jdbcType="VARCHAR" javaType="java.lang.String"/>
       <result property="auditTime" column="audit_time" jdbcType="BIGINT" javaType="long"/>
     </resultMap>
-
+    
     <resultMap id="results_AtolCsvExportEntry" class="AtolCsvExportEntry">
       <result property="auditSite" column="audit_site" jdbcType="VARCHAR" javaType="java.lang.String"/>
       <result property="auditAppName" column="audit_app_name" jdbcType="VARCHAR" javaType="java.lang.String"/>
@@ -66,6 +67,10 @@
         values (#auditUserId#,#auditSite#,#auditAppName#,#auditActionName#,#auditObject#,#auditTime#)
     </sql>
 
+    <sql id="insert_volumetry_AutoIncrement">
+        insert into share_stats_site_volumetry (site_id, site_size, folder_count, file_count, at_time)
+        values (#siteId#,#siteSize#,#folderCount#,#fileCount#,#atTime#)
+    </sql>
     <!-- Global select snippet -->
     <sql id="select_AuditEntriesWhereSnippet">
       <dynamic prepend="where">

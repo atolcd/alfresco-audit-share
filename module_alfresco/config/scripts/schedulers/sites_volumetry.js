@@ -3,7 +3,7 @@ try {
   var sitesNode =  search.luceneSearch('+PATH:"/app:company_home/st:sites/."');
   if (sitesNode && sitesNode.length == 1) {
     sitesNode = sitesNode[0];
-
+    var success;
     for (var i=0, ii=sitesNode.children.length ; i<ii ; i++) {
       var siteNode = sitesNode.children[i];
       if (siteNode.typeShort == "st:site") {
@@ -13,14 +13,17 @@ try {
           var documentLibrary = site.getContainer("documentLibrary");
           if (documentLibrary) {
             // Calcul de la volumétrie
-            // var volumetry = calculateVolumetry(documentLibrary);
+            var volumetry = calculateVolumetry(documentLibrary);
 
             // TODO : Stocker en base
-            // var timestamp = new Date().getTime();
-            // sharestats.insert(timestamp, siteShortName, volumetry.foldersCount, volumetry.documentsCount, volumetry.siteSize);
-
-            // logger.log("Le site '" + siteShortName + "' possède " + volumetry.documentsCount + " document(s), " + volumetry.foldersCount + " dossier(s) et une volumétrie de : " + Math.round(volumetry.siteSize / 1024 / 1024) + " Mo.");
-          }
+            var timestamp = new Date().getTime();
+            success = sharestats.insertVolumetry(siteShortName, volumetry.siteSize, volumetry.foldersCount, volumetry.documentsCount, timestamp);
+            if(success){
+              logger.log("Le site '" + siteShortName + "' possède " + volumetry.documentsCount + " document(s), " + volumetry.foldersCount + " dossier(s) et une volumétrie de : " + Math.round(volumetry.siteSize / 1024 / 1024) + " Mo.");
+            } else {
+              logger.log("Erreur pendant l'insertion de la volumetrie du site : " + siteShortName);
+            }
+         }
           else {
             logger.log("Le site " + siteShortName + " ne possède pas d'espace documentaire.");
           }

@@ -10,5 +10,11 @@
         <selectKey resultClass="long" keyProperty="id" type="post">
             KEY_COLUMN:GENERATED_KEY
         </selectKey>
-    </insert>   
+    </insert> 
+    <insert id="insertVolumetry" parameterClass="AtolVolumetryEntry" >
+        <include refid="insert_volumetry_AutoIncrement"/>
+        <selectKey resultClass="long" keyProperty="id" type="post">
+            KEY_COLUMN:GENERATED_KEY
+        </selectKey>
+    </insert> 
 </sqlMap>

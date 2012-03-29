@@ -182,8 +182,7 @@
      *
      */
     pathToSwf: "/share/components/console/open_flash_chart/open-flash-chart.swf",
-    // pathToSwf: "/share/components/console/open_flash_chart/main.swf",
-
+    
     /**
      * @attribute endDatesArray
      * Dates de référence utilisée pour les graphiques
@@ -238,7 +237,7 @@
 
           me.widgets.moduleCriteriaButton.value = value;
           me.widgets.moduleCriteriaButton.set("label", sText);
-          me.onSearch();
+          me.execute();
         };
       this.widgets.moduleCriteriaButton.getMenu().subscribe("click", onModulesMenuItemClick);
 
@@ -249,7 +248,7 @@
 
           me.widgets.actionCriteriaButton.value = value;
           me.widgets.actionCriteriaButton.set("label", sText);
-          me.onSearch();
+          me.execute();
         };
       this.widgets.actionCriteriaButton.getMenu().subscribe("click", onActionsMenuItemClick);
 
