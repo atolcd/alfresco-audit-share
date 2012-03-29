@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING/DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
+  <import resource="classpath:alfresco/module/share-stats-module-alfresco/context/schedulers-context.xml" />
+
+  <bean name="shareStatsConfigProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="ignoreUnresolvablePlaceholders">
+      <value>true</value>
+    </property>
+    <property name="locations">
+      <list>
+        <value>classpath:alfresco/module/share-stats-module-alfresco/share-stats-config.properties</value>
+      </list>
+    </property>
+  </bean>
+
   <!-- iBatis config for Alfresco (using common datasource) -->
   <bean id="shareStatsAlfrescoSqlMapClient" class="org.alfresco.ibatis.HierarchicalSqlMapClientFactoryBean">
       <property name="dataSource" ref="dataSource"/>
