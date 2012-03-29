@@ -309,4 +309,15 @@
       group by audit_object
       order by audit_popularity DESC
     </select>
+    
+    <!-- Retourne les dernière personne ayant effectuée une action dans la tranche de temps donnée. On les considère connecté -->
+    <select id="selectConnectedUsers" parameterClass="AtolAuditQueryParameters" resultClass="java.lang.String">
+      select distinct(audit_user)
+        from
+      share_stats_audit_entry
+      <dynamic prepend="where">
+        <include refid="site_snippet"/>
+        <include refid="time_snippet" />
+      </dynamic>
+    </select>
 </sqlMap>
