@@ -96,6 +96,7 @@
 
 
         //el, sType, fn, obj, overrideContext
+        Event.addListener("home", "click", parent.onResetDates, null, parent);
         Event.addListener("by-days", "click", parent.onChangeDateFilter, {
           filter: "days"
         }, parent);
@@ -181,6 +182,7 @@
      *
      */
     pathToSwf: "/share/components/console/open_flash_chart/open-flash-chart.swf",
+    // pathToSwf: "/share/components/console/open_flash_chart/main.swf",
 
     /**
      * @attribute endDatesArray
@@ -251,16 +253,7 @@
         };
       this.widgets.actionCriteriaButton.getMenu().subscribe("click", onActionsMenuItemClick);
 
-      var currentDate = new Date();
-      currentDate.setMinutes(0);
-      currentDate.setHours(0);
-      currentDate.setMinutes(0);
-      currentDate.setSeconds(0);
-
-      this.endDatesArray["days"] = currentDate;
-      this.endDatesArray["weeks"] = currentDate;
-      this.endDatesArray["months"] = currentDate;
-      this.endDatesArray["years"] = currentDate;
+      this.setupCurrentDates();
     },
 
     /**
@@ -378,6 +371,7 @@
 
     getByPopularity: function ConsoleAudit_getByPopularity(type) {
       var site = this.convertMenuValue(this.widgets.siteButton.value),
+        module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
         dateFilter = this.currentDateFilter,
         tsArray = this.buildTimeStampArray(),
         from = tsArray[0],
@@ -385,7 +379,7 @@
         params = null;
 
       // Création des paramètres et exécution de la requête
-      params = this.buildParams(null, site, null, type, from, to, this.limit);
+      params = this.buildParams(module, site, null, type, from, to, this.limit);
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-audits" + params;
       Alfresco.util.Ajax.jsonGet({
@@ -403,7 +397,9 @@
           height: "200",
           width: "100%",
           from: from,
-          to: to
+          to: to,
+          module: module,
+          urlTemplate : "http://" + window.location.host + "/share/page/site/{site}/document-details?nodeRef={nodeRef}"
         }
       });
 
@@ -635,6 +631,7 @@
         tsArray.push(from.getTime());
 
         //Date d'arrêt
+        to.setMonth(from.getMonth());
         to.setDate(from.getDate() + 7);
 
         next.setDate(from.getDate() + 1);
@@ -698,7 +695,7 @@
      * Gestionnaire click Jour / Semaine / Mois / Année
      */
     onChangeDateFilter: function ConsoleAudit_OnChangeDateFilter(e, args) {
-      Event.stopEvent(e);
+      if(e) Event.stopEvent(e);
       Dom.removeClass("by-" + this.currentDateFilter, "selected");
       Dom.addClass("by-" + args.filter, "selected");
       this.currentDateFilter = args.filter;
@@ -719,6 +716,7 @@
         newDate = new Date(this.endDatesArray[dateFilter]);
 
       Event.stopEvent(e);
+
       switch (dateFilter) {
       case "days":
         newDate.setDate(this.endDatesArray[dateFilter].getDate() + (1 * coef));
@@ -735,7 +733,11 @@
       }
 
       this.endDatesArray[dateFilter] = newDate;
+      this.execute();
+    },
 
+    onResetDates: function ConsoleAudit_OnResetDates(){
+      this.setupCurrentDates();
       this.execute();
     },
 
@@ -745,12 +747,18 @@
       this.onSearch();
     },
 
-    onSearchClick: function ConsoleAudit_onSearchClick() {
-      this.refreshUIState({
-        "Time": new Date().getTime()
-      });
-    },
+    setupCurrentDates : function ConsoleAudit_setupCurrentDates(){
+      var currentDate = new Date();
+      currentDate.setMinutes(0);
+      currentDate.setHours(0);
+      currentDate.setMinutes(0);
+      currentDate.setSeconds(0);
 
+      this.endDatesArray["days"] = currentDate;
+      this.endDatesArray["weeks"] = currentDate;
+      this.endDatesArray["months"] = currentDate;
+      this.endDatesArray["years"] = currentDate;
+    },
     //Traduction des messages
     _msg: function ConsoleAudit__msg(messageId) {
       return Alfresco.util.message.call(this, messageId, "Alfresco.ConsoleAudit", Array.prototype.slice.call(arguments).slice(1));

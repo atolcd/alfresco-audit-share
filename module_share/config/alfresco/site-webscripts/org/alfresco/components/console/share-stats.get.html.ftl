@@ -9,7 +9,6 @@
 //]]></script>
 
 <div id="${el}-body" class="audit">
-  <!-- Tools panel class="hidden" -->
   <div id="${el}-audit">
     <div class="yui-g">
       <div class="yui-u first">
@@ -24,15 +23,14 @@
 
         <div id="criterias" class="criterias">
 
-          <input type="button" class="criterias-button" id="module-criteria" name="${el}-module-criteria-button" value="${msg("label.menu.module")}${msg("label.documentlibrary")}">
+          <input type="button" class="criterias-button" id="module-criteria" name="${el}-module-criteria-button" value="${msg("label.documentlibrary")}">
           <select id="module-criteria-select" name="${el}-module-criteria-select">
-            <option value="document">${msg("label.menu.module")}${msg("label.documentlibrary")}</option>
-            <option value="wiki">${msg("label.menu.module")}${msg("label.wiki")}</option>
-            <option value="blog">${msg("label.menu.module")}${msg("label.blog")}</option>
-            <option value="discussions">${msg("label.menu.module")}${msg("label.discussion")}</option>
+            <option value="document">${msg("label.documentlibrary")}</option>
+            <option value="wiki">${msg("label.wiki")}</option>
+            <option value="blog">${msg("label.blog")}</option>
+            <option value="discussions">${msg("label.discussion")}</option>
           </select>
 
-          <!-- ${msg("label.auditActionName")} -->
           <input type="button" class="criterias-button" id="action-criteria" name="${el}-action-criteria-button" value="${msg("label.menu.action")}${msg("label.read")}">
           <select id="action-criteria-select" name="${el}-action-criteria-select">
             <option value="read">${msg("label.menu.action")}${msg("label.read")}</option>
@@ -50,6 +48,10 @@
         </div>
 
         <div class="yui-u separator dates-filter">
+          <span id="home">
+            <a href="#">${msg("label.home")}</a>
+          </span>
+          <span class="vb"> | </span>
           <span id="by-days">
             <a href="#">${msg("label.byDay")}</a>
           </span>
