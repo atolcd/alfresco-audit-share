@@ -79,19 +79,19 @@ function buildBarChart(params) {
     "elements": buildBarChartElements(params, x_labels.labels),
 
     "x_axis": {
-      "stroke": 3,
+      "stroke": 2,
       "tick_height": 10,
-      "colour": "#5fab34",
-      "grid-colour": "#c0f0b0",
+      "colour": "#515D6B",
+      "grid-colour": "#EEEEEE",
       "labels": x_labels
     },
 
     "y_axis": {
-      "stroke": 3,
+      "stroke": 2,
       "steps": Math.floor(params.max / 10),
       "tick_length": 3,
-      "colour": "#5fab34",
-      "grid-colour": "#ddf1d1",
+      "colour": "#515D6B",
+      "grid-colour": "#EEEEEE",
       "offset": 0,
       "max": params.max + 2
     }
