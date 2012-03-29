@@ -8,6 +8,7 @@ function getFlashData(param) {
     jsonChart = buildBarChart(params);
     break;
   case "hbar":
+
     jsonChart = buildHBarChart(params);
     break;
   }
@@ -53,7 +54,7 @@ function buildTitle(params) {
     title += getMessage(timeType, "graph.title.date.", from.getWeek(), from.getFullYear());
     break;
   case "days":
-    title += getMessage(timeType, "graph.title.date.", padzero(from.getDate()), padzero(from.getMonth()), from.getFullYear());
+    title += getMessage(timeType, "graph.title.date.", padzero(from.getDate()), padzero(from.getMonth() + 1), from.getFullYear());
     break;
   }
   return title;
@@ -79,19 +80,19 @@ function buildBarChart(params) {
     "elements": buildBarChartElements(params, x_labels.labels),
 
     "x_axis": {
-      "stroke": 2,
+      "stroke": 3,
       "tick_height": 10,
-      "colour": "#515D6B",
-      "grid-colour": "#EEEEEE",
+      "colour": "#5fab34",
+      "grid-colour": "#c0f0b0",
       "labels": x_labels
     },
 
     "y_axis": {
-      "stroke": 2,
+      "stroke": 3,
       "steps": Math.floor(params.max / 10),
       "tick_length": 3,
-      "colour": "#515D6B",
-      "grid-colour": "#EEEEEE",
+      "colour": "#5fab34",
+      "grid-colour": "#ddf1d1",
       "offset": 0,
       "max": params.max + 2
     }
@@ -290,7 +291,8 @@ function buildHBarChart(params) {
       "colour": "#5fab34",
       "grid-colour": "#c0f0b0",
       "offset": false,
-      "max": max
+      "max": max,
+      "steps" : (max >= 15) ? Math.round(max / 10) : 1
     },
     "y_axis": {
       "colour": "#5fab34",
@@ -298,8 +300,8 @@ function buildHBarChart(params) {
       "offset": true,
       "labels": y_labels
     },
-    "tooltip_": {
-      "mouse": 0
+    "tooltip": {
+      "mouse": 1
     }
   };
 
@@ -307,25 +309,36 @@ function buildHBarChart(params) {
 }
 
 function buildHBarChartElements(params, labels) {
-  var elements = null,
-    values = [];
-  pItems = params.items, pItemsLength = pItems.length, i = 0;
 
+  var elements = null,
+    values = [],
+    value_obj, item, module = params.additionalsParams.module,
+    urlTemplate = params.additionalsParams.urlTemplate;
+
+  pItems = params.items, pItemsLength = pItems.length, i = 0;
   for (; i < pItemsLength; i++) {
-    values.push({
-      "right": pItems[i].popularity,
-      "left": 0,
-      "colour": i ? "#0077BF" : "#EE1C2F"
-    });
-    labels.push(pItems[i].name);
+    item = pItems[i];
+    value_obj = {};
+    value_obj.tip = item.name + " : #val#";
+    value_obj.right = item.popularity;
+    value_obj.left = 0;
+    value_obj.colour = i ? "#0077BF" : "#EE1C2F";
+    if (module == "document") {
+      value_obj["on-click"] = YAHOO.lang.substitute(urlTemplate, {
+        site: item.site,
+        nodeRef: item.nodeRef
+      });;
+    }
+    values.push(value_obj);
+    labels.push(pItems[pItemsLength - 1 - i].name);
   }
   elements = [{
     "type": "hbar",
-    "tip": "#val#",
     "colour": "#EC9304",
     "text": "",
     "font-size": 10,
     "values": values
   }];
+  console.log(elements);
   return elements;
 }
