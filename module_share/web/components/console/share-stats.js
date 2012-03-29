@@ -610,7 +610,7 @@
         tsArray.push(from.setDate(1));
         next = new Date(from);
         next.setDate(1);
-        next.setDate(next.getDate() + 3);
+        next.setDate(next.getDate() + 1);
 
         // Date d'arrêt
         to.setDate(1);
@@ -619,7 +619,7 @@
         hasNext = (to.getTime() > next.getTime());
         while (hasNext) {
           tsArray.push(next.getTime());
-          next.setDate(next.getDate() + 3);
+          next.setDate(next.getDate() + 1);
           hasNext = (to.getTime() > next.getTime());
         }
         tsArray.push(next.getTime());

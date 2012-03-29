@@ -177,12 +177,10 @@ function buildBarChartElements(params, labels) {
 
 
 function buildXAxisLabels(params) {
-  var steps = params.totalResults >= 20 ? Math.round(params.totalResults / 10) : 1;
-  var rotationAngle = params.totalResults > 5 ? "-45" : "0";
+  var steps = params.totalResults >= 30 ? Math.round(params.totalResults / 15) : 1;
   var labelConfiguration = {
     "labels": buildBarChartXLabels(params),
-    "steps": steps,
-    "rotate": rotationAngle
+    "steps": steps
   }
 
   return labelConfiguration;
@@ -192,7 +190,6 @@ function buildBarChartXLabels(params) {
   var labels = [],
     timeType = params.currentFilter,
     slicedDates = params.additionalsParams.tsString.split(",");
-
   var padzero = function (n) {
       return n < 10 ? '0' + n.toString() : n.toString();
     };
