@@ -87,7 +87,7 @@
       <div class="yui-u align-right">&nbsp;</div>
     </div>
 -->
-    <div id="${el}-chart-body">
+    <div id="${el}-chart-body" class="main-chart">
       <div class="browsing">
         <div id="chart-prev" class="img-prev-arrow"></div>
         <div id="chart-next" class="img-next-arrow"></div>
