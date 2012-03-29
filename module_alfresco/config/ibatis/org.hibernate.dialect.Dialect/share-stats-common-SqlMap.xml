@@ -50,10 +50,11 @@
       <result property="count" column="audit_count" jdbcType="BIGINT" javaType="int"/>
       <result property="target" column="audit_target" jdbcType="VARCHAR" javaType="java.lang.String"/>
     </resultMap>
-    
+
     <resultMap id="results_AtolAuditObjectPopularity" class="AtolAuditObjectPopularity">
       <result property="popularity" column="audit_popularity" jdbcType="BIGINT" javaType="int"/>
       <result property="auditObject" column="audit_object" jdbcType="VARCHAR" javaType="java.lang.String"/>
+      <result property="auditSite" column="audit_site" jdbcType="VARCHAR" javaType="java.lang.String"/>
     </resultMap>
 
     <!--                -->
@@ -134,25 +135,13 @@
           )
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="wiki">
-          (
             audit_action_name = "page"
-          or
-            audit_action_name = "view"
-          )
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="blog">
-          (
             audit_action_name = "postview"
-          or
-            audit_action_name = "postlist"
-          )
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="discussions">
-          (
             audit_action_name = "topicview"
-          or
-            audit_action_name = "topiclist"
-          )
         </isEqual>
         <include refid="time_snippet" />
         <include refid="site_snippet"/>
@@ -291,41 +280,25 @@
       <include refid="delete_snippet"/>
       group by audit_target
     </select>
-    
+
     <select id="selectByMostUpdated" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditObjectPopularity">
       select
-        count(*) as audit_popularity, audit_object
+        count(*) as audit_popularity, audit_object, audit_site
       from
         share_stats_audit_entry
-      where
-        audit_app_name = 'document'
-      and
-      (
-          audit_action_name ='update'
-        or
-          audit_action_name ='file-updated'
-        or
-          audit_action_name ='inline-edit'
-      )
+      <include refid="update_snippet"/>
       <include refid="site_snippet"/>
       <include refid="time_snippet" />
       group by audit_object
       order by audit_popularity DESC
     </select>
-    
+
     <select id="selectByMostRead" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditObjectPopularity">
       select
-        count(*) as audit_popularity, audit_object
+        count(*) as audit_popularity, audit_object, audit_site
       from
         share_stats_audit_entry
-      where
-        audit_app_name = 'document'
-      and
-      (
-          audit_action_name ='details'
-        or
-          audit_action_name ='download'
-      )
+      <include refid="read_snippet"/>
       <include refid="site_snippet"/>
       <include refid="time_snippet" />
       group by audit_object

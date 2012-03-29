@@ -117,21 +117,27 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 		auditObjectPopularityList = sqlMapClientTemplate.queryForList(query, params);
 		logger.info("Performing " + query + " ... ");
 
+		String app = params.getAppName();
 		Iterator<AuditObjectPopularity> iterator = auditObjectPopularityList.iterator();
 		int treatedItems = 0;
 		// On test si les éléments retournés existent toujours
 		while (iterator.hasNext() && treatedItems < limit) {
 			AuditObjectPopularity auditObjectPopularity = iterator.next();
-			NodeRef nodeRef = new NodeRef(auditObjectPopularity.getAuditObject());
-			if (!nodeService.exists(nodeRef)) {
-				iterator.remove();
-			} else {
-				
-				String name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE);
-				if(name == null || name.isEmpty()){
-					name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+			if("document".equals(app)) {
+				NodeRef nodeRef = new NodeRef(auditObjectPopularity.getAuditObject());
+				if (!nodeService.exists(nodeRef)) {
+					iterator.remove();
+				} else {
+					
+					String name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE);
+					if(name == null || name.isEmpty()){
+						name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+					}
+					auditObjectPopularity.setObjectName(name);
+					treatedItems++;
 				}
-				auditObjectPopularity.setObjectName(name);
+			} else {
+				auditObjectPopularity.setObjectName(auditObjectPopularity.getAuditObject());
 				treatedItems++;
 			}
 		}

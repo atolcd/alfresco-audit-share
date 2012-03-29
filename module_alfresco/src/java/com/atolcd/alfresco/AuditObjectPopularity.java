@@ -4,6 +4,7 @@ public class AuditObjectPopularity {
 	private int popularity;
 	private String auditObject; //Valeur du champ audit_object en base
 	private String objectName;
+	private String auditSite;
 	
 	public AuditObjectPopularity(){
 		
@@ -28,6 +29,14 @@ public class AuditObjectPopularity {
 	}
 	public void setObjectName(String objectName) {
 		this.objectName = objectName;
+	}
+
+	public String getAuditSite() {
+		return auditSite;
+	}
+
+	public void setAuditSite(String auditSite) {
+		this.auditSite = auditSite;
 	}
 	
 }
