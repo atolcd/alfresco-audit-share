@@ -33,9 +33,8 @@
           
           <div class="yui-u filters">
             <span id="home">
-              <a href="#">${msg("label.home")}</a>
+              <span class="home-img" title="${msg('label.home')}"></span>
             </span>
-            <span class="vb"> | </span>
             <span id="by-days">
               <a href="#">${msg("label.byDay")}</a>
             </span>
