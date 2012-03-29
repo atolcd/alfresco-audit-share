@@ -19,13 +19,10 @@
       </div>
       <div class="yui-u align-right">&nbsp;</div>
     </div>
-    <div class="title">
-      ${msg("label.title.criterias")}
-    </div>
     <div class="yui-g separator">
-      <div class="yui-u first">
+      <div class="header">
 
-        <span id="criterias" class="criterias">
+        <div id="criterias" class="criterias">
 
           <input type="button" class="criterias-button" id="module-criteria" name="${el}-module-criteria-button" value="${msg("label.menu.module")}${msg("label.documentlibrary")}">
           <select id="module-criteria-select" name="${el}-module-criteria-select">
@@ -44,30 +41,31 @@
             <option value="updated">${msg("label.menu.action")}${msg("label.updated")}</option>
           </select>
 
-        </span>
+        </div>
 
-        <span class="utility-buttons">
+        <div class="utility-buttons">
           <span class="yui-button yui-push-button criterias-button" id="${el}-export-button">
             <span class="first-child"><button>${msg("button.export")}</button></span>
           </span>
-        </span>
-      </div>
-      <div class="yui-u dates-filter">
-        <span id="by-days">
-          <a href="#">${msg("label.byDay")}</a>
-        </span>
-        <span class="vb"> | </span>
-        <span id="by-weeks" class="selected">
-          <a href="#">${msg("label.byWeek")}</a>
-        </span>
-        <span class="vb"> | </span>
-        <span id="by-months">
-          <a href="#">${msg("label.byMonth")}</a>
-        </span>
-        <span class="vb"> | </span>
-        <span id="by-years">
-          <a href="#">${msg("label.byYear")}</a>
-        </span>
+        </div>
+
+        <div class="yui-u separator dates-filter">
+          <span id="by-days">
+            <a href="#">${msg("label.byDay")}</a>
+          </span>
+          <span class="vb"> | </span>
+          <span id="by-weeks" class="selected">
+            <a href="#">${msg("label.byWeek")}</a>
+          </span>
+          <span class="vb"> | </span>
+          <span id="by-months">
+            <a href="#">${msg("label.byMonth")}</a>
+          </span>
+          <span class="vb"> | </span>
+          <span id="by-years">
+            <a href="#">${msg("label.byYear")}</a>
+          </span>
+        </div>
       </div>
     </div>
 
@@ -88,12 +86,10 @@
     </div>
 -->
     <div id="${el}-chart-body">
-      <span id="chart-prev-wrapper">
-        <img class="img-arrow" id="chart-prev" title="" alt="" src="/share/components/console/img/prev.png">
-      </span>
-      <span id="chart-next-wrapper">
-        <img class="img-arrow" id="chart-next" title="" alt="" src="/share/components/console/img/next.png">
-      </span>
+      <div class="browsing">
+        <div id="chart-prev" class="img-prev-arrow"></div>
+        <div id="chart-next" class="img-next-arrow"></div>
+      </div>
       <div id="${el}-chart-container" class="chart-container">
         <div class="chart" id="${el}-chart"></div>
       </div>
