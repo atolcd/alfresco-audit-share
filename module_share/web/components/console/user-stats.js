@@ -39,8 +39,8 @@
 
     // NOTE: the panel registered first is considered the "default" view and is displayed first
     /* Audit Panel Handler */
-    AuditPanelHandler = function AuditPanelHandler_constructor() {
-      AuditPanelHandler.superclass.constructor.call(this, "audit");
+    UserAuditPanelHandler = function UserAuditPanelHandler_constructor() {
+      UserAuditPanelHandler.superclass.constructor.call(this, "audit");
     };
 
     // Surcharge de la classe Date. Récupère la semaine courante
@@ -49,7 +49,7 @@
      return Math.ceil((((this - onejan) / 86400000) + onejan.getDay()+1)/7);
     };
 
-    YAHOO.extend(AuditPanelHandler, Alfresco.ConsolePanelHandler, {
+    YAHOO.extend(UserAuditPanelHandler, Alfresco.ConsolePanelHandler, {
       /**
        * Called by the ConsolePanelHandler when this panel shall be loaded
        *
@@ -109,7 +109,7 @@
       }
     });
 
-    new AuditPanelHandler();
+    new UserAuditPanelHandler();
 
     return this;
   };
@@ -614,7 +614,7 @@
       this.execute();
     },
 
-    onResetDates: function ConsoleAudit_OnResetDates(){
+    onResetDates: function ConsoleUserAudit_OnResetDates(){
       this.setupCurrentDates();
       this.execute();
     },
@@ -623,7 +623,7 @@
       this.onSearch();
     },
 
-    setupCurrentDates : function ConsoleAudit_setupCurrentDates(){
+    setupCurrentDates : function ConsoleUserAudit_setupCurrentDates(){
       var currentDate = new Date();
       currentDate.setMinutes(0);
       currentDate.setHours(0);
