@@ -27,223 +27,169 @@ import com.csvreader.CsvWriter;
 
 public class AuditExportGet extends AbstractWebScript implements InitializingBean {
 
-    private SelectAuditsGet wsSelectAudits;
-    private SiteService siteService;
+	private SelectAuditsGet wsSelectAudits;
+	private SiteService siteService;
 
-    public void setWsSelectAudits(SelectAuditsGet wsSelectAudits) {
-        this.wsSelectAudits = wsSelectAudits;
-    }
+	public void setWsSelectAudits(SelectAuditsGet wsSelectAudits) {
+		this.wsSelectAudits = wsSelectAudits;
+	}
 
-    public void setSiteService(SiteService siteService) {
-        this.siteService = siteService;
-    }
-    
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Assert.notNull(wsSelectAudits);
-        Assert.notNull(siteService);
-    }
+	public void setSiteService(SiteService siteService) {
+		this.siteService = siteService;
+	}
 
-    /**
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		Assert.notNull(wsSelectAudits);
+		Assert.notNull(siteService);
+	}
+
+	/**
 	 * 
 	 */
-    @Override
-    public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            Charset charset = Charset.forName("UTF-8");// ISO-8859-1
-            CsvWriter csv = new CsvWriter(baos, ',', charset);
+	@Override
+	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			Charset charset = Charset.forName("UTF-8");// ISO-8859-1
+			CsvWriter csv = new CsvWriter(baos, ',', charset);
 
-            Map<String, Object> model = new HashMap<String, Object>();
-            AuditQueryParameters params = wsSelectAudits.buildParametersFromRequest(req);
+			Map<String, Object> model = new HashMap<String, Object>();
+			AuditQueryParameters params = wsSelectAudits.buildParametersFromRequest(req);
 
-            String type = "all";
-            if (req.getParameter("type").startsWith("sites") || (req.getParameter("type").equals("action") && req.getParameter("module") != null)) {
-                type = req.getParameter("type");
-            }
-            wsSelectAudits.checkForQuery(model, params, type);
-            buildCsvFromRequest(model, csv, params, type);
+			wsSelectAudits.checkForQuery(model, params, req.getParameter("type"));
+			buildCsvFromRequest(model, csv, params, req.getParameter("type"));
 
-            csv.close();
-            res.setHeader("Content-Disposition", "attachment; filename=\"export.csv\"");
-            res.setContentType("application/csv");// application/octet-stream
-            baos.writeTo(res.getOutputStream());
+			csv.close();
+			res.setHeader("Content-Disposition", "attachment; filename=\"export.csv\"");
+			res.setContentType("application/csv");// application/octet-stream
+			baos.writeTo(res.getOutputStream());
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+		} catch (Exception e) {
+			e.printStackTrace();
+			res.reset();
+		}
+	}
 
-    /**
-     * 
-     * @param model
-     *            ModÃ¨le dans lequel on Ã©crit
-     * @param csv
-     *            CsvWriter utilisÃ© pour Ã©crire dans le modÃ¨le
-     * @throws SQLException
-     * @throws JSONException
-     * @throws IOException
-     */
-    @SuppressWarnings("unchecked")
-    public void buildCsvFromRequest(Map<String, Object> model, CsvWriter csv, AuditQueryParameters params, String type)
-            throws SQLException, JSONException, IOException {
-        // Sélection de TOUS les audits.
-        String dateRecord = null;
-        if (model.containsKey("results")) {
-            if (!model.containsKey("slicedDates")) {
-                if (params.getDateFrom() > 0 || params.getDateTo() > 0) {
-                    csv.writeRecord(new String[] { I18NUtil.getMessage("csv.site"), I18NUtil.getMessage("csv.module"),
-                            I18NUtil.getMessage("csv.action"), I18NUtil.getMessage("csv.count"),
-                            I18NUtil.getMessage("csv.interval") });
-                    dateRecord = getStringDate(params.getDateFrom()) + " - " + getStringDate(params.getDateTo());
-                } else {
-                    csv.writeRecord(new String[] { I18NUtil.getMessage("csv.site"), I18NUtil.getMessage("csv.module"),
-                            I18NUtil.getMessage("csv.action"), I18NUtil.getMessage("csv.count") });
-                }
+	/**
+	 * 
+	 * @param model
+	 *            ModÃ¨le dans lequel on Ã©crit
+	 * @param csv
+	 *            CsvWriter utilisÃ© pour Ã©crire dans le modÃ¨le
+	 * @throws SQLException
+	 * @throws JSONException
+	 * @throws IOException
+	 */
+	@SuppressWarnings("unchecked")
+	public void buildCsvFromRequest(Map<String, Object> model, CsvWriter csv, AuditQueryParameters params, String type)
+			throws SQLException, JSONException, IOException {
+		// Sélection de TOUS les audits.
+		String dateRecord = null;
+		if (model.containsKey("dates")) {
+			csv.writeRecord(new String[] { I18NUtil.getMessage("csv.interval"), I18NUtil.getMessage("csv.action"),
+					I18NUtil.getMessage("csv.count") });
+			List<List<AuditCount>> auditCountsLists = (List<List<AuditCount>>) model.get("dates");
+			String[] slicedDates = params.getSlicedDates().split(",");
+			for (int i = 0; i < auditCountsLists.size(); i++) {
+				dateRecord = getStringDate(Long.parseLong(slicedDates[i]));
+				dateRecord += " - " + getStringDate(Long.parseLong(slicedDates[i + 1]));
+				writeAuditCount(csv, auditCountsLists.get(i), true, dateRecord, "action");
+			}
+		} else {
+			if (params.getDateFrom() > 0 || params.getDateTo() > 0) {
+				dateRecord = getStringDate(params.getDateFrom()) + "-" + getStringDate(params.getDateTo());
+				csv.writeRecord(new String[] { I18NUtil.getMessage("csv.action"), I18NUtil.getMessage("csv.count"),
+						I18NUtil.getMessage("csv.interval") });
+			} else {
+				csv.writeRecord(new String[] { I18NUtil.getMessage("csv.action"), I18NUtil.getMessage("csv.count") });
+			}
+			List<AuditCount> auditCounts = (List<AuditCount>) model.get("views");
+			writeAuditCount(csv, auditCounts, false, dateRecord, "action");
+		}
+	}
 
-                List<CsvExportEntry> csvExportEntries = (List<CsvExportEntry>) model.get("results");
-                writeCsvEntry(csv, csvExportEntries, false, dateRecord);
-            } else {
-                csv.writeRecord(new String[] { I18NUtil.getMessage("csv.interval"), I18NUtil.getMessage("csv.module"),
-                        I18NUtil.getMessage("csv.action"), I18NUtil.getMessage("csv.count"),
-                        I18NUtil.getMessage("csv.site") });
-                List<List<CsvExportEntry>> auditExportEntryList = (List<List<CsvExportEntry>>) model.get("results");
-                String[] slicedDates = ((String) model.get("slicedDates")).split(",");
-                for (int i = 0; i < auditExportEntryList.size(); i++) {
-                    dateRecord = getStringDate(Long.parseLong(slicedDates[i]));
-                    dateRecord += " - " + getStringDate(Long.parseLong(slicedDates[i + 1]));
-                    writeCsvEntry(csv, auditExportEntryList.get(i), true, dateRecord);
-                }
-            }
-        } else if (type.startsWith("sites")) {
-            if (model.containsKey("slicedDates")) {
-                csv.writeRecord(new String[] { I18NUtil.getMessage("csv.interval"), I18NUtil.getMessage("csv.site"),
-                        I18NUtil.getMessage("csv.count") });
-                List<List<AuditCount>> auditCountsLists = (List<List<AuditCount>>) model.get("dates");
-                String[] slicedDates = ((String) model.get("slicedDates")).split(",");
-                for (int i = 0; i < auditCountsLists.size(); i++) {
-                    dateRecord = getStringDate(Long.parseLong(slicedDates[i]));
-                    dateRecord += " - " + getStringDate(Long.parseLong(slicedDates[i + 1]));
-                    writeAuditCount(csv, auditCountsLists.get(i), true, dateRecord,"site");
-                }
-            } else {
+	/**
+	 * 
+	 * @param csv
+	 *            CsvWriter dans lequel on écrit
+	 * @param auditCounts
+	 * @throws IOException
+	 */
+	public void writeAuditCount(CsvWriter csv, List<AuditCount> auditCounts, boolean dateFirst, String date, String type)
+			throws IOException {
+		for (AuditCount auditCount : auditCounts) {
+			String[] record;
+			int recordIndex = 0;
+			if (date != null) {
+				record = new String[3];
+				if (dateFirst) {
+					record[recordIndex++] = date;
+				}
+			} else {
+				record = new String[2];
+			}
+			if (type.equals("action")) {
+				record[recordIndex++] = I18NUtil.getMessage("csv." + auditCount.getTarget());
+			} else if (type.equals("site")) {
+				SiteInfo siteInfo = siteService.getSite(auditCount.getTarget());
+				String siteTitle = auditCount.getTarget();
+				if (siteInfo != null) {
+					siteTitle = siteInfo.getTitle().replace(",", "");
+				}
+				record[recordIndex++] = siteTitle;
+			}
+			record[recordIndex++] = String.valueOf(auditCount.getCount());
 
-                if (params.getDateFrom() > 0 || params.getDateTo() > 0) {
-                    dateRecord = getStringDate(params.getDateFrom()) + "-" + getStringDate(params.getDateTo());
-                    csv.writeRecord(new String[] { I18NUtil.getMessage("csv.site"), I18NUtil.getMessage("csv.count"),
-                            I18NUtil.getMessage("csv.interval") });
-                } else {
-                    csv.writeRecord(new String[] { I18NUtil.getMessage("csv.site"), I18NUtil.getMessage("csv.count") });
-                }
-                List<AuditCount> auditCounts = (List<AuditCount>) model.get("views");
-                writeAuditCount(csv, auditCounts, false, dateRecord,"site");
-            }
-        } else {
-            if (model.containsKey("slicedDates")) {
-                csv.writeRecord(new String[] { I18NUtil.getMessage("csv.interval"), I18NUtil.getMessage("csv.action"),
-                        I18NUtil.getMessage("csv.count") });
-                List<List<AuditCount>> auditCountsLists = (List<List<AuditCount>>) model.get("dates");
-                String[] slicedDates = ((String) model.get("slicedDates")).split(",");
-                for (int i = 0; i < auditCountsLists.size(); i++) {
-                    dateRecord = getStringDate(Long.parseLong(slicedDates[i]));
-                    dateRecord += " - " + getStringDate(Long.parseLong(slicedDates[i + 1]));
-                    writeAuditCount(csv, auditCountsLists.get(i), true, dateRecord,"action");
-                }
-            } else {
-                if (params.getDateFrom() > 0 || params.getDateTo() > 0) {
-                    dateRecord = getStringDate(params.getDateFrom()) + "-" + getStringDate(params.getDateTo());
-                    csv.writeRecord(new String[] { I18NUtil.getMessage("csv.action"), I18NUtil.getMessage("csv.count"),
-                            I18NUtil.getMessage("csv.interval") });
-                } else {
-                    csv.writeRecord(new String[] { I18NUtil.getMessage("csv.action"), I18NUtil.getMessage("csv.count") });
-                }
-                List<AuditCount> auditCounts = (List<AuditCount>) model.get("views");
-                writeAuditCount(csv, auditCounts, false, dateRecord,"action");
-            }
-        }
-    }
+			if (!dateFirst && date != null) {
+				record[recordIndex++] = date;
+			}
+			csv.writeRecord(record);
+		}
+	}
 
-    /**
-     * 
-     * @param csv
-     *            CsvWriter dans lequel on écrit
-     * @param auditCounts
-     * @throws IOException
-     */
-    public void writeAuditCount(CsvWriter csv, List<AuditCount> auditCounts, boolean dateFirst, String date,String type)
-            throws IOException {
-        for (AuditCount auditCount : auditCounts) {
-            String[] record;
-            int recordIndex = 0;
-            if (date != null) {
-                record = new String[3];
-                if (dateFirst) {
-                    record[recordIndex++] = date;
-                }
-            } else {
-                record = new String[2];
-            }
-            if(type.equals("action")){
-                record[recordIndex++] = I18NUtil.getMessage("csv." + auditCount.getTarget());
-            } else if (type.equals("site")){
-                SiteInfo siteInfo = siteService.getSite(auditCount.getTarget());
-                String siteTitle = auditCount.getTarget();
-                if(siteInfo != null){
-                    siteTitle = siteInfo.getTitle().replace(",", "");
-                }
-                record[recordIndex++] = siteTitle;
-            }
-            record[recordIndex++] = String.valueOf(auditCount.getCount());
+	public void writeCsvEntry(CsvWriter csv, List<CsvExportEntry> csvExportEntries, boolean dateFirst, String date)
+			throws IOException {
+		for (CsvExportEntry csvExportEntry : csvExportEntries) {
+			String[] record;
+			int recordIndex = 0;
+			if (date != null) {
+				record = new String[5];
+				if (dateFirst) {
+					record[recordIndex++] = date;
+				}
+			} else {
+				record = new String[4];
+			}
+			record[recordIndex++] = csvExportEntry.getAuditSite();
+			record[recordIndex++] = I18NUtil.getMessage("csv." + csvExportEntry.getAuditAppName());
+			record[recordIndex++] = I18NUtil.getMessage("csv." + csvExportEntry.getAuditAppName() + "."
+					+ csvExportEntry.getAuditActionName());
+			record[recordIndex++] = String.valueOf(csvExportEntry.getCount());
 
-            if (!dateFirst && date != null) {
-                record[recordIndex++] = date;
-            }
-            csv.writeRecord(record);
-        }
-    }
+			if (!dateFirst && date != null) {
+				record[recordIndex++] = date;
+			}
+			csv.writeRecord(record);
+		}
+	}
 
-    public void writeCsvEntry(CsvWriter csv, List<CsvExportEntry> csvExportEntries, boolean dateFirst, String date)
-            throws IOException {
-        for (CsvExportEntry csvExportEntry : csvExportEntries) {
-            String[] record;
-            int recordIndex = 0;
-            if (date != null) {
-                record = new String[5];
-                if (dateFirst) {
-                    record[recordIndex++] = date;
-                }
-            } else {
-                record = new String[4];
-            }
-            record[recordIndex++] = csvExportEntry.getAuditSite();
-            record[recordIndex++] = I18NUtil.getMessage("csv." + csvExportEntry.getAuditAppName());
-            record[recordIndex++] = I18NUtil.getMessage("csv." + csvExportEntry.getAuditAppName() + "."
-                    + csvExportEntry.getAuditActionName());
-            record[recordIndex++] = String.valueOf(csvExportEntry.getCount());
+	/**
+	 * 
+	 * @param gc
+	 *            GrégorianCalendar dont on souhaite récupérer la date
+	 * 
+	 * @return date String
+	 */
+	public String getStringDate(long l) {
+		GregorianCalendar gc = new GregorianCalendar();
+		gc.setTimeInMillis(l);
 
-            if (!dateFirst && date != null) {
-                record[recordIndex++] = date;
-            }
-            csv.writeRecord(record);
-        }
-    }
+		String date = "";
+		date += String.valueOf(gc.get(Calendar.DAY_OF_MONTH)) + "/";
+		date += String.valueOf(gc.get(Calendar.MONTH) + 1) + "/";
+		date += String.valueOf(gc.get(Calendar.YEAR));
 
-    /**
-     * 
-     * @param gc
-     *            GrégorianCalendar dont on souhaite récupérer la date
-     * 
-     * @return date String
-     */
-    public String getStringDate(long l) {
-        GregorianCalendar gc = new GregorianCalendar();
-        gc.setTimeInMillis(l);
-
-        String date = "";
-        date += String.valueOf(gc.get(Calendar.DAY_OF_MONTH)) + "/";
-        date += String.valueOf(gc.get(Calendar.MONTH) + 1) + "/";
-        date += String.valueOf(gc.get(Calendar.YEAR));
-
-        return date;
-    }
+		return date;
+	}
 }
