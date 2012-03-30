@@ -10,3 +10,4 @@
 <@script type="text/javascript" src="${page.url.context}/res/components/console/open_flash_chart/open_flash_chart.js"></@script>
 <@script type="text/javascript" src="${page.url.context}/res/components/console/open_flash_chart/ofc.js"></@script>
 <@script type="text/javascript" src="${page.url.context}/res/components/console/open_flash_chart/get_data.js"></@script>
+<@script type="text/javascript" src="${page.url.context}/res/components/console/open_flash_chart/get_data_lib.js"></@script>

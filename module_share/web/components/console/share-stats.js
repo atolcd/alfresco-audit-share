@@ -473,27 +473,7 @@
       return res;
     },
 
-    /**
-     *
-     * @method countGraphItems
-     * @return integer
-     */
-    countGraphItems: function ConsoleAudit_countGraphItems(json) {
-      var count = 0;
-      if (json.slicedDates) {
-        var maxItems = 0,
-          item, i;
-        for (i in json.items) {
-          item = json.items[i];
-          maxItems = (item.totalResults > maxItems) ? item.totalResults : maxItems;
-        }
-        count = maxItems * json.totalResults;
-      } else {
-        count = json.totalResults;
-      }
-
-      return count;
-    },
+    
     /**
      * @method convertDate
      * @param d Date au format jj/mm/aaaa
@@ -552,6 +532,7 @@
        * @param module Module selectionné dans l'UI
        * @param dates Ensemble des tranches de dates dans le cas d'une recherche par date
        * @param type Type de requête à effectuer
+       * @param limit Limite de résultats
 
        * @return string params argument à passer à la requête
        */
@@ -581,13 +562,9 @@
 
     /**
      * @method buildTimeStampArray Construit des intervalles de dates
-     * @param nbInterval Nombre d'intervalle de découpage
-     * @param pTo Date de fin du découpage
-     * @param type Type de découpage (Mois/Jour/Semaine)
-     *
      * @return array Tableau contenant les différents intervalles de dates
      */
-    buildTimeStampArray: function ConsoleAudit_buildTimeStampArray(nbInterval) {
+    buildTimeStampArray: function ConsoleAudit_buildTimeStampArray() {
       var tsArray = [],
         from = null,
         to = null,

@@ -21,42 +21,9 @@ function getFlashData(param) {
  * @method get_random_color
  */
 
-function get_random_color() {
-  var letters = '0123456789ABCDEF'.split('');
-  var color = '#';
-  for (var i = 0; i < 6; i++) {
-    color += letters[Math.round(Math.random() * 15)];
-  }
-  return color;
-}
-
 function buildTitle(params) {
-  var title = getMessage(params.additionalsParams.type, "graph.title."),
-    timeType = params.currentFilter,
-    slicedDates = params.additionalsParams.tsString.split(","),
-    from, to;
-
-
-  var padzero = function (n) {
-      return n < 10 ? '0' + n.toString() : n.toString();
-    };
-
-  from = new Date(parseInt(slicedDates[0], 10));
-
-  switch (timeType) {
-  case "years":
-    title += getMessage(timeType, "graph.title.date.", from.getFullYear());
-    break;
-  case "months":
-    title += getMessage(timeType, "graph.title.date.", getMonth(from.getMonth()), from.getFullYear());
-    break;
-  case "weeks":
-    title += getMessage(timeType, "graph.title.date.", from.getWeek(), from.getFullYear());
-    break;
-  case "days":
-    title += getMessage(timeType, "graph.title.date.", padzero(from.getDate()), padzero(from.getMonth() + 1), from.getFullYear());
-    break;
-  }
+  var title = getMessage(params.additionalsParams.type, "graph.title.");
+  title += buildDateTitle(params);
   return title;
 }
 
@@ -223,57 +190,6 @@ function buildBarChartXLabels(params) {
   return labels;
 }
 
-
-/**
- * Retourne le "joli" nom d'un site
- * @method getSiteTitle
- * @param shortName Identifiant du site
- */
-
-function getSiteTitle(shortName, sites) {
-  var res = shortName,
-    i = 0,
-    ii = sites.lenght,
-    currentSite;
-  for (; i < ii; i++) {
-    var currentSite = sites[i];
-    if (currentSite.name == shortName) {
-      res = GLOBALS_sites[i].title;
-      break;
-    }
-  }
-  return res;
-}
-/**
- * Retourne la traduction d'un mois
- * @method getMonth
- * @param integer month
- */
-
-function getMonth(month) {
-  return getMessage(month, "label.month.");
-}
-
-function getDay(day) {
-  return getMessage(day, "label.day.");
-}
-
-/**
- * Retourne la traduction du message donné. Peut être prefixé.
- * @method getMessage
- * @param messageId Identifiant du message à traduire
- * @prefix Optionnel - Préfixe du message
- */
-
-function getMessage(messageId, prefix) {
-  var msg = (prefix) ? prefix + messageId : messageId;
-  var res = Alfresco.util.message.call(null, msg, "Alfresco.ConsoleAudit", Array.prototype.slice.call(arguments).slice(2));
-  res = (res.search("graph.label") == 0) ? messageId : res;
-  return res;
-}
-
-
-
 function buildHBarChart(params) {
   var y_labels = [],
     max = 0;
@@ -341,4 +257,63 @@ function buildHBarChartElements(params, labels) {
   }];
   console.log(elements);
   return elements;
+}
+
+
+function buildDateTitle(params) {
+  var title = "",
+    timeType = params.currentFilter,
+    slicedDates = params.additionalsParams.tsString.split(","),
+    from, to;
+
+  var padzero = function (n) {
+      return n < 10 ? '0' + n.toString() : n.toString();
+    };
+
+  from = new Date(parseInt(slicedDates[0], 10));
+
+  switch (timeType) {
+  case "years":
+    title = getMessage(timeType, "graph.title.date.", from.getFullYear());
+    break;
+  case "months":
+    title = getMessage(timeType, "graph.title.date.", getMonth(from.getMonth()), from.getFullYear());
+    break;
+  case "weeks":
+    title = getMessage(timeType, "graph.title.date.", from.getWeek(), from.getFullYear());
+    break;
+  case "days":
+    title = getMessage(timeType, "graph.title.date.", padzero(from.getDate()), padzero(from.getMonth() + 1), from.getFullYear());
+    break;
+  }
+  return title;
+}
+
+
+/**
+ * Retourne la traduction d'un mois
+ * @method getMonth
+ * @param integer month
+ */
+
+function getMonth(month) {
+  return getMessage(month, "label.month.");
+}
+
+function getDay(day) {
+  return getMessage(day, "label.day.");
+}
+
+/**
+ * Retourne la traduction du message donné. Peut être prefixé.
+ * @method getMessage
+ * @param messageId Identifiant du message à traduire
+ * @prefix Optionnel - Préfixe du message
+ */
+
+function getMessage(messageId, prefix) {
+  var msg = (prefix) ? prefix + messageId : messageId;
+  var res = Alfresco.util.message.call(null, msg, "Alfresco.ConsoleAudit", Array.prototype.slice.call(arguments).slice(2));
+  res = (res.search("graph.label") == 0) ? messageId : res;
+  return res;
 }

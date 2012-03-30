@@ -3,8 +3,7 @@
  *
  * @namespace Alfresco
  * @class Alfresco.ConsoleSitesVolumetry
- */
-(function () {
+ */ (function () {
   /**
    * YUI Library aliases
    */
@@ -44,9 +43,9 @@
     };
 
     // Surcharge de la classe Date. Récupère la semaine courante
-    Date.prototype.getWeek = function() {
-     var onejan = new Date(this.getFullYear(),0,1);
-     return Math.ceil((((this - onejan) / 86400000) + onejan.getDay()+1)/7);
+    Date.prototype.getWeek = function () {
+      var onejan = new Date(this.getFullYear(), 0, 1);
+      return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
     };
 
     YAHOO.extend(SitesVolumetryPanelHandler, Alfresco.ConsolePanelHandler, {
@@ -276,20 +275,26 @@
     onSearch: function ConsoleSitesVolumetry_onSearch() {
       //Récupération des variables de l'UI
       var dateFilter = this.currentDateFilter,
-          site = this.convertMenuValue(this.widgets.siteButton.value),
-          tsString = "";
+        site = this.convertMenuValue(this.widgets.siteButton.value),
+        tsString = "",
+        params = "";
 
       // Crétion du tableau d'intervalle de dates
       if (dateFilter) {
         tsString = this.buildTimeStampArray().toString();
       }
 
+      params = "?dates=" + tsString;
+      if (site) {
+        params += "&site=" + site;
+      }
+
       // Création des paramètres et exécution de la requête
       // TODO:
-      /*
-      this.lastRequest.params = this.buildParams();
 
-      var url = Alfresco.constants.PROXY_URI + "share-stats/select-audits" + this.lastRequest.params;
+      this.lastRequest.params = params;
+
+      var url = Alfresco.constants.PROXY_URI + "share-stats/select-volumetry" + this.lastRequest.params;
       Alfresco.util.Ajax.jsonGet({
         url: url,
         successCallback: {
@@ -300,13 +305,14 @@
         execScripts: true,
         additionalsParams: {
           chartType: "vbar",
+          site: site,
           tsString: tsString,
           target: "chart",
           height: "450",
           width: "90%"
         }
       });
-      */
+
     },
 
     /**
@@ -327,11 +333,11 @@
         response.json.additionalsParams = additionalsParams;
 
         if (chartTag == "embed" || chartTag == "object") {
-          swf.load(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
+          swf.load(getVolumetryFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
         } else {
           //Création variables et attribut - GetFlashData défini dans get_data.js - id : Variables json pour ofc.
           var flashvars = {
-            "get-data": "getFlashData",
+            "get-data": "getVolumetryFlashData",
             "id": escape(YAHOO.lang.JSON.stringify(response.json))
           },
             params = {
@@ -376,27 +382,6 @@
       return res;
     },
 
-    /**
-     *
-     * @method countGraphItems
-     * @return integer
-     */
-    countGraphItems: function ConsoleSitesVolumetry_countGraphItems(json) {
-      var count = 0;
-      if (json.slicedDates) {
-        var maxItems = 0,
-          item, i;
-        for (i in json.items) {
-          item = json.items[i];
-          maxItems = (item.totalResults > maxItems) ? item.totalResults : maxItems;
-        }
-        count = maxItems * json.totalResults;
-      } else {
-        count = json.totalResults;
-      }
-
-      return count;
-    },
     /**
      * @method convertDate
      * @param d Date au format jj/mm/aaaa
@@ -444,19 +429,6 @@
         res = val;
       }
       return res;
-    },
-
-
-    /**
-     * @method buildParams Construit une chaîne de caractère pour passer les arguments en GET
-     * @return string params argument à passer à la requête
-     */
-    buildParams: function ConsoleSitesVolumetry_buildParams() {
-      var params = "";
-
-      // TODO:
-
-      return params;
     },
 
     /**
@@ -574,7 +546,7 @@
      * Gestionnaire click Jour / Semaine / Mois / Année
      */
     onChangeDateFilter: function ConsoleSitesVolumetry_OnChangeDateFilter(e, args) {
-      if(e) Event.stopEvent(e);
+      if (e) Event.stopEvent(e);
       Dom.removeClass("by-" + this.currentDateFilter, "selected");
       Dom.addClass("by-" + args.filter, "selected");
       this.currentDateFilter = args.filter;
@@ -614,7 +586,7 @@
       this.execute();
     },
 
-    onResetDates: function ConsoleSitesVolumetry_OnResetDates(){
+    onResetDates: function ConsoleSitesVolumetry_OnResetDates() {
       this.setupCurrentDates();
       this.execute();
     },
@@ -623,7 +595,7 @@
       this.onSearch();
     },
 
-    setupCurrentDates : function ConsoleSitesVolumetry_setupCurrentDates(){
+    setupCurrentDates: function ConsoleSitesVolumetry_setupCurrentDates() {
       var currentDate = new Date();
       currentDate.setMinutes(0);
       currentDate.setHours(0);
