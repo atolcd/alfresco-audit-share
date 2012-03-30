@@ -24,6 +24,7 @@
                   <item type="link" id="repository">/console/admin-console/repository</item>
                   <item type="link" id="users">/console/admin-console/users</item>
                   <item type="link" id="share-stats">/console/admin-console/share-stats</item>
+                  <item type="link" id="sites-volumetry">/console/admin-console/sites-volumetry</item>
                   <item type="link" id="user-stats">/console/admin-console/user-stats</item>
                </container-group>
             </item>
