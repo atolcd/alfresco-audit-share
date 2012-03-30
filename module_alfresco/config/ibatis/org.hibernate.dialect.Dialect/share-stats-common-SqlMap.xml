@@ -16,6 +16,7 @@
     <typeAlias alias="AtolAuditCount" type="com.atolcd.alfresco.AuditCount"/>
     <typeAlias alias="AtolAuditQueryParameters" type="com.atolcd.alfresco.AuditQueryParameters"/>
     <typeAlias alias="AtolAuditObjectPopularity" type="com.atolcd.alfresco.AuditObjectPopularity"/>
+    <typeAlias alias="AtolAuthorityParameters" type="com.atolcd.alfresco.AtolAuthorityParameters"/>
 
 
     <!--                -->
@@ -39,7 +40,7 @@
       <result property="auditObject" column="audit_object" jdbcType="VARCHAR" javaType="java.lang.String"/>
       <result property="auditTime" column="audit_time" jdbcType="BIGINT" javaType="long"/>
     </resultMap>
-    
+
     <resultMap id="results_AtolCsvExportEntry" class="AtolCsvExportEntry">
       <result property="auditSite" column="audit_site" jdbcType="VARCHAR" javaType="java.lang.String"/>
       <result property="auditAppName" column="audit_app_name" jdbcType="VARCHAR" javaType="java.lang.String"/>
@@ -232,6 +233,7 @@
       <include refid="site_snippet"/>
       </dynamic>
     </sql>
+
     <!--                -->
     <!-- Statements     -->
     <!--                -->
@@ -309,15 +311,80 @@
       group by audit_object
       order by audit_popularity DESC
     </select>
-    
+
     <!-- Retourne les dernière personne ayant effectuée une action dans la tranche de temps donnée. On les considère connecté -->
     <select id="selectConnectedUsers" parameterClass="AtolAuditQueryParameters" resultClass="java.lang.String">
-      select distinct(audit_user)
+      select distinct(audit_user_id)
         from
       share_stats_audit_entry
       <dynamic prepend="where">
         <include refid="site_snippet"/>
         <include refid="time_snippet" />
+      </dynamic>
+    </select>
+
+    <!-- Récupère l'id du qname - member -->
+    <select id="selectQNameId" resultClass="long">
+      select
+        alf_qname.id
+      from
+        alf_qname
+        join alf_namespace alf_ns on (alf_qname.ns_id = alf_ns.id)
+      where
+        alf_ns.uri = 'http://www.alfresco.org/model/content/1.0'
+      and
+        local_name = 'member'
+    </select>
+
+
+    <select id="selectSiteMember" parameterClass="AtolAuthorityParameters" resultClass="java.lang.String">
+      select
+        distinct(assoc.qname_localname) as qname_localname
+      from
+        alf_child_assoc assoc
+        join alf_node parentNode on (parentNode.id = assoc.parent_node_id)
+      where
+        assoc.type_qname_id = #qnameId#
+      and
+        assoc.parent_node_id IN (
+          select
+            childNode.id
+          from
+            alf_child_assoc assoc
+            join alf_node childNode on (childNode.id = assoc.child_node_id)
+          where
+            assoc.type_qname_id = #qnameId#
+          and
+            assoc.qname_localname
+            <iterate open="IN (" close=")" conjunction="," property="groupNames">
+              #groupNames[]#
+            </iterate>
+        );
+    </select>
+
+    <select id="selectVolumetry" parameterClass="AtolAuditQueryParameters" resultClass="long">
+      select
+        avg(site_size)
+      from
+        share_stats_site_volumetry
+      <!-- Reprise des snippets utilisé de share_stats_audit_entry -->
+      <dynamic prepend="where">
+        <isGreaterThan prepend="and" property="dateFrom" compareValue="0">
+          <![CDATA[at_time >= #dateFrom#]]>
+        </isGreaterThan>
+        <isGreaterThan prepend="and" property="dateTo" compareValue="0">
+          <![CDATA[at_time < #dateTo#]]>
+        </isGreaterThan>
+
+        <isNotNull prepend="and" property="siteId">
+            site_id = #siteId#
+        </isNotNull>
+        <isNotNull prepend="and" property="sitesId">
+          site_id
+          <iterate open="IN (" close=")" conjunction="," property="sitesId">
+            #sitesId[]#
+          </iterate>
+        </isNotNull>
       </dynamic>
     </select>
 </sqlMap>

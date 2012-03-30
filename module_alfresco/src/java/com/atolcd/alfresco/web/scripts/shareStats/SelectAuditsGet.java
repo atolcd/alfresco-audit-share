@@ -37,7 +37,6 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 	private static final String SELECT_BY_DELETED = "alfresco.atolcd.audit.selectByDeleted";
 	private static final String SELECT_BY_MOSTREAD = "alfresco.atolcd.audit.selectByMostRead";
 	private static final String SELECT_BY_MOSTUPDATED = "alfresco.atolcd.audit.selectByMostUpdated";
-	// Requete entre sites
 
 	// logger
 	private static final Log logger = LogFactory.getLog(SelectAuditsGet.class);

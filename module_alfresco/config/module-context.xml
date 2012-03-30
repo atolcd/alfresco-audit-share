@@ -31,7 +31,7 @@
       </list>
     </property>
   </bean>
-  
+
   <bean id="shareStatsQueriesSqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
       <property name="sqlMapClient" ref="shareStatsAlfrescoSqlMapClient"/>
   </bean>
@@ -47,14 +47,23 @@
     <property name="nodeService" ref="NodeService"/>
   </bean>
 
-  
+  <bean id="webscript.com.atolcd.alfresco.share-stats.select-users.get" class="com.atolcd.alfresco.web.scripts.shareStats.SelectUsersGet" parent="webscript">
+    <property name="sqlMapClientTemplate" ref="shareStatsQueriesSqlMapClientTemplate"/>
+    <property name="nodeService" ref="NodeService"/>
+    <property name="siteService" ref="SiteService" />
+  </bean>
+
+  <bean id="webscript.com.atolcd.alfresco.share-stats.select-volumetry.get" class="com.atolcd.alfresco.web.scripts.shareStats.SelectVolumetryGet" parent="webscript">
+    <property name="sqlMapClientTemplate" ref="shareStatsQueriesSqlMapClientTemplate"/>
+  </bean>
+
   <bean id="webscript.com.atolcd.alfresco.share-stats.export-audits.get" class="com.atolcd.alfresco.web.scripts.shareStats.AuditExportGet" parent="webscript">
     <property name="wsSelectAudits">
       <ref bean="webscript.com.atolcd.alfresco.share-stats.select-audits.get" />
     </property>
     <property name="siteService" ref="SiteService" />
   </bean>
-	
+
 	<!-- JavaScript API -->
   <bean id="shareStatsScript" parent="baseJavaScriptExtension" class="com.atolcd.alfresco.repo.jscript.ShareStats">
     <property name="extensionName">
@@ -64,7 +73,7 @@
       <ref bean="webscript.com.atolcd.alfresco.share-stats.insert-audit.post" />
     </property>
   </bean>
-	
+
   <!-- Patch de création de la table d'audit en base -->
   <bean id="patch.db-V3.4-ShareStats-ExtraTables" class="com.atolcd.alfresco.repo.patch.SchemaUpgradeScriptPatch" parent="module.baseComponent" >
     <property name="moduleId" value="share-stats-module-alfresco" />
