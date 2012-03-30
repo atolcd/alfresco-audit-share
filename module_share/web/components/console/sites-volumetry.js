@@ -290,8 +290,6 @@
       }
 
       // Création des paramètres et exécution de la requête
-      // TODO:
-
       this.lastRequest.params = params;
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-volumetry" + this.lastRequest.params;

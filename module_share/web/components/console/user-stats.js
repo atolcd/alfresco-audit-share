@@ -277,7 +277,7 @@
       //Récupération des variables de l'UI
       var dateFilter = this.currentDateFilter,
           site = this.convertMenuValue(this.widgets.siteButton.value),
-          tsString = "";
+          tsString = "", params = "";
 
       // Crétion du tableau d'intervalle de dates
       if (dateFilter) {
@@ -285,11 +285,14 @@
       }
 
       // Création des paramètres et exécution de la requête
-      // TODO:
-      /*
-      this.lastRequest.params = this.buildParams();
+      params = "?type=count";
+      params += "&dates="+tsString;
+      if (site) {
+        params += "&site=" + site;
+      }
+      this.lastRequest.params = params;
 
-      var url = Alfresco.constants.PROXY_URI + "share-stats/select-audits" + this.lastRequest.params;
+      var url = Alfresco.constants.PROXY_URI + "share-stats/select-users" + this.lastRequest.params;
       Alfresco.util.Ajax.jsonGet({
         url: url,
         successCallback: {
@@ -300,13 +303,15 @@
         execScripts: true,
         additionalsParams: {
           chartType: "vbar",
+          type: "count",
+          site: site,
           tsString: tsString,
           target: "chart",
           height: "450",
           width: "90%"
         }
       });
-      */
+      
     },
 
     /**
@@ -327,11 +332,11 @@
         response.json.additionalsParams = additionalsParams;
 
         if (chartTag == "embed" || chartTag == "object") {
-          swf.load(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
+          swf.load(getUserFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
         } else {
           //Création variables et attribut - GetFlashData défini dans get_data.js - id : Variables json pour ofc.
           var flashvars = {
-            "get-data": "getFlashData",
+            "get-data": "getUserFlashData",
             "id": escape(YAHOO.lang.JSON.stringify(response.json))
           },
             params = {
@@ -376,27 +381,6 @@
       return res;
     },
 
-    /**
-     *
-     * @method countGraphItems
-     * @return integer
-     */
-    countGraphItems: function ConsoleUserAudit_countGraphItems(json) {
-      var count = 0;
-      if (json.slicedDates) {
-        var maxItems = 0,
-          item, i;
-        for (i in json.items) {
-          item = json.items[i];
-          maxItems = (item.totalResults > maxItems) ? item.totalResults : maxItems;
-        }
-        count = maxItems * json.totalResults;
-      } else {
-        count = json.totalResults;
-      }
-
-      return count;
-    },
     /**
      * @method convertDate
      * @param d Date au format jj/mm/aaaa
