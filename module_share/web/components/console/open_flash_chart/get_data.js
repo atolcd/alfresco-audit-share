@@ -301,7 +301,7 @@ function buildHBarChart(params) {
       "labels": y_labels
     },
     "tooltip": {
-      "mouse": 1
+      "mouse": 2
     }
   };
 
