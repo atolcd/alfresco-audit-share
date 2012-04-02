@@ -98,95 +98,13 @@ function buildBarChartElements(params, labels) {
   return elements;
 }
 
-
 function buildXAxisLabels(params) {
   var steps = params.values.length >= 30 ? Math.round(params.values.length / 15) : 1;
   var labelConfiguration = {
     "labels": buildBarChartXLabels(params),
     "steps": steps
   }
-
   return labelConfiguration;
-}
-
-function buildBarChartXLabels(params) {
-  var labels = [],
-    timeType = params.currentFilter,
-    slicedDates = params.additionalsParams.tsString.split(",");
-  var padzero = function (n) {
-      return n < 10 ? '0' + n.toString() : n.toString();
-    };
-
-  switch (timeType) {
-  case "years":
-    for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      labels[i] = getMonth((new Date(parseInt(slicedDates[i], 10)).getMonth()).toString());
-    }
-    break;
-  case "months":
-    for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      var d = new Date(parseInt(slicedDates[i], 10));
-      labels[i] = padzero(d.getDate()) + "/" + padzero(d.getMonth() + 1);
-    }
-    break;
-  case "weeks":
-    for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      var d = new Date(parseInt(slicedDates[i], 10));
-      labels[i] = getDay(d.getDay()) + " " + padzero(d.getDate()) + "/" + padzero(d.getMonth() + 1);
-    }
-    break;
-  case "days":
-    for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      var d = new Date(parseInt(slicedDates[i], 10));
-      labels[i] = padzero(d.getHours()) + "h00";
-    }
-    break;
-  }
-  return labels;
-}
-
-function buildDateTitle(params) {
-  var title = "",
-    timeType = params.currentFilter,
-    slicedDates = params.additionalsParams.tsString.split(","),
-    from, to;
-
-  var padzero = function (n) {
-      return n < 10 ? '0' + n.toString() : n.toString();
-    };
-
-  from = new Date(parseInt(slicedDates[0], 10));
-
-  switch (timeType) {
-  case "years":
-    title = getMessage(timeType, "graph.title.date.", from.getFullYear());
-    break;
-  case "months":
-    title = getMessage(timeType, "graph.title.date.", getMonth(from.getMonth()), from.getFullYear());
-    break;
-  case "weeks":
-    title = getMessage(timeType, "graph.title.date.", from.getWeek(), from.getFullYear());
-    break;
-  case "days":
-    title = getMessage(timeType, "graph.title.date.", padzero(from.getDate()), padzero(from.getMonth() + 1), from.getFullYear());
-    break;
-  }
-  return title;
-}
-
-
-/**
- * Retourne la traduction d'un mois
- * @method getMonth
- * @param integer month
- */
-
-function getMonth(month) {
-  return getMessage(month, "label.month.");
-}
-
-function getDay(day) {
-  return getMessage(day, "label.day.");
 }
 
 /**
