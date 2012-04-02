@@ -239,7 +239,6 @@ public class AuditFilter implements Filter {
                     }
 
                 } else {
-                	
                     String auditObject = getNodeRefRemoteCall(request, userId, auditData.get("site"), auditData.get("module"), obj);
                     auditData.put("object", auditObject);
                 }
