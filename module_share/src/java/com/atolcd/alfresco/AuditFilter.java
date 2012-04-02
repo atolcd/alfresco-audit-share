@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -179,7 +180,7 @@ public class AuditFilter implements Filter {
         try {
             connector = FrameworkUtil.getConnector(request.getSession(true), userId, AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
             // <url>/share-stats/slingshot/details/{siteId}/{componentId}/{objectId}</url>
-            Response resp = connector.call("/share-stats/slingshot/details/" + siteId + "/" + componentId + "/" + objectId);
+            Response resp = connector.call("/share-stats/slingshot/details/" + siteId + "/" + componentId + "/" + URLEncoder.encode(objectId, "UTF-8"));
 
             if (resp.getStatus().getCode() == Status.STATUS_OK) {
                 try {
@@ -238,6 +239,7 @@ public class AuditFilter implements Filter {
                     }
 
                 } else {
+                	
                     String auditObject = getNodeRefRemoteCall(request, userId, auditData.get("site"), auditData.get("module"), obj);
                     auditData.put("object", auditObject);
                 }
