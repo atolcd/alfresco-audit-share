@@ -6,7 +6,6 @@ import org.springframework.util.Assert;
 
 import com.atolcd.alfresco.AtolVolumetryEntry;
 import com.atolcd.alfresco.web.scripts.shareStats.InsertAuditPost;
-import com.atolcd.alfresco.web.scripts.shareStats.SelectAuditsGet;
 
 public class ShareStats extends BaseScopableProcessorExtension implements InitializingBean {
 

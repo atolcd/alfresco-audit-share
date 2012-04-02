@@ -63,7 +63,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 			if (this.sqlMapClientTemplate != null) {
 				String type = req.getParameter("type");
 				AuditQueryParameters auditQueryParameters = buildParametersFromRequest(req);
-				if ("users-connected".equals(type)) {
+				if ("users-connected".equals(type) || "users-recently-connected".equals(type)) {
 					model.put("users", selectConnectedUsers(auditQueryParameters));
 				} else if ("users-count".equals(type)) {
 					model.put("values", selectConnectedUsersByDate(auditQueryParameters));

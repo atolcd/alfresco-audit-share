@@ -168,10 +168,10 @@
     sites: [],
 
     /**
-     * @attribute limit
-     * Limite de documents remontés par requête de popularité
+     * @attribute recentlyConnectedDelay
+     * Durée (en minutes) depuis laquelle on retrouve les utilisateurs récemments connectés
      */
-    limit: 5,
+    recentlyConnectedDelay: 30,
 
     /**
      * Fired by YUILoaderHelper when required component script files have
@@ -216,6 +216,7 @@
           me.widgets.siteButton.value = value;
           me.widgets.siteButton.set("label", sText);
           me.execute();
+          me.prepareRecentlyConnectedUsersRequest();
         };
 
       menuButtons.push({
@@ -255,10 +256,10 @@
       this.widgets.siteButton.value = "";
 
       this.execute();
+      this.prepareRecentlyConnectedUsersRequest();
     },
 
     onExport: function ConsoleUserAudit_onExport() {
-      // TODO:
       if (this.lastRequest.params) {
         var params = this.lastRequest.params;
         params += "&type=users";
@@ -268,11 +269,56 @@
       }
     },
 
-    getUsers: function ConsoleUserAudit_getUsers(type) {
+    /**
+     * @method prepareRecentlyConnectedUsersRequest
+     */
+    prepareRecentlyConnectedUsersRequest: function ConsoleUserAudit_prepareRecentlyConnectedUsersRequest() {
+      //Récupération des variables de l'UI
+      var site = this.convertMenuValue(this.widgets.siteButton.value),
+        currentDate = new Date(),
+        params = "";
+
+      params = "?type=users-recently-connected";
+      params += "&to=" + currentDate.getTime();
+      params += "&from=" + currentDate.setMinutes(currentDate.getMinutes() - this.recentlyConnectedDelay);
+      if (site) {
+        params += "&site=" + site;
+      }
+
+      this.executeUserRequest(params, "users-recently-connected");
+    },
+
+    /**
+     * @method prepareUserRequest
+     */
+    prepareUserRequest: function ConsoleUserAudit_prepareUserRequest(type) {
+      //Récupération des variables de l'UI
+      var dateFilter = this.currentDateFilter,
+        site = this.convertMenuValue(this.widgets.siteButton.value),
+        params = "";
+
+      // Crétion du tableau d'intervalle de dates
+      tsArray = this.buildTimeStampArray();
+
+      params = "?type=" + type;
+      params += "&from=" + tsArray[0];
+      params += "&to=" + tsArray[tsArray.length - 1];
+      if (site) {
+        params += "&site=" + site;
+      }
+
+      this.executeUserRequest(params, type);
+    },
+
+    /**
+     * @method executeUserRequest
+     */
+    executeUserRequest: function ConsoleUserAudit_executeUserRequest(params, type) {
       var displayUsers = function (response) {
           var names = response.json.items,
             el = Dom.get(this.id + "-" + type);
-          if (names) {
+
+          if (names && names.length) {
             var context = Alfresco.constants.URL_PAGECONTEXT,
               url = "",
               html = "",
@@ -293,23 +339,6 @@
             el.innerHTML = this.msg("label.no-results." + type);
           }
         };
-
-      //Récupération des variables de l'UI
-      var dateFilter = this.currentDateFilter,
-        site = this.convertMenuValue(this.widgets.siteButton.value),
-        tsString = "",
-        params = "";
-
-      // Crétion du tableau d'intervalle de dates
-
-      tsArray = this.buildTimeStampArray();
-      tsString = tsArray[0].toString() + "," + tsArray[tsArray.length - 1];
-
-      params = "?type=" + type;
-      params += "&dates=" + tsString;
-      if (site) {
-        params += "&site=" + site;
-      }
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-users" + params;
       Alfresco.util.Ajax.jsonGet({
@@ -398,10 +427,7 @@
             params = {
               wmode: "opaque"
             },
-
-
-            // /!\ pour IE
-
+            // /!\ pour IE   
             attributes = {
               salign: "l",
               AllowScriptAccess: "always"
@@ -663,8 +689,8 @@
     },
 
     execute: function ConsoleUserAudit_execute() {
-      this.getUsers("users-connected");
-      this.getUsers("users-never-connected");
+      this.prepareUserRequest("users-connected");
+      this.prepareUserRequest("users-never-connected");
       this.onSearch();
     },
 
