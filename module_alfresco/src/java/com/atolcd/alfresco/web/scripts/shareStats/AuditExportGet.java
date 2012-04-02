@@ -57,8 +57,14 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 			Map<String, Object> model = new HashMap<String, Object>();
 			AuditQueryParameters params = wsSelectAudits.buildParametersFromRequest(req);
 
-			wsSelectAudits.checkForQuery(model, params, req.getParameter("type"));
-			buildCsvFromRequest(model, csv, params, req.getParameter("type"));
+			String type = req.getParameter("type");
+			if(type.equals("volumetry") || type.equals("users-count")){
+				String values = req.getParameter("values");
+				model.put("values", values.split(","));
+			} else {
+				wsSelectAudits.checkForQuery(model, params, type);
+			}
+			buildCsvFromRequest(model, csv, params, type);
 
 			csv.close();
 			res.setHeader("Content-Disposition", "attachment; filename=\"export.csv\"");
@@ -96,16 +102,15 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 				dateRecord += " - " + getStringDate(Long.parseLong(slicedDates[i + 1]));
 				writeAuditCount(csv, auditCountsLists.get(i), true, dateRecord, "action");
 			}
-		} else {
-			if (params.getDateFrom() > 0 || params.getDateTo() > 0) {
-				dateRecord = getStringDate(params.getDateFrom()) + "-" + getStringDate(params.getDateTo());
-				csv.writeRecord(new String[] { I18NUtil.getMessage("csv.action"), I18NUtil.getMessage("csv.count"),
-						I18NUtil.getMessage("csv.interval") });
-			} else {
-				csv.writeRecord(new String[] { I18NUtil.getMessage("csv.action"), I18NUtil.getMessage("csv.count") });
+		} else if(model.containsKey("values")){
+			csv.writeRecord(new String[] { I18NUtil.getMessage("csv.interval"), I18NUtil.getMessage("csv."+ type)});
+			String[] slicedDates = params.getSlicedDates().split(",");
+			String[] values = (String[]) model.get("values");
+			for (int i = 0; i < values.length; i++) {
+				dateRecord = getStringDate(Long.parseLong(slicedDates[i]));
+				dateRecord += " - " + getStringDate(Long.parseLong(slicedDates[i + 1]));
+				csv.writeRecord(new String[]{dateRecord,values[i]});
 			}
-			List<AuditCount> auditCounts = (List<AuditCount>) model.get("views");
-			writeAuditCount(csv, auditCounts, false, dateRecord, "action");
 		}
 	}
 

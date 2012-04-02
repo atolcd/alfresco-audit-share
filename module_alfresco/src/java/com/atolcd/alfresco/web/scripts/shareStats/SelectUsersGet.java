@@ -58,19 +58,16 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		// SiteService siteService;
-
 		try {
 			Map<String, Object> model = new HashMap<String, Object>();
-
 			if (this.sqlMapClientTemplate != null) {
 				String type = req.getParameter("type");
 				AuditQueryParameters auditQueryParameters = buildParametersFromRequest(req);
-				if ("list".equals(type)) {
+				if ("users-connected".equals(type)) {
 					model.put("users", selectConnectedUsers(auditQueryParameters));
-				} else if ("count".equals(type)) {
+				} else if ("users-count".equals(type)) {
 					model.put("values", selectConnectedUsersByDate(auditQueryParameters));
-				} else if ("never".equals(type)) {
+				} else if ("users-never-connected".equals(type)) {
 					AtolAuthorityParameters atolAuthorityParameters = buildAuthorityParametersFromRequest(req);
 					model.put("users", selectNeverConnectedUsers(atolAuthorityParameters, auditQueryParameters));
 				}
