@@ -41,19 +41,15 @@ function buildChart(params) {
     "elements": buildBarChartElements(params, x_labels.labels),
 
     "x_axis": {
-      "stroke": 3,
-      "tick_height": 10,
-      "colour": "#5fab34",
-      "grid-colour": "#c0f0b0",
+      "colour": gridColors["x-axis"],
+      "grid-colour": gridColors["x-grid"],
       "labels": x_labels
     },
 
     "y_axis": {
-      "stroke": 3,
       "steps": params.max / 10,
-      "tick_length": 3,
-      "colour": "#5fab34",
-      "grid-colour": "#ddf1d1",
+      "colour": gridColors["y-axis"],
+      "grid-colour": gridColors["y-grid"],
       "offset": 0,
       "max": params.max
     }
@@ -86,17 +82,14 @@ function buildBarChartElements(params, labels) {
   params.max = max ? roundMax(max) : 10;
 
 
-  var type = "bar_glass",
-    color = "#0077BF"; // "#EC9304", "#7CBC28", "#EE1C2F"];
-
   elements.push({
-    "type": type,
-    "colour": color,
+    "type": "bar_glass",
+    "alpha": 0.75,
+    "colour": barChartColors["volumetry"],
     "text": label,
     "font-size": 10,
     "values": values
   });
-
   return elements;
 }
 
@@ -123,4 +116,46 @@ function getMessage(messageId, prefix) {
   var res = Alfresco.util.message.call(null, msg, "Alfresco.ConsoleSitesVolumetry", Array.prototype.slice.call(arguments).slice(2));
   res = (res.search("graph.label") == 0) ? messageId : res;
   return res;
+}
+
+/**
+ * "Arrondi" la valeur max du graphique pour y mettre des valeurs rondes
+ * @method roundMax
+ * @param integer max
+ */
+function roundMax(max) {
+  var new_max = max,
+    coef = 1;
+
+  while (new_max >= 10) {
+    new_max = new_max / 10;
+    coef = coef * 10;
+  }
+
+  new_max = new_max.toPrecision(2);
+
+  if (new_max > 7.5) {
+    new_max = 10;
+    step = 1;
+  } else if (new_max > 5) {
+    new_max = 7.5;
+  } else if (new_max > 2.5) {
+    new_max = 5;
+  } else {
+    new_max = 2.5;
+  }
+
+  return new_max * coef;
+}
+
+/**
+ * Arrondit le nombre number avec la précision digits après la virgule
+ * @method roundNumber
+ * @param number Nombre à arrondir
+ * @param digits Nombre de chiffres après la virgule
+ */
+function roundNumber(number, digits) {
+  var multiple = Math.pow(10, digits);
+  var rndedNum = Math.round(number * multiple) / multiple;
+  return rndedNum;
 }

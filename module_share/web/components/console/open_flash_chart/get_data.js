@@ -47,19 +47,15 @@ function buildBarChart(params) {
     "elements": buildBarChartElements(params, x_labels.labels),
 
     "x_axis": {
-      "stroke": 3,
-      "tick_height": 10,
-      "colour": "#5fab34",
-      "grid-colour": "#c0f0b0",
+      "colour": gridColors["x-axis"],
+      "grid-colour": gridColors["x-grid"],
       "labels": x_labels
     },
 
     "y_axis": {
-      "stroke": 3,
       "steps": Math.floor(params.max / 10),
-      "tick_length": 3,
-      "colour": "#5fab34",
-      "grid-colour": "#ddf1d1",
+      "colour": gridColors["y-axis"],
+      "grid-colour": gridColors["y-grid"],
       "offset": 0,
       "max": params.max + 2
     }
@@ -104,10 +100,6 @@ function buildBarChartElements(params, labels) {
   //Mise à jour du maximum
   params.max = max ? max : 8;
 
-  var type = "bar_glass",
-    color_list = ["#0077BF", "#EC9304", "#7CBC28", "#EE1C2F"],
-    color_idx = 0;
-
   //Modifier values
   for (key in treatedElements) {
     var values = [],
@@ -131,15 +123,14 @@ function buildBarChartElements(params, labels) {
     }
     // TODO : Stacked
     elements.push({
-      "type": type,
-      "colour": color_list[color_idx],
+      "type": "bar_glass",
+      "alpha": 0.75,
+      "colour": barChartColors[key],
       "text": label,
       "font-size": 10,
       "values": values
     });
-    color_idx++;
   }
-
   return elements;
 }
 
@@ -168,15 +159,15 @@ function buildHBarChart(params) {
     "bg_colour": "#FFFFFF",
     "elements": buildHBarChartElements(params, y_labels),
     "x_axis": {
-      "colour": "#5fab34",
-      "grid-colour": "#c0f0b0",
+      "colour": gridColors["x-axis"],
+      "grid-colour": gridColors["x-grid"],
       "offset": false,
       "max": max,
       "steps": (max >= 15) ? Math.round(max / 10) : 1
     },
     "y_axis": {
-      "colour": "#5fab34",
-      "grid-colour": "#c0f0b0",
+      "colour": gridColors["y-axis"],
+      "grid-colour": gridColors["y-grid"],
       "offset": true,
       "labels": y_labels
     },
@@ -190,6 +181,12 @@ function buildHBarChart(params) {
 
 function buildHBarChartElements(params, labels) {
 
+  var crop = function (s) {
+      if (s.length > 25) {
+        s = s.substr(0, 25) + " ...";
+      }
+      return s;
+    };
   var elements = null,
     values = [],
     value_obj, item, module = params.additionalsParams.module,
@@ -202,7 +199,7 @@ function buildHBarChartElements(params, labels) {
     value_obj.tip = item.name + " : #val#";
     value_obj.right = item.popularity;
     value_obj.left = 0;
-    value_obj.colour = i ? "#0077BF" : "#EE1C2F";
+    value_obj.colour = i ? barChartColors["less-popular"] : barChartColors["most-popular"];
     if (module == "document") {
       value_obj["on-click"] = YAHOO.lang.substitute(urlTemplate, {
         site: item.site,
@@ -210,7 +207,7 @@ function buildHBarChartElements(params, labels) {
       });
     }
     values.push(value_obj);
-    labels.push(pItems[pItemsLength - 1 - i].name);
+    labels.push(crop(pItems[pItemsLength - 1 - i].name));
   }
   elements = [{
     "type": "hbar",

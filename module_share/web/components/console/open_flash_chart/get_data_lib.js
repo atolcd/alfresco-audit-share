@@ -18,10 +18,10 @@ function get_random_color() {
  * Retourne le "joli" nom d'un site
  * @method getSiteTitle
  * @param shortName Identifiant du site
- * 
+ *
  */
-/*  
-// En vue d'une utilisation future, 
+/*
+// En vue d'une utilisation future,
 // Supprimer la variable globale qui sera passé par "params"
 function getSiteTitle(shortName, sites) {
   var res = shortName,
@@ -134,44 +134,57 @@ function getDay(day) {
   return getMessage(day, "label.day.");
 }
 
-/**
- * "Arrondi" la valeur max du graphique pour y mettre des valeurs rondes
- * @method roundMax
- * @param integer max
- */
-function roundMax(max) {
-  var new_max = max,
-    coef = 1;
+// Anciennes couleurs
+//"#0077BF" => Bleu - Lectures
+//"#7CBC28" => Vert - Créations
+//"#EC9304" => Orange - Updates
+//"#EE1C2F" => Rouge - Suppressions
+var red = "#EE1C2F",
+  blue = "#19ABEA",lightBlue = "#1B9EFC",darkBlue = "#1B5AF9",
+  green = "#7CBC28", darkGreen = "#0A9200",
+  orange = "#FF9900", lightOrange = "#FFC600", darkOrange = "#FF692B",
+  gray = "#C1C1C1", mediumGray = "#DFDFDF";
 
-  while (new_max >= 10) {
-    new_max = new_max / 10;
-    coef = coef * 10;
-  }
+// Couleurs utilisés par les graphiques
+var barChartColors = [],
+  gridColors = [];
 
-  new_max = new_max.toPrecision(2);
+//Blog
+barChartColors["blog.postview"] = blue;
+barChartColors["blog.blog-create"] = darkGreen;
+barChartColors["blog.blog-delete"] = red;
+barChartColors["blog.blog-update"] = orange;
 
-  if (new_max > 7.5) {
-    new_max = 10;
-    step = 1;
-  } else if (new_max > 5) {
-    new_max = 7.5;
-  } else if (new_max > 2.5) {
-    new_max = 5;
-  } else {
-    new_max = 2.5;
-  }
+//Espace document
+barChartColors["document.details"] = blue;
+barChartColors["document.download"] = darkBlue;
+barChartColors["document.create"] = green;
+barChartColors["document.file-added"] = darkGreen;
+barChartColors["document.file-deleted"] = red;
+barChartColors["document.file-updated"] = darkOrange;
+barChartColors["document.inline-edit"] = lightOrange;
+barChartColors["document.update"] = orange;
 
-  return new_max * coef;
-}
+//Wiki
+barChartColors["wiki.page"] = blue;
+barChartColors["wiki.create-post"] = darkGreen;
+barChartColors["wiki.delete-post"] = red;
+barChartColors["wiki.update-post"] = orange;
 
-/**
- * Arrondit le nombre number avec la précision digits après la virgule
- * @method roundNumber
- * @param number Nombre à arrondir
- * @param digits Nombre de chiffres après la virgule
- */
-function roundNumber(number, digits) {
-  var multiple = Math.pow(10, digits);
-  var rndedNum = Math.round(number * multiple) / multiple;
-  return rndedNum;
-}
+//Discussions
+barChartColors["discussions.topicview"] = blue;
+barChartColors["discussions.discussions-create"] = darkGreen;
+barChartColors["discussions.discussions-deleted"] = red;
+barChartColors["discussions.discussions-update"] = orange;
+
+
+barChartColors["volumetry"] = blue;
+barChartColors["users"] = blue;
+barChartColors["most-popular"] = red;
+barChartColors["less-popular"] = blue;
+
+//Grilles
+gridColors["x-axis"] = gray;
+gridColors["y-axis"] = gray;
+gridColors["x-grid"] = mediumGray;
+gridColors["y-grid"] = mediumGray;

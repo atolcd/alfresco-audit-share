@@ -42,19 +42,15 @@ function buildChart(params) {
     "elements": buildBarChartElements(params, x_labels.labels),
 
     "x_axis": {
-      "stroke": 3,
-      "tick_height": 10,
-      "colour": "#5fab34",
-      "grid-colour": "#c0f0b0",
+      "colour": gridColors["x-axis"],
+      "grid-colour": gridColors["x-grid"],
       "labels": x_labels
     },
 
     "y_axis": {
-      "stroke": 3,
       "steps": Math.floor(params.max / 10),
-      "tick_length": 3,
-      "colour": "#5fab34",
-      "grid-colour": "#ddf1d1",
+      "colour": gridColors["y-grid"],
+      "grid-colour": gridColors["y-grid"],
       "offset": 0,
       "max": params.max + params.max / 10
     }
@@ -85,12 +81,10 @@ function buildBarChartElements(params, labels) {
   //Mise à jour du maximum
   params.max = max ? max : 8;
 
-  var type = "bar_glass",
-    color = "#0077BF"; // "#EC9304", "#7CBC28", "#EE1C2F"];
-
   elements.push({
-    "type": type,
-    "colour": color,
+    "type": "bar_glass",
+    "alpha": 0.75,
+    "colour": barChartColors["users"],
     "text": label,
     "font-size": 10,
     "values": values
