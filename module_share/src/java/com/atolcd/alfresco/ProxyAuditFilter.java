@@ -32,9 +32,11 @@ import org.springframework.extensions.surf.exception.UserFactoryException;
 import org.springframework.extensions.surf.support.AlfrescoUserFactory;
 import org.springframework.extensions.surf.support.ThreadLocalRequestContext;
 import org.springframework.extensions.surf.util.I18NUtil;
+import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.connector.Connector;
 import org.springframework.extensions.webscripts.connector.ConnectorContext;
 import org.springframework.extensions.webscripts.connector.HttpMethod;
+import org.springframework.extensions.webscripts.connector.Response;
 import org.springframework.extensions.webscripts.connector.User;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -54,7 +56,7 @@ public class ProxyAuditFilter implements Filter {
     private static final String URI_DATALIST = "/share/proxy/alfresco/slingshot/datalists/item/";
     private static final String URI_DATALIST_DELETE = "/share/proxy/alfresco/slingshot/datalists/action/item";
 
-    // Mise ‡ jour ‡ partir de formulaire
+    // Mise √† jour √† partir de formulaire
     private static final String URI_NODE_UPDATE = "/share/proxy/alfresco/api/node/";
     private static final String FORMPROCESSOR = "/formprocessor";
 
@@ -72,8 +74,7 @@ public class ProxyAuditFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest sReq, ServletResponse sRes, FilterChain chain) throws IOException,
-            ServletException {
+    public void doFilter(ServletRequest sReq, ServletResponse sRes, FilterChain chain) throws IOException, ServletException {
 
         // Get the HTTP request/response/session
         HttpServletRequest request = (HttpServletRequest) sReq;
@@ -188,25 +189,30 @@ public class ProxyAuditFilter implements Filter {
                     remoteCall(request, auditSample);
                 } else if (requestURI.startsWith(URI_WIKI)) {
                     String[] urlTokens = requestURI.split("/");
+                    String wikiPageId = urlTokens[urlTokens.length - 1];
+                    String siteId = urlTokens[urlTokens.length - 2];
                     if (method.equals(Method.PUT.toString().toString())) {
                         // TODO : Cr√©er des snippets pour la r√©cup√©ration du
                         // site selon JSON/urlTokens??
                         JSONObject params = new JSONObject(requestWrapper.getStringContent());
-                        auditSample.put("auditSite", urlTokens[urlTokens.length - 2]);
+                        auditSample.put("auditSite", siteId);
                         auditSample.put("auditAppName", "wiki");
                         if (params.has("currentVersion")) {
                             auditSample.put("auditActionName", "update-post");
                         } else {
                             auditSample.put("auditActionName", "create-post");
                         }
-                        auditSample.put("auditObject", urlTokens[urlTokens.length - 1]);
+
+                        String auditObject = getNodeRefRemoteCall(request, user.getId(), siteId, "wiki", wikiPageId);
+                        auditSample.put("auditObject", auditObject);
+
                         // Remote call
                         remoteCall(request, auditSample);
                     } else if (method.equals(Method.DELETE.toString())) {
-                        auditSample.put("auditSite", urlTokens[urlTokens.length - 2]);
+                        auditSample.put("auditSite", siteId);
                         auditSample.put("auditAppName", "wiki");
                         auditSample.put("auditActionName", "delete-post");
-                        auditSample.put("auditObject", urlTokens[urlTokens.length - 1]);
+                        auditSample.put("auditObject", wikiPageId);
                         // Remote call
                         remoteCall(request, auditSample);
                     }
@@ -223,7 +229,7 @@ public class ProxyAuditFilter implements Filter {
                         JSONObject params = new JSONObject(requestWrapper.getStringContent());
                         auditSample.put("auditSite", params.get("site"));
                         auditSample.put("auditActionName", "blog-update");
-                        auditSample.put("auditObject", params.get("title"));
+                        auditSample.put("auditObject", getNodeRefFromUrl(requestURI, 0));
 
                         remoteCall(request, auditSample);
                     } else if (method.equals(Method.DELETE.toString())) {
@@ -245,9 +251,14 @@ public class ProxyAuditFilter implements Filter {
                         remoteCall(request, auditSample);
                     } else if (method.equals(Method.PUT.toString().toString())) {
                         JSONObject params = new JSONObject(requestWrapper.getStringContent());
-                        auditSample.put("auditSite", params.get("site"));
+                        String siteId = (String) params.get("site");
+                        auditSample.put("auditSite", siteId);
                         auditSample.put("auditActionName", "discussions-update");
-                        auditSample.put("auditObject", params.get("title"));
+
+                        String[] urlTokens = requestURI.split("/");
+                        String discussionId = urlTokens[urlTokens.length - 1];
+                        String auditObject = getNodeRefRemoteCall(request, user.getId(), siteId, "discussions", discussionId);
+                        auditSample.put("auditObject", auditObject);
 
                         remoteCall(request, auditSample);
                     } else if (method.equals(Method.DELETE.toString())) {
@@ -275,9 +286,12 @@ public class ProxyAuditFilter implements Filter {
                         }
                         remoteCall(request, auditSample);
                     } else if (method.equals(Method.PUT.toString().toString())) {
-                        auditSample.put("auditSite", urlTokens[urlTokens.length - 3]);
-                        auditSample.put("auditObject", params.get("title"));
+                        String siteId = urlTokens[urlTokens.length - 3];
+                        auditSample.put("auditSite", siteId);
                         auditSample.put("auditActionName", "links-update");
+
+                        String auditObject = getNodeRefRemoteCall(request, user.getId(), siteId, "links", urlTokens[urlTokens.length - 1]);
+                        auditSample.put("auditObject", auditObject);
 
                         remoteCall(request, auditSample);
                     }
@@ -332,9 +346,9 @@ public class ProxyAuditFilter implements Filter {
                     remoteCall(request, auditSample);
                 } else if (requestURI.startsWith(URI_NODE_UPDATE) && requestURI.endsWith(FORMPROCESSOR)) {
                     JSONObject updatedData = new JSONObject(requestWrapper.getStringContent());
-                    // L'Èdition en ligne passe par le mÍme formulaire, avec la
-                    // metadonnÈe cm_content
-                    if(!updatedData.has("prop_cm_content")) {
+                    // L'√©dition en ligne passe par le m√™me formulaire, avec la
+                    // metadonn√©e cm_content
+                    if (!updatedData.has("prop_cm_content")) {
                         auditSample.put("auditAppName", "document");
                         auditSample.put("auditObject", getNodeRefFromUrl(requestURI, 1));
 
@@ -371,6 +385,31 @@ public class ProxyAuditFilter implements Filter {
         } catch (ConnectorServiceException e) {
             e.printStackTrace();
         }
+    }
+
+    private String getNodeRefRemoteCall(HttpServletRequest request, String userId, String siteId, String componentId, String objectId)
+            throws JSONException, URIException, UnsupportedEncodingException {
+        Connector connector;
+        try {
+            connector = FrameworkUtil.getConnector(request.getSession(true), userId, AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
+            // <url>/share-stats/slingshot/details/{siteId}/{componentId}/{objectId}</url>
+            Response resp = connector.call("/share-stats/slingshot/details/" + siteId + "/" + componentId + "/" + objectId);
+
+            if (resp.getStatus().getCode() == Status.STATUS_OK) {
+                try {
+                    JSONObject json = new JSONObject(resp.getResponse());
+                    if (json.has("nodeRef")) {
+                        return (String) json.get("nodeRef");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (ConnectorServiceException e) {
+            e.printStackTrace();
+        }
+
+        return objectId;
     }
 
     /**

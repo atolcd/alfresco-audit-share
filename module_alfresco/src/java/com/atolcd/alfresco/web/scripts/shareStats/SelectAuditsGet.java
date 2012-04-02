@@ -7,9 +7,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
+import org.alfresco.model.ForumModel;
+import org.alfresco.repo.site.SiteModel;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -37,6 +41,12 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 	private static final String SELECT_BY_DELETED = "alfresco.atolcd.audit.selectByDeleted";
 	private static final String SELECT_BY_MOSTREAD = "alfresco.atolcd.audit.selectByMostRead";
 	private static final String SELECT_BY_MOSTUPDATED = "alfresco.atolcd.audit.selectByMostUpdated";
+
+	static final QName TYPE_DATALIST = QName.createQName("http://www.alfresco.org/model/datalist/1.0", "dataList");
+	static final QName TYPE_CALENDAR_EVENT = QName.createQName("http://www.alfresco.org/model/calendar", "calendarEvent");
+	static final QName PROP_CALENDAR_EVENT_WHAT = QName.createQName("http://www.alfresco.org/model/calendar", "whatEvent");
+	static final QName TYPE_LINK = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "link");
+	static final QName PROP_LINK_TITLE = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "title");
 
 	// logger
 	private static final Log logger = LogFactory.getLog(SelectAuditsGet.class);
@@ -81,13 +91,12 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 		}
 	}
 
-	public void checkForQuery(Map<String, Object> model, AuditQueryParameters params, String type) throws SQLException,
-			JSONException {
+	public void checkForQuery(Map<String, Object> model, AuditQueryParameters params, String type) throws SQLException, JSONException {
 		checkForQuery(model, params, type, 0);
 	}
 
-	public void checkForQuery(Map<String, Object> model, AuditQueryParameters params, String type, int limit)
-			throws SQLException, JSONException {
+	public void checkForQuery(Map<String, Object> model, AuditQueryParameters params, String type, int limit) throws SQLException,
+			JSONException {
 		switch (queryType.valueOf(type)) {
 		case read:
 			model.put("dates", selectByDate(params, SELECT_BY_VIEW));
@@ -116,28 +125,22 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 		auditObjectPopularityList = sqlMapClientTemplate.queryForList(query, params);
 		logger.info("Performing " + query + " ... ");
 
-		String app = params.getAppName();
 		Iterator<AuditObjectPopularity> iterator = auditObjectPopularityList.iterator();
 		int treatedItems = 0;
 		// On test si les éléments retournés existent toujours
 		while (iterator.hasNext() && treatedItems < limit) {
 			AuditObjectPopularity auditObjectPopularity = iterator.next();
-			if("document".equals(app)) {
+			try {
 				NodeRef nodeRef = new NodeRef(auditObjectPopularity.getAuditObject());
 				if (!nodeService.exists(nodeRef)) {
 					iterator.remove();
 				} else {
-					
-					String name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE);
-					if(name == null || name.isEmpty()){
-						name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
-					}
-					auditObjectPopularity.setObjectName(name);
+					auditObjectPopularity.setObjectName(getPrettyDisplayname(nodeRef));
 					treatedItems++;
 				}
-			} else {
-				auditObjectPopularity.setObjectName(auditObjectPopularity.getAuditObject());
-				treatedItems++;
+			} catch (AlfrescoRuntimeException e) {
+				iterator.remove();
+				logger.error(e);
 			}
 		}
 		limit = auditObjectPopularityList.size() > limit ? limit : auditObjectPopularityList.size();
@@ -181,4 +184,40 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 		}
 	}
 
+	private String getPrettyDisplayname(NodeRef nodeRef) {
+		String nodeName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+
+		QName nodeType = nodeService.getType(nodeRef);
+		if (nodeType.equals(TYPE_DATALIST)) {
+			// DataList : titre
+			return (String) nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE);
+		} else if (nodeType.equals(ForumModel.TYPE_TOPIC)) {
+			// Discussion : on récupère le titre de l'enfant du même nom qui est
+			// la discussion principale
+			NodeRef firstTopic = nodeService.getChildByName(nodeRef, ContentModel.ASSOC_CONTAINS, nodeName);
+			if (firstTopic != null) {
+				return (String) nodeService.getProperty(firstTopic, ContentModel.PROP_TITLE);
+			}
+		} else if (nodeType.equals(TYPE_LINK)) {
+			// Lien : titre du lien (modèle particulier)
+			return (String) nodeService.getProperty(nodeRef, PROP_LINK_TITLE);
+		} else if (nodeType.equals(TYPE_CALENDAR_EVENT)) {
+			// Evenement
+			return (String) nodeService.getProperty(nodeRef, PROP_CALENDAR_EVENT_WHAT);
+		} else {
+			// Others : content, wiki, blog
+			NodeRef parentRef = nodeService.getPrimaryParent(nodeRef).getParentRef();
+			if (parentRef != null) {
+				if (nodeService.hasAspect(parentRef, SiteModel.ASPECT_SITE_CONTAINER)) {
+					String parentName = (String) nodeService.getProperty(parentRef, ContentModel.PROP_NAME);
+					if (parentName.equals("blog") || parentName.equals("wiki")) {
+						// Blog ou Wiki
+						return (String) nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE);
+					}
+				}
+			}
+		}
+
+		return nodeName;
+	}
 }
