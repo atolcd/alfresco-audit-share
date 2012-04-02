@@ -2,8 +2,7 @@ function getUserFlashData(param) {
   var params = YAHOO.lang.JSON.parse(unescape(param)),
     jsonChart = null;
 
-  //TODO
-  jsonChart=buildChart(params);
+  jsonChart = buildChart(params);
 
   return YAHOO.lang.JSON.stringify(jsonChart);
 };
@@ -77,7 +76,7 @@ function buildBarChartElements(params, labels) {
     var item = pItems[i];
     value_obj = {};
     value_obj.top = item;
-    value_obj.tip = label + " : " + item ; // Voir pour un meilleur label ? Formattage de #val#?
+    value_obj.tip = label + " : " + item; // Voir pour un meilleur label ? Formattage de #val#?
     value_obj.tip += "\n" + labels[i];
     values.push(value_obj);
 
@@ -96,15 +95,12 @@ function buildBarChartElements(params, labels) {
     "font-size": 10,
     "values": values
   });
-
-  console.log(elements);
-  console.log(max);
   return elements;
 }
 
 
 function buildXAxisLabels(params) {
-  var steps = params.totalResults >= 30 ? Math.round(params.totalResults / 15) : 1;
+  var steps = params.values.length >= 30 ? Math.round(params.values.length / 15) : 1;
   var labelConfiguration = {
     "labels": buildBarChartXLabels(params),
     "steps": steps

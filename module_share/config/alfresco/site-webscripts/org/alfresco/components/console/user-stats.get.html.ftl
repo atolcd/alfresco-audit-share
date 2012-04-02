@@ -65,8 +65,19 @@
       </div>
     </div>
 
-    <div>
-      <!-- TODO -->
-    </div>
+    <table id="users-table">
+      <tr>
+        <th>${(msg("label.users.connected"))}</th>
+        <th>${(msg("label.users.never-connected"))}</th>
+      </tr>
+      <tr>
+        <td id="${el}-users-connected" class="users-list">
+          
+        </td>
+        <td id="${el}-users-never-connected" class="users-list">
+          
+        </td>
+      </tr>
+    </table>
   </div>
 </div>

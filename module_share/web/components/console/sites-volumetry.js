@@ -3,7 +3,8 @@
  *
  * @namespace Alfresco
  * @class Alfresco.ConsoleSitesVolumetry
- */ (function () {
+ */
+(function () {
   /**
    * YUI Library aliases
    */
@@ -258,13 +259,13 @@
     },
 
     onExport: function ConsoleSitesVolumetry_onExport() {
-      // TODO:
-      /*
       if (this.lastRequest.params) {
-        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + this.lastRequest.params; //?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data));//JSON.stringify
+        var params = this.lastRequest.params;
+        params += "&type=volumetry";
+        params += "&values=" + this.lastRequest.values.toString();
+        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params; //?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data));//JSON.stringify
         window.open(url);
       }
-      */
     },
 
     /**
@@ -327,6 +328,8 @@
 
       if (response.json) {
         this.widgets.exportButton.set("disabled", false);
+        this.lastRequest.values = response.json.values;
+
         response.json.currentFilter = this.currentDateFilter;
         response.json.additionalsParams = additionalsParams;
 

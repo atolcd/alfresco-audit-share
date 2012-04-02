@@ -96,14 +96,12 @@ function buildBarChartElements(params, labels) {
     "values": values
   });
 
-  console.log(elements);
-  console.log(max);
   return elements;
 }
 
 
 function buildXAxisLabels(params) {
-  var steps = params.totalResults >= 30 ? Math.round(params.totalResults / 15) : 1;
+  var steps = params.values.length >= 30 ? Math.round(params.values.length / 15) : 1;
   var labelConfiguration = {
     "labels": buildBarChartXLabels(params),
     "steps": steps

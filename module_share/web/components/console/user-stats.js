@@ -3,8 +3,7 @@
  *
  * @namespace Alfresco
  * @class Alfresco.ConsoleUserAudit
- */
-(function () {
+ */ (function () {
   /**
    * YUI Library aliases
    */
@@ -44,9 +43,9 @@
     };
 
     // Surcharge de la classe Date. Récupère la semaine courante
-    Date.prototype.getWeek = function() {
-     var onejan = new Date(this.getFullYear(),0,1);
-     return Math.ceil((((this - onejan) / 86400000) + onejan.getDay()+1)/7);
+    Date.prototype.getWeek = function () {
+      var onejan = new Date(this.getFullYear(), 0, 1);
+      return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
     };
 
     YAHOO.extend(UserAuditPanelHandler, Alfresco.ConsolePanelHandler, {
@@ -260,14 +259,69 @@
 
     onExport: function ConsoleUserAudit_onExport() {
       // TODO:
-      /*
       if (this.lastRequest.params) {
-        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + this.lastRequest.params; //?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data));//JSON.stringify
+        var params = this.lastRequest.params;
+        params += "&type=users";
+        params += "&values=" + this.lastRequest.values.toString();
+        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params; //?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data));//JSON.stringify
         window.open(url);
       }
-      */
     },
 
+    getUsers: function ConsoleUserAudit_getUsers(type) {
+      var displayUsers = function (response) {
+          var names = response.json.items,
+            el = Dom.get(this.id + "-" + type);
+          if (names) {
+            var context = Alfresco.constants.URL_PAGECONTEXT,
+              url = "",
+              html = "",
+              name = "",
+              i = 0,
+              l = names.length;
+
+            for (; i < l; i++) {
+              name = names[i];
+              html += '<li class="nav-user">';
+              html += '<a class="theme-color-1" tabindex="0" target="_blank" href="' + context + 'user/' + name + '/profile">' + name + '</a>';
+              html += '</li>';
+            }
+
+            html = "<ul>" + html + "</ul>";
+            el.innerHTML = html;
+          } else {
+            el.innerHTML = this.msg("label.no-results." + type);
+          }
+        };
+
+      //Récupération des variables de l'UI
+      var dateFilter = this.currentDateFilter,
+        site = this.convertMenuValue(this.widgets.siteButton.value),
+        tsString = "",
+        params = "";
+
+      // Crétion du tableau d'intervalle de dates
+
+      tsArray = this.buildTimeStampArray();
+      tsString = tsArray[0].toString() + "," + tsArray[tsArray.length - 1];
+
+      params = "?type=" + type;
+      params += "&dates=" + tsString;
+      if (site) {
+        params += "&site=" + site;
+      }
+
+      var url = Alfresco.constants.PROXY_URI + "share-stats/select-users" + params;
+      Alfresco.util.Ajax.jsonGet({
+        url: url,
+        successCallback: {
+          fn: displayUsers,
+          scope: this
+        },
+        failureMessage: this._msg("label.popup.query.error"),
+        execScripts: true
+      });
+    },
     /**
      * @method
      * @param
@@ -276,8 +330,9 @@
     onSearch: function ConsoleUserAudit_onSearch() {
       //Récupération des variables de l'UI
       var dateFilter = this.currentDateFilter,
-          site = this.convertMenuValue(this.widgets.siteButton.value),
-          tsString = "", params = "";
+        site = this.convertMenuValue(this.widgets.siteButton.value),
+        tsString = "",
+        params = "";
 
       // Crétion du tableau d'intervalle de dates
       if (dateFilter) {
@@ -285,8 +340,8 @@
       }
 
       // Création des paramètres et exécution de la requête
-      params = "?type=count";
-      params += "&dates="+tsString;
+      params = "?type=users-count";
+      params += "&dates=" + tsString;
       if (site) {
         params += "&site=" + site;
       }
@@ -311,7 +366,7 @@
           width: "90%"
         }
       });
-      
+
     },
 
     /**
@@ -330,6 +385,7 @@
         this.widgets.exportButton.set("disabled", false);
         response.json.currentFilter = this.currentDateFilter;
         response.json.additionalsParams = additionalsParams;
+        this.lastRequest.values = response.json.values;
 
         if (chartTag == "embed" || chartTag == "object") {
           swf.load(getUserFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
@@ -342,7 +398,10 @@
             params = {
               wmode: "opaque"
             },
+
+
             // /!\ pour IE
+
             attributes = {
               salign: "l",
               AllowScriptAccess: "always"
@@ -558,7 +617,7 @@
      * Gestionnaire click Jour / Semaine / Mois / Année
      */
     onChangeDateFilter: function ConsoleUserAudit_OnChangeDateFilter(e, args) {
-      if(e) Event.stopEvent(e);
+      if (e) Event.stopEvent(e);
       Dom.removeClass("by-" + this.currentDateFilter, "selected");
       Dom.addClass("by-" + args.filter, "selected");
       this.currentDateFilter = args.filter;
@@ -598,16 +657,18 @@
       this.execute();
     },
 
-    onResetDates: function ConsoleUserAudit_OnResetDates(){
+    onResetDates: function ConsoleUserAudit_OnResetDates() {
       this.setupCurrentDates();
       this.execute();
     },
 
     execute: function ConsoleUserAudit_execute() {
+      this.getUsers("users-connected");
+      this.getUsers("users-never-connected");
       this.onSearch();
     },
 
-    setupCurrentDates : function ConsoleUserAudit_setupCurrentDates(){
+    setupCurrentDates: function ConsoleUserAudit_setupCurrentDates() {
       var currentDate = new Date();
       currentDate.setMinutes(0);
       currentDate.setHours(0);
