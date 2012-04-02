@@ -182,7 +182,7 @@
      *
      */
     pathToSwf: "/share/components/console/open_flash_chart/open-flash-chart.swf",
-    
+
     /**
      * @attribute endDatesArray
      * Dates de référence utilisée pour les graphiques
@@ -398,11 +398,25 @@
           from: from,
           to: to,
           module: module,
-          urlTemplate : "http://" + window.location.host + "/share/page/site/{site}/document-details?nodeRef={nodeRef}"
+          urlTemplate : this.getTemplateUrl(module)
         }
       });
-
     },
+
+    getTemplateUrl: function ConsoleAudit_getTemplateUrl(module) {
+      var baseUrl = window.location.protocol + "//" + window.location.host + Alfresco.constants.URL_PAGECONTEXT + "site/{site}/";
+      if (module == "document") {
+        return baseUrl + "document-details?nodeRef={nodeRef}";
+      } else if (module == "wiki") {
+        return baseUrl + "wiki-page?title={id}&listViewLinkBack=true";
+      } else if (module == "blog") {
+        return baseUrl + "blog-postview?postId={id}&listViewLinkBack=true";
+      } else if (module == "discussions") {
+        return baseUrl + "discussions-topicview?topicId={id}&listViewLinkBack=true";
+      }
+      return "";
+    },
+
     /**
      * @method displayGraph Affiche le requête suite à une requête Ajax
      * @param response Réponse de la requête
@@ -473,7 +487,7 @@
       return res;
     },
 
-    
+
     /**
      * @method convertDate
      * @param d Date au format jj/mm/aaaa

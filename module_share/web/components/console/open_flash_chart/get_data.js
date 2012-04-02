@@ -196,7 +196,7 @@ function buildHBarChartElements(params, labels) {
   for (; i < pItemsLength; i++) {
     item = pItems[i];
     value_obj = {};
-    value_obj.tip = item.name + " : #val#";
+    value_obj.tip = item.displayName + " : #val#";
     value_obj.right = item.popularity;
     value_obj.left = 0;
     value_obj.colour = i ? barChartColors["less-popular"] : barChartColors["most-popular"];
@@ -206,8 +206,14 @@ function buildHBarChartElements(params, labels) {
         nodeRef: item.nodeRef
       });
     }
+    else if (module == "wiki" || module == "blog" || module == "discussions") {
+      value_obj["on-click"] = YAHOO.lang.substitute(urlTemplate, {
+        site: item.site,
+        id: item.name
+      });
+    }
     values.push(value_obj);
-    labels.push(crop(pItems[pItemsLength - 1 - i].name));
+    labels.push(crop(pItems[pItemsLength - 1 - i].displayName));
   }
   elements = [{
     "type": "hbar",

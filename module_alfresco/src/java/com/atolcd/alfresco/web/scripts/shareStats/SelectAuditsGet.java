@@ -135,7 +135,8 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 				if (!nodeService.exists(nodeRef)) {
 					iterator.remove();
 				} else {
-					auditObjectPopularity.setObjectName(getPrettyDisplayname(nodeRef));
+					auditObjectPopularity.setObjectName((String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME));
+					auditObjectPopularity.setObjectDisplayName(getPrettyDisplayname(nodeRef));
 					treatedItems++;
 				}
 			} catch (AlfrescoRuntimeException e) {

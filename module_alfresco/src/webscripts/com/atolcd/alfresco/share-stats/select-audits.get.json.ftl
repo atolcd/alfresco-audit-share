@@ -25,7 +25,8 @@
           "popularity": ${auditItem.popularity?c},
           "nodeRef": "${auditItem.auditObject}",
           "site": "${auditItem.auditSite}",
-          "name": "${auditItem.objectName}"
+          "name": "${auditItem.objectName}",
+          "displayName": "${auditItem.objectDisplayName}"
         }<#if auditItem_has_next>,</#if>
       </#list>
     ]
