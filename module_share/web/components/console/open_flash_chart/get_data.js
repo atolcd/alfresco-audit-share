@@ -53,11 +53,11 @@ function buildBarChart(params) {
     },
 
     "y_axis": {
-      "steps": Math.floor(params.max / 10),
+      "steps": params.step,
       "colour": gridColors["y-axis"],
       "grid-colour": gridColors["y-grid"],
       "offset": 0,
-      "max": params.max + 2
+      "max": params.max + params.max/10 //Petite marge
     }
   };
 
@@ -98,7 +98,16 @@ function buildBarChartElements(params, labels) {
     }
   }
   //Mise à jour du maximum
-  params.max = max ? max : 8;
+  var new_max = max, coef = 1;
+
+  while (new_max >= 10) {
+    new_max = new_max / 10;
+    coef = coef * 10;
+  }
+
+  new_max = Math.round(new_max);
+  params.max = new_max;
+  params.step = coef;
 
   //Modifier values
   for (key in treatedElements) {
