@@ -65,20 +65,22 @@
       </div>
     </div>
 
-    <table id="users-table">
-      <tr>
-        <th>${(msg("label.users.recently-connected"))}</th>
-        <th>${(msg("label.users.connected"))}</th>
-        <th>${(msg("label.users.never-connected"))}</th>
-      </tr>
-      <tr>
-        <td id="${el}-users-recently-connected" class="users-list">
-        </td>
-        <td id="${el}-users-connected" class="users-list">
-        </td>
-        <td id="${el}-users-never-connected" class="users-list">
-        </td>
-      </tr>
-    </table>
+    <div class="users-table-container">
+      <table id="users-table">
+        <tr>
+          <th>${(msg("label.users.recently-connected"))}</th>
+          <th>${(msg("label.users.connected"))}</th>
+          <th class="last">${(msg("label.users.never-connected"))}</th>
+        </tr>
+        <tr>
+          <td id="${el}-users-recently-connected" class="users-list">
+          </td>
+          <td id="${el}-users-connected" class="users-list">
+          </td>
+          <td id="${el}-users-never-connected" class="users-list last">
+          </td>
+        </tr>
+      </table>
+    </div>
   </div>
 </div>
