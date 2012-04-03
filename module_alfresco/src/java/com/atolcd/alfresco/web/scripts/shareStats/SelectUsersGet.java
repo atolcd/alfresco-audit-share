@@ -2,6 +2,7 @@ package com.atolcd.alfresco.web.scripts.shareStats;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,7 +12,6 @@ import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -115,8 +115,9 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<String> selectNeverConnectedUsers(AtolAuthorityParameters atolAuthorityParameters, AuditQueryParameters auditQueryParameters) {
+	public Set<String> selectNeverConnectedUsers(AtolAuthorityParameters atolAuthorityParameters, AuditQueryParameters auditQueryParameters) {
 		List<String> users = new ArrayList<String>();
+		
 		List<String> groups = new ArrayList<String>();
 		List<String> auditUsers = new ArrayList<String>();
 		// Tous les membres de sites
@@ -128,18 +129,17 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 		// Tous les utilisateurs tracés par l'audit, en fonction des parametres
 		auditUsers = (List<String>) this.sqlMapClientTemplate.queryForList(SELECT_CONNECTED_USERS, auditQueryParameters);
 
+		Set<String>usersSet = new HashSet<String>(users.size());
 		for (String group : groups) {
 			if (group.startsWith("GROUP_")) {
 				Set<String> s = authorityService.getContainedAuthorities(AuthorityType.USER, group, false);
-				List<String> subusers = new ArrayList<String>();
-				subusers.addAll(s);
-				users = ListUtils.union(users, subusers);
+				usersSet.addAll(s);
 			}
 		}
 
 		// Differentiel
-		users.removeAll(auditUsers);
-		return users;
+		usersSet.removeAll(auditUsers);
+		return usersSet;
 	}
 
 	public AtolAuthorityParameters buildAuthorityParametersFromRequest(WebScriptRequest req) {
