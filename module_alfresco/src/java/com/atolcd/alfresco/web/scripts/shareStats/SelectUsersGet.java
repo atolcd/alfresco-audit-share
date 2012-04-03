@@ -117,7 +117,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	@SuppressWarnings("unchecked")
 	public Set<String> selectNeverConnectedUsers(AtolAuthorityParameters atolAuthorityParameters, AuditQueryParameters auditQueryParameters) {
 		List<String> users = new ArrayList<String>();
-		
+
 		List<String> groups = new ArrayList<String>();
 		List<String> auditUsers = new ArrayList<String>();
 		// Tous les membres de sites
@@ -129,7 +129,8 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 		// Tous les utilisateurs tracés par l'audit, en fonction des parametres
 		auditUsers = (List<String>) this.sqlMapClientTemplate.queryForList(SELECT_CONNECTED_USERS, auditQueryParameters);
 
-		Set<String>usersSet = new HashSet<String>(users.size());
+		Set<String> usersSet = new HashSet<String>(users.size());
+		usersSet.addAll(users);
 		for (String group : groups) {
 			if (group.startsWith("GROUP_")) {
 				Set<String> s = authorityService.getContainedAuthorities(AuthorityType.USER, group, false);
@@ -161,7 +162,6 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 				}
 			}
 			params.setMemberQnameId(this.memberQnameId);
-			// siteService.listMembers("atol", "", "", 0, true);
 			return params;
 		} catch (Exception e) {
 			logger.error("Erreur lors de la construction des parametres [buildAuthorityParametersFromRequest]");
