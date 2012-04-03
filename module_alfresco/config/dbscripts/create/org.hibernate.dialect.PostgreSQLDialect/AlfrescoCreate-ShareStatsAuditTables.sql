@@ -18,7 +18,7 @@ CREATE TABLE share_stats_audit_entry
    audit_time INT8 NOT NULL,
    PRIMARY KEY (id)
 );
-CREATE UNIQUE INDEX idx_share_stats_alf_aud_ent_tm ON share_stats_audit_entry (audit_time);
+CREATE INDEX idx_share_stats_alf_aud_ent_tm ON share_stats_audit_entry (audit_time);
 
 CREATE SEQUENCE share_stats_site_volumetry_seq START WITH 1 INCREMENT BY 1;
 CREATE TABLE share_stats_site_volumetry
@@ -31,7 +31,7 @@ CREATE TABLE share_stats_site_volumetry
   at_time INT8 NOT NULL,
   PRIMARY KEY (id)
 );
-CREATE UNIQUE INDEX idx_share_stats_site_vol_site ON share_stats_site_volumetry (id);
+CREATE INDEX idx_share_stats_site_vol_site ON share_stats_site_volumetry (site_id);
 
 DELETE FROM alf_applied_patch WHERE id = 'patch.db-V3.4-ShareStats-ExtraTables';
 INSERT INTO alf_applied_patch
