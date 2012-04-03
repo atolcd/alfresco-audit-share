@@ -324,7 +324,7 @@
     </select>
 
     <!-- Récupère l'id du qname - member -->
-    <select id="selectQNameId" resultClass="long">
+    <select id="selectQNameId" parameterClass="java.lang.String" resultClass="long">
       select
         alf_qname.id
       from
@@ -333,7 +333,7 @@
       where
         alf_ns.uri = 'http://www.alfresco.org/model/content/1.0'
       and
-        local_name = 'member'
+        local_name = ?
     </select>
 
 
@@ -343,8 +343,11 @@
       from
         alf_child_assoc assoc
         join alf_node parentNode on (parentNode.id = assoc.parent_node_id)
+        join alf_node childNode on (childNode.id = assoc.child_node_id)
       where
-        assoc.type_qname_id = #qnameId#
+        assoc.type_qname_id = #memberQnameId#
+      and
+        childNode.type_qname_id = #personQnameId#
       and
         assoc.parent_node_id IN (
           select
@@ -354,7 +357,7 @@
             join alf_node childNode on (childNode.id = assoc.child_node_id)
           where
             assoc.type_qname_id = #qnameId#
-                   
+
           <isNotNull prepend="and" property="groupNames">
             assoc.qname_localname
             <iterate open="IN (" close=")" conjunction="," property="groupNames">

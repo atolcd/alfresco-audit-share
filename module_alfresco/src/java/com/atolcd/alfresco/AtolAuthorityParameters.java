@@ -4,21 +4,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AtolAuthorityParameters {
-	private long qnameId = 0;
+	private long memberQnameId = 0;
+	private long personQnameId = 0;
 	private List<String> groupNames = null;
 	
 	public AtolAuthorityParameters(){	
 		groupNames = new ArrayList<String>();
 	}
 	
-	public long getQnameId() {
-		return qnameId;
+	public long getMemberQnameId() {
+		return memberQnameId;
 	}
 
-	public void setQnameId(long qnameId) {
-		this.qnameId = qnameId;
+	public void setMemberQnameId(long memberQnameId) {
+		this.memberQnameId = memberQnameId;
 	}
 
+	public long getPersonQnameId() {
+		return personQnameId;
+	}
+
+	public void setPersonQnameId(long personQnameId) {
+		this.personQnameId = personQnameId;
+	}
+	
 	public List<String> getGroupNames() {
 		return groupNames;
 	}

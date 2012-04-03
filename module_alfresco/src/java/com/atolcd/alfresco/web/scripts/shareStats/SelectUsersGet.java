@@ -26,7 +26,8 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	private SqlMapClientTemplate sqlMapClientTemplate;
 	private NodeService nodeService;
 	private SiteService siteService;
-	private long qnameId = 0;
+	private long memberQnameId = 0;
+	private long personQnameId = 0;
 
 	private static final String SELECT_CONNECTED_USERS = "alfresco.atolcd.audit.selectConnectedUsers";
 	private static final String SELECT_QNAME_ID = "alfresco.atolcd.audit.selectQNameId";
@@ -53,7 +54,8 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 		Assert.notNull(this.nodeService);
 		Assert.notNull(this.siteService);
 
-		qnameId = (Long) this.sqlMapClientTemplate.queryForObject(SELECT_QNAME_ID);
+		memberQnameId = (Long) this.sqlMapClientTemplate.queryForObject(SELECT_QNAME_ID,"member");
+		personQnameId = (Long) this.sqlMapClientTemplate.queryForObject(SELECT_QNAME_ID,"person");
 	}
 
 	@Override
@@ -134,7 +136,8 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 					params.setGroupNames(null);
 				}
 			}
-			params.setQnameId(this.qnameId);
+			params.setMemberQnameId(this.memberQnameId);
+			params.setPersonQnameId(this.personQnameId);
 			return params;
 		} catch (Exception e) {
 			logger.error("Erreur lors de la construction des parametres [buildAuthorityParametersFromRequest]");

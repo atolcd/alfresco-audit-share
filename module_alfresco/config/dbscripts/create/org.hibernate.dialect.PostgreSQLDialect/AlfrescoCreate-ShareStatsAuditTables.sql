@@ -31,7 +31,7 @@ CREATE TABLE share_stats_site_volumetry
   at_time INT8 NOT NULL,
   PRIMARY KEY (id)
 );
-CREATE UNIQUE INDEX idx_share_stats_site_vol_site ON share_stats_site_volumetry (site_id);
+CREATE UNIQUE INDEX idx_share_stats_site_vol_site ON share_stats_site_volumetry (id);
 
 DELETE FROM alf_applied_patch WHERE id = 'patch.db-V3.4-ShareStats-ExtraTables';
 INSERT INTO alf_applied_patch
