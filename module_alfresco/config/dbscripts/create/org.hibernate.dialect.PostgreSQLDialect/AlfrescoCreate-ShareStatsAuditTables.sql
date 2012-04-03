@@ -25,11 +25,10 @@ CREATE TABLE share_stats_site_volumetry
 (
   id INT8 NOT NULL,
   site_id varchar(255) NOT NULL,
-  site_size BIGINT UNSIGNED,
-  folder_count INT UNSIGNED,
-  file_count INT UNSIGNED,
+  site_size BIGINT,
+  folder_count INT,
+  file_count INT,
   at_time INT8 NOT NULL,
-  INDEX idx_share_stats_site_vol_site (site_id),
   PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX idx_share_stats_site_vol_site ON share_stats_site_volumetry (site_id);

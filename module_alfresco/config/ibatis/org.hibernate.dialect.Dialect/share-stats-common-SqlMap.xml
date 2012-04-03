@@ -135,19 +135,19 @@
         </isNotNull>
         <isEqual prepend="and" property="appName" compareValue="document">
           (
-            audit_action_name = "details"
+            audit_action_name = 'details'
           or
-            audit_action_name = "download"
+            audit_action_name = 'download'
           )
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="wiki">
-            audit_action_name = "page"
+            audit_action_name = 'page'
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="blog">
-            audit_action_name = "postview"
+            audit_action_name = 'postview'
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="discussions">
-            audit_action_name = "topicview"
+            audit_action_name = 'topicview'
         </isEqual>
         <include refid="time_snippet" />
         <include refid="site_snippet"/>
@@ -163,19 +163,19 @@
         </isNotNull>
         <isEqual prepend="and" property="appName" compareValue="document">
           (
-            audit_action_name = "file-added"
+            audit_action_name = 'file-added'
           or
-            audit_action_name = "create"
+            audit_action_name = 'create'
           )
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="wiki">
-            audit_action_name = "create-post"
+            audit_action_name = 'create-post'
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="blog">
-            audit_action_name = "blog-create"
+            audit_action_name = 'blog-create'
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="discussions">
-            audit_action_name = "discussions-create"
+            audit_action_name = 'discussions-create'
         </isEqual>
       <include refid="time_snippet" />
       <include refid="site_snippet"/>
@@ -190,21 +190,21 @@
         </isNotNull>
         <isEqual prepend="and" property="appName" compareValue="document">
           (
-            audit_action_name = "update"
+            audit_action_name = 'update'
           or
-            audit_action_name = "file-updated"
+            audit_action_name = 'file-updated'
           or
-            audit_action_name = "inline-edit"
+            audit_action_name = 'inline-edit'
           )
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="wiki">
-          audit_action_name = "update-post"
+          audit_action_name = 'update-post'
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="blog">
-          audit_action_name = "blog-update"
+          audit_action_name = 'blog-update'
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="discussions">
-          audit_action_name = "discussions-update"
+          audit_action_name = 'discussions-update'
         </isEqual>
       <include refid="time_snippet" />
       <include refid="site_snippet"/>
@@ -218,16 +218,16 @@
           audit_app_name = #appName#
         </isNotNull>
         <isEqual prepend="and" property="appName" compareValue="document">
-            audit_action_name = "file-deleted"
+            audit_action_name = 'file-deleted'
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="wiki">
-            audit_action_name = "delete-post"
+            audit_action_name = 'delete-post'
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="blog">
-            audit_action_name = "blog-deleted"
+            audit_action_name = 'blog-deleted'
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="discussions">
-            audit_action_name = "discussions-deleted"
+            audit_action_name = 'discussions-deleted'
         </isEqual>
       <include refid="time_snippet" />
       <include refid="site_snippet"/>
@@ -296,7 +296,7 @@
       <include refid="update_snippet"/>
       <include refid="site_snippet"/>
       <include refid="time_snippet" />
-      group by audit_object
+      group by audit_object, audit_site
       order by audit_popularity DESC
     </select>
 
@@ -308,7 +308,7 @@
       <include refid="read_snippet"/>
       <include refid="site_snippet"/>
       <include refid="time_snippet" />
-      group by audit_object
+      group by audit_object, audit_site
       order by audit_popularity DESC
     </select>
 
@@ -354,11 +354,13 @@
             join alf_node childNode on (childNode.id = assoc.child_node_id)
           where
             assoc.type_qname_id = #qnameId#
-          and
+                   
+          <isNotNull prepend="and" property="groupNames">
             assoc.qname_localname
             <iterate open="IN (" close=")" conjunction="," property="groupNames">
               #groupNames[]#
             </iterate>
+          </isNotNull>
         );
     </select>
 

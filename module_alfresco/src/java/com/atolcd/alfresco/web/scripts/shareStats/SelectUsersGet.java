@@ -126,8 +126,12 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 				// On liste tous les sites, puis on ajoute le nom du groupe
 				// container
 				List<SiteInfo> sitesInfo = siteService.listSites("", "");
-				for (SiteInfo siteInfo : sitesInfo) {
-					params.setSite(siteInfo.getShortName());
+				if(sitesInfo.size() > 0){
+					for (SiteInfo siteInfo : sitesInfo) {
+						params.setSite(siteInfo.getShortName());
+					}
+				} else {
+					params.setGroupNames(null);
 				}
 			}
 			params.setQnameId(this.qnameId);
