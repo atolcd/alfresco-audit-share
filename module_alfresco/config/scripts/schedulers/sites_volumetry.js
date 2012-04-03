@@ -15,7 +15,7 @@ try {
             // Calcul de la volumétrie
             var volumetry = calculateVolumetry(documentLibrary);
 
-            // TODO : Stocker en base
+            // Stockage des informations en base
             var timestamp = new Date().getTime();
             success = sharestats.insertVolumetry(siteShortName, volumetry.siteSize, volumetry.foldersCount, volumetry.documentsCount, timestamp);
             if(success){
@@ -39,7 +39,8 @@ try {
   }
 }
 catch(e) {
-  throw e;
+  logger.log("Une erreur s'est produite pendant le calcul de la volumétrie des sites.");
+  logger.log(e);
 }
 
 
