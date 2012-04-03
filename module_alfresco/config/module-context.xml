@@ -51,6 +51,7 @@
     <property name="sqlMapClientTemplate" ref="shareStatsQueriesSqlMapClientTemplate"/>
     <property name="nodeService" ref="NodeService"/>
     <property name="siteService" ref="SiteService" />
+    <property name="authorityService" ref="AuthorityService" />
   </bean>
 
   <bean id="webscript.com.atolcd.alfresco.share-stats.select-volumetry.get" class="com.atolcd.alfresco.web.scripts.shareStats.SelectVolumetryGet" parent="webscript">

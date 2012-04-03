@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -26,8 +30,10 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	private SqlMapClientTemplate sqlMapClientTemplate;
 	private NodeService nodeService;
 	private SiteService siteService;
+	private AuthorityService authorityService;
 	private long memberQnameId = 0;
 	private long personQnameId = 0;
+	private long containerQnameId = 0;
 
 	private static final String SELECT_CONNECTED_USERS = "alfresco.atolcd.audit.selectConnectedUsers";
 	private static final String SELECT_QNAME_ID = "alfresco.atolcd.audit.selectQNameId";
@@ -48,14 +54,19 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 		this.siteService = siteService;
 	}
 
+	public void setAuthorityService(AuthorityService authorityService) {
+		this.authorityService = authorityService;
+	}
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(this.sqlMapClientTemplate);
 		Assert.notNull(this.nodeService);
 		Assert.notNull(this.siteService);
 
-		memberQnameId = (Long) this.sqlMapClientTemplate.queryForObject(SELECT_QNAME_ID,"member");
-		personQnameId = (Long) this.sqlMapClientTemplate.queryForObject(SELECT_QNAME_ID,"person");
+		memberQnameId = (Long) this.sqlMapClientTemplate.queryForObject(SELECT_QNAME_ID, "member");
+		personQnameId = (Long) this.sqlMapClientTemplate.queryForObject(SELECT_QNAME_ID, "person");
+		containerQnameId = (Long) this.sqlMapClientTemplate.queryForObject(SELECT_QNAME_ID, "authorityContainer");
 	}
 
 	@Override
@@ -104,15 +115,28 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<String> selectNeverConnectedUsers(AtolAuthorityParameters atolAuthorityParameters,
-			AuditQueryParameters auditQueryParameters) {
+	public List<String> selectNeverConnectedUsers(AtolAuthorityParameters atolAuthorityParameters, AuditQueryParameters auditQueryParameters) {
 		List<String> users = new ArrayList<String>();
+		List<String> groups = new ArrayList<String>();
 		List<String> auditUsers = new ArrayList<String>();
 		// Tous les membres de sites
+		atolAuthorityParameters.setPersonQnameId(personQnameId);
 		users = (List<String>) this.sqlMapClientTemplate.queryForList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
+		// Tous les groupes de sites
+		atolAuthorityParameters.setPersonQnameId(containerQnameId);
+		groups = (List<String>) this.sqlMapClientTemplate.queryForList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
 		// Tous les utilisateurs tracés par l'audit, en fonction des parametres
-		auditUsers = (List<String>) this.sqlMapClientTemplate
-				.queryForList(SELECT_CONNECTED_USERS, auditQueryParameters);
+		auditUsers = (List<String>) this.sqlMapClientTemplate.queryForList(SELECT_CONNECTED_USERS, auditQueryParameters);
+
+		for (String group : groups) {
+			if (group.startsWith("GROUP_")) {
+				Set<String> s = authorityService.getContainedAuthorities(AuthorityType.USER, group, false);
+				List<String> subusers = new ArrayList<String>();
+				subusers.addAll(s);
+				users = ListUtils.union(users, subusers);
+			}
+		}
+
 		// Differentiel
 		users.removeAll(auditUsers);
 		return users;
@@ -128,7 +152,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 				// On liste tous les sites, puis on ajoute le nom du groupe
 				// container
 				List<SiteInfo> sitesInfo = siteService.listSites("", "");
-				if(sitesInfo.size() > 0){
+				if (sitesInfo.size() > 0) {
 					for (SiteInfo siteInfo : sitesInfo) {
 						params.setSite(siteInfo.getShortName());
 					}
@@ -137,7 +161,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 				}
 			}
 			params.setMemberQnameId(this.memberQnameId);
-			params.setPersonQnameId(this.personQnameId);
+			// siteService.listMembers("atol", "", "", 0, true);
 			return params;
 		} catch (Exception e) {
 			logger.error("Erreur lors de la construction des parametres [buildAuthorityParametersFromRequest]");
