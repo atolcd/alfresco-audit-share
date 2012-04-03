@@ -5,7 +5,7 @@ function main() {
 
   // Check parameters
   if (!siteId || !componentId || !objectId) {
-    return jsonError("No parameters supplied");
+    return status.setCode(status.STATUS_BAD_REQUEST, "No parameters supplied");
   }
 
   // Get the site
@@ -23,7 +23,7 @@ function main() {
   // Get site container
   var container = site.getContainer(componentId);
   if (!container) {
-    return jsonError("Could not locate " + componentId + " container.");
+    return status.setCode(status.STATUS_BAD_REQUEST, "Could not locate " + componentId + " container.");
   }
 
   if (componentId == "wiki" || componentId == "blog") {
