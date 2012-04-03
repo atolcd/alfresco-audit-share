@@ -333,7 +333,7 @@
       where
         alf_ns.uri = 'http://www.alfresco.org/model/content/1.0'
       and
-        local_name = ?
+        local_name = #string#
     </select>
 
 
@@ -356,7 +356,7 @@
             alf_child_assoc assoc
             join alf_node childNode on (childNode.id = assoc.child_node_id)
           where
-            assoc.type_qname_id = #qnameId#
+            assoc.type_qname_id = #memberQnameId#
 
           <isNotNull prepend="and" property="groupNames">
             assoc.qname_localname

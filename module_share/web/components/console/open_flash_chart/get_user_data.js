@@ -80,16 +80,36 @@ function buildBarChartElements(params, labels) {
   }
 
   //Mise à jour du max
-  var new_max = max, coef = 1;
+  //Mise à jour du maximum
+  var new_max = max,
+    coef = 1;
 
-  while (new_max >= 10) {
-    new_max = new_max / 10;
-    coef = coef * 10;
+  if (max == 0) {
+    params.max = 9;
+    params.step = 1;
+  } else {
+    while (max > 10) {
+      max = max / 10;
+      coef = coef * 10;
+    }
+
+    new_max = Math.ceil(max);
+    //Pas
+    params.step = (new_max < 5 && new_max > 1 && coef > 1) ? coef / 2 : coef;
+    // Maximum trop importante pour les valeurs proche de 1x ou 2x.
+    if (coef > 1) {
+      if (max > 1 && max < 1.5) {
+        params.max = new_max * coef * 0.75;
+      } else if (max > 2 && max < 2.5) {
+        params.max = Math.round(new_max * coef * (5 / 6));
+      } else {
+        params.max = new_max * coef;
+      }
+    } else {
+      params.max = new_max;
+      params.step = coef;
+    }
   }
-
-  new_max = Math.round(new_max);
-  params.max = new_max * coef;
-  params.step = coef;
 
   elements.push({
     "type": "bar_glass",
