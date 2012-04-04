@@ -4,7 +4,7 @@
     "items":
     [
       <#if users?size !=0>
-        <#list users as user>
+        <#list users?sort as user>
           {
             "username": "${user}",
             "fullName": "${shareStatsutils.getPersonFullName(user)!""}"
