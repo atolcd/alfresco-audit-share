@@ -224,7 +224,7 @@
             audit_action_name = 'delete-post'
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="blog">
-            audit_action_name = 'blog-deleted'
+            audit_action_name = 'blog-delete'
         </isEqual>
         <isEqual prepend="and" property="appName" compareValue="discussions">
             audit_action_name = 'discussions-deleted'

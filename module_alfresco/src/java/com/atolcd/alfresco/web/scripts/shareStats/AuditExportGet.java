@@ -57,14 +57,15 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 			Map<String, Object> model = new HashMap<String, Object>();
 			AuditQueryParameters params = wsSelectAudits.buildParametersFromRequest(req);
 
+			String interval = req.getParameter("interval");
 			String type = req.getParameter("type");
-			if(type.equals("volumetry") || type.equals("users-count")){
+			if (type.equals("volumetry") || type.equals("users-count")) {
 				String values = req.getParameter("values");
 				model.put("values", values.split(","));
 			} else {
 				wsSelectAudits.checkForQuery(model, params, type);
 			}
-			buildCsvFromRequest(model, csv, params, type);
+			buildCsvFromRequest(model, csv, params, type, interval);
 
 			csv.close();
 			res.setHeader("Content-Disposition", "attachment; filename=\"export.csv\"");
@@ -88,28 +89,26 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")
-	public void buildCsvFromRequest(Map<String, Object> model, CsvWriter csv, AuditQueryParameters params, String type)
+	public void buildCsvFromRequest(Map<String, Object> model, CsvWriter csv, AuditQueryParameters params, String type, String interval)
 			throws SQLException, JSONException, IOException {
 		// Sélection de TOUS les audits.
 		String dateRecord = null;
 		if (model.containsKey("dates")) {
-			csv.writeRecord(new String[] { I18NUtil.getMessage("csv.interval"), I18NUtil.getMessage("csv.action"),
+			csv.writeRecord(new String[] { I18NUtil.getMessage("csv.date"), I18NUtil.getMessage("csv.action"),
 					I18NUtil.getMessage("csv.count") });
 			List<List<AuditCount>> auditCountsLists = (List<List<AuditCount>>) model.get("dates");
 			String[] slicedDates = params.getSlicedDates().split(",");
 			for (int i = 0; i < auditCountsLists.size(); i++) {
-				dateRecord = getStringDate(Long.parseLong(slicedDates[i]));
-				dateRecord += " - " + getStringDate(Long.parseLong(slicedDates[i + 1]));
+				dateRecord = getStringDate(Long.parseLong(slicedDates[i]), interval);
 				writeAuditCount(csv, auditCountsLists.get(i), true, dateRecord, "action");
 			}
-		} else if(model.containsKey("values")){
-			csv.writeRecord(new String[] { I18NUtil.getMessage("csv.interval"), I18NUtil.getMessage("csv."+ type)});
+		} else if (model.containsKey("values")) {
+			csv.writeRecord(new String[] { I18NUtil.getMessage("csv.date"), I18NUtil.getMessage("csv." + type) });
 			String[] slicedDates = params.getSlicedDates().split(",");
 			String[] values = (String[]) model.get("values");
 			for (int i = 0; i < values.length; i++) {
-				dateRecord = getStringDate(Long.parseLong(slicedDates[i]));
-				dateRecord += " - " + getStringDate(Long.parseLong(slicedDates[i + 1]));
-				csv.writeRecord(new String[]{dateRecord,values[i]});
+				dateRecord = getStringDate(Long.parseLong(slicedDates[i]), interval);
+				csv.writeRecord(new String[] { dateRecord, values[i] });
 			}
 		}
 	}
@@ -153,8 +152,7 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 		}
 	}
 
-	public void writeCsvEntry(CsvWriter csv, List<CsvExportEntry> csvExportEntries, boolean dateFirst, String date)
-			throws IOException {
+	public void writeCsvEntry(CsvWriter csv, List<CsvExportEntry> csvExportEntries, boolean dateFirst, String date) throws IOException {
 		for (CsvExportEntry csvExportEntry : csvExportEntries) {
 			String[] record;
 			int recordIndex = 0;
@@ -186,15 +184,42 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 	 * 
 	 * @return date String
 	 */
-	public String getStringDate(long l) {
+	public String getStringDate(long timestamp, String dateInterval) {
 		GregorianCalendar gc = new GregorianCalendar();
-		gc.setTimeInMillis(l);
+		gc.setTimeInMillis(timestamp);
 
 		String date = "";
-		date += String.valueOf(gc.get(Calendar.DAY_OF_MONTH)) + "/";
-		date += String.valueOf(gc.get(Calendar.MONTH) + 1) + "/";
-		date += String.valueOf(gc.get(Calendar.YEAR));
+		switch (intervalEnum.valueOf(dateInterval)) {
+		case days:
+			date = padZero(gc.get(Calendar.HOUR)) + "h00";
+			date += " - ";
+			date += padZero(gc.get(Calendar.HOUR) + 2) + "h00";
+			break;
+		case weeks:
+			date = padZero(gc.get(Calendar.DAY_OF_MONTH)) + "/";
+			date += padZero(gc.get(Calendar.MONTH) + 1) + "/";
+			date += String.valueOf(gc.get(Calendar.YEAR));
+			break;
+		case months:
+			date = padZero(gc.get(Calendar.DAY_OF_MONTH)) + "/";
+			date += padZero(gc.get(Calendar.MONTH) + 1) + "/";
+			date += String.valueOf(gc.get(Calendar.YEAR));
+			break;
+		case years:
+			String monthNumber = String.valueOf(gc.get(Calendar.MONTH));
+			date = I18NUtil.getMessage("csv.month." + monthNumber);
+			date += " " + String.valueOf(gc.get(Calendar.YEAR));
+			break;
+		}
 
 		return date;
+	}
+
+	public String padZero(int n) {
+		String ret = String.valueOf(n);
+		if (n < 10) {
+			ret = "0" + ret;
+		}
+		return ret;
 	}
 }
