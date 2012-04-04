@@ -65,13 +65,26 @@
     <property name="siteService" ref="SiteService" />
   </bean>
 
-	<!-- JavaScript API -->
+  <!-- JavaScript API -->
   <bean id="shareStatsScript" parent="baseJavaScriptExtension" class="com.atolcd.alfresco.repo.jscript.ShareStats">
     <property name="extensionName">
       <value>sharestats</value>
     </property>
     <property name="wsInsertAudits">
       <ref bean="webscript.com.atolcd.alfresco.share-stats.insert-audit.post" />
+    </property>
+  </bean>
+
+  <!-- Template API -->
+  <bean id="cg21.intranet.Template" parent="baseTemplateImplementation" class="com.atolcd.alfresco.repo.template.ShareStatsUtils">
+    <property name="extensionName">
+      <value>shareStatsutils</value>
+    </property>
+    <property name="nodeService">
+      <ref bean="NodeService" />
+    </property>
+    <property name="personService">
+      <ref bean="personService" />
     </property>
   </bean>
 

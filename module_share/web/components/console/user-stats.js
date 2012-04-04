@@ -327,21 +327,21 @@
      */
     executeUserRequest: function ConsoleUserAudit_executeUserRequest(params, type) {
       var displayUsers = function (response) {
-          var names = response.json.items,
+          var users = response.json.items,
             el = Dom.get(this.id + "-" + type);
 
-          if (names && names.length) {
+          if (users && users.length) {
             var context = Alfresco.constants.URL_PAGECONTEXT,
               url = "",
               html = "",
-              name = "",
+              user = "",
               i = 0,
-              l = names.length;
+              l = users.length;
 
             for (; i < l; i++) {
-              name = names[i];
+              user = users[i];
               html += '<li class="nav-user">';
-              html += '<a class="theme-color-1" tabindex="0" target="_blank" href="' + context + 'user/' + name + '/profile">' + name + '</a>';
+              html += '<a class="theme-color-1" tabindex="0" target="_blank" href="' + context + 'user/' + user.username + '/profile">' + user.fullName + ' (' + user.username + ')</a>';
               html += '</li>';
             }
 
@@ -351,7 +351,7 @@
             el.innerHTML = this.msg("label.no-results." + type);
           }
 
-          this.headers[type].innerHTML += " (" + names.length + ")";
+          this.headers[type].innerHTML += " (" + users.length + ")";
         };
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-users" + params;
@@ -404,7 +404,7 @@
         failureMessage: this._msg("label.popup.query.error"),
         execScripts: true,
         additionalsParams: {
-          chartType: "vbar",
+          chartType: "dotline",
           type: "count",
           site: site,
           tsString: tsString,

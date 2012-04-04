@@ -5,7 +5,11 @@
     [
       <#if users?size !=0>
         <#list users as user>
-          "${user}"<#if user_has_next>,</#if>
+          {
+            "username": "${user}",
+            "fullName": "${shareStatsutils.getPersonFullName(user)!""}"
+          }
+          <#if user_has_next>,</#if>
         </#list>
       </#if>
     ]
