@@ -49,9 +49,6 @@ function buildBarChartXLabels(params) {
   var labels = [],
     timeType = params.currentFilter,
     slicedDates = params.additionalsParams.tsString.split(",");
-  var padzero = function (n) {
-      return n < 10 ? '0' + n.toString() : n.toString();
-    };
 
   switch (timeType) {
   case "years":
@@ -115,6 +112,9 @@ function buildDateTitle(params) {
   return title;
 }
 
+function padzero (n) {
+  return n < 10 ? '0' + n.toString() : n.toString();
+ }
 /**
  * Retourne la traduction d'un mois
  * @method getMonth

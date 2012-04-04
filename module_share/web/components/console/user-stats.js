@@ -3,7 +3,8 @@
  *
  * @namespace Alfresco
  * @class Alfresco.ConsoleUserAudit
- */ (function () {
+ */
+(function () {
   /**
    * YUI Library aliases
    */
@@ -81,6 +82,11 @@
         Event.addListener("chart-next", "click", parent.onChangeDateInterval, {
           coef: 1
         }, parent);
+
+        parent.headers["users-connected"] = Dom.get(parent.id + "-users-connected-header");
+        parent.headers["users-never-connected"] = Dom.get(parent.id + "-users-never-connected-header");
+        parent.headers["users-recently-connected"] = Dom.get(parent.id + "-users-recently-connected-header");
+
         this.loadSites();
       },
 
@@ -174,6 +180,12 @@
     recentlyConnectedDelay: 30,
 
     /**
+     * @attribute headers 
+     * Contient les éléments Dom des différents headers de la table sous le graphe
+     */
+    headers: [],
+
+    /**
      * Fired by YUILoaderHelper when required component script files have
      * been loaded into the browser.
      *
@@ -264,6 +276,7 @@
         var params = this.lastRequest.params;
         params += "&type=users";
         params += "&values=" + this.lastRequest.values.toString();
+        params += "&interval=" + this.lastRequest.dateFilter;
         var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params; //?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data));//JSON.stringify
         window.open(url);
       }
@@ -299,7 +312,6 @@
 
       // Crétion du tableau d'intervalle de dates
       tsArray = this.buildTimeStampArray();
-
       params = "?type=" + type;
       params += "&from=" + tsArray[0];
       params += "&to=" + tsArray[tsArray.length - 1];
@@ -338,6 +350,8 @@
           } else {
             el.innerHTML = this.msg("label.no-results." + type);
           }
+
+          this.headers[type].innerHTML += " (" + names.length + ")";
         };
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-users" + params;
@@ -365,7 +379,10 @@
 
       // Crétion du tableau d'intervalle de dates
       if (dateFilter) {
-        tsString = this.buildTimeStampArray().toString();
+        var tsArray = this.buildTimeStampArray();
+        //Mise à jour des labels
+        this.updateUsersLabels(tsArray);
+        tsString = tsArray.toString();
       }
 
       // Création des paramètres et exécution de la requête
@@ -375,6 +392,7 @@
         params += "&site=" + site;
       }
       this.lastRequest.params = params;
+      this.lastRequest.dateFilter = dateFilter;
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-users" + this.lastRequest.params;
       Alfresco.util.Ajax.jsonGet({
@@ -427,7 +445,7 @@
             params = {
               wmode: "opaque"
             },
-            // /!\ pour IE   
+            // /!\ pour IE
             attributes = {
               salign: "l",
               AllowScriptAccess: "always"
@@ -636,6 +654,55 @@
       return tsArray;
     },
 
+    updateUsersLabels: function ConsoleUserAudit_updateUsersLabels(tsArray) {
+      var connectedLabel = "",
+        neverConnectedLabel = "";
+
+      switch (this.currentDateFilter) {
+      case "days":
+        var date = new Date(tsArray[0]),
+          today = new Date();
+
+        if (date.getMonth() == today.getMonth() && date.getDate() == today.getDate() && date.getFullYear() == today.getFullYear()) {
+          connectedLabel = this._msg("label.users.connected.today");
+          neverConnectedLabel = this._msg("label.users.never-connected.today");
+        } else {
+          var day = this._msg("label.day." + date.getDay());
+          day += " " + padzero(date.getDate()) + "/" + padzero(date.getMonth() + 1);
+          connectedLabel = this._msg("label.users.connected." + this.currentDateFilter, day);
+          neverConnectedLabel = this._msg("label.users.never-connected." + this.currentDateFilter, day);
+        }
+        break;
+      case "weeks":
+        var fromDate = new Date(tsArray[0]),
+          lastDate = new Date(tsArray[tsArray.length - 2]),
+          from, to;
+        from = padzero(fromDate.getDate()) + "/" + padzero(fromDate.getMonth() + 1) + "/" + fromDate.getFullYear();
+        to = padzero(lastDate.getDate()) + "/" + padzero(lastDate.getMonth() + 1) + "/" + lastDate.getFullYear();
+        connectedLabel = this._msg("label.users.connected." + this.currentDateFilter, from, to);
+        neverConnectedLabel = this._msg("label.users.never-connected." + this.currentDateFilter, from, to);
+        break;
+      case "months":
+        var date = new Date(tsArray[0]),
+          month;
+        month = this._msg("label.month." + date.getMonth()) + " " + date.getFullYear();
+        connectedLabel = this._msg("label.users.connected." + this.currentDateFilter, month);
+        neverConnectedLabel = this._msg("label.users.never-connected." + this.currentDateFilter, month);
+        break;
+      case "years":
+        var date = new Date(tsArray[0]);
+        connectedLabel = this._msg("label.users.connected." + this.currentDateFilter, date.getFullYear());
+        neverConnectedLabel = this._msg("label.users.never-connected." + this.currentDateFilter, date.getFullYear());
+        break;
+      };
+
+      if (connectedLabel) {
+        this.headers["users-connected"].innerHTML = connectedLabel;
+      }
+      if (neverConnectedLabel) {
+        this.headers["users-never-connected"].innerHTML = neverConnectedLabel;
+      }
+    },
     /**
      * @method onChangeDateFilter
      * @param e Event déclencheur

@@ -263,6 +263,7 @@
         var params = this.lastRequest.params;
         params += "&type=volumetry";
         params += "&values=" + this.lastRequest.values.toString();
+        params += "&interval=" + this.lastRequest.dateFilter;
         var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params; //?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data));//JSON.stringify
         window.open(url);
       }
@@ -292,6 +293,7 @@
 
       // Création des paramètres et exécution de la requête
       this.lastRequest.params = params;
+      this.lastRequest.dateFilter = dateFilter;
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-volumetry" + this.lastRequest.params;
       Alfresco.util.Ajax.jsonGet({

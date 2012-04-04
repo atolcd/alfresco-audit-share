@@ -30,7 +30,7 @@
     <div id="${el}-chart-body" class="main-chart">
       <div class="separator browsing">
           <div id="chart-prev" class="img-prev-arrow"></div>
-          
+
           <div class="yui-u filters">
             <span id="home">
               <span class="home-img" title="${msg('label.home')}"></span>
@@ -50,7 +50,7 @@
             <span id="by-years">
               <a href="#">${msg("label.byYear")}</a>
             </span>
-            
+
             <span class="export-button">
               <span class="yui-button yui-push-button" id="${el}-export-button">
                 <span class="first-child"><button>${msg("button.export")}</button></span>
@@ -68,9 +68,9 @@
     <div class="users-table-container">
       <table id="users-table">
         <tr>
-          <th>${(msg("label.users.recently-connected"))}</th>
-          <th>${(msg("label.users.connected"))}</th>
-          <th class="last">${(msg("label.users.never-connected"))}</th>
+          <th id="${el}-users-recently-connected-header">${(msg("label.users.recently-connected"))}</th>
+          <th id="${el}-users-connected-header">${(msg("label.users.connected"))}</th>
+          <th id="${el}-users-never-connected-header" class="last">${(msg("label.users.never-connected"))}</th>
         </tr>
         <tr>
           <td id="${el}-users-recently-connected" class="users-list">

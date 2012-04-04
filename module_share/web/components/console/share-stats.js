@@ -318,7 +318,9 @@
 
     onExport: function ConsoleAudit_onExport() {
       if (this.lastRequest.params) {
-        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + this.lastRequest.params; //?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data));//JSON.stringify
+        var params = this.lastRequest.params;
+        params += "&interval=" + this.lastRequest.dateFilter;
+        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params;
         window.open(url);
       }
     },
@@ -344,6 +346,7 @@
 
       // Création des paramètres et exécution de la requête
       this.lastRequest.params = this.buildParams(module, site, tsString, type);
+      this.lastRequest.dateFilter = dateFilter;
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-audits" + this.lastRequest.params;
       Alfresco.util.Ajax.jsonGet({
