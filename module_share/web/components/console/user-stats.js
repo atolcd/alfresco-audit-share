@@ -404,7 +404,7 @@
         failureMessage: this._msg("label.popup.query.error"),
         execScripts: true,
         additionalsParams: {
-          chartType: "dotline",
+          chartType: "vbar",
           type: "count",
           site: site,
           tsString: tsString,
