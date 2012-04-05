@@ -62,6 +62,7 @@
         parent.widgets.exportButton.set("disabled", true);
 
         // el, sType, fn, obj, overrideContext
+        Event.addListener("bar_stack-criteria", "click", parent.onShowStackedBar, null, parent);
         Event.addListener("home", "click", parent.onResetDates, null, parent);
         Event.addListener("by-days", "click", parent.onChangeDateFilter, {
           filter: "days"
@@ -214,6 +215,12 @@
           var sText = p_oItem.cfg.getProperty("text"),
             value = p_oItem.value;
 
+          if (value == "") { // Tout les sites
+            Dom.removeClass("bar-stack-criteria-container", "hidden");
+          } else {
+            Dom.addClass("bar-stack-criteria-container", "hidden");
+          }
+
           me.widgets.siteButton.value = value;
           me.widgets.siteButton.set("label", sText);
           me.execute();
@@ -305,7 +312,7 @@
         failureMessage: this._msg("label.popup.query.error"),
         execScripts: true,
         additionalsParams: {
-          chartType: "vbar",
+          chartType: (!site && Dom.get("bar_stack-criteria").checked) ? "bar_stack" : "vbar",
           site: site,
           tsString: tsString,
           target: "chart",
@@ -591,6 +598,10 @@
 
     onResetDates: function ConsoleSitesVolumetry_OnResetDates() {
       this.setupCurrentDates();
+      this.execute();
+    },
+
+    onShowStackedBar: function ConsoleSitesVolumetry_onShowStackedBar() {
       this.execute();
     },
 

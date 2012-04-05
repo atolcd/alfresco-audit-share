@@ -24,6 +24,9 @@
         <div id="criterias" class="criterias">
           <label for="site-criteria-container">${msg("label.menu.site")}</label><div id="site-criteria-container"></div>
         </div>
+        <div id="bar-stack-criteria-container">
+          <input id="bar_stack-criteria" type="checkbox"></input><label for="bar_stack-criteria">${msg("label.menu.use.bar_stack")}</label>
+        </div>
       </div>
     </div>
 

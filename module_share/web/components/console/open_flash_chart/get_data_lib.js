@@ -188,3 +188,8 @@ gridColors["x-axis"] = gray;
 gridColors["y-axis"] = gray;
 gridColors["x-grid"] = mediumGray;
 gridColors["y-grid"] = mediumGray;
+
+
+var barStackedChartColors = {};
+barStackedChartColors.defaultColors = ["#FF6201", "#75C7BB", "#D6191F", "#7CA900", "#373121", "#EB9B00", "#58C3F0", "#7D7B6A", "#EA2673", "#BCA8D0",
+                                       "#8D625B", "#FFD370", "#009285", "#1B9EFC", "#0A9200", "#FF9900", "#C6E56F", "#755A04", "#80001B", "#291309"];

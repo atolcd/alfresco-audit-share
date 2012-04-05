@@ -5,12 +5,14 @@ import org.alfresco.repo.template.BaseTemplateProcessorExtension;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.cmr.site.SiteService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 public class ShareStatsUtils extends BaseTemplateProcessorExtension implements InitializingBean {
 	private NodeService nodeService;
 	private PersonService personService;
+	private SiteService siteService;
 
 	public void setNodeService(NodeService nodeService) {
 		this.nodeService = nodeService;
@@ -20,9 +22,14 @@ public class ShareStatsUtils extends BaseTemplateProcessorExtension implements I
 		this.personService = personService;
 	}
 
+	public void setSiteService(SiteService siteService) {
+		this.siteService = siteService;
+	}
+
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(nodeService, "There must be a NodeService");
 		Assert.notNull(personService, "There must be a PersonService");
+		Assert.notNull(siteService, "There must be a SiteService");
 	}
 
 	public String getPersonFullName(String username) {
@@ -36,5 +43,9 @@ public class ShareStatsUtils extends BaseTemplateProcessorExtension implements I
 		}
 
 		return "";
+	}
+
+	public String getSiteTitle(String shortName) {
+		return siteService.getSite(shortName).getTitle();
 	}
 }

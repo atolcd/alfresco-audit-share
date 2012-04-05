@@ -38,21 +38,25 @@ function buildChart(params) {
 
     "bg_colour": "#FFFFFF",
 
-    "elements": buildBarChartElements(params, x_labels.labels),
-
     "x_axis": {
       "colour": gridColors["x-axis"],
       "grid-colour": gridColors["x-grid"],
       "labels": x_labels
-    },
-
-    "y_axis": {
-      "steps": params.max / 10,
-      "colour": gridColors["y-axis"],
-      "grid-colour": gridColors["y-grid"],
-      "offset": 0,
-      "max": params.max
     }
+  };
+
+  if (params.additionalsParams.chartType == "vbar") {
+    bars.elements = buildBarChartElements(params, x_labels.labels);
+  } else {
+    bars.elements = buildStackedBarChartElements(params, x_labels.labels);
+  }
+
+  bars["y_axis"] = {
+    "steps": params.max / 10,
+    "colour": gridColors["y-axis"],
+    "grid-colour": gridColors["y-grid"],
+    "offset": 0,
+    "max": params.max
   };
 
   return bars;
@@ -66,7 +70,7 @@ function buildBarChartElements(params, labels) {
     values = [],
     label = getMessage("volumetry", "graph.label.");
 
-  //Boucle sur les éléments par date
+  // Boucle sur les Ã©lÃ©ments par date
   for (var i = 0; i < pItemsLength; i++) {
     var item = pItems[i];
     item = roundNumber(item / (1024 * 1024), 2);
@@ -78,7 +82,7 @@ function buildBarChartElements(params, labels) {
 
     max = max > item ? max : item;
   }
-  //Mise à jour du maximum
+  // Mise Ã  jour du maximum
   params.max = max ? roundMax(max) : 10;
 
 
@@ -93,6 +97,67 @@ function buildBarChartElements(params, labels) {
   return elements;
 }
 
+function buildStackedBarChartElements(params, labels) {
+  var max = 0,
+    values = [],
+    label = getMessage("volumetry", "graph.label.");
+
+  // Boucle sur les Ã©lÃ©ments par date
+  for (var i=0, ii=params.stackedValues.length ; i < ii; i++) {
+    var stackedValue = params.stackedValues[i]
+        valueTab = [];
+
+    for (var j=0, jj=stackedValue.length ; j<jj ; j++) {
+      var item = roundNumber(stackedValue[j] / (1024 * 1024), 2),
+          value_obj = {};
+
+      if (item > 0) {
+        // value_obj.tip = labels[i];
+        value_obj.tip = "Site : " + params.sites[j];
+        value_obj.tip += "\n" +label + " : " + item + " Mo";
+        value_obj.tip += "\n\nTotal : #total# Mo";
+      }
+      else {
+        value_obj.tip = "";
+        // HACK : les tooltips se cumulent lors de l'affichage quand
+        // toutes les valeurs sont vides
+        if (params.values[i] == 0 && j == 0) {
+           value_obj.tip = getMessage("label.no-data");
+        }
+      }
+
+      value_obj.val = item;
+      valueTab.push(value_obj);
+    }
+
+    values.push(valueTab);
+
+    var total = roundNumber(params.values[i] / (1024 * 1024), 2);
+    max = max > total ? max : total;
+  }
+
+  // Mise Ã  jour du maximum
+  params.max = max ? roundMax(max) : 10;
+
+  var sites = [];
+  for (var i=0, ii=params.sites.length ; i < ii; i++) {
+    sites.push({
+      "colour": barStackedChartColors.defaultColors[i%barStackedChartColors.defaultColors.length],
+      "text": params.sites[i],
+      "font-size": 10
+    });
+  }
+
+  return [{
+    "type": "bar_stack",
+    "alpha": 0.9,
+    "colours" : barStackedChartColors.defaultColors,
+    "text": label,
+    "font-size": 10,
+    "values": values,
+    "keys": sites
+  }];
+}
 
 function buildXAxisLabels(params) {
   var steps = params.values.length >= 30 ? Math.round(params.values.length / 15) : 1;
@@ -105,10 +170,10 @@ function buildXAxisLabels(params) {
 }
 
 /**
- * Retourne la traduction du message donné. Peut être prefixé.
+ * Retourne la traduction du message donnÃ©. Peut Ãªtre prefixÃ©.
  * @method getMessage
- * @param messageId Identifiant du message à traduire
- * @prefix Optionnel - Préfixe du message
+ * @param messageId Identifiant du message Ã  traduire
+ * @prefix Optionnel - PrÃ©fixe du message
  */
 
 function getMessage(messageId, prefix) {
@@ -149,10 +214,10 @@ function roundMax(max) {
 }
 
 /**
- * Arrondit le nombre number avec la précision digits après la virgule
+ * Arrondit le nombre number avec la prÃ©cision digits aprÃ¨s la virgule
  * @method roundNumber
- * @param number Nombre à arrondir
- * @param digits Nombre de chiffres après la virgule
+ * @param number Nombre Ã  arrondir
+ * @param digits Nombre de chiffres aprÃ¨s la virgule
  */
 function roundNumber(number, digits) {
   var multiple = Math.pow(10, digits);
