@@ -702,6 +702,7 @@
       if (neverConnectedLabel) {
         this.headers["users-never-connected"].innerHTML = neverConnectedLabel;
       }
+      this.headers["users-recently-connected"].innerHTML = this._msg("label.users.recently-connected");
     },
     /**
      * @method onChangeDateFilter

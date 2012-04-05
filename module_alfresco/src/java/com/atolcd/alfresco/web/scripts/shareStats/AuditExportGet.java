@@ -7,10 +7,10 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.json.JSONException;
 import org.springframework.beans.factory.InitializingBean;
@@ -97,10 +97,13 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 			csv.writeRecord(new String[] { I18NUtil.getMessage("csv.date"), I18NUtil.getMessage("csv.action"),
 					I18NUtil.getMessage("csv.count") });
 			List<List<AuditCount>> auditCountsLists = (List<List<AuditCount>>) model.get("dates");
+			// Actuellement, on ne dépasse pas 3 actions / graphique / export
+			Map<String, Integer> actions = new HashMap<String, Integer>(3);
+			getAllActions(actions, auditCountsLists);
 			String[] slicedDates = params.getSlicedDates().split(",");
 			for (int i = 0; i < auditCountsLists.size(); i++) {
 				dateRecord = getStringDate(Long.parseLong(slicedDates[i]), interval);
-				writeAuditCount(csv, auditCountsLists.get(i), true, dateRecord, "action");
+				writeAuditCount(csv, auditCountsLists.get(i), dateRecord, actions);
 			}
 		} else if (model.containsKey("values")) {
 			csv.writeRecord(new String[] { I18NUtil.getMessage("csv.date"), I18NUtil.getMessage("csv." + type) });
@@ -113,6 +116,14 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 		}
 	}
 
+	public void getAllActions(Map<String, Integer> actions, List<List<AuditCount>> auditCountLists) {
+		for (List<AuditCount> auditCountList : auditCountLists) {
+			for (AuditCount auditCount : auditCountList) {
+				actions.put(auditCount.getTarget(), 0);
+			}
+		}
+	}
+
 	/**
 	 * 
 	 * @param csv
@@ -120,36 +131,25 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 	 * @param auditCounts
 	 * @throws IOException
 	 */
-	public void writeAuditCount(CsvWriter csv, List<AuditCount> auditCounts, boolean dateFirst, String date, String type)
-			throws IOException {
-		for (AuditCount auditCount : auditCounts) {
-			String[] record;
-			int recordIndex = 0;
-			if (date != null) {
-				record = new String[3];
-				if (dateFirst) {
-					record[recordIndex++] = date;
-				}
-			} else {
-				record = new String[2];
-			}
-			if (type.equals("action")) {
-				record[recordIndex++] = I18NUtil.getMessage("csv." + auditCount.getTarget());
-			} else if (type.equals("site")) {
-				SiteInfo siteInfo = siteService.getSite(auditCount.getTarget());
-				String siteTitle = auditCount.getTarget();
-				if (siteInfo != null) {
-					siteTitle = siteInfo.getTitle().replace(",", "");
-				}
-				record[recordIndex++] = siteTitle;
-			}
-			record[recordIndex++] = String.valueOf(auditCount.getCount());
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void writeAuditCount(CsvWriter csv, List<AuditCount> auditCounts, String date, Map<String, Integer> actions) throws IOException {
 
-			if (!dateFirst && date != null) {
-				record[recordIndex++] = date;
-			}
-			csv.writeRecord(record);
+		for (AuditCount auditCount : auditCounts) {
+			actions.put(auditCount.getTarget(), auditCount.getCount());
 		}
+
+		Iterator i = actions.entrySet().iterator();
+		while (i.hasNext()) {
+			Map.Entry<String, Integer> e = (Map.Entry<String, Integer>) i.next();
+			String[] record = new String[3];
+
+			record[0] = date;
+			record[1] = I18NUtil.getMessage("csv." + (String) e.getKey());
+			record[2] = ((Integer) e.getValue()).toString();
+			csv.writeRecord(record);
+			e.setValue(new Integer(0));
+		}
+
 	}
 
 	public void writeCsvEntry(CsvWriter csv, List<CsvExportEntry> csvExportEntries, boolean dateFirst, String date) throws IOException {
@@ -191,9 +191,9 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 		String date = "";
 		switch (intervalEnum.valueOf(dateInterval)) {
 		case days:
-			date = padZero(gc.get(Calendar.HOUR)) + "h00";
+			date = padZero(gc.get(Calendar.HOUR_OF_DAY)) + "h00";
 			date += " - ";
-			date += padZero(gc.get(Calendar.HOUR) + 2) + "h00";
+			date += padZero((gc.get(Calendar.HOUR_OF_DAY) + 2) % 24) + "h00";
 			break;
 		case weeks:
 			date = padZero(gc.get(Calendar.DAY_OF_MONTH)) + "/";

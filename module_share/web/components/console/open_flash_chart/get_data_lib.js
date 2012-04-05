@@ -70,8 +70,11 @@ function buildBarChartXLabels(params) {
     break;
   case "days":
     for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      var d = new Date(parseInt(slicedDates[i], 10));
-      labels[i] = padzero(d.getHours()) + "h00";
+      var d = new Date(parseInt(slicedDates[i], 10)), hours = "";
+      hours = padzero(d.getHours()) + "h00";
+      hours += " - ";
+      hours += padzero((d.getHours() + 2) % 24) + "h00";
+      labels[i] = hours;
     }
     break;
   }
