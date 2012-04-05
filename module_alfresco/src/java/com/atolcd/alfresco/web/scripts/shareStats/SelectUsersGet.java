@@ -76,13 +76,13 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 			if (this.sqlMapClientTemplate != null) {
 				String type = req.getParameter("type");
 				AuditQueryParameters auditQueryParameters = buildParametersFromRequest(req);
+				AtolAuthorityParameters atolAuthorityParameters = buildAuthorityParametersFromRequest(req);
 				if ("users-connected".equals(type) || "users-recently-connected".equals(type)) {
-					model.put("users", selectConnectedUsers(auditQueryParameters));
+					model.put("users", selectConnectedUsers(auditQueryParameters, atolAuthorityParameters));
 				} else if ("users-count".equals(type)) {
 					model.put("values", selectConnectedUsersByDate(auditQueryParameters));
 				} else if ("users-never-connected".equals(type)) {
-					AtolAuthorityParameters atolAuthorityParameters = buildAuthorityParametersFromRequest(req);
-					model.put("users", selectNeverConnectedUsers(atolAuthorityParameters, auditQueryParameters));
+					model.put("users", selectNeverConnectedUsers(auditQueryParameters, atolAuthorityParameters));
 				}
 				model.put("type", type);
 			}
@@ -94,9 +94,11 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<String> selectConnectedUsers(AuditQueryParameters params) {
+	public List<String> selectConnectedUsers(AuditQueryParameters params, AtolAuthorityParameters atolAuthorityParameters) {
 		List<String> users = new ArrayList<String>();
 		users = (List<String>) this.sqlMapClientTemplate.queryForList(SELECT_CONNECTED_USERS, params);
+		Set<String> usersSet = this.selectSiteMembers(atolAuthorityParameters);
+		users.retainAll(usersSet);
 		return users;
 	}
 
@@ -115,19 +117,26 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	}
 
 	@SuppressWarnings("unchecked")
-	public Set<String> selectNeverConnectedUsers(AtolAuthorityParameters atolAuthorityParameters, AuditQueryParameters auditQueryParameters) {
-		List<String> users = new ArrayList<String>();
-
-		List<String> groups = new ArrayList<String>();
+	public Set<String> selectNeverConnectedUsers(AuditQueryParameters auditQueryParameters, AtolAuthorityParameters atolAuthorityParameters) {
 		List<String> auditUsers = new ArrayList<String>();
+		auditUsers = (List<String>) this.sqlMapClientTemplate.queryForList(SELECT_CONNECTED_USERS, auditQueryParameters);
+		Set<String> usersSet = this.selectSiteMembers(atolAuthorityParameters);
+		// Differentiel
+		usersSet.removeAll(auditUsers);
+		return usersSet;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Set<String> selectSiteMembers(AtolAuthorityParameters atolAuthorityParameters) {
+		List<String> users = new ArrayList<String>();
+		List<String> groups = new ArrayList<String>();
+
 		// Tous les membres de sites
 		atolAuthorityParameters.setPersonQnameId(personQnameId);
 		users = (List<String>) this.sqlMapClientTemplate.queryForList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
 		// Tous les groupes de sites
 		atolAuthorityParameters.setPersonQnameId(containerQnameId);
 		groups = (List<String>) this.sqlMapClientTemplate.queryForList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
-		// Tous les utilisateurs tracés par l'audit, en fonction des parametres
-		auditUsers = (List<String>) this.sqlMapClientTemplate.queryForList(SELECT_CONNECTED_USERS, auditQueryParameters);
 
 		Set<String> usersSet = new HashSet<String>(users.size());
 		usersSet.addAll(users);
@@ -137,9 +146,6 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 				usersSet.addAll(s);
 			}
 		}
-
-		// Differentiel
-		usersSet.removeAll(auditUsers);
 		return usersSet;
 	}
 
