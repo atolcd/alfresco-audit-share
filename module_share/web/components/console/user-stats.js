@@ -228,7 +228,6 @@
           me.widgets.siteButton.value = value;
           me.widgets.siteButton.set("label", sText);
           me.execute();
-          me.prepareRecentlyConnectedUsersRequest();
         };
 
       menuButtons.push({
@@ -268,7 +267,6 @@
       this.widgets.siteButton.value = "";
 
       this.execute();
-      this.prepareRecentlyConnectedUsersRequest();
     },
 
     onExport: function ConsoleUserAudit_onExport() {
@@ -759,6 +757,7 @@
     execute: function ConsoleUserAudit_execute() {
       this.prepareUserRequest("users-connected");
       this.prepareUserRequest("users-never-connected");
+      this.prepareRecentlyConnectedUsersRequest();
       this.onSearch();
     },
 
