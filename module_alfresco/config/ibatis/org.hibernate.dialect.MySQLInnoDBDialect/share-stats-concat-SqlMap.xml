@@ -11,4 +11,8 @@
     from
       share_stats_audit_entry
   </sql>
+  
+  <sql id="group_by_concat">
+    group by audit_target
+  </sql>
 </sqlMap>

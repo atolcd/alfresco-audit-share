@@ -28,10 +28,10 @@ CREATE TABLE share_stats_site_volumetry
   site_size NUMBER(19,0),
   folder_count NUMBER(9,0),
   file_count NUMBER(9,0),
-  at_time BIGINT NOT NULL,
+  at_time NUMBER(19,0) NOT NULL,
   PRIMARY KEY (id)
-) ENGINE=InnoDB;
-CREATE INDEX idx_share_stats_site_vol_site ON share_stats_audit_entry(site_id);
+);
+CREATE INDEX idx_share_stats_site_vol_site ON share_stats_site_volumetry(site_id);
 
 DELETE FROM alf_applied_patch WHERE id = 'patch.db-V3.4-ShareStats-ExtraTables';
 INSERT INTO alf_applied_patch

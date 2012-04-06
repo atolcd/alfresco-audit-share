@@ -267,25 +267,25 @@
     <select id="selectByRead" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="select_concat_actions"/>
       <include refid="read_snippet"/>
-      group by audit_target
+      <include refid="group_by_concat"/>
     </select>
 
     <select id="selectByUpdated" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="select_concat_actions"/>
       <include refid="update_snippet"/>
-      group by audit_target
+      <include refid="group_by_concat"/>
     </select>
 
     <select id="selectByCreated" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="select_concat_actions"/>
       <include refid="create_snippet"/>
-      group by audit_target
+      <include refid="group_by_concat"/>
     </select>
 
     <select id="selectByDeleted" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="select_concat_actions"/>
       <include refid="delete_snippet"/>
-      group by audit_target
+      <include refid="group_by_concat"/>
     </select>
 
     <select id="selectByMostUpdated" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditObjectPopularity">
