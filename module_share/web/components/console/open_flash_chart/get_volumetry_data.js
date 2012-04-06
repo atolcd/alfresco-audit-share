@@ -33,7 +33,7 @@ function buildChart(params) {
   var bars = {
     "title": {
       "text": buildTitle(params),
-      "style": "{font-size: 16px; color:#515D6B; font-family: Arial,sans-serif; font-weight: bold; text-align: center; margin-top: 5px;}"
+      "style": "{font-size: 16px; color:#515D6B; font-family: Arial,sans-serif; font-weight: bold; text-align: center; margin-top: 5px; margin-bottom: 10px;}"
     },
 
     "bg_colour": "#FFFFFF",
