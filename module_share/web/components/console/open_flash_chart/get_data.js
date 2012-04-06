@@ -236,7 +236,7 @@ function buildHBarChartElements(params, labels) {
     } else if (module == "wiki" || module == "blog" || module == "discussions") {
       value_obj["on-click"] = YAHOO.lang.substitute(urlTemplate, {
         site: item.site,
-        id: item.name
+        id: encodeURIComponent(item.name)
       });
     }
     values.push(value_obj);
