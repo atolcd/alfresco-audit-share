@@ -10,6 +10,7 @@ import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
@@ -22,15 +23,15 @@ import org.springframework.util.Assert;
 import com.atolcd.alfresco.AuditQueryParameters;
 
 public class SelectVolumetryGet extends DeclarativeWebScript implements InitializingBean {
-	private SqlMapClientTemplate sqlMapClientTemplate;
+	private SqlSessionTemplate sqlSessionTemplate;
 	private SiteService siteService;
 	// logger
 	private static final Log logger = LogFactory.getLog(SelectVolumetryGet.class);
 
 	private static final String SELECT_VOLUMETRY = "alfresco.atolcd.audit.selectVolumetry";
 
-	public void setSqlMapClientTemplate(SqlMapClientTemplate sqlMapClientTemplate) {
-		this.sqlMapClientTemplate = sqlMapClientTemplate;
+	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		this.sqlSessionTemplate = sqlSessionTemplate;
 	}
 
 	public void setSiteService(SiteService siteService) {
@@ -39,7 +40,7 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(sqlMapClientTemplate);
+		Assert.notNull(sqlSessionTemplate);
 		Assert.notNull(siteService);
 	}
 
@@ -47,7 +48,7 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 		try {
 			Map<String, Object> model = new HashMap<String, Object>();
 
-			if (this.sqlMapClientTemplate != null) {
+			if (this.sqlSessionTemplate != null) {
 				AuditQueryParameters params = buildParametersFromRequest(req);
 
 				String[] dates = params.getSlicedDates().split(",");
@@ -74,7 +75,7 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 					Long total = (long) 0;
 					for (String site : siteIds) {
 						params.setSiteId(site);
-						Object o = sqlMapClientTemplate.queryForObject(SELECT_VOLUMETRY, params);
+						Object o = sqlSessionTemplate.selectOne(SELECT_VOLUMETRY, params);
 						if (o == null) {
 							values.add(Long.valueOf(0));
 						} else {

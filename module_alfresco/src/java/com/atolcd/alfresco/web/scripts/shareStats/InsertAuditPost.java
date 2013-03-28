@@ -11,13 +11,13 @@ import org.alfresco.service.cmr.site.SiteService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.springframework.orm.ibatis.SqlMapClientTemplate;
 import org.springframework.util.Assert;
 
 import com.atolcd.alfresco.AtolVolumetryEntry;
@@ -27,13 +27,13 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
     private static final String INSERT_ENTRY = "alfresco.atolcd.audit.insertEntry";
     private static final String INSERT_VOLUMETRY = "alfresco.atolcd.audit.insertVolumetry";
     // SqlMapClientTemplate for ibatis calls
-    private SqlMapClientTemplate sqlMapClientTemplate;
+    private SqlSessionTemplate sqlSessionTemplate;
     private SiteService siteService;
 
     private static final Log logger = LogFactory.getLog(InsertAuditPost.class);
 
-    public void setSqlMapClientTemplate(SqlMapClientTemplate sqlMapClientTemplate) {
-        this.sqlMapClientTemplate = sqlMapClientTemplate;
+    public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		this.sqlSessionTemplate = sqlSessionTemplate;
     }
 
     public void setSiteService(SiteService siteService) {
@@ -42,7 +42,7 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(this.sqlMapClientTemplate);
+        Assert.notNull(this.sqlSessionTemplate);
         Assert.notNull(this.siteService);
     }
 
@@ -53,7 +53,7 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
         model.put("success", false);
         try {
             // Check for the sqlMapClientTemplate Bean
-            if (this.sqlMapClientTemplate != null) {
+            if (this.sqlSessionTemplate != null) {
                 // Get the input content given into the request.
                 String jsonArg = req.getContent().getContent();
 
@@ -77,7 +77,7 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
 
     public void insert(AuditEntry auditSample) throws SQLException, JSONException {
         if (!auditSample.getAuditSite().isEmpty()) {
-            sqlMapClientTemplate.insert(INSERT_ENTRY, auditSample);
+        	sqlSessionTemplate.insert(INSERT_ENTRY, auditSample);
             logger.info("Insert ok : " + auditSample.toJSON());
         }
     }
@@ -96,7 +96,7 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
     }
     
     public void insertVolumetry(AtolVolumetryEntry atolVolumetryEntry){
-    	sqlMapClientTemplate.insert(INSERT_VOLUMETRY, atolVolumetryEntry);
+    	sqlSessionTemplate.insert(INSERT_VOLUMETRY, atolVolumetryEntry);
         logger.info("Insert volumetrie ok ");
     }
 }

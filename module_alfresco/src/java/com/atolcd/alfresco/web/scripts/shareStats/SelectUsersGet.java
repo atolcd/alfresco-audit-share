@@ -14,6 +14,7 @@ import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
@@ -27,7 +28,7 @@ import com.atolcd.alfresco.AtolAuthorityParameters;
 import com.atolcd.alfresco.AuditQueryParameters;
 
 public class SelectUsersGet extends DeclarativeWebScript implements InitializingBean {
-	private SqlMapClientTemplate sqlMapClientTemplate;
+	private SqlSessionTemplate sqlSessionTemplate;
 	private NodeService nodeService;
 	private SiteService siteService;
 	private AuthorityService authorityService;
@@ -42,8 +43,8 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	// logger
 	private static final Log logger = LogFactory.getLog(SelectUsersGet.class);
 
-	public void setSqlMapClientTemplate(SqlMapClientTemplate sqlMapClientTemplate) {
-		this.sqlMapClientTemplate = sqlMapClientTemplate;
+	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		this.sqlSessionTemplate = sqlSessionTemplate;
 	}
 
 	public void setNodeService(NodeService nodeService) {
@@ -60,20 +61,20 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.sqlMapClientTemplate);
+		Assert.notNull(this.sqlSessionTemplate);
 		Assert.notNull(this.nodeService);
 		Assert.notNull(this.siteService);
 
-		memberQnameId = (Long) this.sqlMapClientTemplate.queryForObject(SELECT_QNAME_ID, "member");
-		personQnameId = (Long) this.sqlMapClientTemplate.queryForObject(SELECT_QNAME_ID, "person");
-		containerQnameId = (Long) this.sqlMapClientTemplate.queryForObject(SELECT_QNAME_ID, "authorityContainer");
+		memberQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "member");
+		personQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "person");
+		containerQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "authorityContainer");
 	}
 
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		try {
 			Map<String, Object> model = new HashMap<String, Object>();
-			if (this.sqlMapClientTemplate != null) {
+			if (this.sqlSessionTemplate != null) {
 				String type = req.getParameter("type");
 				AuditQueryParameters auditQueryParameters = buildParametersFromRequest(req);
 				AtolAuthorityParameters atolAuthorityParameters = buildAuthorityParametersFromRequest(req);
@@ -96,7 +97,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	@SuppressWarnings("unchecked")
 	public List<String> selectConnectedUsers(AuditQueryParameters params, AtolAuthorityParameters atolAuthorityParameters) {
 		List<String> users = new ArrayList<String>();
-		users = (List<String>) this.sqlMapClientTemplate.queryForList(SELECT_CONNECTED_USERS, params);
+		users = (List<String>) this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, params);
 		Set<String> usersSet = this.selectSiteMembers(atolAuthorityParameters);
 		users.retainAll(usersSet);
 		return users;
@@ -110,7 +111,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 			params.setDateFrom(dates[i]);
 			params.setDateTo(dates[i + 1]);
 			List<String> users = new ArrayList<String>();
-			users = sqlMapClientTemplate.queryForList(SELECT_CONNECTED_USERS, params);
+			users = (List<String>) sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, params);
 			values[i] = users.size();
 		}
 		return values;
@@ -119,7 +120,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	@SuppressWarnings("unchecked")
 	public Set<String> selectNeverConnectedUsers(AuditQueryParameters auditQueryParameters, AtolAuthorityParameters atolAuthorityParameters) {
 		List<String> auditUsers = new ArrayList<String>();
-		auditUsers = (List<String>) this.sqlMapClientTemplate.queryForList(SELECT_CONNECTED_USERS, auditQueryParameters);
+		auditUsers = (List<String>) this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, auditQueryParameters);
 		Set<String> usersSet = this.selectSiteMembers(atolAuthorityParameters);
 		// Differentiel
 		usersSet.removeAll(auditUsers);
@@ -133,10 +134,10 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 
 		// Tous les membres de sites
 		atolAuthorityParameters.setPersonQnameId(personQnameId);
-		users = (List<String>) this.sqlMapClientTemplate.queryForList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
+		users = (List<String>) this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
 		// Tous les groupes de sites
 		atolAuthorityParameters.setPersonQnameId(containerQnameId);
-		groups = (List<String>) this.sqlMapClientTemplate.queryForList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
+		groups = (List<String>) this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
 
 		Set<String> usersSet = new HashSet<String>(users.size());
 		usersSet.addAll(users);

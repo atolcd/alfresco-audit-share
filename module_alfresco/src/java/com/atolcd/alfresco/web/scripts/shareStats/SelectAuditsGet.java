@@ -17,13 +17,13 @@ import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.springframework.orm.ibatis.SqlMapClientTemplate;
 import org.springframework.util.Assert;
 
 import com.atolcd.alfresco.AuditCount;
@@ -32,7 +32,7 @@ import com.atolcd.alfresco.AuditQueryParameters;
 
 public class SelectAuditsGet extends DeclarativeWebScript implements InitializingBean {
 	// SqlMapClientTemplate for ibatis calls
-	private SqlMapClientTemplate sqlMapClientTemplate;
+	private SqlSessionTemplate sqlSessionTemplate;
 	private NodeService nodeService;
 
 	private static final String SELECT_BY_VIEW = "alfresco.atolcd.audit.selectByRead";
@@ -51,8 +51,8 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 	// logger
 	private static final Log logger = LogFactory.getLog(SelectAuditsGet.class);
 
-	public void setSqlMapClientTemplate(SqlMapClientTemplate sqlMapClientTemplate) {
-		this.sqlMapClientTemplate = sqlMapClientTemplate;
+	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		this.sqlSessionTemplate = sqlSessionTemplate;
 	}
 
 	public void setNodeService(NodeService nodeService) {
@@ -61,7 +61,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.sqlMapClientTemplate);
+		Assert.notNull(this.sqlSessionTemplate);
 		Assert.notNull(this.nodeService);
 	}
 
@@ -72,7 +72,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 			Map<String, Object> model = new HashMap<String, Object>();
 
 			// Check for the sqlMapClientTemplate Bean
-			if (this.sqlMapClientTemplate != null) {
+			if (this.sqlSessionTemplate != null) {
 				// Get the input content given into the request.
 				// String jsonArg = req.getContent().getContent();
 				AuditQueryParameters params = buildParametersFromRequest(req);
@@ -122,7 +122,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 	@SuppressWarnings("unchecked")
 	public List<AuditObjectPopularity> selectByPopularity(AuditQueryParameters params, String query, int limit) {
 		List<AuditObjectPopularity> auditObjectPopularityList = new ArrayList<AuditObjectPopularity>();
-		auditObjectPopularityList = sqlMapClientTemplate.queryForList(query, params);
+		auditObjectPopularityList = (List<AuditObjectPopularity>) sqlSessionTemplate.selectList(query, params);
 		logger.info("Performing " + query + " ... ");
 
 		Iterator<AuditObjectPopularity> iterator = auditObjectPopularityList.iterator();
@@ -156,7 +156,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 			params.setDateFrom(dates[i]);
 			params.setDateTo(dates[i + 1]);
 			List<AuditCount> auditSample = new ArrayList<AuditCount>();
-			auditSample = sqlMapClientTemplate.queryForList(query, params);
+			auditSample = (List<AuditCount>) sqlSessionTemplate.selectList(query, params);
 			auditCount.add(auditSample);
 		}
 		logger.info("Performing " + query + " ... ");
