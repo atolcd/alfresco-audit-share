@@ -1,20 +1,16 @@
 <?xml version="1.0"?>
 <project name="AMP Build File" default="prepare-package-amp" basedir=".">
-  <property name="module.id" value="share-stats-module-alfresco"/>
-  
-  <!-- Path to the SDK -->
-  <property name="alfresco.lib.dir" value="../../alfresco-enterprise-sdk-3.4.2/lib"/>
-  
+  <property file="module.properties" />
+  <property file="build.properties" />
 
   <property name="project.dir" value="."/>
-  <property name="csv.file" value="${project.dir}/lib/javacsv.jar"/>
-  <property name="dist.dir" value="${project.dir}/dist"/>
-  <property name="amp.file" value="${dist.dir}/${module.id}.amp"/>
-  <property name="config.dir" value="${project.dir}/config" />
   <property name="build.dir" value="${project.dir}/build"/>
+  <property name="dist.dir" value="${project.dir}/dist"/>
+  <property name="config.dir" value="${project.dir}/config" />
+  <property name="lib.dir" value="${project.dir}/lib" />
   <property name="source.dir" value="${project.dir}/src" />
-  <property name="jar.file" value="${build.dir}/${module.id}.jar"/>
-
+  <property name="amp.file" value="${dist.dir}/${module.id}-${module.version}.amp" />
+  <property name="jar.file" value="${build.dir}/${module.id}-${module.version}.jar"/>
 
 
   <!-- Make Dirs -->
@@ -49,7 +45,7 @@
       <fileset dir="${build.dir}/classes" excludes="**/*Test*" includes="**/*.class" />
     </jar>
   </target>
- 
+
   <!-- Add Webscripts -->
   <target name="add-webscripts-to-package">
     <zip destfile="${amp.file}" update="true">
@@ -62,7 +58,7 @@
     <zip destfile="${amp.file}" update="true">
       <zipfileset file="${project.dir}/*.properties" />
       <zipfileset file="${jar.file}" prefix="lib" />
-      <zipfileset file="${csv.file}" prefix="lib" />
+      <zipfileset dir="${lib.dir}" prefix="lib" includes="*.jar" />
       <zipfileset dir="${config.dir}" prefix="config/alfresco/module/${module.id}" />
     </zip>
   </target>
