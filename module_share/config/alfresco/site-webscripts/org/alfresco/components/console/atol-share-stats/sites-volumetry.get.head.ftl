@@ -1,4 +1,5 @@
-<#include "../component.head.inc">
+<#include "/org/alfresco/components/component.head.inc">
+
 <!-- Admin Console for Share Stats Tool -->
 <@script type="text/javascript" src="${page.url.context}/res/yui/calendar/calendar.js"></@script>
 <@script type="text/javascript" src="${page.url.context}/res/components/console/consoletool.js"></@script>
