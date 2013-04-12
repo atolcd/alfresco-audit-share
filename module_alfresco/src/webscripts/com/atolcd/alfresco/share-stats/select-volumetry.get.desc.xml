@@ -1,0 +1,7 @@
+﻿<webscript>
+  <shortname>Select volumetry</shortname>
+  <description>Select volumetry for Share console</description>
+  <url>/share-stats/select-volumetry</url>
+  <format default="json"/>
+  <authentication>admin</authentication>
+</webscript>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING/DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+  <!-- CRON : volumétrie des sites -->
+  <bean id="scheduledSitesVolumetryJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+    <property name="jobClass">
+      <value>org.alfresco.repo.jscript.ExecuteScriptJob</value>
+    </property>
+    <property name="jobDataAsMap">
+      <map>
+        <entry key="scriptLocation">
+          <bean class="org.alfresco.repo.jscript.ClasspathScriptLocation">
+            <constructor-arg>
+              <value>alfresco/module/share-stats-module-alfresco/scripts/schedulers/sites_volumetry.js</value>
+            </constructor-arg>
+          </bean>
+        </entry>
+        <entry key="scriptService">
+          <ref bean="ScriptService"/>
+        </entry>
+        <entry key="authenticationComponent">
+          <ref bean="authenticationComponent"/>
+        </entry>
+      </map>
+    </property>
+  </bean>
+
+  <bean id="scheduledSitesVolumetryTrigger" class="org.alfresco.util.CronTriggerBean">
+    <property name="jobDetail">
+      <ref bean="scheduledSitesVolumetryJobDetail" />
+    </property>
+    <property name="scheduler">
+      <ref bean="schedulerFactory" />
+    </property>
+    <property name="cronExpression">
+      <value>${share.stats.sites.volumetry.trigger}</value>
+    </property>
+  </bean>
+</beans>

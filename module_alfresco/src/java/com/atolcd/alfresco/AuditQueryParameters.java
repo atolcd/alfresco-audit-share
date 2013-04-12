@@ -35,7 +35,8 @@ public class AuditQueryParameters {
 		userId = null;
 	}
 
-	public AuditQueryParameters(String site, List<String> sites, String app, String action, String obj, long from, long to, String dates, String user) {
+	public AuditQueryParameters(String site, List<String> sites, String app, String action, String obj, long from, long to, String dates,
+			String user) {
 		siteId = site;
 		sitesId = sites;
 		appName = app;
@@ -52,7 +53,11 @@ public class AuditQueryParameters {
 	}
 
 	public void setSitesId(List<String> sitesId) {
-		this.sitesId = sitesId;
+		if (sitesId == null || (sitesId != null && sitesId.isEmpty())) {
+			this.sitesId = null;
+		} else {
+			this.sitesId = sitesId;
+		}
 	}
 
 	// Surcharge du set pour la construction à partir d'une String
@@ -65,7 +70,7 @@ public class AuditQueryParameters {
 			}
 		}
 	}
-    
+
 	public String getSiteId() {
 		return siteId;
 	}

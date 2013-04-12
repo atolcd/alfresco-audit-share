@@ -20,6 +20,18 @@ CREATE TABLE share_stats_audit_entry
 );
 CREATE INDEX idx_share_stats_alf_aud_ent_tm ON share_stats_audit_entry(audit_time);
 
+CREATE SEQUENCE share_stats_site_volumetry_seq START WITH 1 INCREMENT BY 1;
+CREATE TABLE share_stats_site_volumetry
+(
+  id NUMBER(19,0) NOT NULL,
+  site_id VARCHAR2(255) NOT NULL,
+  site_size NUMBER(19,0),
+  folder_count NUMBER(9,0),
+  file_count NUMBER(9,0),
+  at_time NUMBER(19,0) NOT NULL,
+  PRIMARY KEY (id)
+);
+CREATE INDEX idx_share_stats_site_vol_site ON share_stats_site_volumetry(site_id);
 
 DELETE FROM alf_applied_patch WHERE id = 'patch.db-V3.4-ShareStats-ExtraTables';
 INSERT INTO alf_applied_patch

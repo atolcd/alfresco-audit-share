@@ -6,19 +6,32 @@
 --
 --
 
-
+CREATE SEQUENCE share_stats_audit_entry_seq START WITH 1 INCREMENT BY 1;
 CREATE TABLE share_stats_audit_entry
 (
-   id NUMERIC(19,0) IDENTITY NOT NULL,
-   audit_user_id NVARCHAR(255) NOT NULL,
-   audit_site NVARCHAR(255),
-   audit_app_name NVARCHAR(255) NOT NULL,
-   audit_action_name NVARCHAR(255),
-   audit_object NVARCHAR(255),
-   audit_time NUMERIC(19,0) NOT NULL,
+   id INT8 NOT NULL,
+   audit_user_id VARCHAR(255) NOT NULL,
+   audit_site VARCHAR(255),
+   audit_app_name VARCHAR(255) NOT NULL,
+   audit_action_name VARCHAR(255),
+   audit_object VARCHAR(255),
+   audit_time INT8 NOT NULL,
    PRIMARY KEY (id)
 );
 CREATE INDEX idx_share_stats_alf_aud_ent_tm ON share_stats_audit_entry (audit_time);
+
+CREATE SEQUENCE share_stats_site_volumetry_seq START WITH 1 INCREMENT BY 1;
+CREATE TABLE share_stats_site_volumetry
+(
+  id INT8 NOT NULL,
+  site_id varchar(255) NOT NULL,
+  site_size BIGINT,
+  folder_count INT,
+  file_count INT,
+  at_time INT8 NOT NULL,
+  PRIMARY KEY (id)
+);
+CREATE INDEX idx_share_stats_site_vol_site ON share_stats_site_volumetry (site_id);
 
 DELETE FROM alf_applied_patch WHERE id = 'patch.db-V3.4-ShareStats-ExtraTables';
 INSERT INTO alf_applied_patch

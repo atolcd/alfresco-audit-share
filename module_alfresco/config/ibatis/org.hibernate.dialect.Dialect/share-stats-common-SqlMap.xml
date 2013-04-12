@@ -1,26 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<!DOCTYPE sqlMap
-    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
-    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<sqlMap namespace="alfresco.atolcd.audit">
-
-    <!--                -->
-    <!-- Type Defs      -->
-    <!--                -->
-
-    <typeAlias alias="AtolAuditEntry" type="com.atolcd.alfresco.AuditEntry"/>
-    <typeAlias alias="AtolCsvExportEntry" type="com.atolcd.alfresco.CsvExportEntry"/>
-    <typeAlias alias="AtolAuditCount" type="com.atolcd.alfresco.AuditCount"/>
-    <typeAlias alias="AtolAuditQueryParameters" type="com.atolcd.alfresco.AuditQueryParameters"/>
-
-
+<mapper namespace="alfresco.atolcd.audit">
     <!--                -->
     <!-- Parameter Maps -->
     <!--                -->
 
-    <parameterMap id="parameter_IdMap" class="long">
+    <parameterMap id="parameter_IdMap" type="map">
         <parameter property="id" jdbcType="BIGINT" javaType="long"/>
     </parameterMap>
 
@@ -28,7 +15,7 @@
     <!-- Result Maps    -->
     <!--                -->
 
-    <resultMap id="result_AtolAuditEntry" class="AtolAuditEntry">
+    <resultMap id="result_AtolAuditEntry" type="AtolAuditEntry">
       <result property="id" column="id" jdbcType="BIGINT" javaType="long"/>
       <result property="auditUserId" column="audit_user_id" jdbcType="VARCHAR" javaType="java.lang.String"/>
       <result property="auditSite" column="audit_site" jdbcType="VARCHAR" javaType="java.lang.String"/>
@@ -38,126 +25,197 @@
       <result property="auditTime" column="audit_time" jdbcType="BIGINT" javaType="long"/>
     </resultMap>
 
-    <resultMap id="results_AtolCsvExportEntry" class="AtolCsvExportEntry">
+    <resultMap id="results_AtolCsvExportEntry" type="AtolCsvExportEntry">
       <result property="auditSite" column="audit_site" jdbcType="VARCHAR" javaType="java.lang.String"/>
       <result property="auditAppName" column="audit_app_name" jdbcType="VARCHAR" javaType="java.lang.String"/>
       <result property="auditActionName" column="audit_action_name" jdbcType="VARCHAR" javaType="java.lang.String"/>
       <result property="count" column="audit_count" jdbcType="BIGINT" javaType="int"/>
     </resultMap>
 
-    <resultMap id="results_AtolAuditCount" class="AtolAuditCount">
+    <resultMap id="results_AtolAuditCount" type="AtolAuditCount">
       <result property="count" column="audit_count" jdbcType="BIGINT" javaType="int"/>
       <result property="target" column="audit_target" jdbcType="VARCHAR" javaType="java.lang.String"/>
     </resultMap>
-    
+
+    <resultMap id="results_AtolAuditObjectPopularity" type="AtolAuditObjectPopularity">
+      <result property="popularity" column="audit_popularity" jdbcType="BIGINT" javaType="int"/>
+      <result property="auditObject" column="audit_object" jdbcType="VARCHAR" javaType="java.lang.String"/>
+      <result property="auditSite" column="audit_site" jdbcType="VARCHAR" javaType="java.lang.String"/>
+    </resultMap>
+
     <!--                -->
     <!-- SQL Snippets   -->
     <!--                -->
 
     <sql id="insert_AtolAuditEntry_AutoIncrement">
         insert into share_stats_audit_entry (audit_user_id, audit_site, audit_app_name, audit_action_name, audit_object, audit_time)
-        values (#auditUserId#,#auditSite#,#auditAppName#,#auditActionName#,#auditObject#,#auditTime#)
+        values (#{auditUserId},#{auditSite},#{auditAppName},#{auditActionName},#{auditObject},#{auditTime})
     </sql>
 
+    <sql id="insert_volumetry_AutoIncrement">
+        insert into share_stats_site_volumetry (site_id, site_size, folder_count, file_count, at_time)
+        values (#{siteId},#{siteSize},#{folderCount},#{fileCount},#{atTime})
+    </sql>
     <!-- Global select snippet -->
     <sql id="select_AuditEntriesWhereSnippet">
-      <dynamic prepend="where">
+      <where>
         <include refid="site_snippet"/>
         <include refid="time_snippet"/>
-        <isNotNull prepend="and" property="appName">
-            audit_app_name = #appName#
-        </isNotNull>
-        <isNotNull prepend="and" property="actionName">
-            audit_action_name = #actionName#
-        </isNotNull>
-        <isNotNull prepend="and" property="object">
-           audit_object = #object#
-        </isNotNull>
-        <isNotNull prepend="and" property="userId">
-           audit_user_id = #userId#
-        </isNotNull>
-      </dynamic>
+        <if test="appName != null">
+            AND audit_app_name = #{appName}
+        </if>
+        <if test="actionName != null">
+            AND audit_action_name = #{actionName}
+        </if>
+        <if test="object != null">
+           AND audit_object = #{object}
+        </if>
+        <if test="userId != null">
+           AND audit_user_id = #{userId}
+        </if>
+      </where>
     </sql>
 
     <!-- Views Snippet -->
     <sql id="select_auditViewEntriesWhereSnippet">
-      <dynamic prepend="where">
-      <isNotNull prepend="and" property="appName">
-          audit_app_name = #appName#
-      </isNotNull>
-      <include refid="site_snippet"/>
-      <include refid="time_snippet"/>
-      </dynamic>
+      <where>
+        <if test="appName != null">
+            AND audit_app_name = #{appName}
+        </if>
+        <include refid="site_snippet"/>
+        <include refid="time_snippet"/>
+      </where>
     </sql>
 
     <!-- Snippet de dates-->
     <sql id="time_snippet">
-      <isGreaterThan prepend="and" property="dateFrom" compareValue="0">
-        <![CDATA[audit_time >= #dateFrom#]]>
-      </isGreaterThan>
-      <isGreaterThan prepend="and" property="dateTo" compareValue="0">
-        <![CDATA[audit_time < #dateTo#]]>
-      </isGreaterThan>
+      <if test="dateFrom > 0">
+        <![CDATA[ AND audit_time >= #{dateFrom}]]>
+      </if>
+      <if test="dateTo > 0">
+        <![CDATA[ AND audit_time < #{dateTo}]]>
+      </if>
     </sql>
 
     <!-- Snippet pour sites -->
     <sql id="site_snippet">
-      <isNotNull prepend="and" property="siteId">
-          audit_site = #siteId#
-      </isNotNull>
-      <isNotNull prepend="and" property="sitesId">
-        audit_site
-        <iterate open="IN (" close=")" conjunction="," property="sitesId">
-          #sitesId[]#
-        </iterate>
-      </isNotNull>
+      <if test="siteId != null">
+          AND audit_site = #{siteId}
+      </if>
+      <if test="sitesId != null">
+        AND  audit_site IN
+        <foreach item="item" collection="sitesId" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+      </if>
     </sql>
 
 
     <!-- Snippet de consultation-->
-    <sql id="view_snippet">
-      where
-      (
-        audit_action_name in
-          ("page","view","details","postlist","postview","lists","topiclist","topicview","members","groups")
-      or
-        <![CDATA[(audit_app_name = "calendar" and audit_action_name <> "create")]]>
-      or
-        <![CDATA[(audit_app_name = "search" and audit_action_name <> "query")]]>
-      )
-      <isNotNull prepend="and" property="appName">
-          audit_app_name = #appName#
-      </isNotNull>
-      <include refid="time_snippet" />
-      <include refid="site_snippet"/>
+    <sql id="read_snippet">
+      <where>
+        <if test="appName != null">
+          AND audit_app_name = #{appName}
+        </if>
+        <if test="appName == 'document'">
+          AND (
+            audit_action_name = 'details'
+          or
+            audit_action_name = 'download'
+          )
+        </if>
+        <if test="appName == 'wiki'">
+            AND audit_action_name = 'page'
+        </if>
+        <if test="appName == 'blog'">
+            AND audit_action_name = 'postview'
+        </if>
+        <if test="appName == 'discussions'">
+            AND audit_action_name = 'topicview'
+        </if>
+        <include refid="time_snippet" />
+        <include refid="site_snippet"/>
+      </where>
     </sql>
 
-    <!-- Snippet commentaires / réponses -->
-    <sql id="comment_snippet">
-      where
-        audit_action_name = "comments"
-      <isNotNull prepend="and" property="appName">
-          audit_app_name = #appName#
-      </isNotNull>
+
+    <!-- Snippet de création -->
+    <sql id="create_snippet">
+      <where>
+        <if test="appName != null">
+          AND audit_app_name = #{appName}
+        </if>
+        <if test="appName == 'document'">
+          AND (
+            audit_action_name = 'file-added'
+          or
+            audit_action_name = 'create'
+          )
+        </if>
+        <if test="appName == 'wiki'">
+            AND audit_action_name = 'create-post'
+        </if>
+        <if test="appName == 'blog'">
+            AND audit_action_name = 'blog-create'
+        </if>
+        <if test="appName =='discussions'">
+            AND audit_action_name = 'discussions-create'
+        </if>
       <include refid="time_snippet" />
       <include refid="site_snippet"/>
+      </where>
     </sql>
 
-    <!-- Snippet d'opération sur fichiers -->
-    <sql id="file_snippet">
-      where
-      (
-        audit_action_name = "file-deleted"
-      or
-        audit_action_name = "file-added"
-      or
-        audit_action_name = "download"
-      )
-      <isNotNull prepend="and" property="appName">
-          audit_app_name = #appName#
-      </isNotNull>
+    <!-- Snippet de mise à jour -->
+    <sql id="update_snippet">
+      <where>
+        <if test="appName != null">
+          AND audit_app_name = #{appName}
+        </if>
+        <if test="appName == 'document'">
+          AND (
+            audit_action_name = 'update'
+          or
+            audit_action_name = 'file-updated'
+          or
+            audit_action_name = 'inline-edit'
+          )
+        </if>
+        <if test="appName == 'wiki'">
+          AND audit_action_name = 'update-post'
+        </if>
+        <if test="appName == 'blog'">
+          AND audit_action_name = 'blog-update'
+        </if>
+        <if test="appName =='discussions'">
+          AND audit_action_name = 'discussions-update'
+        </if>
       <include refid="time_snippet" />
       <include refid="site_snippet"/>
+      </where>
+    </sql>
+
+    <!-- Snippet de suppression -->
+    <sql id="delete_snippet">
+      <where>
+        <if test="appName != null">
+          AND audit_app_name = #{appName}
+        </if>
+        <if test="appName == 'document'">
+          AND audit_action_name = 'file-deleted'
+        </if>
+        <if test="appName == 'wiki'">
+          AND audit_action_name = 'delete-post'
+        </if>
+        <if test="appName == 'blog'">
+          AND audit_action_name = 'blog-delete'
+        </if>
+        <if test="appName == 'discussions'">
+          AND audit_action_name = 'discussions-deleted'
+        </if>
+      <include refid="time_snippet" />
+      <include refid="site_snippet"/>
+      </where>
     </sql>
 
     <!--                -->
@@ -180,8 +238,8 @@
     <select id="selectAll" resultMap="results_AtolCsvExportEntry">
       select
         audit_site,
-        count(*) as audit_count,     
-        audit_app_name, 
+        count(*) as audit_count,
+        audit_app_name,
         audit_action_name
       from
         share_stats_audit_entry
@@ -189,93 +247,133 @@
       group by audit_site, audit_app_name, audit_action_name
       order by audit_site, audit_app_name, audit_action_name
     </select>
-    
-    <!-- Get stats about module -->
-    <select id="selectModules" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+
+    <select id="selectByRead" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+      <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
+      <include refid="read_snippet"/>
+      <include refid="group_by_concat"/>
+    </select>
+
+    <select id="selectByUpdated" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+      <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
+      <include refid="update_snippet"/>
+      <include refid="group_by_concat"/>
+    </select>
+
+    <select id="selectByCreated" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+      <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
+      <include refid="create_snippet"/>
+      <include refid="group_by_concat"/>
+    </select>
+
+    <select id="selectByDeleted" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+      <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
+      <include refid="delete_snippet"/>
+      <include refid="group_by_concat"/>
+    </select>
+
+    <select id="selectByMostUpdated" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditObjectPopularity">
       select
-        audit_app_name as audit_target, count(*) as audit_count
+        count(*) as audit_popularity, audit_object, audit_site
       from
         share_stats_audit_entry
-      <include refid="select_AuditEntriesWhereSnippet"/>
-      group by audit_target
+      <include refid="update_snippet"/>
+      <include refid="site_snippet"/>
+      <include refid="time_snippet" />
+      group by audit_object, audit_site
+      order by audit_popularity DESC
     </select>
 
-    <!-- Get stats about module views-->
-    <select id="selectModuleViews" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+    <select id="selectByMostRead" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditObjectPopularity">
       select
-        audit_app_name as audit_target, count(*) as audit_count
+        count(*) as audit_popularity, audit_object, audit_site
       from
         share_stats_audit_entry
-
-      <include refid="view_snippet"/>
-      group by audit_target
+      <include refid="read_snippet"/>
+      <include refid="site_snippet"/>
+      <include refid="time_snippet" />
+      group by audit_object, audit_site
+      order by audit_popularity DESC
     </select>
 
-    <!-- Get stats about action -->
-    <select id="selectActions" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
-      <include refid="select_concat_actions"/>
-      <include refid="select_auditViewEntriesWhereSnippet"/>
-      group by audit_target
+    <!-- Retourne les dernière personne ayant effectuée une action dans la tranche de temps donnée. On les considère connecté -->
+    <select id="selectConnectedUsers" parameterType="AtolAuditQueryParameters" resultType="java.lang.String">
+      select distinct(audit_user_id)
+        from
+      share_stats_audit_entry
+      <where>
+        <include refid="site_snippet"/>
+        <include refid="time_snippet" />
+      </where>
     </select>
 
-
-    <!-- Get modules with comments & replies -->
-    <select id="selectComments" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
-      <include refid="select_concat_actions"/>
-      <include refid="comment_snippet" />
-      group by audit_target
-    </select>
-
-    <!-- Get files activities -->
-    <select id="selectFileActions" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
-      <include refid="select_concat_actions"/>
-      <include refid="file_snippet" />
-      group by audit_target
-    </select>
-
-
-    <!-- Get audit wihtin several sites -->
-    <select id="selectViewsBySite" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+    <!-- Récupère l'id du qname - member -->
+    <select id="selectQNameId" parameterType="java.lang.String" resultType="long">
       select
-        audit_site as audit_target, count(*) as audit_count
+        alf_qname.id
       from
-        share_stats_audit_entry
-      <include refid="view_snippet" />
-      group by audit_target
+        alf_qname
+        join alf_namespace alf_ns on (alf_qname.ns_id = alf_ns.id)
+      where
+        alf_ns.uri = 'http://www.alfresco.org/model/content/1.0'
+      and
+        local_name = #{string}
     </select>
 
-    <!-- Get audit wihtin several sites -->
-    <select id="selectFilesBySite" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+
+    <select id="selectSiteMember" parameterType="AtolAuthorityParameters" resultType="java.lang.String">
       select
-        audit_site as audit_target, count(*) as audit_count
+        distinct(assoc.qname_localname) as qname_localname
       from
-        share_stats_audit_entry
-      <include refid="file_snippet" />
-      group by audit_target
+        alf_child_assoc assoc
+        join alf_node parentNode on (parentNode.id = assoc.parent_node_id)
+        join alf_node childNode on (childNode.id = assoc.child_node_id)
+      where
+        assoc.type_qname_id = #{memberQnameId}
+      and
+        childNode.type_qname_id = #{personQnameId}
+      and
+        assoc.parent_node_id IN (
+          select
+            childNode.id
+          from
+            alf_child_assoc assoc
+            join alf_node childNode on (childNode.id = assoc.child_node_id)
+          where
+            assoc.type_qname_id = #{memberQnameId}
+
+          <if test="groupNames != null">
+            AND assoc.qname_localname IN
+            <foreach item="item" collection="groupNames" open="(" separator="," close=")">
+              #{item}
+          </foreach>
+          </if>
+        );
     </select>
 
-    <!-- Get audit wihtin several sites -->
-    <select id="selectCommentsBySite" parameterClass="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+    <select id="selectVolumetry" parameterType="AtolAuditQueryParameters" resultType="long">
       select
-        audit_site as audit_target, count(*) as audit_count
+        avg(site_size)
       from
-        share_stats_audit_entry
-      <include refid="comment_snippet" />
-      group by audit_target
+        share_stats_site_volumetry
+      <!-- Reprise des snippets utilisé de share_stats_audit_entry -->
+      <where>
+        <if test="dateFrom > 0">
+          AND <![CDATA[at_time >= #{dateFrom}]]>
+        </if>
+        <if test="dateTo > 0">
+          AND <![CDATA[at_time < #{dateTo}]]>
+        </if>
+
+        <if test="siteId != null">
+          AND site_id = #{siteId}
+        </if>
+        <if test="sitesId != null">
+          AND site_id IN
+          <foreach item="item" collection="sitesId" open="(" separator="," close=")">
+            #{item}
+          </foreach>
+        </if>
+      </where>
     </select>
-		
-		<select id="selectPopularity" parameterClass="java.lang.String" resultClass="java.lang.Integer">
-			select
-				count(*) as popularity
-			from
-				share_stats_audit_entry
-			where
-				audit_object = #nodeRef#
-			and
-				audit_app_name = "document"
-			and
-				audit_action_name = "details"
-			group by
-				audit_object
-		</select>
-</sqlMap>
+</mapper>

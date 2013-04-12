@@ -18,7 +18,7 @@
    </context-param>
 
    
-  <!-- Audit filter -->
+  <!-- ATOL: Audit filters -->
   <filter>
     <description>Filtre général pour l'audit</description>
     <filter-name>AuditFilter</filter-name>
@@ -35,7 +35,6 @@
     <url-pattern>/p/*</url-pattern>
   </filter-mapping>
   
-
   <filter>
     <description>Filtre pour l'audit (proxy)</description>
     <filter-name>ProxyAuditFilter</filter-name>
@@ -47,7 +46,7 @@
     <url-pattern>/proxy/*</url-pattern>
   </filter-mapping>
   
-  <!-- Audit filter -->
+  <!-- ATOL: Audit filters -->
    
    
    <filter>
@@ -82,6 +81,27 @@
          <param-value>alfresco</param-value>
       </init-param>
    </filter>
+   
+   <filter-mapping>
+      <filter-name>CacheExpiresFilter</filter-name>
+      <url-pattern>*.jpg</url-pattern>
+   </filter-mapping>
+   <filter-mapping>
+      <filter-name>CacheExpiresFilter</filter-name>
+      <url-pattern>*.png</url-pattern>
+   </filter-mapping>
+   <filter-mapping>
+      <filter-name>CacheExpiresFilter</filter-name>
+      <url-pattern>*.gif</url-pattern>
+   </filter-mapping>
+   <filter-mapping>
+      <filter-name>CacheExpiresFilter</filter-name>
+      <url-pattern>*.css</url-pattern>
+   </filter-mapping>
+   <filter-mapping>
+      <filter-name>CacheExpiresFilter</filter-name>
+      <url-pattern>*.js</url-pattern>
+   </filter-mapping>
    
    <filter-mapping>
       <filter-name>Authentication Filter</filter-name>
@@ -124,24 +144,8 @@
    </filter-mapping>
    
    <filter-mapping>
-      <filter-name>CacheExpiresFilter</filter-name>
-      <url-pattern>*.jpg</url-pattern>
-   </filter-mapping>
-   <filter-mapping>
-      <filter-name>CacheExpiresFilter</filter-name>
-      <url-pattern>*.png</url-pattern>
-   </filter-mapping>
-   <filter-mapping>
-      <filter-name>CacheExpiresFilter</filter-name>
-      <url-pattern>*.gif</url-pattern>
-   </filter-mapping>
-   <filter-mapping>
-      <filter-name>CacheExpiresFilter</filter-name>
-      <url-pattern>*.css</url-pattern>
-   </filter-mapping>
-   <filter-mapping>
-      <filter-name>CacheExpiresFilter</filter-name>
-      <url-pattern>*.js</url-pattern>
+      <filter-name>UrlRewriteFilter</filter-name>
+      <url-pattern>/s/*</url-pattern>
    </filter-mapping>
    
    <filter-mapping>
@@ -191,6 +195,5 @@
       <error-code>500</error-code> 
       <location>/error500.jsp</location> 
    </error-page>
-   
 
 </web-app>

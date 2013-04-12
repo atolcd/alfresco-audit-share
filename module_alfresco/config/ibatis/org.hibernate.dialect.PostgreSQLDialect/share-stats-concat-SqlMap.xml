@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="alfresco.atolcd.audit.concat">
+  <sql id="select_concat_actions">
+    select
+      audit_app_name||'.'||audit_action_name as audit_target, count(*) as audit_count
+    from
+      share_stats_audit_entry
+  </sql>
+
+  <sql id="group_by_concat">
+    group by audit_target
+  </sql>
+</mapper>

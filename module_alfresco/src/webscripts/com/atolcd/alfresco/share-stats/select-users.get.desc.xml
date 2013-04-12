@@ -1,0 +1,7 @@
+﻿<webscript>
+  <shortname>Select users</shortname>
+  <description>Select users for Share console</description>
+  <url>/share-stats/select-users</url>
+  <format default="json"/>
+  <authentication>admin</authentication>
+</webscript>

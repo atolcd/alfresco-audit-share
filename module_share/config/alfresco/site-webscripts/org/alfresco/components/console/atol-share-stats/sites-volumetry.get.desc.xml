@@ -1,0 +1,6 @@
+<webscript>
+  <shortname>Volumétrie des sites</shortname>
+  <description>Volumétrie des sites</description>
+  <url>/components/console/sites-volumetry</url>
+  <family>admin-console</family>
+</webscript>

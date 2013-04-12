@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,9 +33,11 @@ import org.springframework.extensions.surf.exception.UserFactoryException;
 import org.springframework.extensions.surf.support.AlfrescoUserFactory;
 import org.springframework.extensions.surf.support.ThreadLocalRequestContext;
 import org.springframework.extensions.surf.util.I18NUtil;
+import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.connector.Connector;
 import org.springframework.extensions.webscripts.connector.ConnectorContext;
 import org.springframework.extensions.webscripts.connector.HttpMethod;
+import org.springframework.extensions.webscripts.connector.Response;
 import org.springframework.extensions.webscripts.connector.User;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -81,8 +84,7 @@ public class AuditFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest sReq, ServletResponse sRes, FilterChain chain) throws IOException,
-            ServletException {
+    public void doFilter(ServletRequest sReq, ServletResponse sRes, FilterChain chain) throws IOException, ServletException {
 
         // Get the HTTP request/response/session
         HttpServletRequest request = (HttpServletRequest) sReq;
@@ -124,8 +126,9 @@ public class AuditFilter implements Filter {
                     if (requestURI.endsWith("/dologin") && (ref != null)) {
                         requestURI = ref;
                     }
-                    HashMap<String, String> auditData = getAuditData(request, requestURI);
-                    // Le parsing inclue parfois les param�tres lorsque le chargement de la page est interrompu pr�matur�ment
+                    HashMap<String, String> auditData = getAuditData(request, user.getId(), requestURI);
+                    // Le parsing inclue parfois les paramètres lorsque le
+                    // chargement de la page est interrompu prématurément
                     if ((auditData.get("module").length() > 0)
                             && (auditData.get("site").length() > 0 && !auditData.get("action").contains("?"))) {
                         auditSample.put("auditSite", auditData.get("site"));
@@ -158,7 +161,7 @@ public class AuditFilter implements Filter {
                     AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
 
             // parameters = null, on passe par le inputstream.
-            // Le webscript est appelÃ© avec l'audit converti en JSON.
+            // Le webscript est appelé avec l'audit converti en JSON.
             ConnectorContext postContext = new ConnectorContext(null, buildDefaultHeaders());
             postContext.setMethod(HttpMethod.POST);
             postContext.setContentType("text/plain;charset=UTF-8");
@@ -171,6 +174,31 @@ public class AuditFilter implements Filter {
         }
     }
 
+    private String getNodeRefRemoteCall(HttpServletRequest request, String userId, String siteId, String componentId, String objectId)
+            throws JSONException, URIException, UnsupportedEncodingException {
+        Connector connector;
+        try {
+            connector = FrameworkUtil.getConnector(request.getSession(true), userId, AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
+            // <url>/share-stats/slingshot/details/{siteId}/{componentId}/{objectId}</url>
+            Response resp = connector.call("/share-stats/slingshot/details/" + siteId + "/" + componentId + "/" + URLEncoder.encode(objectId, "UTF-8"));
+
+            if (resp.getStatus().getCode() == Status.STATUS_OK) {
+                try {
+                    JSONObject json = new JSONObject(resp.getResponse());
+                    if (json.has("nodeRef")) {
+                        return (String) json.get("nodeRef");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (ConnectorServiceException e) {
+            e.printStackTrace();
+        }
+
+        return objectId;
+    }
+
     /**
      * Découpe l'url, analyse les morceaux, puis analyse les paramètres
      * 
@@ -180,7 +208,7 @@ public class AuditFilter implements Filter {
      *            String
      * @return HashMap
      */
-    public HashMap<String, String> getAuditData(HttpServletRequest request, String requestURL) {
+    public HashMap<String, String> getAuditData(HttpServletRequest request, String userId, String requestURL) {
         HashMap<String, String> auditData = new HashMap<String, String>();
         String[] urlTokens = requestURL.split("/");
 
@@ -188,9 +216,8 @@ public class AuditFilter implements Filter {
         auditData.putAll(urlData);
 
         try {
-            // On récupère l'identifiant de l'<<objet>> consulté à  partir
-            // de
-            // son module
+            // On récupère l'identifiant de l'<<objet>> consulté à partir de son
+            // module
             // En cas de null, on catch et on met une chaîne vide.
             String obj = request.getParameter(this.moduleIds.get(urlData.get("module")));
             if (obj != null) {
@@ -200,7 +227,8 @@ public class AuditFilter implements Filter {
                     auditData.put("action", obj);
                     auditData.put("object", "");
                 } else if (auditData.get("module").equals("links") && auditData.get("action").equals("view")) {
-                    auditData.put("object", obj);
+                    String auditObject = getNodeRefRemoteCall(request, userId, auditData.get("site"), auditData.get("module"), obj);
+                    auditData.put("object", auditObject);
                     auditData.put("action", "single-view");
                 } else if (auditData.get("module").equals("search")) {
                     if (!obj.isEmpty()) {
@@ -211,7 +239,8 @@ public class AuditFilter implements Filter {
                     }
 
                 } else {
-                    auditData.put("object", obj);
+                    String auditObject = getNodeRefRemoteCall(request, userId, auditData.get("site"), auditData.get("module"), obj);
+                    auditData.put("object", auditObject);
                 }
             } else {
                 auditData.put("object", "");
@@ -280,7 +309,7 @@ public class AuditFilter implements Filter {
         if (module != null && action != null) {
             if (ignoredCases.containsKey(module)) {
                 if (contains(ignoredCases.get(module), action)) {
-                    // Ne sera pas audit� si ne contient pas de site
+                    // Ne sera pas audité si ne contient pas de site
                     auditData.put("site", "");
                 }
             }

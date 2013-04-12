@@ -1,0 +1,7 @@
+<webscript>
+  <shortname>sitenodedetails</shortname>
+  <description>Retrieve node details</description>
+  <url>/share-stats/slingshot/details/{siteId}/{componentId}/{objectId}</url>
+  <format default="json"/>
+  <authentication>user</authentication>
+</webscript>

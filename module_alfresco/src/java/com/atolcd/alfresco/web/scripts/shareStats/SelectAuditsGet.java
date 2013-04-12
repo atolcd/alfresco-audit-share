@@ -3,52 +3,66 @@ package com.atolcd.alfresco.web.scripts.shareStats;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.error.AlfrescoRuntimeException;
+import org.alfresco.model.ContentModel;
+import org.alfresco.model.ForumModel;
+import org.alfresco.repo.site.SiteModel;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.springframework.orm.ibatis.SqlMapClientTemplate;
 import org.springframework.util.Assert;
 
 import com.atolcd.alfresco.AuditCount;
-import com.atolcd.alfresco.AuditEntry;
+import com.atolcd.alfresco.AuditObjectPopularity;
 import com.atolcd.alfresco.AuditQueryParameters;
 
 public class SelectAuditsGet extends DeclarativeWebScript implements InitializingBean {
 	// SqlMapClientTemplate for ibatis calls
-	private SqlMapClientTemplate sqlMapClientTemplate;
+	private SqlSessionTemplate sqlSessionTemplate;
+	private NodeService nodeService;
 
-	private static final String SELECT_ALL = "alfresco.atolcd.audit.selectAll";
-	private static final String SELECT_ACTION = "alfresco.atolcd.audit.selectActions";
-	private static final String SELECT_COMMENT = "alfresco.atolcd.audit.selectComments";
-	private static final String SELECT_FILE = "alfresco.atolcd.audit.selectFileActions";
-	private static final String SELECT_MODULE = "alfresco.atolcd.audit.selectModules";
-	private static final String SELECT_MODULE_VIEW = "alfresco.atolcd.audit.selectModuleViews";
-	// RequÃªte entre sites
-	private static final String SELECT_SITES_VIEW = "alfresco.atolcd.audit.selectViewsBySite";
-	private static final String SELECT_SITES_FILE = "alfresco.atolcd.audit.selectFilesBySite";
-	private static final String SELECT_SITES_COMMENT = "alfresco.atolcd.audit.selectCommentsBySite";
+	private static final String SELECT_BY_VIEW = "alfresco.atolcd.audit.selectByRead";
+	private static final String SELECT_BY_CREATED = "alfresco.atolcd.audit.selectByCreated";
+	private static final String SELECT_BY_UPDATED = "alfresco.atolcd.audit.selectByUpdated";
+	private static final String SELECT_BY_DELETED = "alfresco.atolcd.audit.selectByDeleted";
+	private static final String SELECT_BY_MOSTREAD = "alfresco.atolcd.audit.selectByMostRead";
+	private static final String SELECT_BY_MOSTUPDATED = "alfresco.atolcd.audit.selectByMostUpdated";
 
-	private static final String SELECT_POPULARITY = "alfresco.atolcd.audit.selectPopularity";
-	private static final String SELECT_POPULARITIES = "alfresco.atolcd.audit.selectPopularities";
+	static final QName TYPE_DATALIST = QName.createQName("http://www.alfresco.org/model/datalist/1.0", "dataList");
+	static final QName TYPE_CALENDAR_EVENT = QName.createQName("http://www.alfresco.org/model/calendar", "calendarEvent");
+	static final QName PROP_CALENDAR_EVENT_WHAT = QName.createQName("http://www.alfresco.org/model/calendar", "whatEvent");
+	static final QName TYPE_LINK = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "link");
+	static final QName PROP_LINK_TITLE = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "title");
+
 	// logger
 	private static final Log logger = LogFactory.getLog(SelectAuditsGet.class);
 
-	public void setSqlMapClientTemplate(SqlMapClientTemplate sqlMapClientTemplate) {
-		this.sqlMapClientTemplate = sqlMapClientTemplate;
+	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		this.sqlSessionTemplate = sqlSessionTemplate;
+	}
+
+	public void setNodeService(NodeService nodeService) {
+		this.nodeService = nodeService;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.sqlMapClientTemplate);
+		Assert.notNull(this.sqlSessionTemplate);
+		Assert.notNull(this.nodeService);
 	}
 
 	@Override
@@ -58,12 +72,17 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 			Map<String, Object> model = new HashMap<String, Object>();
 
 			// Check for the sqlMapClientTemplate Bean
-			if (this.sqlMapClientTemplate != null) {
+			if (this.sqlSessionTemplate != null) {
 				// Get the input content given into the request.
 				// String jsonArg = req.getContent().getContent();
 				AuditQueryParameters params = buildParametersFromRequest(req);
 				String type = req.getParameter("type");
-				checkForQuery(model, params, type);
+				String stringLimit = req.getParameter("limit");
+				int limit = 0;
+				if (stringLimit != null && !stringLimit.isEmpty()) {
+					limit = Integer.parseInt(stringLimit);
+				}
+				checkForQuery(model, params, type, limit);
 			}
 			return model;
 		} catch (Exception e) {
@@ -73,176 +92,60 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 	}
 
 	public void checkForQuery(Map<String, Object> model, AuditQueryParameters params, String type) throws SQLException, JSONException {
+		checkForQuery(model, params, type, 0);
+	}
+
+	public void checkForQuery(Map<String, Object> model, AuditQueryParameters params, String type, int limit) throws SQLException,
+			JSONException {
 		switch (queryType.valueOf(type)) {
-		case all:
-			if(params.getSlicedDates() != null){
-				model.put("slicedDates", params.getSlicedDates());
-				model.put("results", selectAllByDate(params));
-			}
-			else {
-				model.put("results", selectAll(params));
-			}
+		case read:
+			model.put("dates", selectByDate(params, SELECT_BY_VIEW));
 			break;
-		case module:
-			model.put("views", select(params, SELECT_MODULE));
+		case created:
+			model.put("dates", selectByDate(params, SELECT_BY_CREATED));
 			break;
-		case action:
-			model.put("views", select(params, SELECT_ACTION));
+		case deleted:
+			model.put("dates", selectByDate(params, SELECT_BY_DELETED));
 			break;
-		case file:
-			model.put("views", select(params, SELECT_FILE));
+		case updated:
+			model.put("dates", selectByDate(params, SELECT_BY_UPDATED));
 			break;
-		case comment:
-			model.put("views", select(params, SELECT_COMMENT));
+		case mostread:
+			model.put("popularity", selectByPopularity(params, SELECT_BY_MOSTREAD, limit));
 			break;
-		case moduleviews:
-			model.put("views", select(params, SELECT_MODULE_VIEW));
-			break;
-		case sitesview:
-			model.put("views", select(params, SELECT_SITES_VIEW));
-			break;
-		case sitescomment:
-			model.put("views", select(params, SELECT_SITES_COMMENT));
-			break;
-		case sitesfile:
-			model.put("views", select(params, SELECT_SITES_FILE));
-			break;
-		case module_by_month:
-			model.put("dates", selectByDate(params, SELECT_MODULE));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case module_by_week:
-			model.put("dates", selectByDate(params, SELECT_MODULE));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case module_by_day:
-			model.put("dates", selectByDate(params, SELECT_MODULE));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case moduleviews_by_month:
-			model.put("dates", selectByDate(params, SELECT_MODULE_VIEW));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case moduleviews_by_week:
-			model.put("dates", selectByDate(params, SELECT_MODULE_VIEW));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case moduleviews_by_day:
-			model.put("dates", selectByDate(params, SELECT_MODULE_VIEW));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case action_by_month:
-			model.put("dates", selectByDate(params, SELECT_ACTION));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case action_by_week:
-			model.put("dates", selectByDate(params, SELECT_ACTION));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case action_by_day:
-			model.put("dates", selectByDate(params, SELECT_ACTION));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case file_by_month:
-			model.put("dates", selectByDate(params, SELECT_FILE));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case file_by_week:
-			model.put("dates", selectByDate(params, SELECT_FILE));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case file_by_day:
-			model.put("dates", selectByDate(params, SELECT_FILE));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case comment_by_month:
-			model.put("dates", selectByDate(params, SELECT_COMMENT));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case comment_by_week:
-			model.put("dates", selectByDate(params, SELECT_COMMENT));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case comment_by_day:
-			model.put("dates", selectByDate(params, SELECT_COMMENT));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case sitesview_by_month:
-			model.put("dates", selectByDate(params, SELECT_SITES_VIEW));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case sitesview_by_week:
-			model.put("dates", selectByDate(params, SELECT_SITES_VIEW));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case sitesview_by_day:
-			model.put("dates", selectByDate(params, SELECT_SITES_VIEW));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case sitescomment_by_month:
-			model.put("dates", selectByDate(params, SELECT_SITES_COMMENT));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case sitescomment_by_week:
-			model.put("dates", selectByDate(params, SELECT_SITES_COMMENT));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case sitescomment_by_day:
-			model.put("dates", selectByDate(params, SELECT_SITES_COMMENT));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case sitesfile_by_month:
-			model.put("dates", selectByDate(params, SELECT_SITES_FILE));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case sitesfile_by_week:
-			model.put("dates", selectByDate(params, SELECT_SITES_FILE));
-			model.put("slicedDates", params.getSlicedDates());
-			break;
-		case sitesfile_by_day:
-			model.put("dates", selectByDate(params, SELECT_SITES_FILE));
-			model.put("slicedDates", params.getSlicedDates());
+		case mostupdated:
+			model.put("popularity", selectByPopularity(params, SELECT_BY_MOSTUPDATED, limit));
 			break;
 		}
-		model.put("type", type);
-	}
-
-	/**
-	 * 
-	 * @return
-	 * @throws SQLException
-	 * @throws JSONException
-	 */
-	@SuppressWarnings("unchecked")
-	public List<AuditEntry> selectAll(AuditQueryParameters params) throws SQLException, JSONException {
-		List<AuditEntry> auditSamples = new ArrayList<AuditEntry>();
-		auditSamples = sqlMapClientTemplate.queryForList(SELECT_ALL, params);
-		logger.info("Performing selectAll() ... ");
-		return auditSamples;
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<List<AuditEntry>> selectAllByDate(AuditQueryParameters params) throws SQLException, JSONException {
-		List<List<AuditEntry>> auditSamples = new ArrayList<List<AuditEntry>>();
-		String[] dates = params.getSlicedDates().split(",");
-		
-		for (int i = 0; i < dates.length - 1; i++) {
-			params.setDateFrom(dates[i]);
-			params.setDateTo(dates[i + 1]);
-			List<AuditEntry> auditSample = new ArrayList<AuditEntry>();
-			auditSample = sqlMapClientTemplate.queryForList(SELECT_ALL, params);
-			auditSamples.add(auditSample);
-		}
-		logger.info("Performing selectAllByDate() ... ");
-		return auditSamples;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public List<AuditCount> select(AuditQueryParameters params, String query) {
-		List<AuditCount> auditCount = new ArrayList<AuditCount>();
-		auditCount = sqlMapClientTemplate.queryForList(query, params);
+	public List<AuditObjectPopularity> selectByPopularity(AuditQueryParameters params, String query, int limit) {
+		List<AuditObjectPopularity> auditObjectPopularityList = new ArrayList<AuditObjectPopularity>();
+		auditObjectPopularityList = (List<AuditObjectPopularity>) sqlSessionTemplate.selectList(query, params);
 		logger.info("Performing " + query + " ... ");
-		return auditCount;
+
+		Iterator<AuditObjectPopularity> iterator = auditObjectPopularityList.iterator();
+		int treatedItems = 0;
+		// On test si les éléments retournés existent toujours
+		while (iterator.hasNext() && treatedItems < limit) {
+			AuditObjectPopularity auditObjectPopularity = iterator.next();
+			try {
+				NodeRef nodeRef = new NodeRef(auditObjectPopularity.getAuditObject());
+				if (!nodeService.exists(nodeRef)) {
+					iterator.remove();
+				} else {
+					auditObjectPopularity.setObjectName((String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME));
+					auditObjectPopularity.setObjectDisplayName(getPrettyDisplayname(nodeRef));
+					treatedItems++;
+				}
+			} catch (AlfrescoRuntimeException e) {
+				iterator.remove();
+				logger.error(e);
+			}
+		}
+		limit = auditObjectPopularityList.size() > limit ? limit : auditObjectPopularityList.size();
+		return auditObjectPopularityList.subList(0, limit);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -253,7 +156,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 			params.setDateFrom(dates[i]);
 			params.setDateTo(dates[i + 1]);
 			List<AuditCount> auditSample = new ArrayList<AuditCount>();
-			auditSample = sqlMapClientTemplate.queryForList(query, params);
+			auditSample = (List<AuditCount>) sqlSessionTemplate.selectList(query, params);
 			auditCount.add(auditSample);
 		}
 		logger.info("Performing " + query + " ... ");
@@ -262,9 +165,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 
 	public AuditQueryParameters buildParametersFromRequest(WebScriptRequest req) {
 		try {
-			// Users and object to define ...
-
-			// ProblÃ¨me de long / null
+			// Probleme de long / null
 			String dateFrom = req.getParameter("from");
 			String dateTo = req.getParameter("to");
 
@@ -278,23 +179,46 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 			params.setSlicedDates(req.getParameter("dates"));
 			return params;
 		} catch (Exception e) {
-			logger.error("Erreur lors de la construction des paramÃ¨tres [select.java]");
+			logger.error("Erreur lors de la construction des parametres [select.java]");
 			e.printStackTrace();
 			return null;
 		}
 	}
 
-	/**
-	 * Retourne le nombre de fois qu'un document a été consulté
-	 * @param nodeRef String représentant le nodeRef du document
-	 * @return int
-	 */
-	public int getDocumentPopularity(String nodeRef){
-	    int res = 0;
-	    Object o = sqlMapClientTemplate.queryForObject(SELECT_POPULARITY, nodeRef);
-	    if(o != null){
-	        res = (Integer)o;
-	    }
-	    return res;
+	private String getPrettyDisplayname(NodeRef nodeRef) {
+		String nodeName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+
+		QName nodeType = nodeService.getType(nodeRef);
+		if (nodeType.equals(TYPE_DATALIST)) {
+			// DataList : titre
+			return (String) nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE);
+		} else if (nodeType.equals(ForumModel.TYPE_TOPIC)) {
+			// Discussion : on récupère le titre de l'enfant du même nom qui est
+			// la discussion principale
+			NodeRef firstTopic = nodeService.getChildByName(nodeRef, ContentModel.ASSOC_CONTAINS, nodeName);
+			if (firstTopic != null) {
+				return (String) nodeService.getProperty(firstTopic, ContentModel.PROP_TITLE);
+			}
+		} else if (nodeType.equals(TYPE_LINK)) {
+			// Lien : titre du lien (modèle particulier)
+			return (String) nodeService.getProperty(nodeRef, PROP_LINK_TITLE);
+		} else if (nodeType.equals(TYPE_CALENDAR_EVENT)) {
+			// Evenement
+			return (String) nodeService.getProperty(nodeRef, PROP_CALENDAR_EVENT_WHAT);
+		} else {
+			// Others : content, wiki, blog
+			NodeRef parentRef = nodeService.getPrimaryParent(nodeRef).getParentRef();
+			if (parentRef != null) {
+				if (nodeService.hasAspect(parentRef, SiteModel.ASPECT_SITE_CONTAINER)) {
+					String parentName = (String) nodeService.getProperty(parentRef, ContentModel.PROP_NAME);
+					if (parentName.equals("blog") || parentName.equals("wiki")) {
+						// Blog ou Wiki
+						return (String) nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE);
+					}
+				}
+			}
+		}
+
+		return nodeName;
 	}
 }

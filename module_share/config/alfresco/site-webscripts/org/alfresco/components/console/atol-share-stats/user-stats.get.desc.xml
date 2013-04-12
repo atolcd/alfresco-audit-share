@@ -1,0 +1,6 @@
+<webscript>
+  <shortname>Console d'audit sur les utilisateurs</shortname>
+  <description>Console d'audit sur les utilisateurs</description>
+  <url>/components/console/user-stats</url>
+  <family>admin-console</family>
+</webscript>

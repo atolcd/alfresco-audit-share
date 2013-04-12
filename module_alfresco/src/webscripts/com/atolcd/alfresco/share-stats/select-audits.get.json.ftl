@@ -12,33 +12,24 @@
     </#list>
   ]
 </#macro>
-<#if results?exists>
-  <#if results?size !=0>
-  <#-- Template "all" -->
+
+
+<#-- Template statistiques de popularity -->
+<#if popularity?exists>
+  <#if popularity?size !=0>
   {
-    "totalResults": ${results?size?c},
-    "items":
+    "items" :
     [
-    <#list results as result>
-      {
-        "id": ${result.id},
-        "auditUserId": "${result.auditUserId}",
-        "auditAppName": "${result.auditAppName}",
-        "auditActionName": "${result.auditActionName}",
-        "auditSite": "${result.auditSite}",
-        "auditObject": "${result.auditObject}",
-        "auditTime": "${result.auditTime}"
-      }<#if result_has_next>,</#if>
-   </#list>
-  ]
-  }
-  </#if>
-<#-- Template statistiques simple -->
-<#elseif views?exists>
-  <#if views?size !=0>
-  {
-    "type": "${type}",
-    <@auditCount auditItems=views />
+      <#list popularity as auditItem>
+        {
+          "popularity": ${auditItem.popularity?c},
+          "nodeRef": "${auditItem.auditObject}",
+          "site": "${auditItem.auditSite}",
+          "name": "${auditItem.objectName}",
+          "displayName": "${auditItem.objectDisplayName}"
+        }<#if auditItem_has_next>,</#if>
+      </#list>
+    ]
   }
   </#if>
 <#-- Template statistiques par dates -->
@@ -46,8 +37,6 @@
   <#if dates?size !=0>
   {
     "totalResults": ${dates?size?c},
-    "type": "${type}",
-    "slicedDates" : "${slicedDates}",
     "items":
     [
       <#list dates as date>

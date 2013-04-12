@@ -13,5 +13,15 @@
         
         insert into share_stats_audit_entry (id,audit_user_id, audit_site, audit_app_name, audit_action_name, audit_object, audit_time)
         values (#id#,#auditUserId#,#auditSite#,#auditAppName#,#auditActionName#,#auditObject#,#auditTime#)
-    </insert>   
+    </insert>
+    
+    <insert id="insertVolumetry" parameterClass="AtolVolumetryEntry" >
+
+        <selectKey resultClass="long" keyProperty="id" type="pre">
+            select share_stats_site_volumetry_seq.nextval as value from dual
+        </selectKey>
+
+        insert into share_stats_site_volumetry (id, site_id, site_size, folder_count, file_count, at_time)
+        values (#id#,#siteId#,#siteSize#,#folderCount#,#fileCount#,#atTime#)
+    </insert>
 </sqlMap>
