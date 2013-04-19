@@ -231,7 +231,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
             };
 
           // Création du graphique Flash.
-          swfobject.embedSWF(this.pathToSwf, id, additionalsParams.width, additionalsParams.height, "9.0.0", "expressInstall.swf", flashvars, params, attributes);
+          swfobject.embedSWF(this.options.pathToSwf, id, additionalsParams.width, additionalsParams.height, "9.0.0", "expressInstall.swf", flashvars, params, attributes);
         }
 
       } else {

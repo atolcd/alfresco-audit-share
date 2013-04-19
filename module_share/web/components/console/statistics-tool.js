@@ -33,6 +33,14 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
   };
 
   YAHOO.extend(AtolStatistics.Tool, Alfresco.component.Base, {
+    options: {
+      /**
+       * @attribute pathToSwf
+       * Chemin vers le fichier swf d'Open Flash Chart
+       */
+      pathToSwf: "open-flash-chart.swf"
+    },
+
     /**
      * Cache-Résultat de la dernière requête exécutée
      * Utilisé pour l'export CSV
@@ -43,13 +51,6 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       from: null,
       to: null
     },
-
-    /**
-     * @attribute pathToSwf
-     * Chemin vers le fichier swf d'Open Flash Chart
-     *
-     */
-    pathToSwf: "/share/components/console/open_flash_chart/open-flash-chart.swf",
 
     /**
      * @attribute endDatesArray

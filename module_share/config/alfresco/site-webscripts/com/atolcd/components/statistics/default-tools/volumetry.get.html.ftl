@@ -1,7 +1,10 @@
 <#assign el = args.htmlid?html />
 
 <script type="text/javascript">//<![CDATA[
-   new AtolStatistics.Volumetry("${args.htmlid?js_string}").setMessages(${messages});
+  new AtolStatistics.Volumetry("${args.htmlid?js_string}").setOptions({
+      pathToSwf: "${page.url.context}/res/components/console/open_flash_chart/open-flash-chart.swf"
+    }
+  ).setMessages(${messages});
 //]]></script>
 
 <div id="${el}-body" class="volumetry">
