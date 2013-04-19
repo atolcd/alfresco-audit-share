@@ -1,0 +1,7 @@
+<webscript>
+  <shortname>Volumetry statistics</shortname>
+  <description>Volumetry statistics</description>
+  <url>/components/console/volumetry</url>
+  <family>share-stats</family>
+  <family>site-stats</family>
+</webscript>

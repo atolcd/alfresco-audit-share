@@ -1,0 +1,7 @@
+<webscript>
+  <shortname>User connections statistics</shortname>
+  <description>User connections statistics</description>
+  <url>/components/console/user-connections</url>
+  <family>share-stats</family>
+  <family>site-stats</family>
+</webscript>

@@ -1,0 +1,7 @@
+<webscript>
+  <shortname>Global usage statistics</shortname>
+  <description>Global usage statistics</description>
+  <url>/components/console/global-usage</url>
+  <family>share-stats</family>
+  <family>site-stats</family>
+</webscript>

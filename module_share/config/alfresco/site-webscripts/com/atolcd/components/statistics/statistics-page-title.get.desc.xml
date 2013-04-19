@@ -1,0 +1,5 @@
+<webscript>
+  <shortname>Statistics page title</shortname>
+  <description>Title component used in the statistics page</description>
+  <url>/components/title/statistics</url>
+</webscript>

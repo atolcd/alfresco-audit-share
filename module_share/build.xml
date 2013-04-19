@@ -6,6 +6,7 @@
   <property name="project.dir" value="."/>
   <property name="build.dir" value="${project.dir}/build"/>
   <property name="dist.dir" value="${project.dir}/dist"/>
+  <property name="lib.dir" value="${project.dir}/lib" />
   <property name="source.dir" value="${project.dir}/src" />
   <property name="web.dir" value="${project.dir}/web" />
   <property name="amp.file" value="${dist.dir}/${module.id}-${module.version}.amp" />
@@ -67,7 +68,6 @@
   <target name="prepare-package-amp" depends="package-jar, add-web-to-package-amp, add-config-to-package-amp" description="Package the Module for Share" >
     <zip destfile="${amp.file}" update="true">
       <fileset dir="${project.dir}/" includes="*.properties" />
-      <zipfileset dir="${project.dir}/lib" prefix="WEB-INF/lib" />
       <zipfileset file="${jar.file}" prefix="WEB-INF/lib" />
     </zip>
   </target>
@@ -80,7 +80,7 @@
     </yuicompress>
 
     <zip destfile="${amp.file}" update="true">
-      <zipfileset dir="${web.dir}" prefix="web" />
+      <zipfileset dir="${web.dir}" prefix="web" excludes="**/*.db" />
     </zip>
 
     <!-- Clean -->
@@ -90,7 +90,7 @@
   <!-- Config (Webscripts, Site data, Messages, ...)  -->
   <target name="add-config-to-package-amp">
     <zip destfile="${amp.file}" update="true">
-      <zipfileset dir="${project.dir}/config" prefix="WEB-INF/classes" excludes="web.xml" />
+      <zipfileset dir="${project.dir}/config/alfresco" prefix="WEB-INF/classes/alfresco" />
       <zipfileset file="${project.dir}/config/web.xml" prefix="WEB-INF" />
     </zip>
   </target>

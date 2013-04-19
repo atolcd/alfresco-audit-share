@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alfresco-config>
+
+   <config evaluator="string-compare" condition="UriTemplate" replace="true">
+      <!-- list of URI based page Id templates used by Share -->
+      <!-- when pages are requested from the framework, matches are attempted
+           against each uri-template, and the token values returned if matched -->
+      <uri-templates>
+         <!-- Atol: Statistics - Site page -->
+         <!--  Need to be loaded BEFORE the 'sitepage' uri template -->
+         <uri-template id="sitestatisticstoolpage">/site/{site}/site-statistics/{pageid}/{toolid}</uri-template>
+         <uri-template id="sitestatisticspage">/site/{site}/site-statistics/{pageid}</uri-template>
+
+         <!-- Share default uri-templates : @override -->
+         <uri-template id="sitedashboardpage">/site/{site}/dashboard</uri-template>
+         <uri-template id="sitepage">/site/{site}/{pageid}</uri-template>
+         <uri-template id="userdashboardpage">/user/{userid}/dashboard</uri-template>
+         <uri-template id="userpage">/user/{userid}/{pageid}</uri-template>
+         <uri-template id="userprofilepage">/user/{userid}/profile</uri-template>
+         <uri-template id="userdefaultpage">/user/{pageid}</uri-template>
+         <uri-template id="consoletoolpage">/console/{pageid}/{toolid}</uri-template>
+         <uri-template id="consolepage">/console/{pageid}</uri-template>
+         <!--                                         -->
+
+         <!-- Atol: Statistics - Standalone page -->
+         <uri-template id="statisticstoolpage">/statistics/{pageid}/{toolid}</uri-template>
+         <uri-template id="statisticspage">/statistics/{pageid}</uri-template>
+      </uri-templates>
+   </config>
+</alfresco-config>

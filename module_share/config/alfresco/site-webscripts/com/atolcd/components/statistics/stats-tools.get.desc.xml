@@ -1,0 +1,5 @@
+<webscript>
+  <shortname>Statistics Tools</shortname>
+  <description>Reusable tools component for all 'statistics' pages</description>
+  <url>/components/statistics/tools</url>
+</webscript>

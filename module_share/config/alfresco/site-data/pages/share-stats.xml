@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<page>
+   <title>Share statistics</title>
+   <title-id>page.statistics.title</title-id>
+   <description>The landing page for the share statistics</description>
+   <description-id>page.statistics.description</description-id>
+   <template-instance>statistics</template-instance>
+   <authentication>user</authentication>
+</page>

@@ -23,9 +23,11 @@
                   <item type="link" id="replication-jobs">/console/admin-console/replication-jobs</item>
                   <item type="link" id="repository">/console/admin-console/repository</item>
                   <item type="link" id="users">/console/admin-console/users</item>
-                  <item type="link" id="share-stats">/console/admin-console/share-stats</item>
-                  <item type="link" id="sites-volumetry">/console/admin-console/sites-volumetry</item>
-                  <item type="link" id="user-stats">/console/admin-console/user-stats</item>
+
+                  <!-- ATOL -->
+                  <item type="link" id="global-usage">/statistics/share-stats/global-usage</item>
+                  <item type="link" id="volumetry">/statistics/share-stats/volumetry</item>
+                  <item type="link" id="user-connections">/statistics/share-stats/user-connections</item>
                </container-group>
             </item>
          </app-items>

@@ -1,0 +1,15 @@
+<extension>
+  <modules>
+    <!-- Site collaboration navigation -->
+    <module>
+      <id>Add statistics component into the site navigation</id>
+      <auto-deploy>false</auto-deploy>
+      <customizations>
+        <customization>
+          <targetPackageRoot>org.alfresco.components.navigation</targetPackageRoot>
+          <sourcePackageRoot>com.atolcd.components.navigation</sourcePackageRoot>
+        </customization>
+      </customizations>
+    </module>
+  </modules>
+</extension>
