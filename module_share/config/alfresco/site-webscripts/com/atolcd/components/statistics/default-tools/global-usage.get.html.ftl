@@ -35,6 +35,7 @@
             <option value="updated">${msg("label.menu.action")}${msg("label.updated")}</option>
           </select>
 
+          <span id="site-criteria-container"></span>
         </div>
 
         <div class="utility-buttons">

@@ -12,13 +12,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
    * YUI Library aliases
    */
   var Dom = YAHOO.util.Dom,
-    Event = YAHOO.util.Event,
-    Element = YAHOO.util.Element;
-
-  /**
-   * Alfresco Slingshot aliases
-   */
-  var $html = Alfresco.util.encodeHTML;
+      Event = YAHOO.util.Event;
 
   /**
    * UserConnections constructor.
@@ -29,70 +23,10 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
    */
   AtolStatistics.UserConnections = function UserConnections_constructor(htmlId) {
     AtolStatistics.UserConnections.superclass.constructor.call(this, "AtolStatistics.UserConnections", htmlId, ["button", "container", "json"]);
-
-    // Surcharge de la classe Date. Récupère la semaine courante
-    Date.prototype.getWeek = function() {
-     var onejan = new Date(this.getFullYear(),0,1);
-     return Math.ceil((((this - onejan) / 86400000) + onejan.getDay()+1)/7);
-    };
-
     return this;
   };
 
-  YAHOO.extend(AtolStatistics.UserConnections, Alfresco.component.Base, {
-
-    /**
-     * Cache-Résultat de la dernière requête exécutée
-     * Utilisé pour l'export CSV
-     */
-    lastRequest: {
-      params: null,
-      data: null,
-      from: null,
-      to: null
-    },
-
-    /**
-     * @attribute selectedSites
-     * Tableau contenant tous les sites selectionnés dans la boîte de dialogue
-     *
-     */
-    selectedSites: [],
-
-    /**
-     * @attribute siteDialog
-     * Yahoo Simple Dialog - Boîte de dialogue permettant de
-     * sélectionner un ou plusieurs sites
-     *
-     */
-    siteDialog: null,
-
-    /**
-     * @attribute pathToSwf
-     * Chemin vers le fichier swf d'Open Flash Chart
-     *
-     */
-    pathToSwf: "/share/components/console/open_flash_chart/open-flash-chart.swf",
-
-    /**
-     * @attribute endDatesArray
-     * Dates de référence utilisée pour les graphiques
-     * Date présente par défaut
-     */
-    endDatesArray: [],
-    /**
-     * @attribute currentDateFilter
-     * Filtre de date : days,weeks,months,years
-     * "days" par défaut
-     */
-    currentDateFilter: "weeks",
-
-    /**
-     * @attribute sites
-     * Informations sur les sites (id/titre).
-     */
-    sites: [],
-
+  YAHOO.extend(AtolStatistics.UserConnections, AtolStatistics.Tool, {
     /**
      * @attribute recentlyConnectedDelay
      * Durée (en minutes) depuis laquelle on retrouve les utilisateurs récemments connectés
@@ -104,16 +38,6 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
      * Contient les éléments Dom des différents headers de la table sous le graphe
      */
     headers: [],
-
-    /**
-     * Fired by YUILoaderHelper when required component script files have
-     * been loaded into the browser.
-     *
-     * @method onComponentsLoaded
-     */
-    onComponentsLoaded: function UserConnections_onComponentsLoaded() {
-      Event.onContentReady(this.id, this.onReady, this, true);
-    },
 
     /**
      * Fired by YUI when parent element is available for scripting.
@@ -135,7 +59,6 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       Event.addListener("by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
       Event.addListener("by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
       Event.addListener("by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
-
       Event.addListener("chart-prev", "click", this.onChangeDateInterval, { coef: -1 }, this);
       Event.addListener("chart-next", "click", this.onChangeDateInterval, { coef: 1 }, this);
 
@@ -146,91 +69,13 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       this.loadSites();
     },
 
-    loadSites: function loadSites() {
-      //Changement de style pour l'icône de chargement
-      // this.widgets.siteButton.set("label", this.msg("label.loading") + ' <span class="loading"></span>');
-
-      Alfresco.util.Ajax.jsonGet({
-        url: Alfresco.constants.PROXY_URI + "share-stats/site/list-sites",
-        successCallback: {
-          fn: function (res) {
-            this.createSiteMenu(res);
-          },
-          scope: this
-        },
-        failureMessage: this.msg("label.popup.error.list-site"),
-        execScripts: true
-      });
-    },
-
-    /**
-     * @method createSiteDialog
-     * @param res
-     *
-     */
-    createSiteMenu: function UserConnections_createSiteDialog(res) {
-      var menuButtons = [],
-        current_site = null,
-        sites = res.json,
-        i = 0,
-        ii = sites.length,
-        me = this;
-
-      var onSiteMenuClick = function (p_sType, p_aArgs, p_oItem) {
-          var sText = p_oItem.cfg.getProperty("text"),
-            value = p_oItem.value;
-
-          me.widgets.siteButton.value = value;
-          me.widgets.siteButton.set("label", sText);
-          me.execute();
-        };
-
-      menuButtons.push({
-        text: this.msg("label.menu.site.all"),
-        value: "",
-        onclick: {
-          fn: onSiteMenuClick
-        }
-      });
-
-      for (; i < ii; i++) {
-        current_site = sites[i];
-        menuButtons.push({
-          text: current_site.title,
-          value: current_site.name,
-          onclick: {
-            fn: onSiteMenuClick
-          }
-        });
-
-        //Stockage des sites
-        me.sites.push({
-          name: current_site.name,
-          title: current_site.title
-        });
-      }
-      this.widgets.siteButton = new YAHOO.widget.Button({
-        type: "split",
-        name: "site-criteria",
-        id: "site-criteria",
-        menu: menuButtons,
-        container: "site-criteria-container"
-      });
-
-      //Maj des infos du bouttons
-      this.widgets.siteButton.set("label", this.msg("label.menu.site.all"));
-      this.widgets.siteButton.value = "";
-
-      this.execute();
-    },
-
     onExport: function UserConnections_onExport() {
       if (this.lastRequest.params) {
         var params = this.lastRequest.params;
         params += "&type=users";
         params += "&values=" + this.lastRequest.values.toString();
         params += "&interval=" + this.lastRequest.dateFilter;
-        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params; //?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data));//JSON.stringify
+        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params; // ?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data));//JSON.stringify
         window.open(url);
       }
     },
@@ -239,10 +84,10 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
      * @method prepareRecentlyConnectedUsersRequest
      */
     prepareRecentlyConnectedUsersRequest: function UserConnections_prepareRecentlyConnectedUsersRequest() {
-      //Récupération des variables de l'UI
+      // Récupération des variables de l'UI
       var site = this.convertMenuValue(this.widgets.siteButton.value),
-        currentDate = new Date(),
-        params = "";
+          currentDate = new Date(),
+          params = "";
 
       params = "?type=users-recently-connected";
       params += "&to=" + currentDate.getTime();
@@ -258,12 +103,12 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
      * @method prepareUserRequest
      */
     prepareUserRequest: function UserConnections_prepareUserRequest(type) {
-      //Récupération des variables de l'UI
+      // Récupération des variables de l'UI
       var dateFilter = this.currentDateFilter,
         site = this.convertMenuValue(this.widgets.siteButton.value),
         params = "";
 
-      // Crétion du tableau d'intervalle de dates
+      // Création du tableau d'intervalle de dates
       tsArray = this.buildTimeStampArray();
       params = "?type=" + type;
       params += "&from=" + tsArray[0];
@@ -280,32 +125,32 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
      */
     executeUserRequest: function UserConnections_executeUserRequest(params, type) {
       var displayUsers = function (response) {
-          var users = response.json.items,
-            el = Dom.get(this.id + "-" + type);
+        var users = response.json.items,
+          el = Dom.get(this.id + "-" + type);
 
-          if (users && users.length) {
-            var context = Alfresco.constants.URL_PAGECONTEXT,
-              url = "",
-              html = "",
-              user = "",
-              i = 0,
-              l = users.length;
+        if (users && users.length) {
+          var context = Alfresco.constants.URL_PAGECONTEXT,
+            url = "",
+            html = "",
+            user = "",
+            i = 0,
+            l = users.length;
 
-            for (; i < l; i++) {
-              user = users[i];
-              html += '<li class="nav-user">';
-              html += '<a class="theme-color-1" tabindex="0" target="_blank" href="' + context + 'user/' + user.username + '/profile">' + user.fullName + ' (' + user.username + ')</a>';
-              html += '</li>';
-            }
-
-            html = "<ul>" + html + "</ul>";
-            el.innerHTML = html;
-          } else {
-            el.innerHTML = this.msg("label.no-results." + type);
+          for (; i < l; i++) {
+            user = users[i];
+            html += '<li class="nav-user">';
+            html += '<a class="theme-color-1" tabindex="0" target="_blank" href="' + context + 'user/' + user.username + '/profile">' + user.fullName + ' (' + user.username + ')</a>';
+            html += '</li>';
           }
 
-          this.headers[type].innerHTML += " (" + users.length + ")";
-        };
+          html = "<ul>" + html + "</ul>";
+          el.innerHTML = html;
+        } else {
+          el.innerHTML = this.msg("label.no-results." + type);
+        }
+
+        this.headers[type].innerHTML += " (" + users.length + ")";
+      };
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-users" + params;
       Alfresco.util.Ajax.jsonGet({
@@ -318,19 +163,15 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         execScripts: true
       });
     },
-    /**
-     * @method
-     * @param
-     * @return
-     */
+
     onSearch: function UserConnections_onSearch() {
-      //Récupération des variables de l'UI
+      // Récupération des variables de l'UI
       var dateFilter = this.currentDateFilter,
         site = this.convertMenuValue(this.widgets.siteButton.value),
         tsString = "",
         params = "";
 
-      // Crétion du tableau d'intervalle de dates
+      // Création du tableau d'intervalle de dates
       if (dateFilter) {
         var tsArray = this.buildTimeStampArray();
         //Mise à jour des labels
@@ -390,7 +231,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         if (chartTag == "embed" || chartTag == "object") {
           swf.load(getUserFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
         } else {
-          //Création variables et attribut - GetFlashData défini dans get_data.js - id : Variables json pour ofc.
+          // Création variables et attribut - GetFlashData défini dans get_data.js - id : Variables json pour ofc.
           var flashvars = {
             "get-data": "getUserFlashData",
             "id": escape(YAHOO.lang.JSON.stringify(response.json))
@@ -404,88 +245,17 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
               AllowScriptAccess: "always"
             };
 
-          //Création du graphique Flash.
+          // Création du graphique Flash.
           swfobject.embedSWF(this.pathToSwf, id, additionalsParams.width, additionalsParams.height, "9.0.0", "expressInstall.swf", flashvars, params, attributes);
         }
 
       } else {
-        //On remove le SWF courant.
+        // On remove le SWF courant.
         this.removeGraph(id);
         Dom.get(id).innerHTML = this.msg("message.no_results");
         this.widgets.exportButton.set("disabled", true);
       }
     },
-
-    /**
-     * @method removeGraph
-     * @return boolean
-     */
-    removeGraph: function UserConnections_removeGraph(id) {
-      var swf = Dom.get(id),
-        chartTag = swf.tagName.toLowerCase(),
-        res = false;
-
-      if (chartTag == "embed" || chartTag == "object") {
-        swfobject.removeSWF(id);
-        // Le conteneur étant détruit, il faut le recréer ...
-        var newChartDiv = new YAHOO.util.Element(document.createElement("div"));
-        newChartDiv.set("id", id);
-        newChartDiv.appendTo(id + "-container");
-        res = true;
-      }
-
-      return res;
-    },
-
-    /**
-     * @method convertDate
-     * @param d Date au format jj/mm/aaaa
-     * @return integer Timestamp unix de la date
-     */
-    convertDate: function UserConnections_convertDate(d) {
-      var res = 0;
-      if (d.length > 0) {
-        var dateArray = d.split('/');
-        var dateToReturn = new Date(dateArray[2], dateArray[1] - 1, dateArray[0], 0, 0, 0);
-        res = dateToReturn.getTime();
-      }
-      return res;
-    },
-
-    /**
-     * @method convertTimeStamp
-     * @param ts Timestamp unix
-     * @param exclude boolean indiquant si le jour doit être exclu
-     * @return string Date au format jj/mm/aaaa
-     */
-    convertTimeStamp: function UserConnections_convertTimeStamp(ts, exclude) {
-      var d = new Date(ts);
-      // retour un jour en arrière en cas d'exclude
-      if (exclude) {
-        d.setDate(d.getDate() - 1);
-      }
-
-      var month = (d.getMonth() + 1).toString(),
-        day = d.getDate().toString(),
-        year = d.getFullYear().toString();
-
-      return day + "/" + month + "/" + year;
-    },
-
-    /**
-     * Transforme les valeurs en cas de "" ou de undefined
-     * @method convertMenuValue
-     * @param val String Valeur du bouton
-     * @return string Valeur "convertie"
-     */
-    convertMenuValue: function UserConnections_convertMenuValue(val) {
-      var res = null;
-      if (val !== undefined && val !== "") {
-        res = val;
-      }
-      return res;
-    },
-
 
     /**
      * @method buildParams Construit une chaîne de caractère pour passer les arguments en GET
@@ -497,114 +267,6 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       // TODO:
 
       return params;
-    },
-
-    /**
-     * @method buildTimeStampArray Construit des intervalles de dates
-     * @param nbInterval Nombre d'intervalle de découpage
-     * @param pTo Date de fin du découpage
-     * @param type Type de découpage (Mois/Jour/Semaine)
-     *
-     * @return array Tableau contenant les différents intervalles de dates
-     */
-    buildTimeStampArray: function UserConnections_buildTimeStampArray(nbInterval) {
-      var tsArray = [],
-        from = null,
-        to = null,
-        currentDay = null,
-        next = null,
-        hasNext = null,
-        res = "";
-
-      // Création de nouvelles dates à manipuler
-      to = new Date(this.endDatesArray[this.currentDateFilter].getTime());
-      from = new Date(this.endDatesArray[this.currentDateFilter].getTime());
-
-      // Créé les intervalles allant du mois de départ au mois d'arrivée INCLUS
-      if (this.currentDateFilter == "months") {
-        tsArray.push(from.setDate(1));
-        next = new Date(from);
-        next.setDate(1);
-        next.setDate(next.getDate() + 1);
-
-        // Date d'arrêt
-        to.setDate(1);
-        to.setMonth(to.getMonth() + 1);
-
-        hasNext = (to.getTime() > next.getTime());
-        while (hasNext) {
-          tsArray.push(next.getTime());
-          next.setDate(next.getDate() + 1);
-          hasNext = (to.getTime() > next.getTime());
-        }
-        tsArray.push(next.getTime());
-      }
-      // Selectionne par semaine suivant from et to.
-      // Les semaines de "from" et "to" sont INCLUSES
-      else if (this.currentDateFilter == "weeks") {
-        //On utilise la date de départ pour récupérer tous les jours de la semaine
-        next = null, currentDay = to.getDay(), hasNext = false;
-        //Début de semaine
-        from.setDate(to.getDate() - (currentDay - 1));
-        next = new Date(from);
-        tsArray.push(from.getTime());
-
-        //Date d'arrêt
-        to.setMonth(from.getMonth());
-        to.setDate(from.getDate() + 7);
-
-        next.setDate(from.getDate() + 1);
-        hasNext = (to.getTime() > next.getTime());
-        while (hasNext) {
-          tsArray.push(next.getTime());
-          next.setDate(next.getDate() + 1);
-          hasNext = (to.getTime() > next.getTime());
-        }
-        //Semaine suivante, on test au cas où on dépasse.
-        tsArray.push(next.getTime());
-      }
-      // Créé les intervalles allant du jour de départ au jour d'arrivée INCLUS
-      else if (this.currentDateFilter == "days") {
-        //On ajoute la date de départ
-        tsArray.push(from.getTime());
-
-        //On ajoute 1 jour à la date de fin, pour inclure le dernier jour selectionné.
-        to.setDate(to.getDate() + 1);
-
-        //On récupère le jour suivant
-        next = new Date(from);
-        next.setHours(next.getHours() + 2);
-
-        //On vérifie qu'il ne dépasse pas la date de fin, on boucle
-        hasNext = (to > next);
-        while (hasNext) {
-          tsArray.push(next.getTime());
-          next.setHours(next.getHours() + 2);
-          hasNext = (to > next);
-        }
-        tsArray.push(to.getTime());
-      } else if (this.currentDateFilter == "years") {
-        // On se place au début de l'année
-        from.setDate(1);
-        from.setMonth(0);
-        tsArray.push(from.getTime());
-
-        to.setDate(1);
-        to.setMonth(0);
-        to.setFullYear(to.getFullYear() + 1);
-
-        next = new Date(from);
-        next.setMonth(next.getMonth() + 1);
-        hasNext = (to.getTime() > next.getTime());
-        while (hasNext) {
-          tsArray.push(next.getTime());
-          next.setMonth(next.getMonth() + 1);
-          hasNext = (to.getTime() > next.getTime());
-        }
-        tsArray.push(next.getTime());
-      }
-
-      return tsArray;
     },
 
     updateUsersLabels: function UserConnections_updateUsersLabels(tsArray) {
@@ -657,77 +319,13 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       }
       this.headers["users-recently-connected"].innerHTML = this.msg("label.users.recently-connected");
     },
-    /**
-     * @method onChangeDateFilter
-     * @param e Event déclencheur
-     * @param args Composant déclencheur
-     * Gestionnaire click Jour / Semaine / Mois / Année
-     */
-    onChangeDateFilter: function UserConnections_OnChangeDateFilter(e, args) {
-      if (e) Event.stopEvent(e);
-      Dom.removeClass("by-" + this.currentDateFilter, "selected");
-      Dom.addClass("by-" + args.filter, "selected");
-      this.currentDateFilter = args.filter;
-      this.execute();
-    },
-
-
-    /**
-     * @method onChangeDateInterval
-     * @param e Event déclencheur
-     * @param args Composant déclencheur
-     * Gestionnaire click suivant / précédent
-     */
-    onChangeDateInterval: function UserConnections_OnChangeDateInterval(e, args) {
-      var coef = args.coef,
-        currentDate = new Date(),
-        dateFilter = this.currentDateFilter,
-        newDate = new Date(this.endDatesArray[dateFilter]);
-
-      Event.stopEvent(e);
-      switch (dateFilter) {
-      case "days":
-        newDate.setDate(this.endDatesArray[dateFilter].getDate() + (1 * coef));
-        break;
-      case "weeks":
-        newDate.setDate(this.endDatesArray[dateFilter].getDate() + (7 * coef));
-        break;
-      case "months":
-        newDate.setMonth(this.endDatesArray[dateFilter].getMonth() + (1 * coef));
-        break;
-      case "years":
-        newDate.setFullYear(this.endDatesArray[dateFilter].getFullYear() + (1 * coef));
-        break;
-      }
-
-      this.endDatesArray[dateFilter] = newDate;
-      this.execute();
-    },
-
-    onResetDates: function UserConnections_OnResetDates() {
-      this.setupCurrentDates();
-      this.execute();
-    },
 
     execute: function UserConnections_execute() {
       this.prepareUserRequest("users-connected");
       this.prepareUserRequest("users-never-connected");
       this.prepareRecentlyConnectedUsersRequest();
-      this.onSearch();
-    },
 
-    setupCurrentDates: function UserConnections_setupCurrentDates() {
-      var currentDate = new Date();
-      currentDate.setMinutes(0);
-      currentDate.setHours(0);
-      currentDate.setMinutes(0);
-      currentDate.setSeconds(0);
-      currentDate.setMilliseconds(0);
-
-      this.endDatesArray["days"] = currentDate;
-      this.endDatesArray["weeks"] = currentDate;
-      this.endDatesArray["months"] = currentDate;
-      this.endDatesArray["years"] = currentDate;
+      AtolStatistics.UserConnections.superclass.execute.call(this);
     }
   });
 })();

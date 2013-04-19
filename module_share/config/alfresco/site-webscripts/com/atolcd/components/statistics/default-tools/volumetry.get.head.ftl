@@ -2,7 +2,7 @@
 
 <!-- Admin Console for Share Stats Tool -->
 <@script type="text/javascript" src="${page.url.context}/res/yui/calendar/calendar.js"></@script>
-<@script type="text/javascript" src="${page.url.context}/res/components/console/consoletool.js"></@script>
+<@script type="text/javascript" src="${page.url.context}/res/components/console/statistics-tool.js"></@script>
 <@script type="text/javascript" src="${page.url.context}/res/components/console/sites-volumetry.js"></@script>
 <@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/console/sites-volumetry.css" />
 

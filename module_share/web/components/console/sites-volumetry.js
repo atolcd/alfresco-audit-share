@@ -12,13 +12,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
    * YUI Library aliases
    */
   var Dom = YAHOO.util.Dom,
-    Event = YAHOO.util.Event,
-    Element = YAHOO.util.Element;
-
-  /**
-   * Alfresco Slingshot aliases
-   */
-  var $html = Alfresco.util.encodeHTML;
+      Event = YAHOO.util.Event;
 
   /**
    * Volumetry constructor.
@@ -29,85 +23,10 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
    */
   AtolStatistics.Volumetry = function Volumetry_constructor(htmlId) {
     AtolStatistics.Volumetry.superclass.constructor.call(this, "AtolStatistics.Volumetry", htmlId, ["button", "container", "json"]);
-
-    // Surcharge de la classe Date. Récupère la semaine courante
-    Date.prototype.getWeek = function() {
-     var onejan = new Date(this.getFullYear(),0,1);
-     return Math.ceil((((this - onejan) / 86400000) + onejan.getDay()+1)/7);
-    };
-
     return this;
   };
 
-  YAHOO.extend(AtolStatistics.Volumetry, Alfresco.component.Base, {
-    /**
-     * Cache-Résultat de la dernière requête exécutée
-     * Utilisé pour l'export CSV
-     */
-    lastRequest: {
-      params: null,
-      data: null,
-      from: null,
-      to: null
-    },
-
-    /**
-     * @attribute selectedSites
-     * Tableau contenant tous les sites selectionnés dans la boîte de dialogue
-     *
-     */
-    selectedSites: [],
-
-    /**
-     * @attribute siteDialog
-     * Yahoo Simple Dialog - Boîte de dialogue permettant de
-     * sélectionner un ou plusieurs sites
-     *
-     */
-    siteDialog: null,
-
-    /**
-     * @attribute pathToSwf
-     * Chemin vers le fichier swf d'Open Flash Chart
-     *
-     */
-    pathToSwf: "/share/components/console/open_flash_chart/open-flash-chart.swf",
-
-    /**
-     * @attribute endDatesArray
-     * Dates de référence utilisée pour les graphiques
-     * Date présente par défaut
-     */
-    endDatesArray: [],
-    /**
-     * @attribute currentDateFilter
-     * Filtre de date : days,weeks,months,years
-     * "days" par défaut
-     */
-    currentDateFilter: "weeks",
-
-    /**
-     * @attribute sites
-     * Informations sur les sites (id/titre).
-     */
-    sites: [],
-
-    /**
-     * @attribute limit
-     * Limite de documents remontés par requête de popularité
-     */
-    limit: 5,
-
-    /**
-     * Fired by YUILoaderHelper when required component script files have
-     * been loaded into the browser.
-     *
-     * @method onComponentsLoaded
-     */
-    onComponentsLoaded: function Volumetry_onComponentsLoaded() {
-      Event.onContentReady(this.id, this.onReady, this, true);
-    },
-
+  YAHOO.extend(AtolStatistics.Volumetry, AtolStatistics.Tool, {
     /**
      * Fired by YUI when parent element is available for scripting.
      * Component initialisation, including instantiation of YUI widgets and event listener binding.
@@ -129,95 +48,10 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       Event.addListener("by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
       Event.addListener("by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
       Event.addListener("by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
-
       Event.addListener("chart-prev", "click", this.onChangeDateInterval, { coef: -1 }, this);
       Event.addListener("chart-next", "click", this.onChangeDateInterval, { coef: 1 }, this);
 
       this.loadSites();
-    },
-
-    loadSites: function loadSites() {
-      //Changement de style pour l'icône de chargement
-      // this.widgets.siteButton.set("label", this.msg("label.loading") + ' <span class="loading"></span>');
-
-      Alfresco.util.Ajax.jsonGet({
-        url: Alfresco.constants.PROXY_URI + "share-stats/site/list-sites",
-        successCallback: {
-          fn: function (res) {
-            this.createSiteMenu(res);
-          },
-          scope: this
-        },
-        failureMessage: this.msg("label.popup.error.list-site"),
-        execScripts: true
-      });
-    },
-
-    /**
-     * @method createSiteDialog
-     * @param res
-     *
-     */
-    createSiteMenu: function Volumetry_createSiteDialog(res) {
-      var menuButtons = [],
-        current_site = null,
-        sites = res.json,
-        i = 0,
-        ii = sites.length,
-        me = this;
-
-      var onSiteMenuClick = function (p_sType, p_aArgs, p_oItem) {
-          var sText = p_oItem.cfg.getProperty("text"),
-            value = p_oItem.value;
-
-          if (value == "") { // Tout les sites
-            Dom.removeClass("bar-stack-criteria-container", "hidden");
-          } else {
-            Dom.addClass("bar-stack-criteria-container", "hidden");
-          }
-
-          me.widgets.siteButton.value = value;
-          me.widgets.siteButton.set("label", sText);
-          me.execute();
-        };
-
-      menuButtons.push({
-        text: this.msg("label.menu.site.all"),
-        value: "",
-        onclick: {
-          fn: onSiteMenuClick
-        }
-      });
-
-      for (; i < ii; i++) {
-        current_site = sites[i];
-        menuButtons.push({
-          text: current_site.title,
-          value: current_site.name,
-          onclick: {
-            fn: onSiteMenuClick
-          }
-        });
-
-        //Stockage des sites
-        me.sites.push({
-          name: current_site.name,
-          title: current_site.title
-        });
-      }
-      this.widgets.siteButton = new YAHOO.widget.Button({
-        type: "split",
-        name: "site-criteria",
-        id: "site-criteria",
-        menu: menuButtons,
-        container: "site-criteria-container"
-      });
-
-      //Maj des infos du bouttons
-      this.widgets.siteButton.set("label", this.msg("label.menu.site.all"));
-      this.widgets.siteButton.value = "";
-
-      this.execute();
     },
 
     onExport: function Volumetry_onExport() {
@@ -226,24 +60,19 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         params += "&type=volumetry";
         params += "&values=" + this.lastRequest.values.toString();
         params += "&interval=" + this.lastRequest.dateFilter;
-        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params; //?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data));//JSON.stringify
+        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params; // ?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data));//JSON.stringify
         window.open(url);
       }
     },
 
-    /**
-     * @method
-     * @param
-     * @return
-     */
     onSearch: function Volumetry_onSearch() {
-      //Récupération des variables de l'UI
+      // Récupération des variables de l'UI
       var dateFilter = this.currentDateFilter,
         site = this.convertMenuValue(this.widgets.siteButton.value),
         tsString = "",
         params = "";
 
-      // Crétion du tableau d'intervalle de dates
+      // Création du tableau d'intervalle de dates
       if (dateFilter) {
         tsString = this.buildTimeStampArray().toString();
       }
@@ -275,7 +104,29 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
           width: "90%"
         }
       });
+    },
 
+    onSiteMenuClick: function Volumetry_onSiteMenuClick(p_sType, p_aArgs, p_oItem) {
+      var sText = p_oItem.cfg.getProperty("text"),
+          value = p_oItem.value;
+
+      if (value == "") { // Tout les sites
+        Dom.removeClass("bar-stack-criteria-container", "hidden");
+      } else {
+        Dom.addClass("bar-stack-criteria-container", "hidden");
+      }
+
+      this.widgets.siteButton.value = value;
+      this.widgets.siteButton.set("label", sText);
+      this.execute();
+    },
+
+    createSiteMenu: function Volumetry_createSiteMenu(res, hideAllSiteEntry) {
+      if (Alfresco.constants.SITE && Alfresco.constants.SITE != "") {
+        Dom.addClass("bar-stack-criteria-container", "hidden");
+      }
+
+      AtolStatistics.Volumetry.superclass.createSiteMenu.call(this, res, hideAllSiteEntry);
     },
 
     /**
@@ -300,7 +151,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         if (chartTag == "embed" || chartTag == "object") {
           swf.load(getVolumetryFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
         } else {
-          //Création variables et attribut - GetFlashData défini dans get_data.js - id : Variables json pour ofc.
+          // Création variables et attribut - GetFlashData défini dans get_data.js - id : Variables json pour ofc.
           var flashvars = {
             "get-data": "getVolumetryFlashData",
             "id": escape(YAHOO.lang.JSON.stringify(response.json))
@@ -314,268 +165,20 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
               AllowScriptAccess: "always"
             };
 
-          //Création du graphique Flash.
+          // Création du graphique Flash.
           swfobject.embedSWF(this.pathToSwf, id, additionalsParams.width, additionalsParams.height, "9.0.0", "expressInstall.swf", flashvars, params, attributes);
         }
 
       } else {
-        //On remove le SWF courant.
+        // On remove le SWF courant.
         this.removeGraph(id);
         Dom.get(id).innerHTML = this.msg("message.no_results");
         this.widgets.exportButton.set("disabled", true);
       }
     },
 
-    /**
-     * @method removeGraph
-     * @return boolean
-     */
-    removeGraph: function Volumetry_removeGraph(id) {
-      var swf = Dom.get(id),
-        chartTag = swf.tagName.toLowerCase(),
-        res = false;
-
-      if (chartTag == "embed" || chartTag == "object") {
-        swfobject.removeSWF(id);
-        // Le conteneur étant détruit, il faut le recréer ...
-        var newChartDiv = new YAHOO.util.Element(document.createElement("div"));
-        newChartDiv.set("id", id);
-        newChartDiv.appendTo(id + "-container");
-        res = true;
-      }
-
-      return res;
-    },
-
-    /**
-     * @method convertDate
-     * @param d Date au format jj/mm/aaaa
-     * @return integer Timestamp unix de la date
-     */
-    convertDate: function Volumetry_convertDate(d) {
-      var res = 0;
-      if (d.length > 0) {
-        var dateArray = d.split('/');
-        var dateToReturn = new Date(dateArray[2], dateArray[1] - 1, dateArray[0], 0, 0, 0);
-        res = dateToReturn.getTime();
-      }
-      return res;
-    },
-
-    /**
-     * @method convertTimeStamp
-     * @param ts Timestamp unix
-     * @param exclude boolean indiquant si le jour doit être exclu
-     * @return string Date au format jj/mm/aaaa
-     */
-    convertTimeStamp: function Volumetry_convertTimeStamp(ts, exclude) {
-      var d = new Date(ts);
-      // retour un jour en arrière en cas d'exclude
-      if (exclude) {
-        d.setDate(d.getDate() - 1);
-      }
-
-      var month = (d.getMonth() + 1).toString(),
-        day = d.getDate().toString(),
-        year = d.getFullYear().toString();
-
-      return day + "/" + month + "/" + year;
-    },
-
-    /**
-     * Transforme les valeurs en cas de "" ou de undefined
-     * @method convertMenuValue
-     * @param val String Valeur du bouton
-     * @return string Valeur "convertie"
-     */
-    convertMenuValue: function Volumetry_convertMenuValue(val) {
-      var res = null;
-      if (val !== undefined && val !== "") {
-        res = val;
-      }
-      return res;
-    },
-
-    /**
-     * @method buildTimeStampArray Construit des intervalles de dates
-     * @param nbInterval Nombre d'intervalle de découpage
-     * @param pTo Date de fin du découpage
-     * @param type Type de découpage (Mois/Jour/Semaine)
-     *
-     * @return array Tableau contenant les différents intervalles de dates
-     */
-    buildTimeStampArray: function Volumetry_buildTimeStampArray(nbInterval) {
-      var tsArray = [],
-        from = null,
-        to = null,
-        currentDay = null,
-        next = null,
-        hasNext = null,
-        res = "";
-
-      // Création de nouvelles dates à manipuler
-      to = new Date(this.endDatesArray[this.currentDateFilter].getTime());
-      from = new Date(this.endDatesArray[this.currentDateFilter].getTime());
-
-      // Créé les intervalles allant du mois de départ au mois d'arrivée INCLUS
-      if (this.currentDateFilter == "months") {
-        tsArray.push(from.setDate(1));
-        next = new Date(from);
-        next.setDate(1);
-        next.setDate(next.getDate() + 1);
-
-        // Date d'arrêt
-        to.setDate(1);
-        to.setMonth(to.getMonth() + 1);
-
-        hasNext = (to.getTime() > next.getTime());
-        while (hasNext) {
-          tsArray.push(next.getTime());
-          next.setDate(next.getDate() + 1);
-          hasNext = (to.getTime() > next.getTime());
-        }
-        tsArray.push(next.getTime());
-      }
-      // Selectionne par semaine suivant from et to.
-      // Les semaines de "from" et "to" sont INCLUSES
-      else if (this.currentDateFilter == "weeks") {
-        //On utilise la date de départ pour récupérer tous les jours de la semaine
-        next = null, currentDay = to.getDay(), hasNext = false;
-        //Début de semaine
-        from.setDate(to.getDate() - (currentDay - 1));
-        next = new Date(from);
-        tsArray.push(from.getTime());
-
-        //Date d'arrêt
-        to.setMonth(from.getMonth());
-        to.setDate(from.getDate() + 7);
-
-        next.setDate(from.getDate() + 1);
-        hasNext = (to.getTime() > next.getTime());
-        while (hasNext) {
-          tsArray.push(next.getTime());
-          next.setDate(next.getDate() + 1);
-          hasNext = (to.getTime() > next.getTime());
-        }
-        //Semaine suivante, on test au cas où on dépasse.
-        tsArray.push(next.getTime());
-      }
-      // Créé les intervalles allant du jour de départ au jour d'arrivée INCLUS
-      else if (this.currentDateFilter == "days") {
-        //On ajoute la date de départ
-        tsArray.push(from.getTime());
-
-        //On ajoute 1 jour à la date de fin, pour inclure le dernier jour selectionné.
-        to.setDate(to.getDate() + 1);
-
-        //On récupère le jour suivant
-        next = new Date(from);
-        next.setHours(next.getHours() + 2);
-
-        //On vérifie qu'il ne dépasse pas la date de fin, on boucle
-        hasNext = (to > next);
-        while (hasNext) {
-          tsArray.push(next.getTime());
-          next.setHours(next.getHours() + 2);
-          hasNext = (to > next);
-        }
-        tsArray.push(to.getTime());
-      } else if (this.currentDateFilter == "years") {
-        // On se place au début de l'année
-        from.setDate(1);
-        from.setMonth(0);
-        tsArray.push(from.getTime());
-
-        to.setDate(1);
-        to.setMonth(0);
-        to.setFullYear(to.getFullYear() + 1);
-
-        next = new Date(from);
-        next.setMonth(next.getMonth() + 1);
-        hasNext = (to.getTime() > next.getTime());
-        while (hasNext) {
-          tsArray.push(next.getTime());
-          next.setMonth(next.getMonth() + 1);
-          hasNext = (to.getTime() > next.getTime());
-        }
-        tsArray.push(next.getTime());
-      }
-
-      return tsArray;
-    },
-
-    /**
-     * @method onChangeDateFilter
-     * @param e Event déclencheur
-     * @param args Composant déclencheur
-     * Gestionnaire click Jour / Semaine / Mois / Année
-     */
-    onChangeDateFilter: function Volumetry_OnChangeDateFilter(e, args) {
-      if (e) Event.stopEvent(e);
-      Dom.removeClass("by-" + this.currentDateFilter, "selected");
-      Dom.addClass("by-" + args.filter, "selected");
-      this.currentDateFilter = args.filter;
-      this.execute();
-    },
-
-
-    /**
-     * @method onChangeDateInterval
-     * @param e Event déclencheur
-     * @param args Composant déclencheur
-     * Gestionnaire click suivant / précédent
-     */
-    onChangeDateInterval: function Volumetry_OnChangeDateInterval(e, args) {
-      var coef = args.coef,
-        currentDate = new Date(),
-        dateFilter = this.currentDateFilter,
-        newDate = new Date(this.endDatesArray[dateFilter]);
-
-      Event.stopEvent(e);
-      switch (dateFilter) {
-      case "days":
-        newDate.setDate(this.endDatesArray[dateFilter].getDate() + (1 * coef));
-        break;
-      case "weeks":
-        newDate.setDate(this.endDatesArray[dateFilter].getDate() + (7 * coef));
-        break;
-      case "months":
-        newDate.setMonth(this.endDatesArray[dateFilter].getMonth() + (1 * coef));
-        break;
-      case "years":
-        newDate.setFullYear(this.endDatesArray[dateFilter].getFullYear() + (1 * coef));
-        break;
-      }
-
-      this.endDatesArray[dateFilter] = newDate;
-      this.execute();
-    },
-
-    onResetDates: function Volumetry_OnResetDates() {
-      this.setupCurrentDates();
-      this.execute();
-    },
-
     onShowStackedBar: function Volumetry_onShowStackedBar() {
       this.execute();
-    },
-
-    execute: function Volumetry_execute() {
-      this.onSearch();
-    },
-
-    setupCurrentDates: function Volumetry_setupCurrentDates() {
-      var currentDate = new Date();
-      currentDate.setMinutes(0);
-      currentDate.setHours(0);
-      currentDate.setMinutes(0);
-      currentDate.setSeconds(0);
-      currentDate.setMilliseconds(0);
-
-      this.endDatesArray["days"] = currentDate;
-      this.endDatesArray["weeks"] = currentDate;
-      this.endDatesArray["months"] = currentDate;
-      this.endDatesArray["years"] = currentDate;
     }
   });
 })();
