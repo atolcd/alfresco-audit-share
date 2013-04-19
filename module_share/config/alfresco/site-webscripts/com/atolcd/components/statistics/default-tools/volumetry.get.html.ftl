@@ -1,11 +1,7 @@
-<!--[if IE]>
-<iframe id="yui-history-iframe" src="${url.context}/res/yui/history/assets/blank.html"></iframe>
-<![endif]-->
-<input id="yui-history-field" type="hidden" />
+<#assign el = args.htmlid?html />
 
-<#assign el=args.htmlid?html>
 <script type="text/javascript">//<![CDATA[
-   new Alfresco.ConsoleSitesVolumetry("${el}").setMessages(${messages});
+   new AtolStatistics.Volumetry("${args.htmlid?js_string}").setMessages(${messages});
 //]]></script>
 
 <div id="${el}-body" class="volumetry">
@@ -66,10 +62,6 @@
       <div id="${el}-chart-container" class="chart-container">
         <div class="chart" id="${el}-chart"></div>
       </div>
-    </div>
-
-    <div>
-      <!-- TODO -->
     </div>
   </div>
 </div>

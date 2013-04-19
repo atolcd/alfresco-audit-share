@@ -1,8 +1,11 @@
+// AtolStatistics namespace
+if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics = {}; }
+
 /**
- * ConsoleUserAudit tool component.
+ * UserConnections tool component.
  *
- * @namespace Alfresco
- * @class Alfresco.ConsoleUserAudit
+ * @namespace AtolStatistics
+ * @class AtolStatistics.UserConnections
  */
 (function () {
   /**
@@ -18,108 +21,25 @@
   var $html = Alfresco.util.encodeHTML;
 
   /**
-   * ConsoleUserAudit constructor.
+   * UserConnections constructor.
    *
    * @param {String} htmlId The HTML id üof the parent element
-   * @return {Alfresco.ConsoleUserAudit} The new ConsoleUserAudit instance
+   * @return {AtolStatistics.UserConnections} The new UserConnections instance
    * @constructor
    */
-  Alfresco.ConsoleUserAudit = function (htmlId) {
-    this.name = "Alfresco.ConsoleUserAudit";
-    Alfresco.ConsoleUserAudit.superclass.constructor.call(this, htmlId);
-
-    /* Register this component */
-    Alfresco.util.ComponentManager.register(this);
-
-    /* Load YUI Components */
-    Alfresco.util.YUILoaderHelper.require(["button", "container", "datasource", "paginator", "json", "history"], this.onComponentsLoaded, this);
-
-    /* Define panel handlers */
-    var parent = this;
-
-    // NOTE: the panel registered first is considered the "default" view and is displayed first
-    /* Audit Panel Handler */
-    UserAuditPanelHandler = function UserAuditPanelHandler_constructor() {
-      UserAuditPanelHandler.superclass.constructor.call(this, "audit");
-    };
+  AtolStatistics.UserConnections = function UserConnections_constructor(htmlId) {
+    AtolStatistics.UserConnections.superclass.constructor.call(this, "AtolStatistics.UserConnections", htmlId, ["button", "container", "json"]);
 
     // Surcharge de la classe Date. Récupère la semaine courante
-    Date.prototype.getWeek = function () {
-      var onejan = new Date(this.getFullYear(), 0, 1);
-      return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+    Date.prototype.getWeek = function() {
+     var onejan = new Date(this.getFullYear(),0,1);
+     return Math.ceil((((this - onejan) / 86400000) + onejan.getDay()+1)/7);
     };
-
-    YAHOO.extend(UserAuditPanelHandler, Alfresco.ConsolePanelHandler, {
-      /**
-       * Called by the ConsolePanelHandler when this panel shall be loaded
-       *
-       * @method onLoad
-       */
-      onLoad: function onLoad() {
-        // Buttons - Check ?
-        parent.widgets.exportButton = Alfresco.util.createYUIButton(parent, "export-button", parent.onExport);
-
-        parent.widgets.exportButton.set("disabled", true);
-
-        // el, sType, fn, obj, overrideContext
-        Event.addListener("home", "click", parent.onResetDates, null, parent);
-        Event.addListener("by-days", "click", parent.onChangeDateFilter, {
-          filter: "days"
-        }, parent);
-        Event.addListener("by-weeks", "click", parent.onChangeDateFilter, {
-          filter: "weeks"
-        }, parent);
-        Event.addListener("by-months", "click", parent.onChangeDateFilter, {
-          filter: "months"
-        }, parent);
-        Event.addListener("by-years", "click", parent.onChangeDateFilter, {
-          filter: "years"
-        }, parent);
-
-        Event.addListener("chart-prev", "click", parent.onChangeDateInterval, {
-          coef: -1
-        }, parent);
-        Event.addListener("chart-next", "click", parent.onChangeDateInterval, {
-          coef: 1
-        }, parent);
-
-        parent.headers["users-connected"] = Dom.get(parent.id + "-users-connected-header");
-        parent.headers["users-never-connected"] = Dom.get(parent.id + "-users-never-connected-header");
-        parent.headers["users-recently-connected"] = Dom.get(parent.id + "-users-recently-connected-header");
-
-        this.loadSites();
-      },
-
-      /**
-       * Création de la boîte de dialogue de sélection des sites
-       * à partir du résultat du WebScript.
-       * @method createSiteDialog
-       *
-       */
-      loadSites: function loadSites() {
-        //Changement de style pour l'icône de chargement
-        // parent.widgets.siteButton.set("label", parent._msg("label.loading") + ' <span class="loading"></span>');
-
-        Alfresco.util.Ajax.jsonGet({
-          url: Alfresco.constants.PROXY_URI + "share-stats/site/list-sites",
-          successCallback: {
-            fn: function (res) {
-              this.createSiteMenu(res);
-            },
-            scope: parent
-          },
-          failureMessage: parent._msg("label.popup.error.list-site"),
-          execScripts: true
-        });
-      }
-    });
-
-    new UserAuditPanelHandler();
 
     return this;
   };
 
-  YAHOO.extend(Alfresco.ConsoleUserAudit, Alfresco.ConsoleTool, {
+  YAHOO.extend(AtolStatistics.UserConnections, Alfresco.component.Base, {
 
     /**
      * Cache-Résultat de la dernière requête exécutée
@@ -180,7 +100,7 @@
     recentlyConnectedDelay: 30,
 
     /**
-     * @attribute headers 
+     * @attribute headers
      * Contient les éléments Dom des différents headers de la table sous le graphe
      */
     headers: [],
@@ -191,7 +111,7 @@
      *
      * @method onComponentsLoaded
      */
-    onComponentsLoaded: function ConsoleUserAudit_onComponentsLoaded() {
+    onComponentsLoaded: function UserConnections_onComponentsLoaded() {
       Event.onContentReady(this.id, this.onReady, this, true);
     },
 
@@ -201,11 +121,46 @@
      *
      * @method onReady
      */
-    onReady: function ConsoleUserAudit_onReady() {
-      // Call super-class onReady() method
-      Alfresco.ConsoleUserAudit.superclass.onReady.call(this);
-
+    onReady: function UserConnections_onReady() {
       this.setupCurrentDates();
+
+      // Buttons - Check ?
+      this.widgets.exportButton = Alfresco.util.createYUIButton(this, "export-button", this.onExport);
+
+      this.widgets.exportButton.set("disabled", true);
+
+      // el, sType, fn, obj, overrideContext
+      Event.addListener("home", "click", this.onResetDates, null, this);
+      Event.addListener("by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
+      Event.addListener("by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
+      Event.addListener("by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
+      Event.addListener("by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
+
+      Event.addListener("chart-prev", "click", this.onChangeDateInterval, { coef: -1 }, this);
+      Event.addListener("chart-next", "click", this.onChangeDateInterval, { coef: 1 }, this);
+
+      this.headers["users-connected"] = Dom.get(this.id + "-users-connected-header");
+      this.headers["users-never-connected"] = Dom.get(this.id + "-users-never-connected-header");
+      this.headers["users-recently-connected"] = Dom.get(this.id + "-users-recently-connected-header");
+
+      this.loadSites();
+    },
+
+    loadSites: function loadSites() {
+      //Changement de style pour l'icône de chargement
+      // this.widgets.siteButton.set("label", this.msg("label.loading") + ' <span class="loading"></span>');
+
+      Alfresco.util.Ajax.jsonGet({
+        url: Alfresco.constants.PROXY_URI + "share-stats/site/list-sites",
+        successCallback: {
+          fn: function (res) {
+            this.createSiteMenu(res);
+          },
+          scope: this
+        },
+        failureMessage: this.msg("label.popup.error.list-site"),
+        execScripts: true
+      });
     },
 
     /**
@@ -213,7 +168,7 @@
      * @param res
      *
      */
-    createSiteMenu: function ConsoleUserAudit_createSiteDialog(res) {
+    createSiteMenu: function UserConnections_createSiteDialog(res) {
       var menuButtons = [],
         current_site = null,
         sites = res.json,
@@ -231,7 +186,7 @@
         };
 
       menuButtons.push({
-        text: this._msg("label.menu.site.all"),
+        text: this.msg("label.menu.site.all"),
         value: "",
         onclick: {
           fn: onSiteMenuClick
@@ -263,13 +218,13 @@
       });
 
       //Maj des infos du bouttons
-      this.widgets.siteButton.set("label", this._msg("label.menu.site.all"));
+      this.widgets.siteButton.set("label", this.msg("label.menu.site.all"));
       this.widgets.siteButton.value = "";
 
       this.execute();
     },
 
-    onExport: function ConsoleUserAudit_onExport() {
+    onExport: function UserConnections_onExport() {
       if (this.lastRequest.params) {
         var params = this.lastRequest.params;
         params += "&type=users";
@@ -283,7 +238,7 @@
     /**
      * @method prepareRecentlyConnectedUsersRequest
      */
-    prepareRecentlyConnectedUsersRequest: function ConsoleUserAudit_prepareRecentlyConnectedUsersRequest() {
+    prepareRecentlyConnectedUsersRequest: function UserConnections_prepareRecentlyConnectedUsersRequest() {
       //Récupération des variables de l'UI
       var site = this.convertMenuValue(this.widgets.siteButton.value),
         currentDate = new Date(),
@@ -302,7 +257,7 @@
     /**
      * @method prepareUserRequest
      */
-    prepareUserRequest: function ConsoleUserAudit_prepareUserRequest(type) {
+    prepareUserRequest: function UserConnections_prepareUserRequest(type) {
       //Récupération des variables de l'UI
       var dateFilter = this.currentDateFilter,
         site = this.convertMenuValue(this.widgets.siteButton.value),
@@ -323,7 +278,7 @@
     /**
      * @method executeUserRequest
      */
-    executeUserRequest: function ConsoleUserAudit_executeUserRequest(params, type) {
+    executeUserRequest: function UserConnections_executeUserRequest(params, type) {
       var displayUsers = function (response) {
           var users = response.json.items,
             el = Dom.get(this.id + "-" + type);
@@ -359,7 +314,7 @@
           fn: displayUsers,
           scope: this
         },
-        failureMessage: this._msg("label.popup.query.error"),
+        failureMessage: this.msg("label.popup.query.error"),
         execScripts: true
       });
     },
@@ -368,7 +323,7 @@
      * @param
      * @return
      */
-    onSearch: function ConsoleUserAudit_onSearch() {
+    onSearch: function UserConnections_onSearch() {
       //Récupération des variables de l'UI
       var dateFilter = this.currentDateFilter,
         site = this.convertMenuValue(this.widgets.siteButton.value),
@@ -399,7 +354,7 @@
           fn: this.displayGraph,
           scope: this
         },
-        failureMessage: this._msg("label.popup.query.error"),
+        failureMessage: this.msg("label.popup.query.error"),
         execScripts: true,
         additionalsParams: {
           chartType: "vbar",
@@ -418,7 +373,7 @@
      * @method displayGraph Affiche le requête suite à une requête Ajax
      * @param response Réponse de la requête
      */
-    displayGraph: function ConsoleUserAudit_displayGraph(response) {
+    displayGraph: function UserConnections_displayGraph(response) {
       var additionalsParams, id, swf, chartTag;
 
       additionalsParams = response.config.additionalsParams;
@@ -456,7 +411,7 @@
       } else {
         //On remove le SWF courant.
         this.removeGraph(id);
-        Dom.get(id).innerHTML = this._msg("message.no_results");
+        Dom.get(id).innerHTML = this.msg("message.no_results");
         this.widgets.exportButton.set("disabled", true);
       }
     },
@@ -465,7 +420,7 @@
      * @method removeGraph
      * @return boolean
      */
-    removeGraph: function ConsoleUserAudit_removeGraph(id) {
+    removeGraph: function UserConnections_removeGraph(id) {
       var swf = Dom.get(id),
         chartTag = swf.tagName.toLowerCase(),
         res = false;
@@ -487,7 +442,7 @@
      * @param d Date au format jj/mm/aaaa
      * @return integer Timestamp unix de la date
      */
-    convertDate: function ConsoleUserAudit_convertDate(d) {
+    convertDate: function UserConnections_convertDate(d) {
       var res = 0;
       if (d.length > 0) {
         var dateArray = d.split('/');
@@ -503,7 +458,7 @@
      * @param exclude boolean indiquant si le jour doit être exclu
      * @return string Date au format jj/mm/aaaa
      */
-    convertTimeStamp: function ConsoleUserAudit_convertTimeStamp(ts, exclude) {
+    convertTimeStamp: function UserConnections_convertTimeStamp(ts, exclude) {
       var d = new Date(ts);
       // retour un jour en arrière en cas d'exclude
       if (exclude) {
@@ -523,7 +478,7 @@
      * @param val String Valeur du bouton
      * @return string Valeur "convertie"
      */
-    convertMenuValue: function ConsoleUserAudit_convertMenuValue(val) {
+    convertMenuValue: function UserConnections_convertMenuValue(val) {
       var res = null;
       if (val !== undefined && val !== "") {
         res = val;
@@ -536,7 +491,7 @@
      * @method buildParams Construit une chaîne de caractère pour passer les arguments en GET
      * @return string params argument à passer à la requête
      */
-    buildParams: function ConsoleUserAudit_buildParams() {
+    buildParams: function UserConnections_buildParams() {
       var params = "";
 
       // TODO:
@@ -552,7 +507,7 @@
      *
      * @return array Tableau contenant les différents intervalles de dates
      */
-    buildTimeStampArray: function ConsoleUserAudit_buildTimeStampArray(nbInterval) {
+    buildTimeStampArray: function UserConnections_buildTimeStampArray(nbInterval) {
       var tsArray = [],
         from = null,
         to = null,
@@ -652,7 +607,7 @@
       return tsArray;
     },
 
-    updateUsersLabels: function ConsoleUserAudit_updateUsersLabels(tsArray) {
+    updateUsersLabels: function UserConnections_updateUsersLabels(tsArray) {
       var connectedLabel = "",
         neverConnectedLabel = "";
 
@@ -662,13 +617,13 @@
           today = new Date();
 
         if (date.getMonth() == today.getMonth() && date.getDate() == today.getDate() && date.getFullYear() == today.getFullYear()) {
-          connectedLabel = this._msg("label.users.connected.today");
-          neverConnectedLabel = this._msg("label.users.never-connected.today");
+          connectedLabel = this.msg("label.users.connected.today");
+          neverConnectedLabel = this.msg("label.users.never-connected.today");
         } else {
-          var day = this._msg("label.day." + date.getDay());
+          var day = this.msg("label.day." + date.getDay());
           day += " " + padzero(date.getDate()) + "/" + padzero(date.getMonth() + 1);
-          connectedLabel = this._msg("label.users.connected." + this.currentDateFilter, day);
-          neverConnectedLabel = this._msg("label.users.never-connected." + this.currentDateFilter, day);
+          connectedLabel = this.msg("label.users.connected." + this.currentDateFilter, day);
+          neverConnectedLabel = this.msg("label.users.never-connected." + this.currentDateFilter, day);
         }
         break;
       case "weeks":
@@ -677,20 +632,20 @@
           from, to;
         from = padzero(fromDate.getDate()) + "/" + padzero(fromDate.getMonth() + 1) + "/" + fromDate.getFullYear();
         to = padzero(lastDate.getDate()) + "/" + padzero(lastDate.getMonth() + 1) + "/" + lastDate.getFullYear();
-        connectedLabel = this._msg("label.users.connected." + this.currentDateFilter, from, to);
-        neverConnectedLabel = this._msg("label.users.never-connected." + this.currentDateFilter, from, to);
+        connectedLabel = this.msg("label.users.connected." + this.currentDateFilter, from, to);
+        neverConnectedLabel = this.msg("label.users.never-connected." + this.currentDateFilter, from, to);
         break;
       case "months":
         var date = new Date(tsArray[0]),
           month;
-        month = this._msg("label.month." + date.getMonth()) + " " + date.getFullYear();
-        connectedLabel = this._msg("label.users.connected." + this.currentDateFilter, month);
-        neverConnectedLabel = this._msg("label.users.never-connected." + this.currentDateFilter, month);
+        month = this.msg("label.month." + date.getMonth()) + " " + date.getFullYear();
+        connectedLabel = this.msg("label.users.connected." + this.currentDateFilter, month);
+        neverConnectedLabel = this.msg("label.users.never-connected." + this.currentDateFilter, month);
         break;
       case "years":
         var date = new Date(tsArray[0]);
-        connectedLabel = this._msg("label.users.connected." + this.currentDateFilter, date.getFullYear());
-        neverConnectedLabel = this._msg("label.users.never-connected." + this.currentDateFilter, date.getFullYear());
+        connectedLabel = this.msg("label.users.connected." + this.currentDateFilter, date.getFullYear());
+        neverConnectedLabel = this.msg("label.users.never-connected." + this.currentDateFilter, date.getFullYear());
         break;
       };
 
@@ -700,7 +655,7 @@
       if (neverConnectedLabel) {
         this.headers["users-never-connected"].innerHTML = neverConnectedLabel;
       }
-      this.headers["users-recently-connected"].innerHTML = this._msg("label.users.recently-connected");
+      this.headers["users-recently-connected"].innerHTML = this.msg("label.users.recently-connected");
     },
     /**
      * @method onChangeDateFilter
@@ -708,7 +663,7 @@
      * @param args Composant déclencheur
      * Gestionnaire click Jour / Semaine / Mois / Année
      */
-    onChangeDateFilter: function ConsoleUserAudit_OnChangeDateFilter(e, args) {
+    onChangeDateFilter: function UserConnections_OnChangeDateFilter(e, args) {
       if (e) Event.stopEvent(e);
       Dom.removeClass("by-" + this.currentDateFilter, "selected");
       Dom.addClass("by-" + args.filter, "selected");
@@ -723,7 +678,7 @@
      * @param args Composant déclencheur
      * Gestionnaire click suivant / précédent
      */
-    onChangeDateInterval: function ConsoleUserAudit_OnChangeDateInterval(e, args) {
+    onChangeDateInterval: function UserConnections_OnChangeDateInterval(e, args) {
       var coef = args.coef,
         currentDate = new Date(),
         dateFilter = this.currentDateFilter,
@@ -749,19 +704,19 @@
       this.execute();
     },
 
-    onResetDates: function ConsoleUserAudit_OnResetDates() {
+    onResetDates: function UserConnections_OnResetDates() {
       this.setupCurrentDates();
       this.execute();
     },
 
-    execute: function ConsoleUserAudit_execute() {
+    execute: function UserConnections_execute() {
       this.prepareUserRequest("users-connected");
       this.prepareUserRequest("users-never-connected");
       this.prepareRecentlyConnectedUsersRequest();
       this.onSearch();
     },
 
-    setupCurrentDates: function ConsoleUserAudit_setupCurrentDates() {
+    setupCurrentDates: function UserConnections_setupCurrentDates() {
       var currentDate = new Date();
       currentDate.setMinutes(0);
       currentDate.setHours(0);
@@ -773,11 +728,6 @@
       this.endDatesArray["weeks"] = currentDate;
       this.endDatesArray["months"] = currentDate;
       this.endDatesArray["years"] = currentDate;
-    },
-
-    //Traduction des messages
-    _msg: function ConsoleUserAudit__msg(messageId) {
-      return Alfresco.util.message.call(this, messageId, "Alfresco.ConsoleUserAudit", Array.prototype.slice.call(arguments).slice(1));
     }
   });
 })();

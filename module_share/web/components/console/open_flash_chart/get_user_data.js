@@ -140,7 +140,7 @@ function buildXAxisLabels(params) {
 
 function getMessage(messageId, prefix) {
   var msg = (prefix) ? prefix + messageId : messageId;
-  var res = Alfresco.util.message.call(null, msg, "Alfresco.ConsoleUserAudit", Array.prototype.slice.call(arguments).slice(2));
+  var res = Alfresco.util.message.call(null, msg, "AtolStatistics.UserConnections", Array.prototype.slice.call(arguments).slice(2));
   res = (res.search("graph.label") == 0) ? messageId : res;
   return res;
 }

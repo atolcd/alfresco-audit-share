@@ -1,26 +1,11 @@
+// AtolStatistics namespace
+if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics = {}; }
+
 /**
- * Copyright (C) 2005-2010 Alfresco Software Limited.
+ * GlobalUsage tool component.
  *
- * This file is part of Alfresco
- *
- * Alfresco is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Alfresco is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
- */
-/**
- * ConsoleAudit tool component.
- *
- * @namespace Alfresco
- * @class Alfresco.ConsoleAudit
+ * @namespace AtolStatistics
+ * @class AtolStatistics.GlobalUsage
  */
 (function () {
   /**
@@ -36,30 +21,14 @@
   var $html = Alfresco.util.encodeHTML;
 
   /**
-   * ConsoleAudit constructor.
+   * GlobalUsage constructor.
    *
    * @param {String} htmlId The HTML id üof the parent element
-   * @return {Alfresco.ConsoleAudit} The new ConsoleAudit instance
+   * @return {AtolStatistics.GlobalUsage} The new GlobalUsage instance
    * @constructor
    */
-  Alfresco.ConsoleAudit = function (htmlId) {
-    this.name = "Alfresco.ConsoleAudit";
-    Alfresco.ConsoleAudit.superclass.constructor.call(this, htmlId);
-
-    /* Register this component */
-    Alfresco.util.ComponentManager.register(this);
-
-    /* Load YUI Components */
-    Alfresco.util.YUILoaderHelper.require(["button", "container", "datasource", "paginator", "json", "history"], this.onComponentsLoaded, this);
-
-    /* Define panel handlers */
-    var parent = this;
-
-    // NOTE: the panel registered first is considered the "default" view and is displayed first
-    /* Audit Panel Handler */
-    AuditPanelHandler = function AuditPanelHandler_constructor() {
-      AuditPanelHandler.superclass.constructor.call(this, "audit");
-    };
+  AtolStatistics.GlobalUsage = function GlobalUsage_constructor(htmlId) {
+    AtolStatistics.GlobalUsage.superclass.constructor.call(this, "AtolStatistics.GlobalUsage", htmlId, ["button", "container", "json"]);
 
     // Surcharge de la classe Date. Récupère la semaine courante
     Date.prototype.getWeek = function() {
@@ -67,89 +36,10 @@
      return Math.ceil((((this - onejan) / 86400000) + onejan.getDay()+1)/7);
     };
 
-    YAHOO.extend(AuditPanelHandler, Alfresco.ConsolePanelHandler, {
-      /**
-       * Called by the ConsolePanelHandler when this panel shall be loaded
-       *
-       * @method onLoad
-       */
-      onLoad: function onLoad() {
-        // Buttons - Check ?
-        // parent.widgets.searchButton = Alfresco.util.createYUIButton(parent, "search-button", parent.onSearch);
-        parent.widgets.exportButton = Alfresco.util.createYUIButton(parent, "export-button", parent.onExport);
-
-        parent.widgets.exportButton.set("disabled", true);
-
-        parent.widgets.moduleCriteriaButton = new YAHOO.widget.Button("module-criteria", {
-          type: "split",
-          menu: "module-criteria-select",
-          lazyloadmenu: false
-        });
-        parent.widgets.moduleCriteriaButton.value = "document";
-
-        parent.widgets.actionCriteriaButton = new YAHOO.widget.Button("action-criteria", {
-          type: "split",
-          menu: "action-criteria-select",
-          lazyloadmenu: false
-        });
-        parent.widgets.actionCriteriaButton.value = "read";
-
-
-        //el, sType, fn, obj, overrideContext
-        Event.addListener("home", "click", parent.onResetDates, null, parent);
-        Event.addListener("by-days", "click", parent.onChangeDateFilter, {
-          filter: "days"
-        }, parent);
-        Event.addListener("by-weeks", "click", parent.onChangeDateFilter, {
-          filter: "weeks"
-        }, parent);
-        Event.addListener("by-months", "click", parent.onChangeDateFilter, {
-          filter: "months"
-        }, parent);
-        Event.addListener("by-years", "click", parent.onChangeDateFilter, {
-          filter: "years"
-        }, parent);
-
-        Event.addListener("chart-prev", "click", parent.onChangeDateInterval, {
-          coef: -1
-        }, parent);
-        Event.addListener("chart-next", "click", parent.onChangeDateInterval, {
-          coef: 1
-        }, parent);
-        this.loadSites();
-      },
-
-      /**
-       * Création de la boîte de dialogue de sélection des sites
-       * à partir du résultat du WebScript.
-       * @method createSiteDialog
-       *
-       */
-      loadSites: function loadSites() {
-        //Changement de style pour l'icône de chargement
-        // parent.widgets.siteButton.set("label", parent._msg("label.loading") + ' <span class="loading"></span>');
-
-        Alfresco.util.Ajax.jsonGet({
-          url: Alfresco.constants.PROXY_URI + "share-stats/site/list-sites",
-          successCallback: {
-            fn: function (res) {
-              this.createSiteMenu(res);
-            },
-            scope: parent
-          },
-          failureMessage: parent._msg("label.popup.error.list-site"),
-          execScripts: true
-        });
-      }
-    });
-
-    new AuditPanelHandler();
-
     return this;
   };
 
-  YAHOO.extend(Alfresco.ConsoleAudit, Alfresco.ConsoleTool, {
-
+  YAHOO.extend(AtolStatistics.GlobalUsage, Alfresco.component.Base, {
     /**
      * Cache-Résultat de la dernière requête exécutée
      * Utilisé pour l'export CSV
@@ -214,7 +104,7 @@
      *
      * @method onComponentsLoaded
      */
-    onComponentsLoaded: function ConsoleAudit_onComponentsLoaded() {
+    onComponentsLoaded: function GlobalUsage_onComponentsLoaded() {
       Event.onContentReady(this.id, this.onReady, this, true);
     },
 
@@ -224,9 +114,26 @@
      *
      * @method onReady
      */
-    onReady: function ConsoleAudit_onReady() {
-      // Call super-class onReady() method
-      Alfresco.ConsoleAudit.superclass.onReady.call(this);
+    onReady: function GlobalUsage_onReady() {
+      // Buttons - Check ?
+      // this.widgets.searchButton = Alfresco.util.createYUIButton(this, "search-button", this.onSearch);
+      this.widgets.exportButton = Alfresco.util.createYUIButton(this, "export-button", this.onExport);
+
+      this.widgets.exportButton.set("disabled", true);
+
+      this.widgets.moduleCriteriaButton = new YAHOO.widget.Button("module-criteria", {
+        type: "split",
+        menu: "module-criteria-select",
+        lazyloadmenu: false
+      });
+      this.widgets.moduleCriteriaButton.value = "document";
+
+      this.widgets.actionCriteriaButton = new YAHOO.widget.Button("action-criteria", {
+        type: "split",
+        menu: "action-criteria-select",
+        lazyloadmenu: false
+      });
+      this.widgets.actionCriteriaButton.value = "read";
 
       //Composants créé, on ajoute des listeners sur les menus.
       var me = this;
@@ -253,6 +160,35 @@
       this.widgets.actionCriteriaButton.getMenu().subscribe("click", onActionsMenuItemClick);
 
       this.setupCurrentDates();
+
+      //el, sType, fn, obj, overrideContext
+      Event.addListener("home", "click", this.onResetDates, null, this);
+      Event.addListener("by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
+      Event.addListener("by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
+      Event.addListener("by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
+      Event.addListener("by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
+
+      Event.addListener("chart-prev", "click", this.onChangeDateInterval, { coef: -1 }, this);
+      Event.addListener("chart-next", "click", this.onChangeDateInterval, { coef: 1 }, this);
+
+      this.loadSites();
+    },
+
+    loadSites: function loadSites() {
+      //Changement de style pour l'icône de chargement
+      // this.widgets.siteButton.set("label", this.msg("label.loading") + ' <span class="loading"></span>');
+
+      Alfresco.util.Ajax.jsonGet({
+        url: Alfresco.constants.PROXY_URI + "share-stats/site/list-sites",
+        successCallback: {
+          fn: function (res) {
+            this.createSiteMenu(res);
+          },
+          scope: this
+        },
+        failureMessage: this.msg("label.popup.error.list-site"),
+        execScripts: true
+      });
     },
 
     /**
@@ -260,7 +196,7 @@
      * @param res
      *
      */
-    createSiteMenu: function ConsoleAudit_createSiteDialog(res) {
+    createSiteMenu: function GlobalUsage_createSiteDialog(res) {
       var menuButtons = [],
         current_site = null,
         sites = res.json,
@@ -278,7 +214,7 @@
         };
 
       menuButtons.push({
-        text: this._msg("label.menu.site.all"),
+        text: this.msg("label.menu.site.all"),
         value: "",
         onclick: {
           fn: onSiteMenuClick
@@ -310,13 +246,13 @@
       });
 
       //Maj des infos du bouttons
-      this.widgets.siteButton.set("label", this._msg("label.menu.site.all"));
+      this.widgets.siteButton.set("label", this.msg("label.menu.site.all"));
       this.widgets.siteButton.value = "";
 
       this.execute();
     },
 
-    onExport: function ConsoleAudit_onExport() {
+    onExport: function GlobalUsage_onExport() {
       if (this.lastRequest.params) {
         var params = this.lastRequest.params;
         params += "&interval=" + this.lastRequest.dateFilter;
@@ -330,7 +266,7 @@
      * @param
      * @return
      */
-    onSearch: function ConsoleAudit_onSearch() {
+    onSearch: function GlobalUsage_onSearch() {
       //Récupération des variables de l'UI
       var action = this.convertMenuValue(this.widgets.actionCriteriaButton.value),
         module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
@@ -355,7 +291,7 @@
           fn: this.displayGraph,
           scope: this
         },
-        failureMessage: this._msg("label.popup.query.error"),
+        failureMessage: this.msg("label.popup.query.error"),
         execScripts: true,
         additionalsParams: {
           chartType: "vbar",
@@ -371,7 +307,7 @@
       // this.widgets.searchButton.blur();
     },
 
-    getByPopularity: function ConsoleAudit_getByPopularity(type) {
+    getByPopularity: function GlobalUsage_getByPopularity(type) {
       var site = this.convertMenuValue(this.widgets.siteButton.value),
         module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
         dateFilter = this.currentDateFilter,
@@ -390,7 +326,7 @@
           fn: this.displayGraph,
           scope: this
         },
-        failureMessage: this._msg("label.popup.query.error"),
+        failureMessage: this.msg("label.popup.query.error"),
         execScripts: true,
         additionalsParams: {
           chartType: "hbar",
@@ -406,7 +342,7 @@
       });
     },
 
-    getTemplateUrl: function ConsoleAudit_getTemplateUrl(module) {
+    getTemplateUrl: function GlobalUsage_getTemplateUrl(module) {
       var baseUrl = window.location.protocol + "//" + window.location.host + Alfresco.constants.URL_PAGECONTEXT + "site/{site}/";
       if (module == "document") {
         return baseUrl + "document-details?nodeRef={nodeRef}";
@@ -424,7 +360,7 @@
      * @method displayGraph Affiche le requête suite à une requête Ajax
      * @param response Réponse de la requête
      */
-    displayGraph: function ConsoleAudit_displayGraph(response) {
+    displayGraph: function GlobalUsage_displayGraph(response) {
       var additionalsParams, id, swf, chartTag;
 
       additionalsParams = response.config.additionalsParams;
@@ -463,7 +399,7 @@
       } else {
         //On remove le SWF courant.
         this.removeGraph(id);
-        Dom.get(id).innerHTML = this._msg("message.no_results");
+        Dom.get(id).innerHTML = this.msg("message.no_results");
         this.widgets.exportButton.set("disabled", true);
       }
       // this.widgets.searchButton.blur();
@@ -473,7 +409,7 @@
      * @method removeGraph
      * @return boolean
      */
-    removeGraph: function ConsoleAudit_removeGraph(id) {
+    removeGraph: function GlobalUsage_removeGraph(id) {
       var swf = Dom.get(id),
         chartTag = swf.tagName.toLowerCase(),
         res = false;
@@ -496,7 +432,7 @@
      * @param d Date au format jj/mm/aaaa
      * @return integer Timestamp unix de la date
      */
-    convertDate: function ConsoleAudit_convertDate(d) {
+    convertDate: function GlobalUsage_convertDate(d) {
       var res = 0;
       if (d.length > 0) {
         var dateArray = d.split('/');
@@ -512,7 +448,7 @@
      * @param exclude boolean indiquant si le jour doit être exclu
      * @return string Date au format jj/mm/aaaa
      */
-    convertTimeStamp: function ConsoleAudit_convertTimeStamp(ts, exclude) {
+    convertTimeStamp: function GlobalUsage_convertTimeStamp(ts, exclude) {
       var d = new Date(ts);
       // retour un jour en arrière en cas d'exclude
       if (exclude) {
@@ -532,7 +468,7 @@
      * @param val String Valeur du bouton
      * @return string Valeur "convertie"
      */
-    convertMenuValue: function ConsoleAudit_convertMenuValue(val) {
+    convertMenuValue: function GlobalUsage_convertMenuValue(val) {
       var res = null;
       if (val !== undefined && val !== "") {
         res = val;
@@ -553,7 +489,7 @@
 
        * @return string params argument à passer à la requête
        */
-    buildParams: function ConsoleAudit_buildParams(module, site, dates, type, from, to, limit) {
+    buildParams: function GlobalUsage_buildParams(module, site, dates, type, from, to, limit) {
       var params = "?type=" + type;
 
       if (dates !== null && dates != "") {
@@ -581,7 +517,7 @@
      * @method buildTimeStampArray Construit des intervalles de dates
      * @return array Tableau contenant les différents intervalles de dates
      */
-    buildTimeStampArray: function ConsoleAudit_buildTimeStampArray() {
+    buildTimeStampArray: function GlobalUsage_buildTimeStampArray() {
       var tsArray = [],
         from = null,
         to = null,
@@ -687,7 +623,7 @@
      * @param args Composant déclencheur
      * Gestionnaire click Jour / Semaine / Mois / Année
      */
-    onChangeDateFilter: function ConsoleAudit_OnChangeDateFilter(e, args) {
+    onChangeDateFilter: function GlobalUsage_OnChangeDateFilter(e, args) {
       if(e) Event.stopEvent(e);
       Dom.removeClass("by-" + this.currentDateFilter, "selected");
       Dom.addClass("by-" + args.filter, "selected");
@@ -702,7 +638,7 @@
      * @param args Composant déclencheur
      * Gestionnaire click suivant / précédent
      */
-    onChangeDateInterval: function ConsoleAudit_OnChangeDateInterval(e, args) {
+    onChangeDateInterval: function GlobalUsage_OnChangeDateInterval(e, args) {
       var coef = args.coef,
         currentDate = new Date(),
         dateFilter = this.currentDateFilter,
@@ -729,18 +665,18 @@
       this.execute();
     },
 
-    onResetDates: function ConsoleAudit_OnResetDates(){
+    onResetDates: function GlobalUsage_OnResetDates(){
       this.setupCurrentDates();
       this.execute();
     },
 
-    execute: function ConsoleAudit_execute() {
+    execute: function GlobalUsage_execute() {
       this.getByPopularity("mostupdated");
       this.getByPopularity("mostread");
       this.onSearch();
     },
 
-    setupCurrentDates : function ConsoleAudit_setupCurrentDates(){
+    setupCurrentDates : function GlobalUsage_setupCurrentDates(){
       var currentDate = new Date();
       currentDate.setMinutes(0);
       currentDate.setHours(0);
@@ -752,10 +688,6 @@
       this.endDatesArray["weeks"] = currentDate;
       this.endDatesArray["months"] = currentDate;
       this.endDatesArray["years"] = currentDate;
-    },
-    //Traduction des messages
-    _msg: function ConsoleAudit__msg(messageId) {
-      return Alfresco.util.message.call(this, messageId, "Alfresco.ConsoleAudit", Array.prototype.slice.call(arguments).slice(1));
     }
   });
 })();

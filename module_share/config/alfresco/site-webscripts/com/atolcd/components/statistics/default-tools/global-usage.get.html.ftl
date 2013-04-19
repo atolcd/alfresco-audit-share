@@ -1,11 +1,7 @@
-<!--[if IE]>
-<iframe id="yui-history-iframe" src="${url.context}/res/yui/history/assets/blank.html"></iframe>
-<![endif]-->
-<input id="yui-history-field" type="hidden" />
+<#assign el = args.htmlid?html />
 
-<#assign el=args.htmlid?html>
 <script type="text/javascript">//<![CDATA[
-   new Alfresco.ConsoleAudit("${el}").setMessages(${messages});
+   new AtolStatistics.GlobalUsage("${args.htmlid?js_string}").setMessages(${messages});
 //]]></script>
 
 <div id="${el}-body" class="audit">
@@ -70,22 +66,6 @@
       </div>
     </div>
 
-<#--
-    <div class="yui-g separator">
-      <div class="yui-u first">
-        <div class="search-text">
-          <div class="search-button">
-            <span class="yui-button yui-push-button" id="${el}-search-button">
-               <span class="first-child"><button>${msg("button.search")}</button></span>
-            </span>
-            <span class="vb"> | </span>
-
-          </div>
-        </div>
-      </div>
-      <div class="yui-u align-right">&nbsp;</div>
-    </div>
--->
     <div id="${el}-chart-body" class="main-chart">
       <div class="browsing">
         <div id="chart-prev" class="img-prev-arrow"></div>

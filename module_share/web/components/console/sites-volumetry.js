@@ -1,8 +1,11 @@
+// AtolStatistics namespace
+if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics = {}; }
+
 /**
- * ConsoleSitesVolumetry tool component.
+ * Volumetry tool component.
  *
- * @namespace Alfresco
- * @class Alfresco.ConsoleSitesVolumetry
+ * @namespace AtolStatistics
+ * @class AtolStatistics.Volumetry
  */
 (function () {
   /**
@@ -18,105 +21,25 @@
   var $html = Alfresco.util.encodeHTML;
 
   /**
-   * ConsoleSitesVolumetry constructor.
+   * Volumetry constructor.
    *
    * @param {String} htmlId The HTML id üof the parent element
-   * @return {Alfresco.ConsoleSitesVolumetry} The new ConsoleSitesVolumetry instance
+   * @return {AtolStatistics.Volumetry} The new Volumetry instance
    * @constructor
    */
-  Alfresco.ConsoleSitesVolumetry = function (htmlId) {
-    this.name = "Alfresco.ConsoleSitesVolumetry";
-    Alfresco.ConsoleSitesVolumetry.superclass.constructor.call(this, htmlId);
-
-    /* Register this component */
-    Alfresco.util.ComponentManager.register(this);
-
-    /* Load YUI Components */
-    Alfresco.util.YUILoaderHelper.require(["button", "container", "datasource", "paginator", "json", "history"], this.onComponentsLoaded, this);
-
-    /* Define panel handlers */
-    var parent = this;
-
-    // NOTE: the panel registered first is considered the "default" view and is displayed first
-    /* Panel Handler */
-    SitesVolumetryPanelHandler = function SitesVolumetryPanelHandler_constructor() {
-      SitesVolumetryPanelHandler.superclass.constructor.call(this, "volumetry");
-    };
+  AtolStatistics.Volumetry = function Volumetry_constructor(htmlId) {
+    AtolStatistics.Volumetry.superclass.constructor.call(this, "AtolStatistics.Volumetry", htmlId, ["button", "container", "json"]);
 
     // Surcharge de la classe Date. Récupère la semaine courante
-    Date.prototype.getWeek = function () {
-      var onejan = new Date(this.getFullYear(), 0, 1);
-      return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+    Date.prototype.getWeek = function() {
+     var onejan = new Date(this.getFullYear(),0,1);
+     return Math.ceil((((this - onejan) / 86400000) + onejan.getDay()+1)/7);
     };
-
-    YAHOO.extend(SitesVolumetryPanelHandler, Alfresco.ConsolePanelHandler, {
-      /**
-       * Called by the ConsolePanelHandler when this panel shall be loaded
-       *
-       * @method onLoad
-       */
-      onLoad: function onLoad() {
-        // Buttons - Check ?
-        parent.widgets.exportButton = Alfresco.util.createYUIButton(parent, "export-button", parent.onExport);
-
-        parent.widgets.exportButton.set("disabled", true);
-
-        // el, sType, fn, obj, overrideContext
-        Event.addListener("bar_stack-criteria", "click", parent.onShowStackedBar, null, parent);
-        Event.addListener("home", "click", parent.onResetDates, null, parent);
-        Event.addListener("by-days", "click", parent.onChangeDateFilter, {
-          filter: "days"
-        }, parent);
-        Event.addListener("by-weeks", "click", parent.onChangeDateFilter, {
-          filter: "weeks"
-        }, parent);
-        Event.addListener("by-months", "click", parent.onChangeDateFilter, {
-          filter: "months"
-        }, parent);
-        Event.addListener("by-years", "click", parent.onChangeDateFilter, {
-          filter: "years"
-        }, parent);
-
-        Event.addListener("chart-prev", "click", parent.onChangeDateInterval, {
-          coef: -1
-        }, parent);
-        Event.addListener("chart-next", "click", parent.onChangeDateInterval, {
-          coef: 1
-        }, parent);
-        this.loadSites();
-      },
-
-      /**
-       * Création de la boîte de dialogue de sélection des sites
-       * à partir du résultat du WebScript.
-       * @method createSiteDialog
-       *
-       */
-      loadSites: function loadSites() {
-        //Changement de style pour l'icône de chargement
-        // parent.widgets.siteButton.set("label", parent._msg("label.loading") + ' <span class="loading"></span>');
-
-        Alfresco.util.Ajax.jsonGet({
-          url: Alfresco.constants.PROXY_URI + "share-stats/site/list-sites",
-          successCallback: {
-            fn: function (res) {
-              this.createSiteMenu(res);
-            },
-            scope: parent
-          },
-          failureMessage: parent._msg("label.popup.error.list-site"),
-          execScripts: true
-        });
-      }
-    });
-
-    new SitesVolumetryPanelHandler();
 
     return this;
   };
 
-  YAHOO.extend(Alfresco.ConsoleSitesVolumetry, Alfresco.ConsoleTool, {
-
+  YAHOO.extend(AtolStatistics.Volumetry, Alfresco.component.Base, {
     /**
      * Cache-Résultat de la dernière requête exécutée
      * Utilisé pour l'export CSV
@@ -181,7 +104,7 @@
      *
      * @method onComponentsLoaded
      */
-    onComponentsLoaded: function ConsoleSitesVolumetry_onComponentsLoaded() {
+    onComponentsLoaded: function Volumetry_onComponentsLoaded() {
       Event.onContentReady(this.id, this.onReady, this, true);
     },
 
@@ -191,11 +114,43 @@
      *
      * @method onReady
      */
-    onReady: function ConsoleSitesVolumetry_onReady() {
-      // Call super-class onReady() method
-      Alfresco.ConsoleSitesVolumetry.superclass.onReady.call(this);
-
+    onReady: function Volumetry_onReady() {
       this.setupCurrentDates();
+
+      // Buttons - Check ?
+      this.widgets.exportButton = Alfresco.util.createYUIButton(this, "export-button", this.onExport);
+
+      this.widgets.exportButton.set("disabled", true);
+
+      // el, sType, fn, obj, overrideContext
+      Event.addListener("bar_stack-criteria", "click", this.onShowStackedBar, null, this);
+      Event.addListener("home", "click", this.onResetDates, null, this);
+      Event.addListener("by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
+      Event.addListener("by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
+      Event.addListener("by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
+      Event.addListener("by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
+
+      Event.addListener("chart-prev", "click", this.onChangeDateInterval, { coef: -1 }, this);
+      Event.addListener("chart-next", "click", this.onChangeDateInterval, { coef: 1 }, this);
+
+      this.loadSites();
+    },
+
+    loadSites: function loadSites() {
+      //Changement de style pour l'icône de chargement
+      // this.widgets.siteButton.set("label", this.msg("label.loading") + ' <span class="loading"></span>');
+
+      Alfresco.util.Ajax.jsonGet({
+        url: Alfresco.constants.PROXY_URI + "share-stats/site/list-sites",
+        successCallback: {
+          fn: function (res) {
+            this.createSiteMenu(res);
+          },
+          scope: this
+        },
+        failureMessage: this.msg("label.popup.error.list-site"),
+        execScripts: true
+      });
     },
 
     /**
@@ -203,7 +158,7 @@
      * @param res
      *
      */
-    createSiteMenu: function ConsoleSitesVolumetry_createSiteDialog(res) {
+    createSiteMenu: function Volumetry_createSiteDialog(res) {
       var menuButtons = [],
         current_site = null,
         sites = res.json,
@@ -227,7 +182,7 @@
         };
 
       menuButtons.push({
-        text: this._msg("label.menu.site.all"),
+        text: this.msg("label.menu.site.all"),
         value: "",
         onclick: {
           fn: onSiteMenuClick
@@ -259,13 +214,13 @@
       });
 
       //Maj des infos du bouttons
-      this.widgets.siteButton.set("label", this._msg("label.menu.site.all"));
+      this.widgets.siteButton.set("label", this.msg("label.menu.site.all"));
       this.widgets.siteButton.value = "";
 
       this.execute();
     },
 
-    onExport: function ConsoleSitesVolumetry_onExport() {
+    onExport: function Volumetry_onExport() {
       if (this.lastRequest.params) {
         var params = this.lastRequest.params;
         params += "&type=volumetry";
@@ -281,7 +236,7 @@
      * @param
      * @return
      */
-    onSearch: function ConsoleSitesVolumetry_onSearch() {
+    onSearch: function Volumetry_onSearch() {
       //Récupération des variables de l'UI
       var dateFilter = this.currentDateFilter,
         site = this.convertMenuValue(this.widgets.siteButton.value),
@@ -309,7 +264,7 @@
           fn: this.displayGraph,
           scope: this
         },
-        failureMessage: this._msg("label.popup.query.error"),
+        failureMessage: this.msg("label.popup.query.error"),
         execScripts: true,
         additionalsParams: {
           chartType: (!site && Dom.get("bar_stack-criteria").checked) ? "bar_stack" : "vbar",
@@ -327,7 +282,7 @@
      * @method displayGraph Affiche le requête suite à une requête Ajax
      * @param response Réponse de la requête
      */
-    displayGraph: function ConsoleSitesVolumetry_displayGraph(response) {
+    displayGraph: function Volumetry_displayGraph(response) {
       var additionalsParams, id, swf, chartTag;
 
       additionalsParams = response.config.additionalsParams;
@@ -366,7 +321,7 @@
       } else {
         //On remove le SWF courant.
         this.removeGraph(id);
-        Dom.get(id).innerHTML = this._msg("message.no_results");
+        Dom.get(id).innerHTML = this.msg("message.no_results");
         this.widgets.exportButton.set("disabled", true);
       }
     },
@@ -375,7 +330,7 @@
      * @method removeGraph
      * @return boolean
      */
-    removeGraph: function ConsoleSitesVolumetry_removeGraph(id) {
+    removeGraph: function Volumetry_removeGraph(id) {
       var swf = Dom.get(id),
         chartTag = swf.tagName.toLowerCase(),
         res = false;
@@ -397,7 +352,7 @@
      * @param d Date au format jj/mm/aaaa
      * @return integer Timestamp unix de la date
      */
-    convertDate: function ConsoleSitesVolumetry_convertDate(d) {
+    convertDate: function Volumetry_convertDate(d) {
       var res = 0;
       if (d.length > 0) {
         var dateArray = d.split('/');
@@ -413,7 +368,7 @@
      * @param exclude boolean indiquant si le jour doit être exclu
      * @return string Date au format jj/mm/aaaa
      */
-    convertTimeStamp: function ConsoleSitesVolumetry_convertTimeStamp(ts, exclude) {
+    convertTimeStamp: function Volumetry_convertTimeStamp(ts, exclude) {
       var d = new Date(ts);
       // retour un jour en arrière en cas d'exclude
       if (exclude) {
@@ -433,7 +388,7 @@
      * @param val String Valeur du bouton
      * @return string Valeur "convertie"
      */
-    convertMenuValue: function ConsoleSitesVolumetry_convertMenuValue(val) {
+    convertMenuValue: function Volumetry_convertMenuValue(val) {
       var res = null;
       if (val !== undefined && val !== "") {
         res = val;
@@ -449,7 +404,7 @@
      *
      * @return array Tableau contenant les différents intervalles de dates
      */
-    buildTimeStampArray: function ConsoleSitesVolumetry_buildTimeStampArray(nbInterval) {
+    buildTimeStampArray: function Volumetry_buildTimeStampArray(nbInterval) {
       var tsArray = [],
         from = null,
         to = null,
@@ -555,7 +510,7 @@
      * @param args Composant déclencheur
      * Gestionnaire click Jour / Semaine / Mois / Année
      */
-    onChangeDateFilter: function ConsoleSitesVolumetry_OnChangeDateFilter(e, args) {
+    onChangeDateFilter: function Volumetry_OnChangeDateFilter(e, args) {
       if (e) Event.stopEvent(e);
       Dom.removeClass("by-" + this.currentDateFilter, "selected");
       Dom.addClass("by-" + args.filter, "selected");
@@ -570,7 +525,7 @@
      * @param args Composant déclencheur
      * Gestionnaire click suivant / précédent
      */
-    onChangeDateInterval: function ConsoleSitesVolumetry_OnChangeDateInterval(e, args) {
+    onChangeDateInterval: function Volumetry_OnChangeDateInterval(e, args) {
       var coef = args.coef,
         currentDate = new Date(),
         dateFilter = this.currentDateFilter,
@@ -596,20 +551,20 @@
       this.execute();
     },
 
-    onResetDates: function ConsoleSitesVolumetry_OnResetDates() {
+    onResetDates: function Volumetry_OnResetDates() {
       this.setupCurrentDates();
       this.execute();
     },
 
-    onShowStackedBar: function ConsoleSitesVolumetry_onShowStackedBar() {
+    onShowStackedBar: function Volumetry_onShowStackedBar() {
       this.execute();
     },
 
-    execute: function ConsoleSitesVolumetry_execute() {
+    execute: function Volumetry_execute() {
       this.onSearch();
     },
 
-    setupCurrentDates: function ConsoleSitesVolumetry_setupCurrentDates() {
+    setupCurrentDates: function Volumetry_setupCurrentDates() {
       var currentDate = new Date();
       currentDate.setMinutes(0);
       currentDate.setHours(0);
@@ -621,11 +576,6 @@
       this.endDatesArray["weeks"] = currentDate;
       this.endDatesArray["months"] = currentDate;
       this.endDatesArray["years"] = currentDate;
-    },
-
-    //Traduction des messages
-    _msg: function ConsoleSitesVolumetry__msg(messageId) {
-      return Alfresco.util.message.call(this, messageId, "Alfresco.ConsoleSitesVolumetry", Array.prototype.slice.call(arguments).slice(1));
     }
   });
 })();
