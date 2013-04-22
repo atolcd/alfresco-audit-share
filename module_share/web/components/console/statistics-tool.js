@@ -90,18 +90,28 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       //Changement de style pour l'icône de chargement
       // this.widgets.siteButton.set("label", this.msg("label.loading") + ' <span class="loading"></span>');
 
-      if (Alfresco.constants.SITE && Alfresco.constants.SITE != "") {
-        var res = {
-          json: [{
-              name: Alfresco.constants.SITE,
-              title: Alfresco.constants.SITE // TODO: récupérer le titre
-            }
-          ]
-        };
-        this.createSiteMenu(res, true);
+      if (this.options.siteId && this.options.siteId != "") {
+        Alfresco.util.Ajax.jsonGet({
+          url: Alfresco.constants.PROXY_URI + "api/sites/" + encodeURIComponent(this.options.siteId),
+          successCallback: {
+            fn: function (res) {
+
+              var param = {
+                json: [{
+                    name: this.options.siteId,
+                    title: res.json.title || ""
+                  }
+                ]
+              };
+              this.createSiteMenu(param, true);
+            },
+            scope: this
+          },
+          failureMessage: this.msg("label.popup.error.list-site")
+        });
       } else {
         Alfresco.util.Ajax.jsonGet({
-          url: Alfresco.constants.PROXY_URI + "share-stats/site/list-sites",
+          url: Alfresco.constants.PROXY_URI + "share-stats/site/list-sites?role=SiteManager",
           successCallback: {
             fn: function (res) {
               this.createSiteMenu(res);
@@ -123,27 +133,15 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     },
 
     createSiteMenu: function Tool_createSiteMenu(res, hideAllSiteEntry) {
-      var menuButtons = [],
-        current_site = null,
-        sites = res.json,
-        i = 0,
-        ii = sites.length,
-        me = this;
+      var siteMenuButtons = [],
+          allSitesMenuButton = [],
+          menuButtons = [],
+          siteIds = [],
+          me = this;
 
-      if (!hideAllSiteEntry) {
-        menuButtons.push({
-          text: this.msg("label.menu.site.all"),
-          value: "",
-          onclick: {
-            fn: this.onSiteMenuClick,
-            scope: this
-          }
-        });
-      }
-
-      for (; i < ii; i++) {
-        current_site = sites[i];
-        menuButtons.push({
+      for (var i=0, ii=res.json.length ; i < ii ; i++) {
+        var current_site = res.json[i];
+        siteMenuButtons.push({
           text: current_site.title,
           value: current_site.name,
           onclick: {
@@ -152,12 +150,26 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
           }
         });
 
-        //Stockage des sites
+        // Stockage des sites
+        siteIds.push(current_site.name);
         me.sites.push({
           name: current_site.name,
           title: current_site.title
         });
       }
+
+      if (!hideAllSiteEntry) {
+        allSitesMenuButton.push({
+          text: this.msg("label.menu.site.all"),
+          value: (this.options.isAdmin == true) ? '' : siteIds.join(','), // On ne passe pas la liste complète des sites pour un admin
+          onclick: {
+            fn: this.onSiteMenuClick,
+            scope: this
+          }
+        });
+      }
+
+      menuButtons = allSitesMenuButton.concat(siteMenuButtons);
       var btOpts = {
         type: "split",
         name: "site-criteria",
@@ -165,12 +177,14 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         menu: menuButtons,
         container: "site-criteria-container"
       };
-      if (Alfresco.constants.SITE && Alfresco.constants.SITE != "") {
+
+      if (menuButtons.length <= 1) {
         btOpts.disabled = true;
       }
+
       this.widgets.siteButton = new YAHOO.widget.Button(btOpts);
 
-      // Maj des infos du bouttons
+      // Maj des infos du bouton
       // Sélection de la 1ère entrée
       this.widgets.siteButton.set("label", menuButtons[0].text);
       this.widgets.siteButton.value = menuButtons[0].value;

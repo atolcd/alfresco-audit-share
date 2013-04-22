@@ -2,7 +2,10 @@
 
 <script type="text/javascript">//<![CDATA[
   new AtolStatistics.GlobalUsage("${args.htmlid?js_string}").setOptions({
-      pathToSwf: "${page.url.context}/res/components/console/open_flash_chart/open-flash-chart.swf"
+      pathToSwf: "${page.url.context}/res/components/console/open_flash_chart/open-flash-chart.swf",
+      siteId: "${page.url.templateArgs.site!""}",
+      currentUser: "${user.name?js_string}",
+      isAdmin: ${user.isAdmin?string}
     }
   ).setMessages(${messages});
 //]]></script>

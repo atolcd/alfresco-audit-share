@@ -79,7 +79,11 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
 
       params = "?dates=" + tsString;
       if (site) {
-        params += "&site=" + site;
+        if (site.indexOf(',') >= 0) {
+          params += "&sites=" + site;
+        } else {
+          params += "&site=" + site;
+        }
       }
 
       // Création des paramètres et exécution de la requête
@@ -110,7 +114,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       var sText = p_oItem.cfg.getProperty("text"),
           value = p_oItem.value;
 
-      if (value == "") { // Tout les sites
+      if (value == "" || value.indexOf(',') >= 0) { // Tous les sites
         Dom.removeClass("bar-stack-criteria-container", "hidden");
       } else {
         Dom.addClass("bar-stack-criteria-container", "hidden");
@@ -122,7 +126,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     },
 
     createSiteMenu: function Volumetry_createSiteMenu(res, hideAllSiteEntry) {
-      if (Alfresco.constants.SITE && Alfresco.constants.SITE != "") {
+      if (this.options.siteId && this.options.siteId != "") {
         Dom.addClass("bar-stack-criteria-container", "hidden");
       }
 

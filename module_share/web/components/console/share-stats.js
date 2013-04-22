@@ -265,7 +265,11 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         params += "&module=" + module;
       }
       if (site !== null) {
-        params += "&site=" + site;
+        if (site.indexOf(',') >= 0) {
+          params += "&sites=" + site;
+        } else {
+          params += "&site=" + site;
+        }
       }
       if (from) {
         params += "&from=" + from;

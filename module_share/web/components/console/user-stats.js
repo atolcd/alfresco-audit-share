@@ -93,7 +93,11 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       params += "&to=" + currentDate.getTime();
       params += "&from=" + currentDate.setMinutes(currentDate.getMinutes() - this.recentlyConnectedDelay);
       if (site) {
-        params += "&site=" + site;
+        if (site.indexOf(',') >= 0) {
+          params += "&sites=" + site;
+        } else {
+          params += "&site=" + site;
+        }
       }
 
       this.executeUserRequest(params, "users-recently-connected");
@@ -114,7 +118,11 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       params += "&from=" + tsArray[0];
       params += "&to=" + tsArray[tsArray.length - 1];
       if (site) {
-        params += "&site=" + site;
+        if (site.indexOf(',') >= 0) {
+          params += "&sites=" + site;
+        } else {
+          params += "&site=" + site;
+        }
       }
 
       this.executeUserRequest(params, type);
@@ -183,7 +191,11 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       params = "?type=users-count";
       params += "&dates=" + tsString;
       if (site) {
-        params += "&site=" + site;
+        if (site.indexOf(',') >= 0) {
+          params += "&sites=" + site;
+        } else {
+          params += "&site=" + site;
+        }
       }
       this.lastRequest.params = params;
       this.lastRequest.dateFilter = dateFilter;
