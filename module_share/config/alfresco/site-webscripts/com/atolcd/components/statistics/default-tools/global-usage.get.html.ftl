@@ -25,12 +25,12 @@
 
         <div id="criterias" class="criterias">
 
-          <input type="button" class="criterias-button" id="module-criteria" name="${el}-module-criteria-button" value="${msg("label.documentlibrary")}">
+          <input type="button" class="criterias-button" id="module-criteria" name="${el}-module-criteria-button" value="${msg("graph.label.document")}">
           <select id="module-criteria-select" name="${el}-module-criteria-select">
-            <option value="document">${msg("label.documentlibrary")}</option>
-            <option value="wiki">${msg("label.wiki")}</option>
-            <option value="blog">${msg("label.blog")}</option>
-            <option value="discussions">${msg("label.discussion")}</option>
+            <option value="document">${msg("graph.label.document")}</option>
+            <option value="wiki">${msg("graph.label.wiki")}</option>
+            <option value="blog">${msg("graph.label.blog")}</option>
+            <option value="discussions">${msg("graph.label.discussions")}</option>
           </select>
 
           <input type="button" class="criterias-button" id="action-criteria" name="${el}-action-criteria-button" value="${msg("label.menu.action")}${msg("label.read")}">
@@ -75,8 +75,8 @@
 
     <div id="${el}-chart-body" class="main-chart">
       <div class="browsing">
-        <div id="chart-prev" class="img-prev-arrow"></div>
-        <div id="chart-next" class="img-next-arrow"></div>
+        <div id="chart-prev" class="img-prev-arrow" title="${msg("label.previous")}"></div>
+        <div id="chart-next" class="img-next-arrow" title="${msg("label.next")}"></div>
       </div>
       <div id="${el}-chart-container" class="chart-container">
         <div class="chart" id="${el}-chart"></div>

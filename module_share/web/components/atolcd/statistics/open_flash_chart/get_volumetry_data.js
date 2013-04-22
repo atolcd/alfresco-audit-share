@@ -68,7 +68,7 @@ function buildBarChartElements(params, labels) {
     pItemsLength = pItems.length,
     max = 0,
     values = [],
-    label = getMessage("volumetry", "graph.label.");
+    label = getMessage("volumetry", "graph.label.", getMessage("size.megabytes"));
 
   // Boucle sur les éléments par date
   for (var i = 0; i < pItemsLength; i++) {
@@ -122,7 +122,7 @@ function buildStackedBarChartElements(params, labels) {
         // HACK : les tooltips se cumulent lors de l'affichage quand
         // toutes les valeurs sont vides
         if (params.values[i] == 0 && j == 0) {
-           value_obj.tip = getMessage("label.no-data");
+           value_obj.tip = getMessage("label.graph.no-data");
         }
       }
 

@@ -88,7 +88,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
 
     loadSites: function loadSites() {
       //Changement de style pour l'icône de chargement
-      // this.widgets.siteButton.set("label", this.msg("label.loading") + ' <span class="loading"></span>');
+      // this.widgets.siteButton.set("label", this.msg("label.sites.loading") + ' <span class="loading"></span>');
 
       if (this.options.siteId && this.options.siteId != "") {
         Alfresco.util.Ajax.jsonGet({

@@ -237,7 +237,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       } else {
         // On remove le SWF courant.
         this.removeGraph(id);
-        Dom.get(id).innerHTML = this.msg("message.no_results");
+        Dom.get(id).innerHTML = this.msg("message.empty");
         this.widgets.exportButton.set("disabled", true);
       }
       // this.widgets.searchButton.blur();
