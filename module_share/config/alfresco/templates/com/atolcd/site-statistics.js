@@ -1,1 +1,0 @@
-<import resource="classpath:/alfresco/templates/com/atolcd/statistics.js">

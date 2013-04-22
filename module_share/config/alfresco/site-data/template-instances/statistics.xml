@@ -1,6 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <template-instance>
    <template-type>com/atolcd/statistics</template-type>
+   <properties>
+      <pageFamily>statistics</pageFamily>
+   </properties>
    <components>
 
       <!-- Title -->
@@ -9,10 +12,28 @@
          <url>/components/title/statistics</url>
       </component>
 
+      <!-- Site: Title -->
+      <component>
+         <region-id>site-title</region-id>
+         <url>/components/title/collaboration-title</url>
+      </component>
+
+      <!-- Site: Navigation -->
+      <component>
+         <region-id>navigation</region-id>
+         <url>/components/navigation/collaboration-navigation</url>
+      </component>
+
       <!-- Tools -->
       <component>
          <region-id>tools</region-id>
          <url>/components/statistics/tools</url>
+      </component>
+
+      <!-- Error handling: unauthorized -->
+      <component>
+         <region-id>unauthorized</region-id>
+         <url>/components/statistics/error/unauthorized</url>
       </component>
 
    </components>

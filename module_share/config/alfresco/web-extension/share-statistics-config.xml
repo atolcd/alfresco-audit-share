@@ -8,8 +8,8 @@
       <uri-templates>
          <!-- Atol: Statistics - Site page -->
          <!--  Need to be loaded BEFORE the 'sitepage' uri template -->
-         <uri-template id="sitestatisticstoolpage">/site/{site}/site-statistics/{pageid}/{toolid}</uri-template>
-         <uri-template id="sitestatisticspage">/site/{site}/site-statistics/{pageid}</uri-template>
+         <uri-template id="sitestatisticstoolpage">/site/{site}/statistics/{pageid}/{toolid}</uri-template>
+         <uri-template id="sitestatisticspage">/site/{site}/statistics/{pageid}</uri-template>
 
          <!-- Share default uri-templates : @override -->
          <uri-template id="sitedashboardpage">/site/{site}/dashboard</uri-template>

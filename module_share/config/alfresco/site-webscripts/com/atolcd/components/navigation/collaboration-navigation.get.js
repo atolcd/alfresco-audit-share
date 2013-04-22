@@ -18,7 +18,7 @@ if (userIsSiteManager) {
   model.pages.push(
     {
       title: "Site Statistics",
-      pageUrl: "site-statistics/site-stats/",
+      pageUrl: "statistics/site-stats/",
       sitePageTitle: msg.get("link.site-stats")
     }
   );

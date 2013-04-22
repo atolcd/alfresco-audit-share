@@ -4,6 +4,6 @@
    <title-id>page.site.statistics.title</title-id>
    <description>The landing page for the site statistics</description>
    <description-id>page.site.statistics.description</description-id>
-   <template-instance>site-statistics</template-instance>
+   <template-instance>statistics</template-instance>
    <authentication>user</authentication>
 </page>
