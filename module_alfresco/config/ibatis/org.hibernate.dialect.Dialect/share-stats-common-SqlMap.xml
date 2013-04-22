@@ -233,8 +233,19 @@
             id = ?
     </select>
 
+    <select id="selectEntriesToUpdate" resultMap="result_AtolAuditEntry">
+      select
+        *
+      from
+        share_stats_audit_entry
+      where
+          audit_object NOT LIKE '%workspace://%'
+        AND
+          audit_object != ''
+        AND
+          audit_app_name NOT IN ('dashboard','members')
+    </select>
     <!-- Get all audit records -->
-
     <select id="selectAll" resultMap="results_AtolCsvExportEntry">
       select
         audit_site,
@@ -376,4 +387,24 @@
         </if>
       </where>
     </select>
+
+
+    <update id="updateAuditEntry" parameterType="AtolAuditEntry">
+      update
+        share_stats_audit_entry
+      set
+        audit_object = #{auditObject}
+      where
+        id = #{id}
+    </update>
+
+
+    <delete id="deleteByParameters" parameterType="AtolAuditQueryParameters">
+      delete
+      from
+        share_stats_audit_entry
+      <where>
+        <include refid="time_snippet"/>
+      </where>
+    </delete>
 </mapper>

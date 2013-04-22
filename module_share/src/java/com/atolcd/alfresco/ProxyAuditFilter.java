@@ -41,10 +41,22 @@ import org.springframework.extensions.webscripts.connector.Response;
 import org.springframework.extensions.webscripts.connector.User;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import com.atolcd.alfresco.helper.AuditHelper;
+
 @SuppressWarnings("deprecation")
-public class ProxyAuditFilter implements Filter {
+public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
     private ServletContext servletContext;
 
+    public static final String KEY_SITE = "site";
+    public static final String KEY_MODULE = "module";
+    public static final String KEY_ACTION = "action";
+
+    // Faux identifiant de site qui indiquant au webscript d'insertion que le
+    // site doit être recherché
+    // à partir de l'auditObject via le siteService avant insertion.
+    public static final String TEMP_SITE = "/service";
+
+    // Uri parsées
     private static final String URI_BLOG = "/share/proxy/alfresco/api/blog/";
     private static final String URI_LINKS = "/share/proxy/alfresco/api/links/";
     private static final String URI_DOWNLOAD = "/share/proxy/alfresco/api/node/content/";
@@ -61,6 +73,17 @@ public class ProxyAuditFilter implements Filter {
     private static final String URI_NODE_UPDATE = "/share/proxy/alfresco/api/node/";
     private static final String FORMPROCESSOR = "/formprocessor";
 
+    // Repository et sites
+    private static final String URI_ACTION = "/share/proxy/alfresco/slingshot/doclib/action/files";
+
+    // Social
+    private static final String URI_SOCIAL_PUBLISHING = "/share/proxy/alfresco/api/publishing/queue";
+
+    private static final String GET = Method.GET.toString();
+    private static final String POST = Method.POST.toString();
+    private static final String PUT = Method.PUT.toString();
+    private static final String DELETE = Method.DELETE.toString();
+
     @Override
     public void destroy() {
     }
@@ -76,14 +99,10 @@ public class ProxyAuditFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest sReq, ServletResponse sRes, FilterChain chain) throws IOException, ServletException {
-
         // Get the HTTP request/response/session
         HttpServletRequest request = (HttpServletRequest) sReq;
         // HttpServletResponse response = (HttpServletResponse) sRes;
         RequestWrapper requestWrapper = new RequestWrapper(request);
-
-        // System.out.println("Requested : " +
-        // request.getRequestURL().toString());
         // initialize a new request context
         RequestContext context = ThreadLocalRequestContext.getRequestContext();
 
@@ -104,87 +123,75 @@ public class ProxyAuditFilter implements Filter {
             }
         }
         User user = context.getUser();
-        String requestURI = request.getRequestURI();// .getRequestURL().toString();
+        String requestURI = request.getRequestURI();
         String method = request.getMethod().toUpperCase();
-        // Tester la méthode get ?
+
         if (user != null) {
             try {
                 // Création de l'auditSample
                 JSONObject auditSample = new JSONObject();
-                auditSample.put("id", "0");
-                auditSample.put("auditUserId", user.getId());
-                auditSample.put("auditSite", "");
-                auditSample.put("auditAppName", "");
-                auditSample.put("auditActionName", "");
-                auditSample.put("auditObject", "");
-                auditSample.put("auditTime", Long.toString(System.currentTimeMillis()));
+                auditSample.put(AUDIT_ID, "0");
+                auditSample.put(AUDIT_USER_ID, user.getId());
+                auditSample.put(AUDIT_SITE, "");
+                auditSample.put(AUDIT_APP_NAME, "");
+                auditSample.put(AUDIT_ACTION_NAME, "");
+                auditSample.put(AUDIT_OBJECT, "");
+                auditSample.put(AUDIT_TIME, Long.toString(System.currentTimeMillis()));
 
                 // Ne se déclenche que pour les docs
-                if (requestURI.endsWith("/activity") && request.getMethod().equals(Method.POST.toString())) {
+                if (requestURI.endsWith("/doclib/activity") && request.getMethod().equals(POST)) {
                     String type = request.getContentType().split(";")[0];
                     if (type.equals("application/json")) {
                         // Get JSON Object
                         JSONObject activityFeed = new JSONObject(requestWrapper.getStringContent());
-                        // Mise à jour de l'auditSample à insérer
 
-                        if (activityFeed.has("nodeRef")) {
-                            auditSample.put("auditAppName", "document");
-                            auditSample.put("auditSite", activityFeed.getString("site"));
-                            auditSample.put("auditActionName", activityFeed.getString("type"));
-                            // fileName aussi possible
-                            auditSample.put("auditObject", activityFeed.getString("nodeRef"));
-                        } else if (activityFeed.has("fileCount")) {
-                            // Plusieurs docs d'un coup. On ne récupère pas
-                            // les
-                            // nodeRefs.
-                            auditSample.put("auditAppName", "document");
-                            auditSample.put("auditSite", activityFeed.getString("site"));
-                            auditSample.put("auditActionName", activityFeed.getString("type"));
+                        String activityType = activityFeed.getString("type");
+                        if (activityType != null && "file-added".equals(activityType)) {
+                            if (activityFeed.has("nodeRef")) {
+                                auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
+                                auditSample.put(AUDIT_SITE, activityFeed.getString("site"));
+                                auditSample.put(AUDIT_ACTION_NAME, activityType);
+                                auditSample.put(AUDIT_OBJECT, activityFeed.getString("nodeRef"));
+                                auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
 
-                            if (auditSample.get("auditActionName").toString().endsWith("added")) {
-                                auditSample.put("auditActionName", "file-added");
-                            } else if (auditSample.get("auditActionName").toString().endsWith("deleted")) {
-                                auditSample.put("auditActionName", "file-deleted");
-                            }
-                            int fileCount = activityFeed.getInt("fileCount");
-                            for (int i = 0; i < fileCount; i++) {
                                 remoteCall(request, auditSample);
                             }
                         }
+                    }
+                } else if (requestURI.startsWith(URI_NODE_UPDATE) && requestURI.endsWith(FORMPROCESSOR)) {
+                    JSONObject updatedData = new JSONObject(requestWrapper.getStringContent());
+                    // L'édition en ligne passe par le même formulaire, avec la
+                    // metadonnée cm_content
+                    if (!updatedData.has("prop_cm_content")) {
+                        auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
+                        auditSample.put(AUDIT_OBJECT, getNodeRefFromUrl(requestURI, 1));
 
-                        // Uniformisation des noms
-                        if (auditSample.get("auditAppName").equals("documentlibrary")) {
-                            auditSample.put("auditAppName", "document");
-                        }
-
-                        // Remote call for DB
+                        auditSample.put(AUDIT_ACTION_NAME, "update");
+                        auditSample.put(AUDIT_SITE, TEMP_SITE);
                         remoteCall(request, auditSample);
                     }
                 } else if (requestURI.endsWith("/activity/create")) {
                     String jsonPost = requestWrapper.getStringContent();
                     if (jsonPost != null && !jsonPost.isEmpty()) {
                         JSONObject json = new JSONObject(jsonPost);
-                        // if ?
-                        auditSample.put("auditAppName", "document");
-                        auditSample.put("auditSite", json.getString("site"));
-                        auditSample.put("auditActionName", "create");
-                        auditSample.put("auditObject", json.getString("nodeRef"));
-
-                        remoteCall(request, auditSample);
+                        String mod = AuditHelper.extractModFromActivity(json);
+                        if (mod != null) {
+                            auditSample.put(AUDIT_APP_NAME, mod);
+                            auditSample.put(AUDIT_SITE, json.getString("site"));
+                            auditSample.put(AUDIT_ACTION_NAME, AuditHelper.extractActionFromActivity(json));
+                            auditSample.put(AUDIT_OBJECT, json.getString("nodeRef"));
+                            remoteCall(request, auditSample);
+                        }
                     }
                 } else if (requestURI.endsWith("/comments") || requestURI.endsWith("/replies")) {
                     // Comments & replies
                     String[] urlTokens = request.getHeader("referer").toString().split("/");
                     HashMap<String, String> auditData = this.getUrlData(urlTokens);
 
-                    auditSample.put("auditSite", auditData.get("site"));
-                    auditSample.put("auditAppName", auditData.get("module"));
-                    auditSample.put("auditActionName", "comments");
-                    auditSample.put("auditObject", getNodeRefFromUrl(requestURI, 1));
-                    // Ancienne méthode pour récupérer le postId - NodeRef
-                    // Maintenant
-                    // auditSample.put("auditObject",
-                    // getUrlParameters(urlTokens[urlTokens.length-1]).get("postId"));
+                    auditSample.put(AUDIT_SITE, auditData.get(KEY_SITE));
+                    auditSample.put(AUDIT_APP_NAME, auditData.get(KEY_MODULE));
+                    auditSample.put(AUDIT_ACTION_NAME, "comments");
+                    auditSample.put(AUDIT_OBJECT, getNodeRefFromUrl(requestURI, 1));
 
                     // Remote call for DB
                     remoteCall(request, auditSample);
@@ -193,170 +200,201 @@ public class ProxyAuditFilter implements Filter {
                     String wikiPageId = urlTokens[urlTokens.length - 1];
                     String siteId = urlTokens[urlTokens.length - 2];
                     if (method.equals(Method.PUT.toString().toString())) {
-                        // TODO : Créer des snippets pour la récupération du
-                        // site selon JSON/urlTokens??
                         JSONObject params = new JSONObject(requestWrapper.getStringContent());
-                        auditSample.put("auditSite", siteId);
-                        auditSample.put("auditAppName", "wiki");
+                        auditSample.put(AUDIT_SITE, siteId);
+                        auditSample.put(AUDIT_APP_NAME, MOD_WIKI);
                         if (params.has("currentVersion")) {
-                            auditSample.put("auditActionName", "update-post");
+                            auditSample.put(AUDIT_ACTION_NAME, "update-post");
                         } else {
-                            auditSample.put("auditActionName", "create-post");
+                            auditSample.put(AUDIT_ACTION_NAME, "create-post");
                         }
 
-                        String auditObject = getNodeRefRemoteCall(request, user.getId(), siteId, "wiki", wikiPageId);
-                        auditSample.put("auditObject", auditObject);
+                        String auditObject = getNodeRefRemoteCall(request, user.getId(), siteId, MOD_WIKI, wikiPageId);
+                        auditSample.put(AUDIT_OBJECT, auditObject);
 
                         // Remote call
                         remoteCall(request, auditSample);
-                    } else if (method.equals(Method.DELETE.toString())) {
-                        auditSample.put("auditSite", siteId);
-                        auditSample.put("auditAppName", "wiki");
-                        auditSample.put("auditActionName", "delete-post");
-                        auditSample.put("auditObject", wikiPageId);
+                    } else if (method.equals(DELETE)) {
+                        auditSample.put(AUDIT_SITE, siteId);
+                        auditSample.put(AUDIT_APP_NAME, MOD_WIKI);
+                        auditSample.put(AUDIT_ACTION_NAME, "delete-post");
+                        auditSample.put(AUDIT_OBJECT, wikiPageId);
                         // Remote call
                         remoteCall(request, auditSample);
                     }
                 } else if (requestURI.startsWith(URI_BLOG)) {
-                    auditSample.put("auditAppName", "blog");
-                    if (method.equals(Method.POST.toString())) {
+                    auditSample.put(AUDIT_APP_NAME, MOD_BLOG);
+                    if (method.equals(POST)) {
                         JSONObject params = new JSONObject(requestWrapper.getStringContent());
-                        auditSample.put("auditSite", params.get("site"));
-                        auditSample.put("auditActionName", "blog-create");
-                        auditSample.put("auditObject", params.get("title"));
+                        auditSample.put(AUDIT_SITE, params.get("site"));
+                        auditSample.put(AUDIT_ACTION_NAME, "blog-create");
+                        auditSample.put(AUDIT_OBJECT, params.get("title"));
 
                         remoteCall(request, auditSample);
-                    } else if (method.equals(Method.PUT.toString().toString())) {
+                    } else if (method.equals(PUT)) {
                         JSONObject params = new JSONObject(requestWrapper.getStringContent());
-                        auditSample.put("auditSite", params.get("site"));
-                        auditSample.put("auditActionName", "blog-update");
-                        auditSample.put("auditObject", getNodeRefFromUrl(requestURI, 0));
+                        auditSample.put(AUDIT_SITE, params.get("site"));
+                        auditSample.put(AUDIT_ACTION_NAME, "blog-update");
+                        auditSample.put(AUDIT_OBJECT, getNodeRefFromUrl(requestURI, 0));
 
                         remoteCall(request, auditSample);
-                    } else if (method.equals(Method.DELETE.toString())) {
+                    } else if (method.equals(DELETE)) {
                         String[] urlTokens = requestURI.split("/");
-                        auditSample.put("auditObject", urlTokens[urlTokens.length - 1]);
-                        auditSample.put("auditSite", urlTokens[urlTokens.length - 3]);
-                        auditSample.put("auditActionName", "blog-delete");
+                        auditSample.put(AUDIT_OBJECT, urlTokens[urlTokens.length - 1]);
+                        auditSample.put(AUDIT_SITE, urlTokens[urlTokens.length - 3]);
+                        auditSample.put(AUDIT_ACTION_NAME, "blog-delete");
 
                         remoteCall(request, auditSample);
                     }
                 } else if (requestURI.startsWith(URI_DISCUSSIONS)) {
-                    auditSample.put("auditAppName", "discussions");
-                    if (method.equals(Method.POST.toString())) {
+                    auditSample.put(AUDIT_APP_NAME, "discussions");
+                    if (method.equals(POST)) {
                         JSONObject params = new JSONObject(requestWrapper.getStringContent());
-                        auditSample.put("auditSite", params.get("site"));
-                        auditSample.put("auditActionName", "discussions-create");
-                        auditSample.put("auditObject", params.get("title"));
+                        auditSample.put(AUDIT_SITE, params.get("site"));
+                        auditSample.put(AUDIT_ACTION_NAME, "discussions-create");
+                        auditSample.put(AUDIT_OBJECT, params.get("title"));
 
                         remoteCall(request, auditSample);
-                    } else if (method.equals(Method.PUT.toString().toString())) {
+                    } else if (method.equals(PUT)) {
                         JSONObject params = new JSONObject(requestWrapper.getStringContent());
                         String siteId = (String) params.get("site");
-                        auditSample.put("auditSite", siteId);
-                        auditSample.put("auditActionName", "discussions-update");
+                        auditSample.put(AUDIT_SITE, siteId);
+                        auditSample.put(AUDIT_ACTION_NAME, "discussions-update");
 
                         String[] urlTokens = requestURI.split("/");
                         String discussionId = urlTokens[urlTokens.length - 1];
                         String auditObject = getNodeRefRemoteCall(request, user.getId(), siteId, "discussions", discussionId);
-                        auditSample.put("auditObject", auditObject);
+                        auditSample.put(AUDIT_OBJECT, auditObject);
 
                         remoteCall(request, auditSample);
-                    } else if (method.equals(Method.DELETE.toString())) {
+                    } else if (method.equals(DELETE)) {
                         String[] urlTokens = requestURI.split("/");
-                        auditSample.put("auditActionName", "discussions-deleted");
-                        auditSample.put("auditObject", urlTokens[urlTokens.length - 1]);
-                        auditSample.put("auditSite", urlTokens[urlTokens.length - 3]);
+                        auditSample.put(AUDIT_ACTION_NAME, "discussions-deleted");
+                        auditSample.put(AUDIT_OBJECT, urlTokens[urlTokens.length - 1]);
+                        auditSample.put(AUDIT_SITE, urlTokens[urlTokens.length - 3]);
 
                         remoteCall(request, auditSample);
                     }
-                } else if (requestURI.startsWith(URI_LINKS) && !method.equals(Method.GET.toString())) {
+                } else if (requestURI.startsWith(URI_LINKS) && !method.equals(GET)) {
                     String[] urlTokens = requestURI.split("/");
                     JSONObject params = new JSONObject(requestWrapper.getStringContent());
-                    auditSample.put("auditAppName", "links");
+                    auditSample.put(AUDIT_APP_NAME, MOD_LINKS);
 
-                    if (method.equals(Method.POST.toString())) {
+                    if (method.equals(POST)) {
                         if (requestURI.startsWith(URI_LINKS + "delete/")) {
-                            auditSample.put("auditSite", urlTokens[urlTokens.length - 2]);
-                            auditSample.put("auditObject", params.getJSONArray("items").get(0));
-                            auditSample.put("auditActionName", "links-delete");
+                            auditSample.put(AUDIT_SITE, urlTokens[urlTokens.length - 2]);
+                            auditSample.put(AUDIT_OBJECT, params.getJSONArray("items").get(0));
+                            auditSample.put(AUDIT_ACTION_NAME, "links-delete");
                         } else {
-                            auditSample.put("auditObject", params.get("title"));
-                            auditSample.put("auditSite", urlTokens[urlTokens.length - 3]);
-                            auditSample.put("auditActionName", "links-create");
+                            auditSample.put(AUDIT_OBJECT, params.get("title"));
+                            auditSample.put(AUDIT_SITE, urlTokens[urlTokens.length - 3]);
+                            auditSample.put(AUDIT_ACTION_NAME, "links-create");
                         }
                         remoteCall(request, auditSample);
-                    } else if (method.equals(Method.PUT.toString().toString())) {
+                    } else if (method.equals(PUT)) {
                         String siteId = urlTokens[urlTokens.length - 3];
-                        auditSample.put("auditSite", siteId);
-                        auditSample.put("auditActionName", "links-update");
+                        auditSample.put(AUDIT_SITE, siteId);
+                        auditSample.put(AUDIT_ACTION_NAME, "links-update");
 
-                        String auditObject = getNodeRefRemoteCall(request, user.getId(), siteId, "links", urlTokens[urlTokens.length - 1]);
-                        auditSample.put("auditObject", auditObject);
-
-                        remoteCall(request, auditSample);
-                    }
-                } else if ((requestURI.startsWith(URI_DATALIST) || requestURI.startsWith(URI_DATALIST_DELETE))
-                        && method.equals(Method.POST.toString())) {
-
-                    boolean isDeleteRequest = request.getParameter("alf_method") != null;
-                    auditSample.put("auditAppName", "data");
-                    auditSample.put("auditSite", "/service");
-                    if (isDeleteRequest) {
-                        auditSample.put("auditActionName", "datalist-delete");
-                        JSONObject params = new JSONObject(requestWrapper.getStringContent());
-                        JSONArray items = params.getJSONArray("nodeRefs");
-                        for (int i = 0; i < items.length(); i++) {
-                            auditSample.put("auditObject", items.getString(i));
-
-                            remoteCall(request, auditSample);
-                        }
-                    } else {
-                        auditSample.put("auditActionName", "datalist-post");
-                        auditSample.put("auditObject", getNodeRefFromUrl(requestURI, 0));
+                        String auditObject = getNodeRefRemoteCall(request, user.getId(), siteId, MOD_LINKS, urlTokens[urlTokens.length - 1]);
+                        auditSample.put(AUDIT_OBJECT, auditObject);
 
                         remoteCall(request, auditSample);
                     }
                 } else if (requestURI.startsWith(URI_DOWNLOAD)) {
-                    if (request.getParameter("a") != null && !request.getParameter("a").isEmpty()) {
-                        auditSample.put("auditAppName", "document");
-                        auditSample.put("auditObject", getNodeRefFromUrl(requestURI, 1));
+                    String a = request.getParameter("a");
+                    if (a != null && !a.isEmpty()) {
+                        auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
+                        auditSample.put(AUDIT_OBJECT, getNodeRefFromUrl(requestURI, 1));
 
-                        auditSample.put("auditActionName", "download");
-                        auditSample.put("auditSite", "/service");
+                        auditSample.put(AUDIT_ACTION_NAME, "true".equalsIgnoreCase(a) ? "download" : "stream");
+                        auditSample.put(AUDIT_SITE, TEMP_SITE);
                         remoteCall(request, auditSample);
                     }
-                } else if (requestURI.endsWith("memberships") && method.equals(Method.GET.toString().toString())) {
+                } else if (requestURI.startsWith(URI_ACTION)) {
+                    String alfMethod = request.getParameter("alf_method");
+                    if ("delete".equals(alfMethod)) {
+                        JSONObject params = new JSONObject(requestWrapper.getStringContent());
+                        JSONArray nodeRefs = params.getJSONArray("nodeRefs");
+                        auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
+                        auditSample.put(AUDIT_SITE, TEMP_SITE);
+                        auditSample.put(AUDIT_ACTION_NAME, "file-deleted");
+
+                        for (int i = 0; i < nodeRefs.length(); i++) {
+                            auditSample.put(AUDIT_OBJECT, nodeRefs.getString(i));
+
+                            remoteCall(request, auditSample);
+                        }
+                    }
+                } else if (requestURI.endsWith("memberships") && method.equals(GET)) {
 
                     String type = request.getParameter("authorityType");
                     String nf = request.getParameter("nf");
                     String[] urlTokens = requestURI.split("/");
 
-                    auditSample.put("auditSite", urlTokens[urlTokens.length - 2]);
-                    auditSample.put("auditAppName", "members");
-                    auditSample.put("auditActionName", type.toLowerCase());
-                    auditSample.put("auditObject", nf);
+                    auditSample.put(AUDIT_SITE, urlTokens[urlTokens.length - 2]);
+                    auditSample.put(AUDIT_APP_NAME, MOD_MEMBERS);
+                    auditSample.put(AUDIT_ACTION_NAME, type.toLowerCase());
+                    auditSample.put(AUDIT_OBJECT, nf);
                     remoteCall(request, auditSample);
                 } else if (requestURI.endsWith(URI_CALENDAR)) {
                     JSONObject params = new JSONObject(requestWrapper.getStringContent());
-                    auditSample.put("auditAppName", "calendar");
-                    auditSample.put("auditActionName", "create");
-                    auditSample.put("auditSite", params.get("site"));
-                    auditSample.put("auditObject", params.get("what"));
+                    auditSample.put(AUDIT_APP_NAME, MOD_CALENDAR);
+                    auditSample.put(AUDIT_ACTION_NAME, "create");
+                    auditSample.put(AUDIT_SITE, params.get("site"));
+                    auditSample.put(AUDIT_OBJECT, params.get("what"));
 
                     remoteCall(request, auditSample);
-                } else if (requestURI.startsWith(URI_NODE_UPDATE) && requestURI.endsWith(FORMPROCESSOR)) {
-                    JSONObject updatedData = new JSONObject(requestWrapper.getStringContent());
-                    // L'édition en ligne passe par le même formulaire, avec la
-                    // metadonnée cm_content
-                    if (!updatedData.has("prop_cm_content")) {
-                        auditSample.put("auditAppName", "document");
-                        auditSample.put("auditObject", getNodeRefFromUrl(requestURI, 1));
+                } else if ((requestURI.startsWith(URI_DATALIST) || requestURI.startsWith(URI_DATALIST_DELETE)) && method.equals(POST)) {
+                    boolean isDeleteRequest = request.getParameter("alf_method") != null;
+                    auditSample.put(AUDIT_APP_NAME, MOD_DATA);
+                    auditSample.put(AUDIT_SITE, TEMP_SITE);
+                    if (isDeleteRequest) {
+                        auditSample.put(AUDIT_ACTION_NAME, "datalist-delete");
+                        JSONObject params = new JSONObject(requestWrapper.getStringContent());
+                        JSONArray items = params.getJSONArray("nodeRefs");
+                        for (int i = 0; i < items.length(); i++) {
+                            auditSample.put(AUDIT_OBJECT, items.getString(i));
 
-                        auditSample.put("auditActionName", "update");
-                        auditSample.put("auditSite", "/service");
+                            remoteCall(request, auditSample);
+                        }
+                    } else {
+                        auditSample.put(AUDIT_ACTION_NAME, "datalist-post");
+                        auditSample.put(AUDIT_OBJECT, getNodeRefFromUrl(requestURI, 0));
+
                         remoteCall(request, auditSample);
                     }
+                } else if (requestURI.startsWith(URI_SOCIAL_PUBLISHING) && method.equals(POST)) {
+                    auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
+                    auditSample.put(AUDIT_SITE, TEMP_SITE);
+
+                    auditSample.put(AUDIT_ACTION_NAME, "publish");
+                    JSONObject params = new JSONObject(requestWrapper.getStringContent());
+                    JSONArray items = params.getJSONArray("publishNodes");
+                    for (int i = 0; i < items.length(); i++) {
+                        auditSample.put(AUDIT_OBJECT, items.getString(i));
+                        remoteCall(request, auditSample);
+                    }
+                    // partir sur un stockage plus conséquent des données ?
+                    // Stockage JSON et tout ?
+                    // {
+                    // "channelId":"workspace://SpacesStore/ab665024-e23e-4af5-8964-3f8c5c179a71",
+                    // "publishNodes":["workspace://SpacesStore/0caddbbe-eb7c-4bb6-b6fc-5b023b760b84"],
+                    // "statusUpdate":{"message":"Hrhrhrhrr","channelIds":["workspace://SpacesStore/b0bf5dbc-53a8-4653-b67a-a6c2b88f6cb2"],
+                    // "nodeRef":"workspace://SpacesStore/0caddbbe-eb7c-4bb6-b6fc-5b023b760b84"}
+                    // }
+                } else if (requestURI.indexOf("/ratings") != -1) {
+                    auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
+                    auditSample.put(AUDIT_SITE, TEMP_SITE);
+                    int offset = 1;
+                    if (POST.equals(method)) {
+                        auditSample.put(AUDIT_ACTION_NAME, "rate");
+                    } else if (DELETE.equals(method)) {
+                        auditSample.put(AUDIT_ACTION_NAME, "unrate");
+                        offset = 2;
+                    }
+                    auditSample.put(AUDIT_OBJECT, getNodeRefFromUrl(requestURI, offset));
+                    remoteCall(request, auditSample);
                 }
 
             } catch (JSONException e) {
@@ -371,7 +409,7 @@ public class ProxyAuditFilter implements Filter {
             UnsupportedEncodingException {
         Connector connector;
         try {
-            connector = FrameworkUtil.getConnector(request.getSession(true), auditSample.getString("auditUserId"),
+            connector = FrameworkUtil.getConnector(request.getSession(true), auditSample.getString(AUDIT_USER_ID),
                     AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
 
             // Le webscript est appelé avec l'audit converti en JSON.
@@ -391,10 +429,12 @@ public class ProxyAuditFilter implements Filter {
     private String getNodeRefRemoteCall(HttpServletRequest request, String userId, String siteId, String componentId, String objectId)
             throws JSONException, URIException, UnsupportedEncodingException {
         Connector connector;
+
         try {
             connector = FrameworkUtil.getConnector(request.getSession(true), userId, AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
             // <url>/share-stats/slingshot/details/{siteId}/{componentId}/{objectId}</url>
-            Response resp = connector.call("/share-stats/slingshot/details/" + siteId + "/" + componentId + "/" + URLEncoder.encode(objectId, "UTF-8"));
+            Response resp = connector.call("/share-stats/slingshot/details/" + siteId + "/" + componentId + "/"
+                    + URLEncoder.encode(objectId, "UTF-8"));
 
             if (resp.getStatus().getCode() == Status.STATUS_OK) {
                 try {
@@ -428,48 +468,28 @@ public class ProxyAuditFilter implements Filter {
     }
 
     /**
-     * @deprecated
-     * @param url
-     * @return
-     */
-    public HashMap<String, String> getUrlParameters(String queryString) {
-        HashMap<String, String> urlParameters = new HashMap<String, String>();
-        queryString = queryString.substring(queryString.indexOf('?') + 1);
-        String[] urlTokens = queryString.split("&");
-        for (String token : urlTokens) {
-            String[] parameter = token.split("=");
-            if (parameter.length > 1) {
-                urlParameters.put(parameter[0], parameter[1]);
-            } else {
-                urlParameters.put(parameter[0], "");
-            }
-        }
-        return urlParameters;
-    }
-
-    /**
      * 
      * @param url
      * @return
      */
     public HashMap<String, String> getUrlData(String[] urlTokens) {
         HashMap<String, String> urlData = new HashMap<String, String>();
-        urlData.put("module", "");
-        urlData.put("action", "");
-        urlData.put("site", "");
+        urlData.put(KEY_MODULE, "");
+        urlData.put(KEY_ACTION, "");
+        urlData.put(KEY_SITE, "");
 
         boolean siteFlag = false;
         for (int i = 0; i < urlTokens.length; i++) {
-            if (urlTokens[i].equals("site") && !siteFlag) {
+            if (urlTokens[i].equals(KEY_SITE) && !siteFlag) {
                 siteFlag = true;
-            } else if (siteFlag && (urlData.get("site").equals(""))) {
-                urlData.put("site", urlTokens[i]);
+            } else if (siteFlag && (urlData.get(KEY_SITE).equals(""))) {
+                urlData.put(KEY_SITE, urlTokens[i]);
                 String[] splittedModuleAction = urlTokens[i + 1].split("-");
-                urlData.put("module", splittedModuleAction[0]);
+                urlData.put(KEY_MODULE, splittedModuleAction[0]);
                 if (splittedModuleAction.length > 1) {
-                    urlData.put("action", splittedModuleAction[1]);
+                    urlData.put(KEY_ACTION, splittedModuleAction[1]);
                 } else if (splittedModuleAction.length == 1) {
-                    urlData.put("action", "");
+                    urlData.put(KEY_ACTION, "");
                 }
             }
         }
@@ -488,5 +508,4 @@ public class ProxyAuditFilter implements Filter {
         headers.put("Accept-Language", I18NUtil.getLocale().toString().replace('_', '-'));
         return headers;
     }
-
 }

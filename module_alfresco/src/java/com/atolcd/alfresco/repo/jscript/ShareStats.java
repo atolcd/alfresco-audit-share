@@ -9,27 +9,26 @@ import com.atolcd.alfresco.web.scripts.shareStats.InsertAuditPost;
 
 public class ShareStats extends BaseScopableProcessorExtension implements InitializingBean {
 
-    private InsertAuditPost wsInsertAudits;
+	private InsertAuditPost wsInsertAudits;
 
-    public void setWsInsertAudits(InsertAuditPost wsInsertAudits) {
-        this.wsInsertAudits = wsInsertAudits;
-    }
+	public void setWsInsertAudits(InsertAuditPost wsInsertAudits) {
+		this.wsInsertAudits = wsInsertAudits;
+	}
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        // TODO Auto-generated method stub
-        Assert.notNull(wsInsertAudits);
-    }
-    
-    public boolean insertVolumetry(String siteId,long siteSize, int folderCount,int fileCount,long atTime) {
-    	boolean success = true;
-    	try{
-    		AtolVolumetryEntry atolVolumetryEntry = new AtolVolumetryEntry(siteId,siteSize,folderCount,fileCount,atTime);
-    		this.wsInsertAudits.insertVolumetry(atolVolumetryEntry);
-    	}catch(Exception e){
-    		e.printStackTrace();
-    		success = false;
-    	}
-    	return success;
-    }
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		Assert.notNull(wsInsertAudits);
+	}
+
+	public boolean insertVolumetry(String siteId, long siteSize, int folderCount, int fileCount, long atTime) {
+		boolean success = true;
+		try {
+			AtolVolumetryEntry atolVolumetryEntry = new AtolVolumetryEntry(siteId, siteSize, folderCount, fileCount, atTime);
+			this.wsInsertAudits.insertVolumetry(atolVolumetryEntry);
+		} catch (Exception e) {
+			e.printStackTrace();
+			success = false;
+		}
+		return success;
+	}
 }

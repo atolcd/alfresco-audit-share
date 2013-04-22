@@ -27,6 +27,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.util.Assert;
 
 import com.atolcd.alfresco.AuditCount;
+import com.atolcd.alfresco.AuditEntry;
 import com.atolcd.alfresco.AuditObjectPopularity;
 import com.atolcd.alfresco.AuditQueryParameters;
 
@@ -41,6 +42,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 	private static final String SELECT_BY_DELETED = "alfresco.atolcd.audit.selectByDeleted";
 	private static final String SELECT_BY_MOSTREAD = "alfresco.atolcd.audit.selectByMostRead";
 	private static final String SELECT_BY_MOSTUPDATED = "alfresco.atolcd.audit.selectByMostUpdated";
+	private static final String SELECT_TO_UPDATE = "alfresco.atolcd.audit.selectEntriesToUpdate";
 
 	static final QName TYPE_DATALIST = QName.createQName("http://www.alfresco.org/model/datalist/1.0", "dataList");
 	static final QName TYPE_CALENDAR_EVENT = QName.createQName("http://www.alfresco.org/model/calendar", "calendarEvent");
@@ -161,6 +163,11 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 		}
 		logger.info("Performing " + query + " ... ");
 		return auditCount;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<AuditEntry> selectEntriesToUpdate() {
+		return (List<AuditEntry>) sqlSessionTemplate.selectList(SELECT_TO_UPDATE);
 	}
 
 	public AuditQueryParameters buildParametersFromRequest(WebScriptRequest req) {

@@ -41,7 +41,6 @@ public class ShareStatsUtils extends BaseTemplateProcessorExtension implements I
 
 			return (firstName != null ? firstName : "") + " " + (lastName != null ? lastName.toUpperCase() : "");
 		}
-
 		return "";
 	}
 

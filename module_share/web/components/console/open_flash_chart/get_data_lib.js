@@ -2,7 +2,6 @@
  * Retourn une couleur aléatoirement
  * @method get_random_color
  */
-
 function get_random_color() {
   var letters = '0123456789ABCDEF'.split('');
   var color = '#';
@@ -79,6 +78,18 @@ function buildBarChartXLabels(params) {
     break;
   }
   return labels;
+}
+
+/**
+ * Configure la rotation des labels sur l'axe des X
+ * @param o
+ * @param params
+ */
+function addRotation(o,params){
+  // Filtre par heures de la journées. Les labels de chevauchent sur les "petits" écrans.
+  if(params.currentFilter == "day"){
+    o.rotate = -45;
+  }
 }
 
 /**

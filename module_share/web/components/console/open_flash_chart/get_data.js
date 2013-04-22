@@ -169,6 +169,7 @@ function buildXAxisLabels(params) {
     "labels": buildBarChartXLabels(params),
     "steps": steps
   }
+  addRotation(labelConfiguration,params);
   return labelConfiguration;
 }
 

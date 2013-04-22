@@ -42,12 +42,21 @@ import org.springframework.extensions.webscripts.connector.User;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 @SuppressWarnings("deprecation")
-public class AuditFilter implements Filter {
+public class AuditFilter extends AuditFilterConstants implements Filter {
+    public static final String KEY_SITE = "site";
+    public static final String KEY_MODULE = "module";
+    public static final String KEY_OBJECT = "object";
+    public static final String KEY_ACTION = "action";
+
     private ServletContext servletContext;
     // Store the "object" parameters to get for each module
     private HashMap<String, String> moduleIds;
     private HashMap<String, String[]> ignoredCases;
     private static final Log logger = LogFactory.getLog(AuditFilter.class);
+
+    // Identifiant utilisé en base pour identifier un audit sur le repo et non
+    // sur un site.
+    private static final String REPOSITORY_SITE = "/service";
 
     @Override
     public void destroy() {
@@ -115,8 +124,8 @@ public class AuditFilter implements Filter {
             try {
                 // Préparation du JSON à envoyer.
                 JSONObject auditSample = new JSONObject();
-                auditSample.put("id", "0");
-                auditSample.put("auditUserId", user.getId());
+                auditSample.put(AUDIT_ID, "0");
+                auditSample.put(AUDIT_USER_ID, user.getId());
 
                 // Audit de la console ??
                 if (requestURI.startsWith("/share/page/console/")) {
@@ -129,16 +138,15 @@ public class AuditFilter implements Filter {
                     HashMap<String, String> auditData = getAuditData(request, user.getId(), requestURI);
                     // Le parsing inclue parfois les paramètres lorsque le
                     // chargement de la page est interrompu prématurément
-                    if ((auditData.get("module").length() > 0)
-                            && (auditData.get("site").length() > 0 && !auditData.get("action").contains("?"))) {
-                        auditSample.put("auditSite", auditData.get("site"));
-                        auditSample.put("auditAppName", auditData.get("module"));
-                        auditSample.put("auditActionName", auditData.get("action"));
-                        auditSample.put("auditObject", auditData.get("object"));
-                        auditSample.put("auditTime", Long.toString(System.currentTimeMillis()));
+                    if ((auditData.get(KEY_MODULE).length() > 0) && (!auditData.get(KEY_ACTION).contains("?"))) {
+                        auditSample.put(AUDIT_SITE, auditData.get(KEY_SITE));
+                        auditSample.put(AUDIT_APP_NAME, auditData.get(KEY_MODULE));
+                        auditSample.put(AUDIT_ACTION_NAME, auditData.get(KEY_ACTION));
+                        auditSample.put(AUDIT_OBJECT, auditData.get(KEY_OBJECT));
+                        auditSample.put(AUDIT_TIME, Long.toString(System.currentTimeMillis()));
 
                         // Remote call for DB
-                        if (moduleIds.containsKey(auditSample.get("auditAppName"))) {
+                        if (moduleIds.containsKey(auditSample.get(AUDIT_APP_NAME))) {
                             remoteCall(request, auditSample);
                         } else {
                             logger.info("Ignored : " + requestURI);
@@ -157,9 +165,8 @@ public class AuditFilter implements Filter {
             UnsupportedEncodingException {
         Connector connector;
         try {
-            connector = FrameworkUtil.getConnector(request.getSession(true), auditSample.getString("auditUserId"),
+            connector = FrameworkUtil.getConnector(request.getSession(true), auditSample.getString(AUDIT_USER_ID),
                     AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
-
             // parameters = null, on passe par le inputstream.
             // Le webscript est appelé avec l'audit converti en JSON.
             ConnectorContext postContext = new ConnectorContext(null, buildDefaultHeaders());
@@ -174,13 +181,25 @@ public class AuditFilter implements Filter {
         }
     }
 
+    /**
+     * @param request
+     * @param userId
+     * @param siteId
+     * @param componentId
+     * @param objectId
+     * @return
+     * @throws JSONException
+     * @throws URIException
+     * @throws UnsupportedEncodingException
+     */
     private String getNodeRefRemoteCall(HttpServletRequest request, String userId, String siteId, String componentId, String objectId)
             throws JSONException, URIException, UnsupportedEncodingException {
         Connector connector;
         try {
             connector = FrameworkUtil.getConnector(request.getSession(true), userId, AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
             // <url>/share-stats/slingshot/details/{siteId}/{componentId}/{objectId}</url>
-            Response resp = connector.call("/share-stats/slingshot/details/" + siteId + "/" + componentId + "/" + URLEncoder.encode(objectId, "UTF-8"));
+            Response resp = connector.call("/share-stats/slingshot/details/" + siteId + "/" + componentId + "/"
+                    + URLEncoder.encode(objectId, "UTF-8"));
 
             if (resp.getStatus().getCode() == Status.STATUS_OK) {
                 try {
@@ -212,41 +231,42 @@ public class AuditFilter implements Filter {
         HashMap<String, String> auditData = new HashMap<String, String>();
         String[] urlTokens = requestURL.split("/");
 
-        HashMap<String, String> urlData = getUrlData(urlTokens);
+        HashMap<String, String> urlData = getUrlData(urlTokens, requestURL.indexOf("site") != -1);
+
         auditData.putAll(urlData);
 
         try {
             // On récupère l'identifiant de l'<<objet>> consulté à partir de son
             // module
             // En cas de null, on catch et on met une chaîne vide.
-            String obj = request.getParameter(this.moduleIds.get(urlData.get("module")));
+            String obj = request.getParameter(this.moduleIds.get(urlData.get(KEY_MODULE)));
             if (obj != null) {
                 // On déplace le paramètre dans l'action pour faciliter les
                 // requêtes
-                if (auditData.get("module").equals("calendar")) {
-                    auditData.put("action", obj);
-                    auditData.put("object", "");
-                } else if (auditData.get("module").equals("links") && auditData.get("action").equals("view")) {
-                    String auditObject = getNodeRefRemoteCall(request, userId, auditData.get("site"), auditData.get("module"), obj);
-                    auditData.put("object", auditObject);
-                    auditData.put("action", "single-view");
+                if (auditData.get(KEY_MODULE).equals("calendar")) {
+                    auditData.put(KEY_ACTION, obj);
+                    auditData.put(KEY_OBJECT, "");
+                } else if (auditData.get(KEY_MODULE).equals(MOD_LINKS) && auditData.get(KEY_ACTION).equals("view")) {
+                    String auditObject = getNodeRefRemoteCall(request, userId, auditData.get(KEY_SITE), auditData.get(KEY_MODULE), obj);
+                    auditData.put(KEY_OBJECT, auditObject);
+                    auditData.put(KEY_ACTION, "single-view");
                 } else if (auditData.get("module").equals("search")) {
                     if (!obj.isEmpty()) {
-                        auditData.put("action", "query");
-                        auditData.put("object", obj);
+                        auditData.put(KEY_ACTION, "query");
+                        auditData.put(KEY_OBJECT, obj);
                     } else {
-                        auditData.put("object", "");
+                        auditData.put(KEY_OBJECT, "");
                     }
 
                 } else {
-                    String auditObject = getNodeRefRemoteCall(request, userId, auditData.get("site"), auditData.get("module"), obj);
-                    auditData.put("object", auditObject);
+                    String auditObject = getNodeRefRemoteCall(request, userId, auditData.get(KEY_SITE), auditData.get(KEY_MODULE), obj);
+                    auditData.put(KEY_OBJECT, auditObject);
                 }
             } else {
-                auditData.put("object", "");
+                auditData.put(KEY_OBJECT, "");
             }
         } catch (Exception e) {
-            auditData.put("object", "");
+            auditData.put(KEY_OBJECT, "");
         }
 
         return filter(auditData);
@@ -256,14 +276,33 @@ public class AuditFilter implements Filter {
      * Parse l'url découpage afin d'en tirer les informations d'audit
      * 
      * @param urlTokens
-     *            String[]
+     * @param hasSite
      * @return HashMap
      */
-    public HashMap<String, String> getUrlData(String[] urlTokens) {
+    public HashMap<String, String> getUrlData(String[] urlTokens, boolean hasSite) {
         HashMap<String, String> urlData = new HashMap<String, String>();
-        urlData.put("module", "");
-        urlData.put("action", "");
-        urlData.put("site", "");
+        urlData.put(KEY_MODULE, "");
+        urlData.put(KEY_ACTION, "");
+        urlData.put(KEY_SITE, "");
+
+        // Voir les effets de bord au retrait de traitement des url sans sites
+        if (!hasSite) {
+            // On simule la présence d'un site en modifiant les morceaux d'url
+            String[] newUrlTokens = new String[urlTokens.length + 2];
+            int j = 0;
+            String token;
+            for (int i = 0; i < urlTokens.length; i++) {
+                token = urlTokens[i];
+                newUrlTokens[i + j] = token;
+                if (urlTokens[i].equals("page")) {
+                    newUrlTokens[i + 1] = "site";
+                    newUrlTokens[i + 2] = REPOSITORY_SITE;
+                    j = 2;
+                }
+            }
+            // On recopie les nouveaux tokens
+            urlTokens = newUrlTokens;
+        }
 
         boolean siteFlag = false;
         for (int i = 0; i < urlTokens.length; i++) {
@@ -272,51 +311,65 @@ public class AuditFilter implements Filter {
             }
             // On trouve le token "site" dans l'url, le prochain token est
             // le nom du site
-            else if (siteFlag && (urlData.get("site").equals(""))) {
-                urlData.put("site", urlTokens[i]);
+            else if (siteFlag && (urlData.get(KEY_SITE).isEmpty())) {
+                urlData.put(KEY_SITE, urlTokens[i]);
                 String[] splittedModuleAction = urlTokens[i + 1].split("-");
                 // test pour site-members & site-groups
                 if (splittedModuleAction[0].equals("site")) {
-                    urlData.put("module", "members");
+                    urlData.put(KEY_MODULE, MOD_MEMBERS);
                 } else {
-                    urlData.put("module", splittedModuleAction[0]);
+                    urlData.put(KEY_MODULE, splittedModuleAction[0]);
                 }
 
                 // Test d'action (module-action; wiki-create par exemple)
                 if (splittedModuleAction.length > 1) {
-                    urlData.put("action", splittedModuleAction[1]);
+                    urlData.put(KEY_ACTION, splittedModuleAction[1]);
                 } else if (splittedModuleAction.length == 1) {
-                    if (urlData.get("module").endsWith("library")) {
-                        urlData.put("module", "document");
-                        urlData.put("action", "library");
-                    } else if (urlData.get("module").endsWith("search")) {
-                        urlData.put("action", splittedModuleAction[0]);
-                        urlData.put("module", "search");
+                    if (urlData.get(KEY_MODULE).endsWith("library")) {
+                        urlData.put(KEY_MODULE, MOD_DOCUMENT);
+                        urlData.put(KEY_ACTION, "library");
+                    } else if (urlData.get(KEY_MODULE).endsWith("search")) {
+                        urlData.put(KEY_ACTION, splittedModuleAction[0]);
+                        urlData.put(KEY_MODULE, "search");
                     } else {
                         // On suppose que c'est une consultation
-                        urlData.put("action", "view");
+                        urlData.put(KEY_ACTION, "view");
                     }
                 }
             }
         }
+
         return urlData;
     }
 
+    /**
+     * Filtre les données d'audit.
+     * 
+     * @param auditData
+     * @return
+     */
     public HashMap<String, String> filter(HashMap<String, String> auditData) {
-        String module = auditData.get("module");
-        String action = auditData.get("action");
+        String module = auditData.get(KEY_MODULE);
+        String action = auditData.get(KEY_ACTION);
 
         if (module != null && action != null) {
             if (ignoredCases.containsKey(module)) {
                 if (contains(ignoredCases.get(module), action)) {
                     // Ne sera pas audité si ne contient pas de site
-                    auditData.put("site", "");
+                    auditData.put(KEY_SITE, "");
                 }
             }
         }
         return auditData;
     }
 
+    /**
+     * Indique si une String est contenu dans un tableau de String
+     * 
+     * @param array
+     * @param toFind
+     * @return
+     */
     public boolean contains(String[] array, String toFind) {
         boolean res = false;
         for (int i = 0; i < array.length; i++) {
