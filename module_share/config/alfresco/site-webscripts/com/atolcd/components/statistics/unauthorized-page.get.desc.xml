@@ -1,0 +1,5 @@
+<webscript>
+  <shortname>Unauthorized handling</shortname>
+  <description>Redirect unauthorized users to their dashboard</description>
+  <url>/components/statistics/error/unauthorized</url>
+</webscript>

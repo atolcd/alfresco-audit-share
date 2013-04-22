@@ -1,12 +1,14 @@
 <#include "/org/alfresco/include/alfresco-template.ftl" />
 
 <@templateHeader>
-   <script type="text/javascript">//<![CDATA[
+  <#if userIsAllowed?? && userIsAllowed>
+    <script type="text/javascript">//<![CDATA[
       new Alfresco.widget.Resizer("Statistics").setOptions(
       {
          initialWidth: 190
       });
-   //]]></script>
+    //]]></script>
+  </#if>
 </@>
 
 <@templateBody>
@@ -21,6 +23,7 @@
    </div>
    
    <div id="bd">
+      <#if userIsAllowed?? && userIsAllowed>
       <div class="yui-t1" id="alfresco-statistics">
          <div id="yui-main">
             <div class="yui-b" id="alf-content">
@@ -31,6 +34,9 @@
             <@region id="tools" scope="template" />
          </div>
       </div>
+      <#else>
+        <@region id="unauthorized" scope="template" />
+      </#if>
    </div>
 </@>
 

@@ -5,6 +5,11 @@ function main() {
   // family of tools to use for this console is linked to the current pageId from the URL
   var family = page.url.templateArgs["pageid"];
   if (family != null) {
+    model.userIsAllowed = checkPermissions();
+    if (!model.userIsAllowed) {
+      return
+    }
+
     var component = sitedata.getComponent("page", "myctool", family); // find the existing current tool component binding
 
     // collect the tools required for this console
@@ -83,6 +88,38 @@ function main() {
     toolsArray.push(g);
   }
   context.setValue("statistic-tools", toolsArray);
+}
+
+function checkPermissions() {
+  // Check permissions
+  if (page.url.templateArgs.site) {
+    // We are in the context of a site, so call the repository to see if the user is site manager or not
+    var json = remote.call("/api/sites/" + page.url.templateArgs.site + "/memberships/" + encodeURIComponent(user.name));
+    if (json.status == 200) {
+      var obj = eval('(' + json + ')');
+      if (obj) {
+        return (obj.role == "SiteManager");
+      }
+    }
+  } else if (user.isAdmin) {
+    // User is an administrator
+    return true;
+  } else {
+    // Check if current user is site manager of a site
+    // http://localhost:8080/alfresco/s/api/people/admin/sites?roles=user
+    var json = remote.call("/api/people/" + encodeURIComponent(user.name) + "/sites?roles=user");
+    if (json.status == 200) {
+      var sites = eval('(' + json + ')');
+      if (sites && sites.length > 0) {
+        for (var i=0, ii=sites.length ; i<ii ; i++) {
+          if (sites[i].siteRole == "SiteManager") {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
 }
 
 main();
