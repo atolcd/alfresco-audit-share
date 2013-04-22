@@ -3,5 +3,5 @@
   <description>Select users for Share console</description>
   <url>/share-stats/select-users</url>
   <format default="json"/>
-  <authentication>admin</authentication>
+  <authentication>user</authentication>
 </webscript>

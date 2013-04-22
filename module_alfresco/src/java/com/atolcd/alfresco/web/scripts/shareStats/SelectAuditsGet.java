@@ -30,6 +30,7 @@ import com.atolcd.alfresco.AuditCount;
 import com.atolcd.alfresco.AuditEntry;
 import com.atolcd.alfresco.AuditObjectPopularity;
 import com.atolcd.alfresco.AuditQueryParameters;
+import com.atolcd.alfresco.helper.PermissionsHelper;
 
 public class SelectAuditsGet extends DeclarativeWebScript implements InitializingBean {
 	// SqlMapClientTemplate for ibatis calls
@@ -70,22 +71,25 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		try {
-			// Map passé au template.
 			Map<String, Object> model = new HashMap<String, Object>();
-
-			// Check for the sqlMapClientTemplate Bean
-			if (this.sqlSessionTemplate != null) {
-				// Get the input content given into the request.
-				// String jsonArg = req.getContent().getContent();
-				AuditQueryParameters params = buildParametersFromRequest(req);
-				String type = req.getParameter("type");
-				String stringLimit = req.getParameter("limit");
-				int limit = 0;
-				if (stringLimit != null && !stringLimit.isEmpty()) {
-					limit = Integer.parseInt(stringLimit);
+			if (PermissionsHelper.isAuthorized(req)) {
+				// Check for the sqlMapClientTemplate Bean
+				if (this.sqlSessionTemplate != null) {
+					// Get the input content given into the request.
+					// String jsonArg = req.getContent().getContent();
+					AuditQueryParameters params = buildParametersFromRequest(req);
+					String type = req.getParameter("type");
+					String stringLimit = req.getParameter("limit");
+					int limit = 0;
+					if (stringLimit != null && !stringLimit.isEmpty()) {
+						limit = Integer.parseInt(stringLimit);
+					}
+					checkForQuery(model, params, type, limit);
 				}
-				checkForQuery(model, params, type, limit);
+			} else {
+				status.setCode(Status.STATUS_UNAUTHORIZED);
 			}
+
 			return model;
 		} catch (Exception e) {
 			e.printStackTrace();

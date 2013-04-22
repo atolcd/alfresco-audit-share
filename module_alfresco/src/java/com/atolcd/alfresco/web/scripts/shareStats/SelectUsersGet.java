@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
 
 import com.atolcd.alfresco.AtolAuthorityParameters;
 import com.atolcd.alfresco.AuditQueryParameters;
+import com.atolcd.alfresco.helper.PermissionsHelper;
 
 public class SelectUsersGet extends DeclarativeWebScript implements InitializingBean {
 	private SqlSessionTemplate sqlSessionTemplate;
@@ -73,19 +74,24 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		try {
 			Map<String, Object> model = new HashMap<String, Object>();
-			if (this.sqlSessionTemplate != null) {
-				String type = req.getParameter("type");
-				AuditQueryParameters auditQueryParameters = buildParametersFromRequest(req);
-				AtolAuthorityParameters atolAuthorityParameters = buildAuthorityParametersFromRequest(req);
-				if ("users-connected".equals(type) || "users-recently-connected".equals(type)) {
-					model.put("users", selectConnectedUsers(auditQueryParameters, atolAuthorityParameters));
-				} else if ("users-count".equals(type)) {
-					model.put("values", selectConnectedUsersByDate(auditQueryParameters));
-				} else if ("users-never-connected".equals(type)) {
-					model.put("users", selectNeverConnectedUsers(auditQueryParameters, atolAuthorityParameters));
+			if (PermissionsHelper.isAuthorized(req)) {
+				if (this.sqlSessionTemplate != null) {
+					String type = req.getParameter("type");
+					AuditQueryParameters auditQueryParameters = buildParametersFromRequest(req);
+					AtolAuthorityParameters atolAuthorityParameters = buildAuthorityParametersFromRequest(req);
+					if ("users-connected".equals(type) || "users-recently-connected".equals(type)) {
+						model.put("users", selectConnectedUsers(auditQueryParameters, atolAuthorityParameters));
+					} else if ("users-count".equals(type)) {
+						model.put("values", selectConnectedUsersByDate(auditQueryParameters));
+					} else if ("users-never-connected".equals(type)) {
+						model.put("users", selectNeverConnectedUsers(auditQueryParameters, atolAuthorityParameters));
+					}
+					model.put("type", type);
 				}
-				model.put("type", type);
+			} else {
+				status.setCode(Status.STATUS_UNAUTHORIZED);
 			}
+
 			return model;
 		} catch (Exception e) {
 			e.printStackTrace();

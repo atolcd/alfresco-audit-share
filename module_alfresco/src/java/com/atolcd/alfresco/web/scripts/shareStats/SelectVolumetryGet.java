@@ -20,6 +20,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.util.Assert;
 
 import com.atolcd.alfresco.AuditQueryParameters;
+import com.atolcd.alfresco.helper.PermissionsHelper;
 
 public class SelectVolumetryGet extends DeclarativeWebScript implements InitializingBean {
 	private SqlSessionTemplate sqlSessionTemplate;
@@ -46,51 +47,55 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		try {
 			Map<String, Object> model = new HashMap<String, Object>();
+			if (PermissionsHelper.isAuthorized(req)) {
+				if (this.sqlSessionTemplate != null) {
+					AuditQueryParameters params = buildParametersFromRequest(req);
 
-			if (this.sqlSessionTemplate != null) {
-				AuditQueryParameters params = buildParametersFromRequest(req);
+					String[] dates = params.getSlicedDates().split(",");
+					Map<String, List<Long>> stackedValues = new HashMap<String, List<Long>>(dates.length - 1);
+					List<Long> countValues = new ArrayList<Long>(dates.length - 1);
 
-				String[] dates = params.getSlicedDates().split(",");
-				Map<String, List<Long>> stackedValues = new HashMap<String, List<Long>>(dates.length - 1);
-				List<Long> countValues = new ArrayList<Long>(dates.length - 1);
-
-				List<String> siteIds = new ArrayList<String>();
-				if (params.getSiteId() == null && params.getSitesId() == null) {
-					siteIds = getAllSites();
-				} else if (params.getSiteId() != null) {
-					siteIds.add(params.getSiteId());
-				} else if (params.getSitesId() != null) {
-					siteIds = params.getSitesId();
-				}
-
-				// On travaille site par site
-				params.setSitesId(Collections.<String> emptyList());
-
-				for (int i = 0; i < dates.length - 1; i++) {
-					params.setDateFrom(dates[i]);
-					params.setDateTo(dates[i + 1]);
-
-					List<Long> values = new ArrayList<Long>(siteIds.size());
-					Long total = (long) 0;
-					for (String site : siteIds) {
-						params.setSiteId(site);
-						Object o = sqlSessionTemplate.selectOne(SELECT_VOLUMETRY, params);
-						if (o == null) {
-							values.add(Long.valueOf(0));
-						} else {
-							values.add((Long) o);
-							total += (Long) o;
-						}
+					List<String> siteIds = new ArrayList<String>();
+					if (params.getSiteId() == null && params.getSitesId() == null) {
+						siteIds = getAllSites();
+					} else if (params.getSiteId() != null) {
+						siteIds.add(params.getSiteId());
+					} else if (params.getSitesId() != null) {
+						siteIds = params.getSitesId();
 					}
 
-					countValues.add(total);
-					stackedValues.put(String.valueOf(i > 9 ? i : "0" + i), values);
-				}
+					// On travaille site par site
+					params.setSitesId(Collections.<String> emptyList());
 
-				model.put("values", countValues);
-				model.put("stackedValues", stackedValues.entrySet());
-				model.put("sites", siteIds);
+					for (int i = 0; i < dates.length - 1; i++) {
+						params.setDateFrom(dates[i]);
+						params.setDateTo(dates[i + 1]);
+
+						List<Long> values = new ArrayList<Long>(siteIds.size());
+						Long total = (long) 0;
+						for (String site : siteIds) {
+							params.setSiteId(site);
+							Object o = sqlSessionTemplate.selectOne(SELECT_VOLUMETRY, params);
+							if (o == null) {
+								values.add(Long.valueOf(0));
+							} else {
+								values.add((Long) o);
+								total += (Long) o;
+							}
+						}
+
+						countValues.add(total);
+						stackedValues.put(String.valueOf(i > 9 ? i : "0" + i), values);
+					}
+
+					model.put("values", countValues);
+					model.put("stackedValues", stackedValues.entrySet());
+					model.put("sites", siteIds);
+				}
+			} else {
+				status.setCode(Status.STATUS_UNAUTHORIZED);
 			}
+
 			return model;
 		} catch (Exception e) {
 			e.printStackTrace();

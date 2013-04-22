@@ -3,5 +3,5 @@
   <description>Select stats for Share console</description>
   <url>/share-stats/select-audits</url>
   <format default="json"/>
-  <authentication>admin</authentication>
+  <authentication>user</authentication>
 </webscript>

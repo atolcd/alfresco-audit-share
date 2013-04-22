@@ -3,7 +3,7 @@
   <description>Export d'audit au format CSV</description>
   <url>/share-stats/export-audits</url>
   <format default="text"/>
-  <authentication>admin</authentication>
+  <authentication>user</authentication>
   <transaction>required</transaction>
   <cache>
     <never>false</never>

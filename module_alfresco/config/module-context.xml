@@ -53,11 +53,11 @@
     <property name="siteService" ref="SiteService"/>
     <property name="wsSelectAudits" ref="webscript.com.atolcd.alfresco.share-stats.select-audits.get"/>
   </bean>
-  
+
   <bean id="webscript.com.atolcd.alfresco.share-stats.delete-audits.delete" class="com.atolcd.alfresco.web.scripts.shareStats.DeleteAuditDelete" parent="webscript">
     <property name="sqlSessionTemplate" ref="shareStatsQueriesSqlSessionClientTemplate"/>
   </bean>
-  
+
   <bean id="webscript.com.atolcd.alfresco.share-stats.select-users.get" class="com.atolcd.alfresco.web.scripts.shareStats.SelectUsersGet" parent="webscript">
     <property name="sqlSessionTemplate" ref="shareStatsQueriesSqlSessionClientTemplate"/>
     <property name="nodeService" ref="NodeService"/>
@@ -79,9 +79,14 @@
 
   <!--  Utilitaire  -->
   <bean id="SearchHelper" class="com.atolcd.alfresco.helper.SearchHelper">
-  	<property name="searchService" ref="SearchService"/>
+    <property name="searchService" ref="SearchService"/>
   </bean>
-  
+
+  <bean id="PermissionsHelper" class="com.atolcd.alfresco.helper.PermissionsHelper">
+    <property name="siteService" ref="SiteService"/>
+    <property name="authorityService" ref="AuthorityService"/>
+  </bean>
+
   <!-- JavaScript API -->
   <bean id="shareStatsScript" parent="baseJavaScriptExtension" class="com.atolcd.alfresco.repo.jscript.ShareStats">
     <property name="extensionName">

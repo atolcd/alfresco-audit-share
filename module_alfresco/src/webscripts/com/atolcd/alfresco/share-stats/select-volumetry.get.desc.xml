@@ -3,5 +3,5 @@
   <description>Select volumetry for Share console</description>
   <url>/share-stats/select-volumetry</url>
   <format default="json"/>
-  <authentication>admin</authentication>
+  <authentication>user</authentication>
 </webscript>

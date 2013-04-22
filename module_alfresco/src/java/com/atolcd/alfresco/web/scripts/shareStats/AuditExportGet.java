@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.extensions.surf.util.I18NUtil;
 import org.springframework.extensions.webscripts.AbstractWebScript;
+import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 import org.springframework.util.Assert;
@@ -23,6 +24,7 @@ import org.springframework.util.Assert;
 import com.atolcd.alfresco.AuditCount;
 import com.atolcd.alfresco.AuditQueryParameters;
 import com.atolcd.alfresco.CsvExportEntry;
+import com.atolcd.alfresco.helper.PermissionsHelper;
 import com.csvreader.CsvWriter;
 
 public class AuditExportGet extends AbstractWebScript implements InitializingBean {
@@ -50,27 +52,31 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 	@Override
 	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			Charset charset = Charset.forName("UTF-8");// ISO-8859-1
-			CsvWriter csv = new CsvWriter(baos, ',', charset);
+			if (PermissionsHelper.isAuthorized(req)) {
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				Charset charset = Charset.forName("UTF-8");// ISO-8859-1
+				CsvWriter csv = new CsvWriter(baos, ',', charset);
 
-			Map<String, Object> model = new HashMap<String, Object>();
-			AuditQueryParameters params = wsSelectAudits.buildParametersFromRequest(req);
+				Map<String, Object> model = new HashMap<String, Object>();
+				AuditQueryParameters params = wsSelectAudits.buildParametersFromRequest(req);
 
-			String interval = req.getParameter("interval");
-			String type = req.getParameter("type");
-			if (type.equals("volumetry") || type.equals("users-count")) {
-				String values = req.getParameter("values");
-				model.put("values", values.split(","));
+				String interval = req.getParameter("interval");
+				String type = req.getParameter("type");
+				if (type.equals("volumetry") || type.equals("users-count")) {
+					String values = req.getParameter("values");
+					model.put("values", values.split(","));
+				} else {
+					wsSelectAudits.checkForQuery(model, params, type);
+				}
+				buildCsvFromRequest(model, csv, params, type, interval);
+
+				csv.close();
+				res.setHeader("Content-Disposition", "attachment; filename=\"export.csv\"");
+				res.setContentType("application/csv");// application/octet-stream
+				baos.writeTo(res.getOutputStream());
 			} else {
-				wsSelectAudits.checkForQuery(model, params, type);
+				res.setStatus(Status.STATUS_UNAUTHORIZED);
 			}
-			buildCsvFromRequest(model, csv, params, type, interval);
-
-			csv.close();
-			res.setHeader("Content-Disposition", "attachment; filename=\"export.csv\"");
-			res.setContentType("application/csv");// application/octet-stream
-			baos.writeTo(res.getOutputStream());
 
 		} catch (Exception e) {
 			e.printStackTrace();
