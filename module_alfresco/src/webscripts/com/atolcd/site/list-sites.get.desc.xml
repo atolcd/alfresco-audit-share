@@ -3,5 +3,5 @@
   <description>Liste tous les sites existants</description>
   <url>/share-stats/site/list-sites</url>
   <format default="json">argument</format>
-  <authentication>admin</authentication>
+  <authentication>user</authentication>
 </webscript>
