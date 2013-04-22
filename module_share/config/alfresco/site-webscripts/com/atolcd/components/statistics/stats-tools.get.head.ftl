@@ -1,3 +1,1 @@
-<#include "/org/alfresco/components/component.head.inc">
-<!-- Console Tools -->
-<@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/console/tools.css" />
+<@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/tools.css" />
