@@ -52,28 +52,26 @@ function buildBarChartXLabels(params) {
   switch (timeType) {
   case "years":
     for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      labels[i] = getMonth((new Date(parseInt(slicedDates[i], 10)).getMonth()).toString());
+      labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.fullMonth); // default: mmmm
     }
     break;
   case "months":
     for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      var d = new Date(parseInt(slicedDates[i], 10));
-      labels[i] = padzero(d.getDate()) + "/" + padzero(d.getMonth() + 1);
+      labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.shortDay); // default: dd/mm
     }
     break;
   case "weeks":
     for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      var d = new Date(parseInt(slicedDates[i], 10));
-      labels[i] = getDay(d.getDay()) + " " + padzero(d.getDate()) + "/" + padzero(d.getMonth() + 1);
+      labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.fullDay); // default: dddd mm/yyyy
     }
     break;
   case "days":
     for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      var d = new Date(parseInt(slicedDates[i], 10)), hours = "";
-      hours = padzero(d.getHours()) + "h00";
-      hours += " - ";
-      hours += padzero((d.getHours() + 2) % 24) + "h00";
-      labels[i] = hours;
+      var timestamp = parseInt(slicedDates[i], 10),
+          h1 = Alfresco.thirdparty.dateFormat(new Date(timestamp), AtolStatistics.dateFormatMasks.shortHour), // default: HH'h'
+          h2 = Alfresco.thirdparty.dateFormat(new Date(timestamp + (2 * 60 * 60 * 1000)), AtolStatistics.dateFormatMasks.shortHour); // + 2 hours
+
+      labels[i] = h1 + " - " + h2;
     }
     break;
   }
@@ -101,51 +99,24 @@ function buildDateTitle(params) {
   var title = "",
     timeType = params.currentFilter,
     slicedDates = params.additionalsParams.tsString.split(","),
-    from, to;
-
-  var padzero = function (n) {
-      return n < 10 ? '0' + n.toString() : n.toString();
-    };
-
-  from = new Date(parseInt(slicedDates[0], 10));
+    from = new Date(parseInt(slicedDates[0], 10));
 
   switch (timeType) {
   case "years":
     title = getMessage(timeType, "graph.title.date.", from.getFullYear());
     break;
   case "months":
-    title = getMessage(timeType, "graph.title.date.", getMonth(from.getMonth()), from.getFullYear());
+    var m = Alfresco.thirdparty.dateFormat(from, AtolStatistics.dateFormatMasks.fullMonth);
+    title = getMessage(timeType, "graph.title.date.", m, from.getFullYear());
     break;
   case "weeks":
     title = getMessage(timeType, "graph.title.date.", from.getWeek(), from.getFullYear());
     break;
   case "days":
-    title = getMessage(timeType, "graph.title.date.", padzero(from.getDate()), padzero(from.getMonth() + 1), from.getFullYear());
+    title = getMessage(timeType, "graph.title.date.", Alfresco.thirdparty.dateFormat(from, AtolStatistics.dateFormatMasks.shortDate));
     break;
   }
   return title;
-}
-
-function padzero (n) {
-  return n < 10 ? '0' + n.toString() : n.toString();
- }
-/**
- * Retourne la traduction d'un mois
- * @method getMonth
- * @param integer month
- */
-
-function getMonth(month) {
-  return getMessage(month, "label.month.");
-}
-
-/**
- * Retourne la traduction d'un jour
- * @method getDay
- * @param integer day
- */
-function getDay(day) {
-  return getMessage(day, "label.day.");
 }
 
 // Anciennes couleurs

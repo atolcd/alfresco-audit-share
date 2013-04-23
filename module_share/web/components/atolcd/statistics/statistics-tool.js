@@ -1,5 +1,18 @@
 // AtolStatistics namespace
-if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics = {}; }
+if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics = {}; AtolStatistics.dateFormatMasks = AtolStatistics.dateFormatMasks || {}; }
+
+AtolStatistics.dateFormatMasks = {
+  fullDate: Alfresco.util.message("statistics.date-format.fullDate"),
+  mediumDate: Alfresco.util.message("statistics.date-format.mediumDate"),
+  shortDate: Alfresco.util.message("statistics.date-format.shortDate"),
+  monthYear: Alfresco.util.message("statistics.date-format.monthYear"),
+  fullDay: Alfresco.util.message("statistics.date-format.fullDay"),
+  mediumDay: Alfresco.util.message("statistics.date-format.mediumDay"),
+  shortDay: Alfresco.util.message("statistics.date-format.shortDay"),
+  fullMonth: Alfresco.util.message("statistics.date-format.fullMonth"),
+  fullHour: Alfresco.util.message("statistics.date-format.fullHour"),
+  shortHour: Alfresco.util.message("statistics.date-format.shortHour")
+};
 
 /**
  * Tool tool component.
@@ -16,7 +29,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
   /**
    * Tool constructor.
    *
-   * @param {String} htmlId The HTML id üof the parent element
+   * @param {String} htmlId The HTML id of the parent element
    * @return {AtolStatistics.Tool} The new Tool instance
    * @constructor
    */

@@ -12,12 +12,13 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
    * YUI Library aliases
    */
   var Dom = YAHOO.util.Dom,
-      Event = YAHOO.util.Event;
+      Event = YAHOO.util.Event,
+      dateFormat = Alfresco.thirdparty.dateFormat;
 
   /**
    * UserConnections constructor.
    *
-   * @param {String} htmlId The HTML id üof the parent element
+   * @param {String} htmlId The HTML id of the parent element
    * @return {AtolStatistics.UserConnections} The new UserConnections instance
    * @constructor
    */
@@ -288,34 +289,32 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       switch (this.currentDateFilter) {
       case "days":
         var date = new Date(tsArray[0]),
-          today = new Date();
+            today = new Date();
 
         if (date.getMonth() == today.getMonth() && date.getDate() == today.getDate() && date.getFullYear() == today.getFullYear()) {
           connectedLabel = this.msg("label.users.connected.today");
           neverConnectedLabel = this.msg("label.users.never-connected.today");
         } else {
-          var day = this.msg("label.day." + date.getDay());
-          day += " " + padzero(date.getDate()) + "/" + padzero(date.getMonth() + 1);
+          var day = dateFormat(date, AtolStatistics.dateFormatMasks.mediumDay); // dddd dd/mm
           connectedLabel = this.msg("label.users.connected." + this.currentDateFilter, day);
           neverConnectedLabel = this.msg("label.users.never-connected." + this.currentDateFilter, day);
         }
         break;
+
       case "weeks":
-        var fromDate = new Date(tsArray[0]),
-          lastDate = new Date(tsArray[tsArray.length - 2]),
-          from, to;
-        from = padzero(fromDate.getDate()) + "/" + padzero(fromDate.getMonth() + 1) + "/" + fromDate.getFullYear();
-        to = padzero(lastDate.getDate()) + "/" + padzero(lastDate.getMonth() + 1) + "/" + lastDate.getFullYear();
+        var from = dateFormat(new Date(tsArray[0]), AtolStatistics.dateFormatMasks.shortDate), // dd/mm/yyyy
+            to   = dateFormat(new Date(tsArray[tsArray.length - 2]), AtolStatistics.dateFormatMasks.shortDate); // dd/mm/yyyy
+
         connectedLabel = this.msg("label.users.connected." + this.currentDateFilter, from, to);
         neverConnectedLabel = this.msg("label.users.never-connected." + this.currentDateFilter, from, to);
         break;
+
       case "months":
-        var date = new Date(tsArray[0]),
-          month;
-        month = this.msg("label.month." + date.getMonth()) + " " + date.getFullYear();
+        var month = dateFormat(new Date(tsArray[0]), AtolStatistics.dateFormatMasks.monthYear); // mmmm yyyy
         connectedLabel = this.msg("label.users.connected." + this.currentDateFilter, month);
         neverConnectedLabel = this.msg("label.users.never-connected." + this.currentDateFilter, month);
         break;
+
       case "years":
         var date = new Date(tsArray[0]);
         connectedLabel = this.msg("label.users.connected." + this.currentDateFilter, date.getFullYear());
