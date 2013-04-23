@@ -3,7 +3,7 @@
     <!-- Site collaboration navigation -->
     <module>
       <id>Add statistics component into the site navigation</id>
-      <auto-deploy>false</auto-deploy>
+      <auto-deploy>true</auto-deploy>
       <customizations>
         <customization>
           <targetPackageRoot>org.alfresco.components.navigation</targetPackageRoot>
