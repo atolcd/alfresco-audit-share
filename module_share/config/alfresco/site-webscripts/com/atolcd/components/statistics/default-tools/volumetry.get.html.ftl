@@ -11,7 +11,6 @@
 //]]></script>
 
 <div id="${el}-body" class="volumetry">
-  <!-- Tools panel class="hidden" -->
   <div id="${el}-volumetry">
     <div class="yui-g">
       <div class="yui-u first">
@@ -24,7 +23,7 @@
     <div class="yui-g separator">
       <div class="header">
         <div id="criterias" class="criterias">
-          <label for="site-criteria-container">${msg("label.menu.site")}</label><div id="site-criteria-container"></div>
+          <label for="site-criteria-container">${msg("label.menu.site")}</label><span id="site-criteria-container"></span>
         </div>
         <div id="bar-stack-criteria-container">
           <input id="bar_stack-criteria" type="checkbox"></input><label for="bar_stack-criteria">${msg("label.menu.use.bar_stack")}</label>

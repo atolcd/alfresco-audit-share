@@ -11,7 +11,6 @@
 //]]></script>
 
 <div id="${el}-body" class="audit">
-  <!-- Tools panel class="hidden" -->
   <div id="${el}-audit">
     <div class="yui-g">
       <div class="yui-u first">
@@ -24,7 +23,7 @@
     <div class="yui-g separator">
       <div class="header">
         <div id="criterias" class="criterias">
-          <label for="site-criteria-container">${msg("label.menu.site")}</label><div id="site-criteria-container"></div>
+          <label for="site-criteria-container">${msg("label.menu.site")}</label><span id="site-criteria-container"></span>
         </div>
       </div>
     </div>
