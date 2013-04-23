@@ -15,6 +15,11 @@ function main() {
     // collect the tools required for this console
     var tools = sitedata.findWebScripts(family);
 
+    // collect the tools reserved for admins ("admin-stats" family)
+    if (user.isAdmin) {
+      tools = tools.concat(sitedata.findWebScripts("admin-stats"));
+    }
+
     // process each tool and generate the data so that a label+link can
     // be output by the component template for each tool required
     for (var i=0, ii=tools.length ; i<ii; i++) {
