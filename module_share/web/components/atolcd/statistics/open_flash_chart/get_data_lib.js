@@ -85,9 +85,9 @@ function buildBarChartXLabels(params) {
  * @param o
  * @param params
  */
-function addRotation(o,params){
+function addRotation(o, params){
   // Filtre par heures de la journées. Les labels de chevauchent sur les "petits" écrans.
-  if(params.currentFilter == "day"){
+  if (params.currentFilter == "days"){
     o.rotate = -45;
   }
 }
