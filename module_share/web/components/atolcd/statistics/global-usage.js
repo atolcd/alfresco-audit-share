@@ -27,11 +27,13 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
   };
 
   YAHOO.extend(AtolStatistics.GlobalUsage, AtolStatistics.Tool, {
-    /**
-     * @attribute limit
-     * Limite de documents remontés par requête de popularité
-     */
-    limit: 5,
+    options: {
+      /**
+       * @attribute limit
+       * Limite de documents remontés par requête de popularité
+       */
+      limit: 5
+    },
 
     /**
      * Fired by YUI when parent element is available for scripting.
@@ -155,7 +157,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
           params = null;
 
       // Création des paramètres et exécution de la requête
-      params = this.buildParams(module, site, null, type, from, to, this.limit);
+      params = this.buildParams(module, site, null, type, from, to, this.options.limit);
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-audits" + params;
       Alfresco.util.Ajax.jsonGet({

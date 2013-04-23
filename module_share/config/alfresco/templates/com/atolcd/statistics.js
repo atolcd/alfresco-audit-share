@@ -16,7 +16,7 @@ function main() {
     var tools = sitedata.findWebScripts(family);
 
     // collect the tools reserved for admins ("admin-stats" family)
-    if (user.isAdmin) {
+    if (user.isAdmin && !page.url.templateArgs.site) {
       tools = tools.concat(sitedata.findWebScripts("admin-stats"));
     }
 

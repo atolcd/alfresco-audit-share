@@ -10,13 +10,17 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     onReady: function Menu_onReady() {
       var container = YAHOO.util.Selector.query(".header .app-items")[0];
       var menu = ([
-        { text : this.msg("header.global-usage.label"), title: "TEST", classname: "global-usage", url : Alfresco.constants.URL_PAGECONTEXT + "statistics/share-stats/global-usage" },
+        { text : this.msg("header.global-usage.label"), classname: "global-usage", url : Alfresco.constants.URL_PAGECONTEXT + "statistics/share-stats/global-usage" },
         { text : this.msg("header.volumetry.label"), classname: "volumetry", url : Alfresco.constants.URL_PAGECONTEXT + "statistics/share-stats/volumetry" },
         { text : this.msg("header.user-connections.label"), classname: "user-connections", url : Alfresco.constants.URL_PAGECONTEXT + "statistics/share-stats/user-connections" }
        ]);
 
       if (this.options.isAdmin) {
         // add new menu entries
+        menu.push([
+            { text : this.msg("header.repo-usage.label"), classname: "global-usage", url : Alfresco.constants.URL_PAGECONTEXT + "statistics/share-stats/repo-usage" }
+          ]
+        );
       }
 
       this.widgets.menuButton = new YAHOO.widget.Button({

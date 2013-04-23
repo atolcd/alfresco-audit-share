@@ -5,7 +5,7 @@
     <script type="text/javascript">//<![CDATA[
       new Alfresco.widget.Resizer("Statistics").setOptions(
       {
-         initialWidth: 190
+         initialWidth: 200
       });
     //]]></script>
   </#if>
@@ -21,7 +21,7 @@
         <@region id="title" scope="template" />
       </#if>
    </div>
-   
+
    <div id="bd">
       <#if userIsAllowed?? && userIsAllowed>
       <div class="yui-t1" id="alfresco-statistics">

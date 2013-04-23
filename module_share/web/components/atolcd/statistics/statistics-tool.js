@@ -161,7 +161,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       if (!hideAllSiteEntry) {
         allSitesMenuButton.push({
           text: this.msg("label.menu.site.all"),
-          value: (this.options.isAdmin == true) ? '' : siteIds.join(','), // On ne passe pas la liste complète des sites pour un admin
+          value: siteIds.join(','),
           onclick: {
             fn: this.onSiteMenuClick,
             scope: this

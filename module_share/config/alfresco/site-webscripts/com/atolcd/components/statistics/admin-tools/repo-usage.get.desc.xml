@@ -1,0 +1,6 @@
+<webscript>
+  <shortname>Repository statistics</shortname>
+  <description>Repository statistics</description>
+  <url>/components/console/repo-usage</url>
+  <family>admin-stats</family>
+</webscript>
