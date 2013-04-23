@@ -1,0 +1,5 @@
+<webscript>
+  <shortname>Share statistics menu</shortname>
+  <url>/components/statistics/menu</url>
+  <family>statistics</family>
+</webscript>

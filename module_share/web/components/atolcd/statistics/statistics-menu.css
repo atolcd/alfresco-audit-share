@@ -1,0 +1,18 @@
+/* Menu */
+
+.header .yui-menu-button.statistics-menu .first-child {
+  background-image: url("./img/global-usage.png");
+  background-position: 50% 4px !important;
+}
+
+.header .yuimenu .bd li.global-usage .yuimenuitemlabel {
+  background-image: url("./img/global-usage.png");
+}
+
+.header .yuimenu .bd li.volumetry .yuimenuitemlabel {
+  background-image: url("./img/volumetry.png");
+}
+
+.header .yuimenu .bd li.user-connections .yuimenuitemlabel {
+  background-image: url("./img/user-connections.png");
+}

@@ -1,0 +1,20 @@
+<extension>
+  <modules>
+    <module>
+      <id>Statistics Menu</id>
+      <auto-deploy>true</auto-deploy>
+      <components>
+        <component>
+          <scope>global</scope>
+          <region-id>header</region-id>
+          <source-id>global</source-id>
+          <sub-components>
+            <sub-component id="share-statistics-menu">
+              <url>/components/statistics/menu</url>
+            </sub-component>
+          </sub-components>
+        </component>
+      </components>
+    </module>
+  </modules>
+</extension>
