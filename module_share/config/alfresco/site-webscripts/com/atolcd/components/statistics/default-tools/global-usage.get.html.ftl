@@ -10,8 +10,8 @@
   ).setMessages(${messages});
 //]]></script>
 
-<div id="${el}-body" class="audit">
-  <div id="${el}-audit">
+<div id="${el}-body" class="statistic-tool">
+  <div id="${el}-global-usage">
     <div class="yui-g">
       <div class="yui-u first">
         <div class="title">
@@ -24,8 +24,7 @@
       <div class="header">
 
         <div id="criterias" class="criterias">
-
-          <input type="button" class="criterias-button" id="module-criteria" name="${el}-module-criteria-button" value="${msg("graph.label.document")}">
+          <input type="button" class="criterias-button" id="module-criteria" name="${el}-module-criteria-button" value="${msg('graph.label.document')}" />
           <select id="module-criteria-select" name="${el}-module-criteria-select">
             <option value="document">${msg("graph.label.document")}</option>
             <option value="wiki">${msg("graph.label.wiki")}</option>
@@ -33,7 +32,7 @@
             <option value="discussions">${msg("graph.label.discussions")}</option>
           </select>
 
-          <input type="button" class="criterias-button" id="action-criteria" name="${el}-action-criteria-button" value="${msg("label.menu.action")}${msg("label.read")}">
+          <input type="button" class="criterias-button" id="action-criteria" name="${el}-action-criteria-button" value="${msg('label.menu.action')}${msg('label.read')}" />
           <select id="action-criteria-select" name="${el}-action-criteria-select">
             <option value="read">${msg("label.menu.action")}${msg("label.read")}</option>
             <option value="created">${msg("label.menu.action")}${msg("label.created")}</option>
@@ -42,15 +41,13 @@
           </select>
 
           <span id="site-criteria-container"></span>
-        </div>
 
-        <div class="utility-buttons">
-          <span class="yui-button yui-push-button criterias-button" id="${el}-export-button">
+          <span class="yui-button yui-push-button" id="${el}-export-button">
             <span class="first-child"><button>${msg("button.export")}</button></span>
           </span>
         </div>
 
-        <div class="yui-u separator dates-filter">
+        <div class="yui-u separator filters">
           <span id="home">
             <span class="home-img" title="${msg('label.home')}"></span>
           </span>

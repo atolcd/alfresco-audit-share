@@ -1,10 +1,12 @@
 <#include "/org/alfresco/components/component.head.inc">
 
 <!-- Admin Console for Share Stats Tool -->
+<@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/statistics-tool.css" />
+<@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/global-usage.css" />
+
 <@script type="text/javascript" src="${page.url.context}/res/yui/calendar/calendar.js"></@script>
 <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/statistics-tool.js"></@script>
 <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/global-usage.js"></@script>
-<@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/global-usage.css" />
 
 <!-- Open Flash Chart -->
 <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/open_flash_chart/swfobject.js"></@script>

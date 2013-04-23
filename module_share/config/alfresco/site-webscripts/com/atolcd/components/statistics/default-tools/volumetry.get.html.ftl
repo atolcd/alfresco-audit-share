@@ -10,7 +10,7 @@
   ).setMessages(${messages});
 //]]></script>
 
-<div id="${el}-body" class="volumetry">
+<div id="${el}-body" class="statistic-tool">
   <div id="${el}-volumetry">
     <div class="yui-g">
       <div class="yui-u first">
@@ -23,7 +23,7 @@
     <div class="yui-g separator">
       <div class="header">
         <div id="criterias" class="criterias">
-          <label for="site-criteria-container">${msg("label.menu.site")}</label><span id="site-criteria-container"></span>
+          <label for="site-criteria-container">${msg("label.menu.site")}</label><span class="criterias-button" id="site-criteria-container"></span>
         </div>
         <div id="bar-stack-criteria-container">
           <input id="bar_stack-criteria" type="checkbox"></input><label for="bar_stack-criteria">${msg("label.menu.use.bar_stack")}</label>

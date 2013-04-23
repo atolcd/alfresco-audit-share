@@ -10,8 +10,8 @@
   ).setMessages(${messages});
 //]]></script>
 
-<div id="${el}-body" class="audit">
-  <div id="${el}-audit">
+<div id="${el}-body" class="statistic-tool">
+  <div id="${el}-user-connections">
     <div class="yui-g">
       <div class="yui-u first">
         <div class="title">
@@ -23,7 +23,7 @@
     <div class="yui-g separator">
       <div class="header">
         <div id="criterias" class="criterias">
-          <label for="site-criteria-container">${msg("label.menu.site")}</label><span id="site-criteria-container"></span>
+          <label for="site-criteria-container">${msg("label.menu.site")}</label><span class="criterias-button" id="site-criteria-container"></span>
         </div>
       </div>
     </div>
