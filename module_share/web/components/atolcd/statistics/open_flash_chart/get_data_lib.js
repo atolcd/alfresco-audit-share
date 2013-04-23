@@ -62,7 +62,7 @@ function buildBarChartXLabels(params) {
     break;
   case "weeks":
     for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.fullDay); // default: dddd mm/yyyy
+      labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.mediumDay); // default: dddd dd/mm
     }
     break;
   case "days":
