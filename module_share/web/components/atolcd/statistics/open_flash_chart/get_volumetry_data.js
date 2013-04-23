@@ -9,9 +9,9 @@ function getVolumetryFlashData(param) {
 
 function buildTitle(params) {
   var title = "",
-    site = params.additionalsParams.site;
+      site = params.additionalsParams.site;
 
-  if (site) {
+  if (site && site.indexOf(',') == -1) {
     title = getMessage("site", "graph.title.", site);
   } else {
     title = getMessage("all", "graph.title.");
