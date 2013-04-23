@@ -17,7 +17,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
   /**
    * Volumetry constructor.
    *
-   * @param {String} htmlId The HTML id üof the parent element
+   * @param {String} htmlId The HTML id of the parent element
    * @return {AtolStatistics.Volumetry} The new Volumetry instance
    * @constructor
    */

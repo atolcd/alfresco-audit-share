@@ -17,7 +17,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
   /**
    * GlobalUsage constructor.
    *
-   * @param {String} htmlId The HTML id üof the parent element
+   * @param {String} htmlId The HTML id of the parent element
    * @return {AtolStatistics.GlobalUsage} The new GlobalUsage instance
    * @constructor
    */
