@@ -88,9 +88,9 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     onSearch: function Volumetry_onSearch() {
       // Récupération des variables de l'UI
       var dateFilter = this.options.currentDateFilter,
-        site = this.convertMenuValue(this.widgets.siteButton.value),
-        tsString = "",
-        params = "";
+          site = this.convertMenuValue(this.widgets.siteButton.value),
+          tsString = "",
+          params = "";
 
       // Création du tableau d'intervalle de dates
       if (dateFilter) {

@@ -28,7 +28,6 @@ function buildTitle(params) {
  * @param params JSON Parameters from query
  * @return JSON Bar Chart Data
  */
-
 function buildChart(params) {
   params.max = 0;
   var x_labels = buildXAxisLabels(params);
@@ -155,8 +154,7 @@ function buildStackedBarChartElements(params, labels) {
     "alpha": 0.7,
     "colours" : barStackedChartColors.defaultColors,
     "font-size": 10,
-    "values": values/*,
-    "tip": "X label [#x_label#], Value [#val#]<br>Total [#total#]"*/
+    "values": values
   }];
 }
 
@@ -184,6 +182,7 @@ function buildLineChartElements(params, labels) {
 
     max = max > value ? max : value;
   }
+
   // Mise à jour du maximum
   params.max = max ? roundMax(max) : 10;
 
@@ -280,7 +279,6 @@ function buildXAxisLabels(params) {
  * @param messageId Identifiant du message à traduire
  * @prefix Optionnel - Préfixe du message
  */
-
 function getMessage(messageId, prefix) {
   var msg = (prefix) ? prefix + messageId : messageId;
   var res = Alfresco.util.message.call(null, msg, "AtolStatistics.Volumetry", Array.prototype.slice.call(arguments).slice(2));
@@ -295,7 +293,7 @@ function getMessage(messageId, prefix) {
  */
 function roundMax(max) {
   var new_max = max,
-    coef = 1;
+      coef = 1;
 
   while (new_max >= 10) {
     new_max = new_max / 10;

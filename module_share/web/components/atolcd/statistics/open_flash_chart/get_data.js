@@ -1,16 +1,15 @@
 function getFlashData(param) {
   var params = YAHOO.lang.JSON.parse(unescape(param)),
-    jsonChart = null;
-
+      jsonChart = null;
 
   switch (params.additionalsParams.chartType) {
-  case "vbar":
-    jsonChart = buildBarChart(params);
-    break;
-  case "hbar":
+    case "vbar":
+      jsonChart = buildBarChart(params);
+      break;
 
-    jsonChart = buildHBarChart(params);
-    break;
+    case "hbar":
+      jsonChart = buildHBarChart(params);
+      break;
   }
 
   return YAHOO.lang.JSON.stringify(jsonChart);
@@ -20,11 +19,8 @@ function getFlashData(param) {
  * Retourn une couleur aléatoirement
  * @method get_random_color
  */
-
 function buildTitle(params) {
-  var title = getMessage(params.additionalsParams.type, "graph.title.");
-  title += buildDateTitle(params);
-  return title;
+  return getMessage(params.additionalsParams.type, "graph.title.") + buildDateTitle(params);
 }
 
 /**
@@ -32,7 +28,6 @@ function buildTitle(params) {
  * @param params JSON Parameters from query
  * @return JSON Bar Chart Data
  */
-
 function buildBarChart(params) {
   params.max = 0;
   var x_labels = buildXAxisLabels(params);
@@ -69,10 +64,9 @@ function buildBarChartElements(params, labels) {
     pItems = params.items,
     pItemsLength = pItems.length,
     max = 0;
-  //  isSiteRequest = (params.type.search("sites") == 0) ? true : false;
 
   var treatedElements = [];
-  //Boucle sur les éléments par date
+  // Boucle sur les éléments par date
   for (var i = 0; i < pItemsLength; i++) {
     var items = pItems[i];
     if (items.totalResults > 0) {
@@ -81,7 +75,7 @@ function buildBarChartElements(params, labels) {
         var target = items.items[j].target,
           count = items.items[j].count;
 
-        //Test si l'élément a déjà été traité
+        // Test si l'élément a déjà été traité
         if (treatedElements[target] == undefined) {
           treatedElements[target] = [];
           treatedElements[target][i] = count;
@@ -97,7 +91,8 @@ function buildBarChartElements(params, labels) {
       }
     }
   }
-  //Mise à jour du maximum
+
+  // Mise à jour du maximum
   var new_max = max,
     coef = 1;
 
@@ -111,7 +106,7 @@ function buildBarChartElements(params, labels) {
     }
 
     new_max = Math.ceil(max);
-    //Pas
+    // Pas
     params.step = (new_max < 5 && new_max > 1 && coef > 1) ? coef / 2 : coef;
     // Maximum trop importante pour les valeurs proche de 1x ou 2x.
     if (coef > 1) {
@@ -128,14 +123,13 @@ function buildBarChartElements(params, labels) {
     }
   }
 
-  //Modifier values
+  // Modifier values
   for (key in treatedElements) {
     var values = [],
-      value_obj = {};
-    // label = isSiteRequest ? getSiteTitle(key,params.currentSites) : getMessage(key, "graph.label.");
-    label = getMessage(key, "graph.label.");
+        value_obj = {},
+        label = getMessage(key, "graph.label.");
 
-    //Vérification des valeurs non remplies
+    // Vérification des valeurs non remplies
     for (var j = 0; j < pItemsLength; j++) {
       if (!treatedElements[key][j]) {
         treatedElements[key][j] = 0;
@@ -159,6 +153,7 @@ function buildBarChartElements(params, labels) {
       "values": values
     });
   }
+
   return elements;
 }
 
@@ -170,16 +165,19 @@ function buildXAxisLabels(params) {
     "steps": steps
   }
   addRotation(labelConfiguration, params);
+
   return labelConfiguration;
 }
 
 
 function buildHBarChart(params) {
   var y_labels = [],
-    max = 0;
+      max = 0;
+
   if (params.items) {
     max = params.items[0].popularity + 1;
   }
+
   var bars = {
     "title": {
       "text": getMessage(params.additionalsParams.type, "graph.label.", (params.items.length == 1) ? '' : params.items.length),
@@ -209,26 +207,25 @@ function buildHBarChart(params) {
 }
 
 function buildHBarChartElements(params, labels) {
-
   var crop = function (s) {
-      if (s.length > 25) {
-        s = s.substr(0, 25) + " ...";
-      }
-      return s;
-    };
-  var elements = null,
-    values = [],
-    value_obj, item, module = params.additionalsParams.module,
-    urlTemplate = params.additionalsParams.urlTemplate;
+    if (s.length > 25) { s = s.substr(0, 25) + " ..."; }
+    return s;
+  };
 
-  pItems = params.items, pItemsLength = pItems.length, i = 0;
-  for (; i < pItemsLength; i++) {
-    item = pItems[i];
-    value_obj = {};
-    value_obj.tip = item.displayName + " : #val#";
-    value_obj.right = item.popularity;
-    value_obj.left = 0;
-    value_obj.colour = i ? barChartColors["less-popular"] : barChartColors["most-popular"];
+  var elements = null,
+      values = [],
+      module = params.additionalsParams.module,
+      urlTemplate = params.additionalsParams.urlTemplate;
+
+  for (var i=0, ii=params.items.length ; i<ii ; i++) {
+    var item = params.items[i];
+    var value_obj = {
+      tip: item.displayName + " : #val#",
+      right: item.popularity,
+      left: 0,
+      colour: i ? barChartColors["less-popular"] : barChartColors["most-popular"]
+    };
+
     if (module == "document") {
       value_obj["on-click"] = YAHOO.lang.substitute(urlTemplate, {
         site: item.site,
@@ -240,9 +237,11 @@ function buildHBarChartElements(params, labels) {
         id: encodeURIComponent(item.name)
       });
     }
+
     values.push(value_obj);
-    labels.push(crop(pItems[pItemsLength - 1 - i].displayName));
+    labels.push(crop(params.items[ii - 1 - i].displayName));
   }
+
   elements = [{
     "type": "hbar",
     "colour": "#EC9304",
@@ -250,6 +249,7 @@ function buildHBarChartElements(params, labels) {
     "font-size": 10,
     "values": values
   }];
+
   return elements;
 }
 
@@ -259,7 +259,6 @@ function buildHBarChartElements(params, labels) {
  * @param messageId Identifiant du message à traduire
  * @prefix Optionnel - Préfixe du message
  */
-
 function getMessage(messageId, prefix) {
   var msg = (prefix) ? prefix + messageId : messageId;
   var res = Alfresco.util.message.call(null, msg, "AtolStatistics.GlobalUsage", Array.prototype.slice.call(arguments).slice(2));

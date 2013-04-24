@@ -72,13 +72,13 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
 
       // Comportement du menu de filtre par Actions
       var onActionsMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
-          var sText = p_aArgs[1].cfg.getProperty("text"),
+        var sText = p_aArgs[1].cfg.getProperty("text"),
             value = p_aArgs[1].value;
 
-          me.widgets.actionCriteriaButton.value = value;
-          me.widgets.actionCriteriaButton.set("label", sText);
-          me.execute();
-        };
+        me.widgets.actionCriteriaButton.value = value;
+        me.widgets.actionCriteriaButton.set("label", sText);
+        me.execute();
+      };
       this.widgets.actionCriteriaButton.getMenu().subscribe("click", onActionsMenuItemClick);
 
       this.setupCurrentDates();
@@ -105,7 +105,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     },
 
     onSearch: function GlobalUsage_onSearch() {
-      //Récupération des variables de l'UI
+      // Récupération des variables de l'UI
       var action = this.convertMenuValue(this.widgets.actionCriteriaButton.value),
           module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
           dateFilter = this.options.currentDateFilter,
@@ -140,9 +140,6 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
           width: "90%"
         }
       });
-
-      // Problème de focus avec le bouton et flash
-      // this.widgets.searchButton.blur();
     },
 
     getByPopularity: function GlobalUsage_getByPopularity(type) {
@@ -214,7 +211,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         if (chartTag == "embed" || chartTag == "object") {
           swf.load(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
         } else {
-          //Création variables et attribut - GetFlashData défini dans get_data.js - id : Variables json pour ofc.
+          // Création variables et attributs - GetFlashData défini dans get_data.js - id : Variables json pour ofc.
           var flashvars = {
             "get-data": "getFlashData",
             "id": escape(YAHOO.lang.JSON.stringify(response.json))
@@ -238,7 +235,6 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         Dom.get(id).innerHTML = this.msg("message.empty");
         this.widgets.exportButton.set("disabled", true);
       }
-      // this.widgets.searchButton.blur();
     },
 
     /**

@@ -11,34 +11,6 @@ function get_random_color() {
   return color;
 }
 
-
-
-/**
- * Retourne le "joli" nom d'un site
- * @method getSiteTitle
- * @param shortName Identifiant du site
- *
- */
-/*
-// En vue d'une utilisation future,
-// Supprimer la variable globale qui sera passé par "params"
-function getSiteTitle(shortName, sites) {
-  var res = shortName,
-    i = 0,
-    ii = sites.lenght,
-    currentSite;
-  for (; i < ii; i++) {
-    var currentSite = sites[i];
-    if (currentSite.name == shortName) {
-      res = GLOBALS_sites[i].title;
-      break;
-    }
-  }
-  return res;
-}
-
-*/
-
 /**
  * Construit les labels de l'axe des abscisses à partir des paramètres
  * @method buildBarChartXLabels
@@ -46,34 +18,37 @@ function getSiteTitle(shortName, sites) {
  */
 function buildBarChartXLabels(params) {
   var labels = [],
-    timeType = params.currentFilter,
-    slicedDates = params.additionalsParams.tsString.split(",");
+      timeType = params.currentFilter,
+      slicedDates = params.additionalsParams.tsString.split(",");
 
   switch (timeType) {
-  case "years":
-    for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.fullMonth); // default: mmmm
-    }
-    break;
-  case "months":
-    for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.shortDay); // default: dd/mm
-    }
-    break;
-  case "weeks":
-    for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.mediumDay); // default: dddd dd/mm
-    }
-    break;
-  case "days":
-    for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
-      var timestamp = parseInt(slicedDates[i], 10),
-          h1 = Alfresco.thirdparty.dateFormat(new Date(timestamp), AtolStatistics.dateFormatMasks.shortHour), // default: HH'h'
-          h2 = Alfresco.thirdparty.dateFormat(new Date(timestamp + (2 * 60 * 60 * 1000)), AtolStatistics.dateFormatMasks.shortHour); // + 2 hours
+    case "years":
+      for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+        labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.fullMonth); // default: mmmm
+      }
+      break;
 
-      labels[i] = h1 + " - " + h2;
-    }
-    break;
+    case "months":
+      for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+        labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.shortDay); // default: dd/mm
+      }
+      break;
+
+    case "weeks":
+      for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+        labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.mediumDay); // default: dddd dd/mm
+      }
+      break;
+
+    case "days":
+      for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+        var timestamp = parseInt(slicedDates[i], 10),
+            h1 = Alfresco.thirdparty.dateFormat(new Date(timestamp), AtolStatistics.dateFormatMasks.shortHour), // default: HH'h'
+            h2 = Alfresco.thirdparty.dateFormat(new Date(timestamp + (2 * 60 * 60 * 1000)), AtolStatistics.dateFormatMasks.shortHour); // + 2 hours
+
+        labels[i] = h1 + " - " + h2;
+      }
+      break;
   }
   return labels;
 }
@@ -84,10 +59,8 @@ function buildBarChartXLabels(params) {
  * @param params
  */
 function addRotation(o, params){
-  // Filtre par heures de la journées. Les labels de chevauchent sur les "petits" écrans.
-  if (params.currentFilter == "days"){
-    o.rotate = -45;
-  }
+  // Filtre par heures de la journée. Les labels de chevauchent sur les "petits" écrans.
+  if (params.currentFilter == "days"){ o.rotate = -45; }
 }
 
 /**
@@ -97,33 +70,37 @@ function addRotation(o, params){
  */
 function buildDateTitle(params) {
   var title = "",
-    timeType = params.currentFilter,
-    slicedDates = params.additionalsParams.tsString.split(","),
-    from = new Date(parseInt(slicedDates[0], 10));
+      timeType = params.currentFilter,
+      slicedDates = params.additionalsParams.tsString.split(","),
+      from = new Date(parseInt(slicedDates[0], 10));
 
   switch (timeType) {
-  case "years":
-    title = getMessage(timeType, "graph.title.date.", from.getFullYear());
-    break;
-  case "months":
-    var m = Alfresco.thirdparty.dateFormat(from, AtolStatistics.dateFormatMasks.fullMonth);
-    title = getMessage(timeType, "graph.title.date.", m, from.getFullYear());
-    break;
-  case "weeks":
-    title = getMessage(timeType, "graph.title.date.", from.getWeek(), from.getFullYear());
-    break;
-  case "days":
-    title = getMessage(timeType, "graph.title.date.", Alfresco.thirdparty.dateFormat(from, AtolStatistics.dateFormatMasks.shortDate));
-    break;
+    case "years":
+      title = getMessage(timeType, "graph.title.date.", from.getFullYear());
+      break;
+
+    case "months":
+      var m = Alfresco.thirdparty.dateFormat(from, AtolStatistics.dateFormatMasks.fullMonth);
+      title = getMessage(timeType, "graph.title.date.", m, from.getFullYear());
+      break;
+
+    case "weeks":
+      title = getMessage(timeType, "graph.title.date.", from.getWeek(), from.getFullYear());
+      break;
+
+    case "days":
+      title = getMessage(timeType, "graph.title.date.", Alfresco.thirdparty.dateFormat(from, AtolStatistics.dateFormatMasks.shortDate));
+      break;
   }
+
   return title;
 }
 
 // Anciennes couleurs
-//"#0077BF" => Bleu - Lectures
-//"#7CBC28" => Vert - Créations
-//"#EC9304" => Orange - Updates
-//"#EE1C2F" => Rouge - Suppressions
+// "#0077BF" => Bleu - Lectures
+// "#7CBC28" => Vert - Créations
+// "#EC9304" => Orange - Updates
+// "#EE1C2F" => Rouge - Suppressions
 var red = "#EE1C2F",
   blue = "#19ABEA",lightBlue = "#1B9EFC",darkBlue = "#1B5AF9",
   green = "#7CBC28", darkGreen = "#0A9200",
@@ -134,13 +111,13 @@ var red = "#EE1C2F",
 var barChartColors = [],
   gridColors = [];
 
-//Blog
+// Blog
 barChartColors["blog.postview"] = blue;
 barChartColors["blog.blog-create"] = darkGreen;
 barChartColors["blog.blog-delete"] = red;
 barChartColors["blog.blog-update"] = orange;
 
-//Espace document
+// Espace document
 barChartColors["document.details"] = blue;
 barChartColors["document.download"] = darkBlue;
 barChartColors["document.create"] = green;
@@ -150,13 +127,13 @@ barChartColors["document.file-updated"] = darkOrange;
 barChartColors["document.inline-edit"] = lightOrange;
 barChartColors["document.update"] = orange;
 
-//Wiki
+// Wiki
 barChartColors["wiki.page"] = blue;
 barChartColors["wiki.create-post"] = darkGreen;
 barChartColors["wiki.delete-post"] = red;
 barChartColors["wiki.update-post"] = orange;
 
-//Discussions
+// Discussions
 barChartColors["discussions.topicview"] = blue;
 barChartColors["discussions.discussions-create"] = darkGreen;
 barChartColors["discussions.discussions-deleted"] = red;
@@ -168,7 +145,7 @@ barChartColors["users"] = blue;
 barChartColors["most-popular"] = red;
 barChartColors["less-popular"] = blue;
 
-//Grilles
+// Grilles
 gridColors["x-axis"] = gray;
 gridColors["y-axis"] = gray;
 gridColors["x-grid"] = mediumGray;

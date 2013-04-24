@@ -1,6 +1,6 @@
 function getUserFlashData(param) {
   var params = YAHOO.lang.JSON.parse(unescape(param)),
-    jsonChart = null;
+      jsonChart = null;
 
   jsonChart = buildChart(params);
 
@@ -28,7 +28,6 @@ function buildTitle(params) {
  * @param params JSON Parameters from query
  * @return JSON Bar Chart Data
  */
-
 function buildChart(params) {
   params.max = 0;
   var x_labels = buildXAxisLabels(params);
@@ -62,28 +61,25 @@ function buildChart(params) {
 
 function buildBarChartElements(params, labels) {
   var elements = [],
-    pItems = params.values,
-    pItemsLength = pItems.length,
-    max = 0,
-    values = [],
-    label = getMessage("connection", "graph.label.");
+      max = 0,
+      values = [],
+      label = getMessage("connection", "graph.label.");
 
-  //Boucle sur les éléments par date
-  for (var i = 0; i < pItemsLength; i++) {
-    var item = pItems[i];
-    value_obj = {};
-    value_obj.top = item;
-    value_obj.tip = label + " : " + item; // Voir pour un meilleur label ? Formattage de #val#?
-    value_obj.tip += "\n" + labels[i];
-    values.push(value_obj);
+  // Boucle sur les éléments par date
+  for (var i=0, ii=params.values.length ; i<ii ; i++) {
+    var value = params.values[i];
 
-    max = max > item ? max : item;
+    values.push({
+      top: value,
+      tip: label + " : " + value + "\n" + labels[i]
+    });
+
+    max = max > value ? max : value;
   }
 
-  //Mise à jour du max
-  //Mise à jour du maximum
+  // Mise à jour du maximum
   var new_max = max,
-    coef = 1;
+      coef = 1;
 
   if (max == 0) {
     params.max = 9;
@@ -95,7 +91,7 @@ function buildBarChartElements(params, labels) {
     }
 
     new_max = Math.ceil(max);
-    //Pas
+    // Pas
     params.step = (new_max < 5 && new_max > 1 && coef > 1) ? coef / 2 : coef;
     // Maximum trop importante pour les valeurs proche de 1x ou 2x.
     if (coef > 1) {
@@ -120,6 +116,7 @@ function buildBarChartElements(params, labels) {
     "font-size": 10,
     "values": values
   });
+
   return elements;
 }
 
@@ -130,6 +127,7 @@ function buildXAxisLabels(params) {
     "steps": steps
   }
   addRotation(labelConfiguration, params);
+
   return labelConfiguration;
 }
 
@@ -139,7 +137,6 @@ function buildXAxisLabels(params) {
  * @param messageId Identifiant du message à traduire
  * @prefix Optionnel - Préfixe du message
  */
-
 function getMessage(messageId, prefix) {
   var msg = (prefix) ? prefix + messageId : messageId;
   var res = Alfresco.util.message.call(null, msg, "AtolStatistics.UserConnections", Array.prototype.slice.call(arguments).slice(2));

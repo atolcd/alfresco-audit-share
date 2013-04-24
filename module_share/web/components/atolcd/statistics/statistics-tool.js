@@ -101,7 +101,7 @@ AtolStatistics.dateFormatMasks = {
     },
 
     loadSites: function loadSites() {
-      //Changement de style pour l'icône de chargement
+      // Changement de style pour l'icône de chargement
       // this.widgets.siteButton.set("label", this.msg("label.sites.loading") + ' <span class="loading"></span>');
 
       if (this.options.siteId && this.options.siteId != "") {
@@ -109,7 +109,6 @@ AtolStatistics.dateFormatMasks = {
           url: Alfresco.constants.PROXY_URI + "api/sites/" + encodeURIComponent(this.options.siteId),
           successCallback: {
             fn: function (res) {
-
               var param = {
                 json: [{
                     name: this.options.siteId,
@@ -241,14 +240,14 @@ AtolStatistics.dateFormatMasks = {
       // Selectionne par semaine suivant from et to.
       // Les semaines de "from" et "to" sont INCLUSES
       else if (this.options.currentDateFilter == "weeks") {
-        //On utilise la date de départ pour récupérer tous les jours de la semaine
+        // On utilise la date de départ pour récupérer tous les jours de la semaine
         next = null, currentDay = to.getDay(), hasNext = false;
-        //Début de semaine
+        // Début de semaine
         from.setDate(to.getDate() - (currentDay - 1));
         next = new Date(from);
         tsArray.push(from.getTime());
 
-        //Date d'arrêt
+        // Date d'arrêt
         to.setMonth(from.getMonth());
         to.setDate(from.getDate() + 7);
 
@@ -259,22 +258,22 @@ AtolStatistics.dateFormatMasks = {
           next.setDate(next.getDate() + 1);
           hasNext = (to.getTime() > next.getTime());
         }
-        //Semaine suivante, on test au cas où on dépasse.
+        // Semaine suivante, on test au cas où on dépasse.
         tsArray.push(next.getTime());
       }
       // Créé les intervalles allant du jour de départ au jour d'arrivée INCLUS
       else if (this.options.currentDateFilter == "days") {
-        //On ajoute la date de départ
+        // On ajoute la date de départ
         tsArray.push(from.getTime());
 
-        //On ajoute 1 jour à la date de fin, pour inclure le dernier jour selectionné.
+        // On ajoute 1 jour à la date de fin, pour inclure le dernier jour selectionné.
         to.setDate(to.getDate() + 1);
 
-        //On récupère le jour suivant
+        // On récupère le jour suivant
         next = new Date(from);
         next.setHours(next.getHours() + 2);
 
-        //On vérifie qu'il ne dépasse pas la date de fin, on boucle
+        // On vérifie qu'il ne dépasse pas la date de fin, on boucle
         hasNext = (to > next);
         while (hasNext) {
           tsArray.push(next.getTime());
@@ -317,7 +316,7 @@ AtolStatistics.dateFormatMasks = {
 
       if (chartTag == "embed" || chartTag == "object") {
         swfobject.removeSWF(id);
-        //Le conteneur étant détruit, il faut le recréer ...
+        // Le conteneur étant détruit, il faut le recréer ...
         var newChartDiv = new YAHOO.util.Element(document.createElement("div"));
         newChartDiv.set("id", id);
         newChartDiv.appendTo(id + "-container");

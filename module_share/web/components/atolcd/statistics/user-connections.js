@@ -137,18 +137,14 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     executeUserRequest: function UserConnections_executeUserRequest(params, type) {
       var displayUsers = function (response) {
         var users = response.json.items,
-          el = Dom.get(this.id + "-" + type);
+            el = Dom.get(this.id + "-" + type);
 
         if (users && users.length) {
           var context = Alfresco.constants.URL_PAGECONTEXT,
-            url = "",
-            html = "",
-            user = "",
-            i = 0,
-            l = users.length;
+              html = "";
 
-          for (; i < l; i++) {
-            user = users[i];
+          for (var i=0, ii=users.length ; i<ii ; i++) {
+            var user = users[i];
             html += '<li class="nav-user">';
             html += '<a class="theme-color-1" tabindex="0" target="_blank" href="' + context + 'user/' + user.username + '/profile">' + user.fullName + ' (' + user.username + ')</a>';
             html += '</li>';
@@ -278,11 +274,8 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
      * @return string params argument à passer à la requête
      */
     buildParams: function UserConnections_buildParams() {
-      var params = "";
-
       // TODO:
-
-      return params;
+      return "";
     },
 
     updateUsersLabels: function UserConnections_updateUsersLabels(tsArray) {
