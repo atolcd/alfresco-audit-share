@@ -131,6 +131,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         additionalsParams: {
           chartType: chartType,
           site: site,
+          siteTitle: this.sites[site] || '',
           tsString: tsString,
           target: "chart",
           height: "450",

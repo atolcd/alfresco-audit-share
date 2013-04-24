@@ -9,10 +9,12 @@ function getVolumetryFlashData(param) {
 
 function buildTitle(params) {
   var title = "",
-      site = params.additionalsParams.site;
+      site = params.additionalsParams.site,
+      siteTitle = params.additionalsParams.siteTitle || '';
 
   if (site && site.indexOf(',') == -1) {
-    title = getMessage("site", "graph.title.", site);
+    var opt = '<i>"' + ((siteTitle != "") ? siteTitle : site) + '"</i>';
+    title = getMessage("site", "graph.title.", opt);
   } else {
     title = getMessage("all", "graph.title.");
   }

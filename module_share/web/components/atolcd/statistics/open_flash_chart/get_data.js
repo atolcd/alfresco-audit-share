@@ -182,7 +182,7 @@ function buildHBarChart(params) {
   }
   var bars = {
     "title": {
-      "text": getMessage(params.additionalsParams.type, "graph.label."),
+      "text": getMessage(params.additionalsParams.type, "graph.label.", (params.items.length == 1) ? '' : params.items.length),
       "style": "{font-size: 16px; color:#515D6B; font-family: Arial,sans-serif; font-weight: bold; text-align: center;}"
     },
     "bg_colour": "#FFFFFF",

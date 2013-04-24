@@ -23,7 +23,10 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
    */
   AtolStatistics.GlobalUsage = function GlobalUsage_constructor(htmlId) {
     AtolStatistics.GlobalUsage.superclass.constructor.call(this, "AtolStatistics.GlobalUsage", htmlId, ["button", "container", "json"]);
+
+    // Default values
     this.options.limit = 5;
+
     return this;
   };
 
@@ -167,7 +170,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
           chartType: "hbar",
           type: type,
           target: type,
-          height: "200",
+          height: "" + ((this.options.limit * 22) + 50),
           width: "100%",
           from: from,
           to: to,
@@ -207,8 +210,6 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         this.widgets.exportButton.set("disabled", false);
         response.json.currentFilter = this.options.currentDateFilter;
         response.json.additionalsParams = additionalsParams;
-        // response.json.currentSites = this.sites;
-        // console.log(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
 
         if (chartTag == "embed" || chartTag == "object") {
           swf.load(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));

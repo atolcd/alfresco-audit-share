@@ -84,7 +84,7 @@ AtolStatistics.dateFormatMasks = {
      * @attribute sites
      * Informations sur les sites (id/titre).
      */
-    sites: [],
+    sites: {},
 
     /**
      * Fired by YUI when parent element is available for scripting.
@@ -150,8 +150,7 @@ AtolStatistics.dateFormatMasks = {
       var siteMenuButtons = [],
           allSitesMenuButton = [],
           menuButtons = [],
-          siteIds = [],
-          me = this;
+          siteIds = [];
 
       for (var i=0, ii=res.json.length ; i < ii ; i++) {
         var current_site = res.json[i];
@@ -166,10 +165,7 @@ AtolStatistics.dateFormatMasks = {
 
         // Stockage des sites
         siteIds.push(current_site.name);
-        me.sites.push({
-          name: current_site.name,
-          title: current_site.title
-        });
+        this.sites[current_site.name] = current_site.title;
       }
 
       if (!hideAllSiteEntry) {

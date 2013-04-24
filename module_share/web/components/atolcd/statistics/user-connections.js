@@ -216,6 +216,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
           chartType: "vbar",
           type: "count",
           site: site,
+          siteTitle: this.sites[site] || '',
           tsString: tsString,
           target: "chart",
           height: "450",
