@@ -24,7 +24,8 @@ AtolStatistics.dateFormatMasks = {
   /**
    * YUI Library aliases
    */
-  var Event = YAHOO.util.Event;
+  var Dom = YAHOO.util.Dom,
+      Event = YAHOO.util.Event;
 
   /**
    * Tool constructor.
@@ -51,7 +52,14 @@ AtolStatistics.dateFormatMasks = {
        * @attribute pathToSwf
        * Chemin vers le fichier swf d'Open Flash Chart
        */
-      pathToSwf: "open-flash-chart.swf"
+      pathToSwf: "open-flash-chart.swf",
+
+      /**
+       * @attribute currentDateFilter
+       * Filtre de date : days, weeks, months, years
+       * "weeks" par défaut
+       */
+      currentDateFilter: "weeks"
     },
 
     /**
@@ -73,13 +81,6 @@ AtolStatistics.dateFormatMasks = {
     endDatesArray: [],
 
     /**
-     * @attribute currentDateFilter
-     * Filtre de date : days,weeks,months,years
-     * "days" par défaut
-     */
-    currentDateFilter: "weeks",
-
-    /**
      * @attribute sites
      * Informations sur les sites (id/titre).
      */
@@ -92,7 +93,7 @@ AtolStatistics.dateFormatMasks = {
      * @method onReady
      */
     onReady: function Tool_onReady() {
-      // To be overridden
+      Dom.addClass(this.id + "-by-" + this.options.currentDateFilter, "selected");
     },
 
     onSearch: function Tool_onSearch() {
@@ -219,11 +220,11 @@ AtolStatistics.dateFormatMasks = {
         res = "";
 
       // Création de nouvelles dates à manipuler
-      to = new Date(this.endDatesArray[this.currentDateFilter].getTime());
-      from = new Date(this.endDatesArray[this.currentDateFilter].getTime());
+      to = new Date(this.endDatesArray[this.options.currentDateFilter].getTime());
+      from = new Date(this.endDatesArray[this.options.currentDateFilter].getTime());
 
       // Créé les intervalles allant du mois de départ au mois d'arrivée INCLUS
-      if (this.currentDateFilter == "months") {
+      if (this.options.currentDateFilter == "months") {
         tsArray.push(from.setDate(1));
         next = new Date(from);
         next.setDate(1);
@@ -243,7 +244,7 @@ AtolStatistics.dateFormatMasks = {
       }
       // Selectionne par semaine suivant from et to.
       // Les semaines de "from" et "to" sont INCLUSES
-      else if (this.currentDateFilter == "weeks") {
+      else if (this.options.currentDateFilter == "weeks") {
         //On utilise la date de départ pour récupérer tous les jours de la semaine
         next = null, currentDay = to.getDay(), hasNext = false;
         //Début de semaine
@@ -266,7 +267,7 @@ AtolStatistics.dateFormatMasks = {
         tsArray.push(next.getTime());
       }
       // Créé les intervalles allant du jour de départ au jour d'arrivée INCLUS
-      else if (this.currentDateFilter == "days") {
+      else if (this.options.currentDateFilter == "days") {
         //On ajoute la date de départ
         tsArray.push(from.getTime());
 
@@ -285,7 +286,7 @@ AtolStatistics.dateFormatMasks = {
           hasNext = (to > next);
         }
         tsArray.push(to.getTime());
-      } else if (this.currentDateFilter == "years") {
+      } else if (this.options.currentDateFilter == "years") {
         // On se place au début de l'année
         from.setDate(1);
         from.setMonth(0);
@@ -388,9 +389,9 @@ AtolStatistics.dateFormatMasks = {
      */
     onChangeDateFilter: function Tool_OnChangeDateFilter(e, args) {
       if (e) Event.stopEvent(e);
-      Dom.removeClass("by-" + this.currentDateFilter, "selected");
-      Dom.addClass("by-" + args.filter, "selected");
-      this.currentDateFilter = args.filter;
+      Dom.removeClass(this.id + "-by-" + this.options.currentDateFilter, "selected");
+      Dom.addClass(this.id + "-by-" + args.filter, "selected");
+      this.options.currentDateFilter = args.filter;
       this.execute();
     },
 
@@ -403,7 +404,7 @@ AtolStatistics.dateFormatMasks = {
     onChangeDateInterval: function Tool_OnChangeDateInterval(e, args) {
       var coef = args.coef,
         currentDate = new Date(),
-        dateFilter = this.currentDateFilter,
+        dateFilter = this.options.currentDateFilter,
         newDate = new Date(this.endDatesArray[dateFilter]);
 
       Event.stopEvent(e);

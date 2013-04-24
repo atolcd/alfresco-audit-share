@@ -51,19 +51,19 @@
           <span id="home">
             <span class="home-img" title="${msg('label.home')}"></span>
           </span>
-          <span id="by-days">
+          <span id="${el}-by-days">
             <a href="#">${msg("label.byDay")}</a>
           </span>
           <span class="vb"> | </span>
-          <span id="by-weeks" class="selected">
+          <span id="${el}-by-weeks">
             <a href="#">${msg("label.byWeek")}</a>
           </span>
           <span class="vb"> | </span>
-          <span id="by-months">
+          <span id="${el}-by-months">
             <a href="#">${msg("label.byMonth")}</a>
           </span>
           <span class="vb"> | </span>
-          <span id="by-years">
+          <span id="${el}-by-years">
             <a href="#">${msg("label.byYear")}</a>
           </span>
         </div>

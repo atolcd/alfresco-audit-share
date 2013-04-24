@@ -47,6 +47,8 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
      * @method onReady
      */
     onReady: function UserConnections_onReady() {
+      AtolStatistics.UserConnections.superclass.onReady.call(this);
+
       this.setupCurrentDates();
 
       // Buttons - Check ?
@@ -56,10 +58,10 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
 
       // el, sType, fn, obj, overrideContext
       Event.addListener("home", "click", this.onResetDates, null, this);
-      Event.addListener("by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
-      Event.addListener("by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
-      Event.addListener("by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
-      Event.addListener("by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
+      Event.addListener(this.id + "-by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
+      Event.addListener(this.id + "-by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
+      Event.addListener(this.id + "-by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
+      Event.addListener(this.id + "-by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
       Event.addListener("chart-prev", "click", this.onChangeDateInterval, { coef: -1 }, this);
       Event.addListener("chart-next", "click", this.onChangeDateInterval, { coef: 1 }, this);
 
@@ -109,7 +111,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
      */
     prepareUserRequest: function UserConnections_prepareUserRequest(type) {
       // Récupération des variables de l'UI
-      var dateFilter = this.currentDateFilter,
+      var dateFilter = this.options.currentDateFilter,
         site = this.convertMenuValue(this.widgets.siteButton.value),
         params = "";
 
@@ -175,7 +177,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
 
     onSearch: function UserConnections_onSearch() {
       // Récupération des variables de l'UI
-      var dateFilter = this.currentDateFilter,
+      var dateFilter = this.options.currentDateFilter,
         site = this.convertMenuValue(this.widgets.siteButton.value),
         tsString = "",
         params = "";
@@ -237,7 +239,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
 
       if (response.json) {
         this.widgets.exportButton.set("disabled", false);
-        response.json.currentFilter = this.currentDateFilter;
+        response.json.currentFilter = this.options.currentDateFilter;
         response.json.additionalsParams = additionalsParams;
         this.lastRequest.values = response.json.values;
 
@@ -286,7 +288,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       var connectedLabel = "",
         neverConnectedLabel = "";
 
-      switch (this.currentDateFilter) {
+      switch (this.options.currentDateFilter) {
       case "days":
         var date = new Date(tsArray[0]),
             today = new Date();
@@ -296,8 +298,8 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
           neverConnectedLabel = this.msg("label.users.never-connected.today");
         } else {
           var day = dateFormat(date, AtolStatistics.dateFormatMasks.mediumDay); // dddd dd/mm
-          connectedLabel = this.msg("label.users.connected." + this.currentDateFilter, day);
-          neverConnectedLabel = this.msg("label.users.never-connected." + this.currentDateFilter, day);
+          connectedLabel = this.msg("label.users.connected." + this.options.currentDateFilter, day);
+          neverConnectedLabel = this.msg("label.users.never-connected." + this.options.currentDateFilter, day);
         }
         break;
 
@@ -305,20 +307,20 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         var from = dateFormat(new Date(tsArray[0]), AtolStatistics.dateFormatMasks.shortDate), // dd/mm/yyyy
             to   = dateFormat(new Date(tsArray[tsArray.length - 2]), AtolStatistics.dateFormatMasks.shortDate); // dd/mm/yyyy
 
-        connectedLabel = this.msg("label.users.connected." + this.currentDateFilter, from, to);
-        neverConnectedLabel = this.msg("label.users.never-connected." + this.currentDateFilter, from, to);
+        connectedLabel = this.msg("label.users.connected." + this.options.currentDateFilter, from, to);
+        neverConnectedLabel = this.msg("label.users.never-connected." + this.options.currentDateFilter, from, to);
         break;
 
       case "months":
         var month = dateFormat(new Date(tsArray[0]), AtolStatistics.dateFormatMasks.monthYear); // mmmm yyyy
-        connectedLabel = this.msg("label.users.connected." + this.currentDateFilter, month);
-        neverConnectedLabel = this.msg("label.users.never-connected." + this.currentDateFilter, month);
+        connectedLabel = this.msg("label.users.connected." + this.options.currentDateFilter, month);
+        neverConnectedLabel = this.msg("label.users.never-connected." + this.options.currentDateFilter, month);
         break;
 
       case "years":
         var date = new Date(tsArray[0]);
-        connectedLabel = this.msg("label.users.connected." + this.currentDateFilter, date.getFullYear());
-        neverConnectedLabel = this.msg("label.users.never-connected." + this.currentDateFilter, date.getFullYear());
+        connectedLabel = this.msg("label.users.connected." + this.options.currentDateFilter, date.getFullYear());
+        neverConnectedLabel = this.msg("label.users.never-connected." + this.options.currentDateFilter, date.getFullYear());
         break;
       };
 

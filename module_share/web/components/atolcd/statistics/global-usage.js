@@ -23,18 +23,11 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
    */
   AtolStatistics.GlobalUsage = function GlobalUsage_constructor(htmlId) {
     AtolStatistics.GlobalUsage.superclass.constructor.call(this, "AtolStatistics.GlobalUsage", htmlId, ["button", "container", "json"]);
+    this.options.limit = 5;
     return this;
   };
 
   YAHOO.extend(AtolStatistics.GlobalUsage, AtolStatistics.Tool, {
-    options: {
-      /**
-       * @attribute limit
-       * Limite de documents remontés par requête de popularité
-       */
-      limit: 5
-    },
-
     /**
      * Fired by YUI when parent element is available for scripting.
      * Component initialisation, including instantiation of YUI widgets and event listener binding.
@@ -42,6 +35,8 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
      * @method onReady
      */
     onReady: function GlobalUsage_onReady() {
+      AtolStatistics.GlobalUsage.superclass.onReady.call(this);
+
       this.widgets.exportButton = Alfresco.util.createYUIButton(this, "export-button", this.onExport);
       this.widgets.exportButton.set("disabled", true);
 
@@ -87,10 +82,10 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
 
       // el, sType, fn, obj, overrideContext
       Event.addListener("home", "click", this.onResetDates, null, this);
-      Event.addListener("by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
-      Event.addListener("by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
-      Event.addListener("by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
-      Event.addListener("by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
+      Event.addListener(this.id + "-by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
+      Event.addListener(this.id + "-by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
+      Event.addListener(this.id + "-by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
+      Event.addListener(this.id + "-by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
       Event.addListener("chart-prev", "click", this.onChangeDateInterval, { coef: -1 }, this);
       Event.addListener("chart-next", "click", this.onChangeDateInterval, { coef: 1 }, this);
 
@@ -110,7 +105,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       //Récupération des variables de l'UI
       var action = this.convertMenuValue(this.widgets.actionCriteriaButton.value),
           module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
-          dateFilter = this.currentDateFilter,
+          dateFilter = this.options.currentDateFilter,
           site = this.convertMenuValue(this.widgets.siteButton.value),
           type = action,
           tsString = "";
@@ -150,7 +145,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     getByPopularity: function GlobalUsage_getByPopularity(type) {
       var site = this.convertMenuValue(this.widgets.siteButton.value),
           module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
-          dateFilter = this.currentDateFilter,
+          dateFilter = this.options.currentDateFilter,
           tsArray = this.buildTimeStampArray(),
           from = tsArray[0],
           to = tsArray[tsArray.length - 1],
@@ -210,7 +205,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
 
       if (response.json) {
         this.widgets.exportButton.set("disabled", false);
-        response.json.currentFilter = this.currentDateFilter;
+        response.json.currentFilter = this.options.currentDateFilter;
         response.json.additionalsParams = additionalsParams;
         // response.json.currentSites = this.sites;
         // console.log(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));

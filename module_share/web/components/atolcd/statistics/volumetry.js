@@ -34,6 +34,8 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
      * @method onReady
      */
     onReady: function Volumetry_onReady() {
+      AtolStatistics.Volumetry.superclass.onReady.call(this);
+
       var me = this;
       this.setupCurrentDates();
 
@@ -62,10 +64,10 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       // el, sType, fn, obj, overrideContext
       Event.addListener("bar_stack-criteria", "click", this.onShowStackedBar, null, this);
       Event.addListener("home", "click", this.onResetDates, null, this);
-      Event.addListener("by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
-      Event.addListener("by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
-      Event.addListener("by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
-      Event.addListener("by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
+      Event.addListener(this.id + "-by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
+      Event.addListener(this.id + "-by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
+      Event.addListener(this.id + "-by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
+      Event.addListener(this.id + "-by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
       Event.addListener("chart-prev", "click", this.onChangeDateInterval, { coef: -1 }, this);
       Event.addListener("chart-next", "click", this.onChangeDateInterval, { coef: 1 }, this);
 
@@ -85,7 +87,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
 
     onSearch: function Volumetry_onSearch() {
       // Récupération des variables de l'UI
-      var dateFilter = this.currentDateFilter,
+      var dateFilter = this.options.currentDateFilter,
         site = this.convertMenuValue(this.widgets.siteButton.value),
         tsString = "",
         params = "";
@@ -176,7 +178,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         this.widgets.exportButton.set("disabled", false);
         this.lastRequest.values = response.json.values;
 
-        response.json.currentFilter = this.currentDateFilter;
+        response.json.currentFilter = this.options.currentDateFilter;
         response.json.additionalsParams = additionalsParams;
 
         if (chartTag == "embed" || chartTag == "object") {

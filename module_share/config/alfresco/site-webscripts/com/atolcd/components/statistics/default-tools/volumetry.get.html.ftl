@@ -5,7 +5,8 @@
       pathToSwf: "${page.url.context}/res/components/atolcd/statistics/open_flash_chart/open-flash-chart.swf",
       siteId: "${page.url.templateArgs.site!""}",
       currentUser: "${user.name?js_string}",
-      isAdmin: ${user.isAdmin?string}
+      isAdmin: ${user.isAdmin?string},
+      currentDateFilter: "months"
     }
   ).setMessages(${messages});
 //]]></script>
@@ -48,19 +49,19 @@
             <span id="home">
               <span class="home-img" title="${msg('label.home')}"></span>
             </span>
-            <span id="by-days">
+            <span id="${el}-by-days">
               <a href="#">${msg("label.byDay")}</a>
             </span>
             <span class="vb"> | </span>
-            <span id="by-weeks" class="selected">
+            <span id="${el}-by-weeks">
               <a href="#">${msg("label.byWeek")}</a>
             </span>
             <span class="vb"> | </span>
-            <span id="by-months">
+            <span id="${el}-by-months">
               <a href="#">${msg("label.byMonth")}</a>
             </span>
             <span class="vb"> | </span>
-            <span id="by-years">
+            <span id="${el}-by-years">
               <a href="#">${msg("label.byYear")}</a>
             </span>
 
