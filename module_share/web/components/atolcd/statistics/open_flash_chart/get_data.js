@@ -149,7 +149,7 @@ function buildBarChartElements(params, labels) {
       value_obj.tip += "\n" + labels[i];
       values.push(value_obj);
     }
-    // TODO : Stacked
+
     elements.push({
       "type": "bar_glass",
       "alpha": 0.75,

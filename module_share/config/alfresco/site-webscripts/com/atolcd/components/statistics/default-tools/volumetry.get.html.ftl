@@ -24,7 +24,16 @@
       <div class="header">
         <div id="criterias" class="criterias">
           <label for="site-criteria-container">${msg("label.menu.site")}</label><span class="criterias-button" id="site-criteria-container"></span>
+
+          <span class="criterias-button">
+            <input type="button" id="chart-type-criteria" name="${el}-chart-type-criteria-button" value="${msg('graph.type.line')}" />
+            <select id="chart-type-criteria-select" name="${el}-chart-type-criteria-select">
+              <option value="line">${msg("graph.type.line")}</option>
+              <option value="bar">${msg("graph.type.bar")}</option>
+            </select>
+          </span>
         </div>
+
         <div id="bar-stack-criteria-container">
           <input id="bar_stack-criteria" type="checkbox"></input><label for="bar_stack-criteria">${msg("label.menu.use.bar_stack")}</label>
         </div>

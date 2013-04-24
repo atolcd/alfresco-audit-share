@@ -8,6 +8,12 @@
         ${value?c}<#if value_has_next>,</#if>
         </#list>
       </#if>
+    ],
+    "sites" : [
+      <#list sites as site>
+        "${shareStatsutils.getSiteTitle(site)}"
+        <#if site_has_next>,</#if>
+      </#list>
     ]
     <#if args.sites?? || (!args.site?? && !args.sites??)>
       , "stackedValues":
@@ -19,12 +25,6 @@
             </#list>
           ]
           <#if sv_has_next>,</#if>
-        </#list>
-      ],
-      "sites" : [
-        <#list sites as site>
-          "${shareStatsutils.getSiteTitle(site)}"
-          <#if site_has_next>,</#if>
         </#list>
       ]
     </#if>

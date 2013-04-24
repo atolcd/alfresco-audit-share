@@ -34,12 +34,30 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
      * @method onReady
      */
     onReady: function Volumetry_onReady() {
+      var me = this;
       this.setupCurrentDates();
 
       // Buttons - Check ?
       this.widgets.exportButton = Alfresco.util.createYUIButton(this, "export-button", this.onExport);
-
       this.widgets.exportButton.set("disabled", true);
+
+      // Chart type button
+      this.widgets.chartTypeCriteriaButton = new YAHOO.widget.Button("chart-type-criteria", {
+        type: "split",
+        menu: "chart-type-criteria-select",
+        lazyloadmenu: false
+      });
+      this.widgets.chartTypeCriteriaButton.value = "line";
+
+      var onChartTypeMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
+        var sText = p_aArgs[1].cfg.getProperty("text"),
+            value = p_aArgs[1].value;
+
+        me.widgets.chartTypeCriteriaButton.value = value;
+        me.widgets.chartTypeCriteriaButton.set("label", sText);
+        me.execute();
+      };
+      this.widgets.chartTypeCriteriaButton.getMenu().subscribe("click", onChartTypeMenuItemClick);
 
       // el, sType, fn, obj, overrideContext
       Event.addListener("bar_stack-criteria", "click", this.onShowStackedBar, null, this);
@@ -90,6 +108,15 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       this.lastRequest.params = params;
       this.lastRequest.dateFilter = dateFilter;
 
+      var chartType = "line";
+      if ((!site || site.indexOf(',') >= 0) && Dom.get("bar_stack-criteria").checked) {
+        // multiple
+        chartType = (this.widgets.chartTypeCriteriaButton.value == "bar") ? "bar_stack" : "lines";
+      } else {
+        // single
+        chartType = (this.widgets.chartTypeCriteriaButton.value == "bar") ? "vbar" : "line";
+      }
+
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-volumetry" + this.lastRequest.params;
       Alfresco.util.Ajax.jsonGet({
         url: url,
@@ -100,7 +127,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         failureMessage: this.msg("label.popup.query.error"),
         execScripts: true,
         additionalsParams: {
-          chartType: (!site && Dom.get("bar_stack-criteria").checked) ? "bar_stack" : "vbar",
+          chartType: chartType,
           site: site,
           tsString: tsString,
           target: "chart",

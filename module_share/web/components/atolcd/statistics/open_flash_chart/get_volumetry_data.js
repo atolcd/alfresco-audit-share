@@ -47,8 +47,13 @@ function buildChart(params) {
 
   if (params.additionalsParams.chartType == "vbar") {
     bars.elements = buildBarChartElements(params, x_labels.labels);
+  } else if (params.additionalsParams.chartType == "line") {
+    bars.elements = buildLineChartElements(params, x_labels.labels);
+  } else if (params.additionalsParams.chartType == "lines") {
+    bars.elements = buildLinesChartElements(params, x_labels.labels);
   } else {
     bars.elements = buildStackedBarChartElements(params, x_labels.labels);
+    bars.tooltip = { "mouse": 2 };
   }
 
   bars["y_axis"] = {
@@ -59,48 +64,51 @@ function buildChart(params) {
     "max": params.max
   };
 
+  bars["y_legend"] = {
+    "text": getMessage("volumetry", "graph.label.", getMessage("size.megabytes")),
+    "style": "{font-size: 12px; color: #778877}"
+  };
+
   return bars;
 }
 
 function buildBarChartElements(params, labels) {
-  var elements = [],
-    pItems = params.values,
-    pItemsLength = pItems.length,
-    max = 0,
-    values = [],
-    label = getMessage("volumetry", "graph.label.", getMessage("size.megabytes"));
+  var max = 0,
+      elements = [],
+      values = [];
 
   // Boucle sur les éléments par date
-  for (var i = 0; i < pItemsLength; i++) {
-    var item = pItems[i];
-    item = roundNumber(item / (1024 * 1024), 2);
-    value_obj = {};
-    value_obj.top = item;
-    value_obj.tip = label + " : " + item + " Mo"; // Voir pour un meilleur label ? Formattage de #val#?
-    value_obj.tip += "\n" + labels[i];
-    values.push(value_obj);
+  for (var i=0, ii=params.values.length ; i<ii ; i++) {
+    var value = roundNumber(params.values[i] / (1024 * 1024), 2);
 
-    max = max > item ? max : item;
+    var tip = labels[i] + "\n" + getMessage("volumetry", "graph.label.", getMessage("size.megabytes")) + " : " + value + " " + getMessage("size.megabytes");
+    if (params.sites && params.sites.length == 1) {
+      tip += "\n" + getMessage("label.menu.site") + " " + params.sites[0];
+    }
+
+    values.push({
+      top: value,
+      tip: tip
+    });
+
+    max = max > value ? max : value;
   }
   // Mise à jour du maximum
   params.max = max ? roundMax(max) : 10;
-
 
   elements.push({
     "type": "bar_glass",
     "alpha": 0.75,
     "colour": barChartColors["volumetry"],
-    "text": label,
     "font-size": 10,
     "values": values
   });
+
   return elements;
 }
 
 function buildStackedBarChartElements(params, labels) {
-  var max = 0,
-    values = [],
-    label = getMessage("volumetry", "graph.label.");
+  var max = 0, values = [];
 
   // Boucle sur les éléments par date
   for (var i=0, ii=params.stackedValues.length ; i < ii; i++) {
@@ -108,25 +116,25 @@ function buildStackedBarChartElements(params, labels) {
         valueTab = [];
 
     for (var j=0, jj=stackedValue.length ; j<jj ; j++) {
-      var item = roundNumber(stackedValue[j] / (1024 * 1024), 2),
-          value_obj = {};
+      var value = roundNumber(stackedValue[j] / (1024 * 1024), 2);
+      var value_obj = {
+        val: value
+      };
 
-      if (item > 0) {
-        // value_obj.tip = labels[i];
-        value_obj.tip = "Site : " + params.sites[j];
-        value_obj.tip += "\n" +label + " : " + item + " Mo";
-        value_obj.tip += "\n\nTotal : #total# Mo";
+      if (value > 0) {
+        value_obj.tip = labels[i] + "\n\n";
+        value_obj.tip += getMessage("volumetry", "graph.label.", getMessage("size.megabytes")) + " : " + value + " " + getMessage("size.megabytes") + "\n";
+        value_obj.tip += getMessage("label.menu.site") + " " + params.sites[j] + "\n\n";
+        value_obj.tip += getMessage("graph.label.global.volumetry") + " #total# Mo";
       }
       else {
-        value_obj.tip = "";
-        // HACK : les tooltips se cumulent lors de l'affichage quand
-        // toutes les valeurs sont vides
+        // value_obj.tip = "i=" + i + " - j=" + j;
+        // HACK : les tooltips se cumulent lors de l'affichage quand toutes les valeurs sont vides
         if (params.values[i] == 0 && j == 0) {
-           value_obj.tip = getMessage("label.graph.no-data");
+          value_obj.tip = getMessage("label.graph.no-data");
         }
       }
 
-      value_obj.val = item;
       valueTab.push(value_obj);
     }
 
@@ -139,24 +147,119 @@ function buildStackedBarChartElements(params, labels) {
   // Mise à jour du maximum
   params.max = max ? roundMax(max) : 10;
 
-  var sites = [];
-  for (var i=0, ii=params.sites.length ; i < ii; i++) {
-    sites.push({
-      "colour": barStackedChartColors.defaultColors[i%barStackedChartColors.defaultColors.length],
-      "text": params.sites[i],
-      "font-size": 10
-    });
-  }
 
   return [{
     "type": "bar_stack",
-    "alpha": 0.9,
+    "alpha": 0.7,
     "colours" : barStackedChartColors.defaultColors,
-    "text": label,
+    "font-size": 10,
+    "values": values/*,
+    "tip": "X label [#x_label#], Value [#val#]<br>Total [#total#]"*/
+  }];
+}
+
+function buildLineChartElements(params, labels) {
+  var max = 0,
+      elements = [],
+      values = [];
+
+  // Boucle sur les éléments par date
+  for (var i=0, ii=params.values.length ; i<ii ; i++) {
+    var value = roundNumber(params.values[i] / (1024 * 1024), 2);
+
+    var tip = labels[i] + "\n" + getMessage("volumetry", "graph.label.", getMessage("size.megabytes")) + " : " + value + " " + getMessage("size.megabytes");
+    if (params.sites && params.sites.length == 1) {
+      tip += "\n" + getMessage("label.menu.site") + " " + params.sites[0];
+    }
+
+    var value_obj = {
+      type: "dot",
+      value: value,
+      tip: tip
+    };
+
+    values.push((value === 0) ? null : value_obj);
+
+    max = max > value ? max : value;
+  }
+  // Mise à jour du maximum
+  params.max = max ? roundMax(max) : 10;
+
+  elements.push({
+    "type": "line",
+    "alpha": 0.75,
     "font-size": 10,
     "values": values,
-    "keys": sites
-  }];
+    "dot-style": {
+      "type": "dot",
+      "dot-size": 3,
+      "halo-size": 1,
+      "colour": barChartColors["volumetry"]
+    },
+    "width": 2,
+    "colour": barChartColors["volumetry"]
+  });
+
+  return elements;
+}
+
+function buildLinesChartElements(params, labels) {
+  var max = 0, lines = [], linesValues = {};
+
+  for (var i=0, ii=params.stackedValues.length ; i < ii; i++) {
+    var periodValues = params.stackedValues[i];
+    for (var j=0, jj=periodValues.length ; j<jj ; j++) {
+      var dotValue = roundNumber(periodValues[j] / (1024 * 1024), 2);
+      if (!linesValues[j]) {
+        linesValues[j] = {
+          siteTitle: params.sites[j],
+          values: []
+        };
+      }
+
+      var dot = {};
+      dot.type = "dot";
+
+      if (dotValue > 0) {
+        dot.value = dotValue;
+        dot.tip = labels[i] + "\n\n";
+        dot.tip += getMessage("label.menu.site") + " " + params.sites[j];
+        dot.tip += "\n" + getMessage("volumetry", "graph.label.", getMessage("size.megabytes")) + " : " + dotValue + getMessage("size.megabytes");
+      } else {
+        dot = null;
+      }
+
+      linesValues[j].values.push(dot);
+    }
+
+    var total = roundNumber(params.values[i] / (1024 * 1024), 2);
+    max = max > total ? max : total;
+  }
+
+  var cpt = 0;
+  for (var siteValues in linesValues) {
+    var colour = barStackedChartColors.defaultColors[cpt%barStackedChartColors.defaultColors.length];
+    lines.push({
+      "type": "line",
+      "values": linesValues[siteValues].values,
+      "dot-style": {
+        "type": "dot",
+        "dot-size": 5,
+        "halo-size": 1,
+        "colour": colour
+      },
+      "width": 4,
+      "colour": colour,
+      "font-size": 10
+    });
+
+    cpt ++;
+  }
+
+  // Mise à jour du maximum
+  params.max = max ? roundMax(max) : 10;
+
+  return lines;
 }
 
 function buildXAxisLabels(params) {
