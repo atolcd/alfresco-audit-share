@@ -1,27 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<!DOCTYPE sqlMap
-    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
-    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<sqlMap namespace="alfresco.atolcd.audit">
-    <insert id="insertEntry" parameterClass="AtolAuditEntry" >
-    
-        <selectKey resultClass="long" keyProperty="id" type="pre">
-            select share_stats_audit_entry_seq.nextval as value from dual
-        </selectKey>
-        
-        insert into share_stats_audit_entry (id,audit_user_id, audit_site, audit_app_name, audit_action_name, audit_object, audit_time)
-        values (#id#,#auditUserId#,#auditSite#,#auditAppName#,#auditActionName#,#auditObject#,#auditTime#)
-    </insert>
-    
-    <insert id="insertVolumetry" parameterClass="AtolVolumetryEntry" >
+<mapper namespace="alfresco.atolcd.audit.insert">
+  <insert id="insertEntry" parameterType="AtolAuditEntry" >
+    <selectKey resultType="long" keyProperty="id" order="BEFORE">
+      select share_stats_audit_entry_seq.nextval as value from dual
+    </selectKey>
 
-        <selectKey resultClass="long" keyProperty="id" type="pre">
-            select share_stats_site_volumetry_seq.nextval as value from dual
-        </selectKey>
+    insert into share_stats_audit_entry (id, audit_user_id, audit_site, audit_app_name, audit_action_name, audit_object, audit_time)
+    values (#{id}, #{auditUserId}, #{auditSite}, #{auditAppName}, #{auditActionName}, #{auditObject}, #{auditTime})
+  </insert>
 
-        insert into share_stats_site_volumetry (id, site_id, site_size, folder_count, file_count, at_time)
-        values (#id#,#siteId#,#siteSize#,#folderCount#,#fileCount#,#atTime#)
-    </insert>
-</sqlMap>
+  <insert id="insertVolumetry" parameterType="AtolVolumetryEntry">
+    <selectKey resultType="long" keyProperty="id" order="BEFORE">
+      select share_stats_site_volumetry_seq.nextval as value from dual
+    </selectKey>
+
+    insert into share_stats_site_volumetry (id, site_id, site_size, folder_count, file_count, at_time)
+    values (#{id}, #{siteId}, #{siteSize}, #{folderCount}, #{fileCount}, #{atTime})
+  </insert>
+</mapper>
