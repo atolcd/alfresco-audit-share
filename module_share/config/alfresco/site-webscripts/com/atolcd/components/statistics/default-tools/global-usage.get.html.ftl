@@ -40,7 +40,7 @@
             <option value="updated">${msg("label.menu.action")}${msg("label.updated")}</option>
           </select>
 
-          <span id="site-criteria-container"></span>
+          <input type="button" class="criterias-button" id="site-criteria" name="${el}-site-criteria-button" value="" />
 
           <span class="yui-button yui-push-button" id="${el}-export-button">
             <span class="first-child"><button>${msg("button.export")}</button></span>

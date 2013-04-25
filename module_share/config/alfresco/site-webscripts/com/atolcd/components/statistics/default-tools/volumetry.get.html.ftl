@@ -24,7 +24,7 @@
     <div class="yui-g separator">
       <div class="header">
         <div id="criterias" class="criterias">
-          <label for="site-criteria-container">${msg("label.menu.site")}</label><span class="criterias-button" id="site-criteria-container"></span>
+          <label>${msg("label.menu.site")}</label><span class="criterias-button"><input type="button" id="site-criteria" name="${el}-site-criteria-button" value="" /></span>
 
           <span class="criterias-button">
             <input type="button" id="chart-type-criteria" name="${el}-chart-type-criteria-button" value="${msg('graph.type.line')}" />

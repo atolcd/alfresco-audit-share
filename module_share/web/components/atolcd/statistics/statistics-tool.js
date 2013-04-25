@@ -171,6 +171,7 @@ AtolStatistics.dateFormatMasks = {
         allSitesMenuButton.push({
           text: this.msg("label.menu.site.all"),
           value: siteIds.join(','),
+
           onclick: {
             fn: this.onSiteMenuClick,
             scope: this
@@ -181,22 +182,21 @@ AtolStatistics.dateFormatMasks = {
       menuButtons = allSitesMenuButton.concat(siteMenuButtons);
       var btOpts = {
         type: "split",
-        name: "site-criteria",
-        id: "site-criteria",
         menu: menuButtons,
-        container: "site-criteria-container"
+        lazyloadmenu: false
       };
 
       if (menuButtons.length <= 1) {
         btOpts.disabled = true;
       }
 
-      this.widgets.siteButton = new YAHOO.widget.Button(btOpts);
+      this.widgets.siteButton = new YAHOO.widget.Button("site-criteria", btOpts);
 
       // Maj des infos du bouton
       // Sélection de la 1ère entrée
       this.widgets.siteButton.set("label", menuButtons[0].text);
       this.widgets.siteButton.value = menuButtons[0].value;
+      this.widgets.siteButton.set("selectedMenuItem", this.widgets.siteButton.getMenu().getItem(0));
 
       this.execute();
     },
