@@ -60,13 +60,15 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
     // Identifiant utilisé en base pour identifier un audit sur le repo et non
     // sur un site.
     private static final String REPOSITORY_SITE = "/service";
-    
+
     static {
         // Urls exactes devant être filtrées
         ignoredUrl = new HashSet<String>();
         ignoredUrl.add("/share/page");
+        ignoredUrl.add("/share/page/");
+        ignoredUrl.add("/share/page/console");
         ignoredUrl.add("/share/page/console/");
-        
+
         // Cas ignorés des sites.
         ignoredCases = new HashMap<String, String[]>();
         ignoredCases.put("wiki", new String[] { "create" });
@@ -74,7 +76,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         ignoredCases.put("links", new String[] { "linkedit" });
         ignoredCases.put("discussions", new String[] { "createtopic" });
         ignoredCases.put("calendar", new String[] { "month", "week", "day" });
-        
+
         // "Tableau" module -> paramètres
         // Utilisé pour lire les paramètres d'audit
         moduleIds = new HashMap<String, String>();
@@ -97,7 +99,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
 
     @Override
     public void init(FilterConfig args) throws ServletException {
-        this.servletContext = args.getServletContext(); 
+        this.servletContext = args.getServletContext();
     }
 
     private ApplicationContext getApplicationContext() {
@@ -138,7 +140,6 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
                 JSONObject auditSample = new JSONObject();
                 auditSample.put(AUDIT_ID, "0");
                 auditSample.put(AUDIT_USER_ID, user.getId());
-
 
                 String ref = request.getHeader("referer");
                 if (requestURI.endsWith("/dologin") && (ref != null)) {
@@ -320,7 +321,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
             }
             // On trouve le token "site" dans l'url, le prochain token est
             // le nom du site
-            else if (siteFlag && (urlData.get(KEY_SITE).isEmpty())) {
+            else if (siteFlag && (urlData.get(KEY_SITE).isEmpty()) && i < urlTokens.length) {
                 urlData.put(KEY_SITE, urlTokens[i]);
                 String[] splittedModuleAction = urlTokens[i + 1].split("-");
                 // test pour site-members & site-groups
