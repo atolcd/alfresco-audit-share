@@ -32,9 +32,9 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	private NodeService nodeService;
 	private SiteService siteService;
 	private AuthorityService authorityService;
-	private long memberQnameId = 0;
-	private long personQnameId = 0;
-	private long containerQnameId = 0;
+	private Long memberQnameId = null;
+	private Long personQnameId = null;
+	private Long containerQnameId = null;
 
 	private static final String SELECT_CONNECTED_USERS = "alfresco.atolcd.audit.selectConnectedUsers";
 	private static final String SELECT_QNAME_ID = "alfresco.atolcd.audit.selectQNameId";
@@ -64,10 +64,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 		Assert.notNull(this.sqlSessionTemplate);
 		Assert.notNull(this.nodeService);
 		Assert.notNull(this.siteService);
-
-		memberQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "member");
-		personQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "person");
-		containerQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "authorityContainer");
+		Assert.notNull(this.authorityService);
 	}
 
 	@Override
@@ -138,10 +135,10 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 		List<String> groups = new ArrayList<String>();
 
 		// Tous les membres de sites
-		atolAuthorityParameters.setPersonQnameId(personQnameId);
+		atolAuthorityParameters.setPersonQnameId(getPersonQnameId());
 		users = (List<String>) this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
 		// Tous les groupes de sites
-		atolAuthorityParameters.setPersonQnameId(containerQnameId);
+		atolAuthorityParameters.setPersonQnameId(getContainerQnameId());
 		groups = (List<String>) this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
 
 		Set<String> usersSet = new HashSet<String>(users.size());
@@ -173,7 +170,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 					params.setGroupNames(null);
 				}
 			}
-			params.setMemberQnameId(this.memberQnameId);
+			params.setMemberQnameId(this.getMemberQnameId());
 			return params;
 		} catch (Exception e) {
 			logger.error("Erreur lors de la construction des parametres [buildAuthorityParametersFromRequest]");
@@ -202,5 +199,29 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	private Long getMemberQnameId() {
+		if (this.memberQnameId == null) {
+			this.memberQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "member");
+		}
+
+		return this.memberQnameId;
+	}
+
+	private Long getPersonQnameId() {
+		if (this.personQnameId == null) {
+			this.personQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "person");
+		}
+
+		return this.personQnameId;
+	}
+
+	private Long getContainerQnameId() {
+		if (this.containerQnameId == null) {
+			this.containerQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "authorityContainer");
+		}
+
+		return this.containerQnameId;
 	}
 }
