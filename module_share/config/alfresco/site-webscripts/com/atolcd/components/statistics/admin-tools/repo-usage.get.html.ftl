@@ -40,7 +40,7 @@
 
           <input type="button" class="criterias-button" id="site-criteria" name="${el}-site-criteria-button" value="${msg('graph.label.repository')}" />
           <select id="site-criteria-select" name="${el}-site-criteria-select">
-            <option value="/repo">${msg("graph.label.repository")}</option>
+            <option value="_repository">${msg("graph.label.repository")}</option>
           </select>
 
           <span class="yui-button yui-push-button" id="${el}-export-button">

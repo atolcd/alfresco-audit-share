@@ -7,6 +7,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.util.Assert;
 
+import com.atolcd.alfresco.web.scripts.shareStats.InsertAuditPost;
+
 public class PermissionsHelper implements InitializingBean {
 
 	private static SiteService siteService;
@@ -37,6 +39,11 @@ public class PermissionsHelper implements InitializingBean {
 
 		String site = req.getParameter("site");
 		if (site != null) {
+			if (InsertAuditPost.SITE_REPOSITORY.equals(site)) {
+				// mandatory: need to be Alfresco administrator
+				return false;
+			}
+
 			// Current user must be "SiteManager" of the site
 			isAllowed = isSiteManager(site, currentUser);
 		}

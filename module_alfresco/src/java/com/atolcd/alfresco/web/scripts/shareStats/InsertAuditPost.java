@@ -28,7 +28,7 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
 	private static final String INSERT_VOLUMETRY = "alfresco.atolcd.audit.insertVolumetry";
 
 	private static final String SITE_TO_FIND = "/service";
-	private static final String SITE_REPOSITORY = "/repo";
+	public static final String SITE_REPOSITORY = "_repository";
 
 	private static final String MODEL_SUCCESS = "success";
 	// SqlMapClientTemplate for ibatis calls

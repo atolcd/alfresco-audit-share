@@ -37,8 +37,8 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         lazyloadmenu: false
       });
 
-      // set the '/repo' value
-      this.widgets.siteButton.value = "/repo";
+      // set the '_repository' value
+      this.widgets.siteButton.value = "_repository";
 
       // hide the button
       this.widgets.siteButton.addClass("hidden");
