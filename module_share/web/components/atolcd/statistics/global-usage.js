@@ -70,6 +70,12 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       };
       this.widgets.moduleCriteriaButton.getMenu().subscribe("click", onModulesMenuItemClick);
 
+      // Add separator before last item
+      var itemsCount = this.widgets.moduleCriteriaButton.getMenu().getItems().length;
+      if (itemsCount > 0) {
+        Dom.addClass(this.widgets.moduleCriteriaButton.getMenu().getItem(itemsCount - 1).element, "menu-separator");
+      }
+
       // Comportement du menu de filtre par Actions
       var onActionsMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
         var sText = p_aArgs[1].cfg.getProperty("text"),
