@@ -24,6 +24,14 @@
       <div class="header">
         <div id="criterias" class="criterias">
           <label>${msg("label.menu.site")}</label><span class="criterias-button"><input type="button" id="site-criteria" name="${el}-site-criteria-button" value="" /></span>
+
+          <span class="criterias-button">
+            <input type="button" id="chart-type-criteria" name="${el}-chart-type-criteria-button" value="${msg('graph.type.bar')}" />
+            <select id="chart-type-criteria-select" name="${el}-chart-type-criteria-select">
+              <option value="bar">${msg("graph.type.bar")}</option>
+              <option value="line">${msg("graph.type.line")}</option>
+            </select>
+          </span>
         </div>
       </div>
     </div>

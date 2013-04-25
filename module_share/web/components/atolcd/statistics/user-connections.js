@@ -49,12 +49,29 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     onReady: function UserConnections_onReady() {
       AtolStatistics.UserConnections.superclass.onReady.call(this);
 
+      var me = this;
       this.setupCurrentDates();
 
       // Buttons - Check ?
       this.widgets.exportButton = Alfresco.util.createYUIButton(this, "export-button", this.onExport);
-
       this.widgets.exportButton.set("disabled", true);
+
+      // Chart type button
+      this.widgets.chartTypeCriteriaButton = new YAHOO.widget.Button("chart-type-criteria", {
+        type: "split",
+        menu: "chart-type-criteria-select",
+        lazyloadmenu: false
+      });
+
+      var onChartTypeMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
+        var sText = p_aArgs[1].cfg.getProperty("text"),
+            value = p_aArgs[1].value;
+
+        me.widgets.chartTypeCriteriaButton.value = value;
+        me.widgets.chartTypeCriteriaButton.set("label", sText);
+        me.execute();
+      };
+      this.widgets.chartTypeCriteriaButton.getMenu().subscribe("click", onChartTypeMenuItemClick);
 
       // el, sType, fn, obj, overrideContext
       Event.addListener("home", "click", this.onResetDates, null, this);
@@ -209,7 +226,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         failureMessage: this.msg("label.popup.query.error"),
         execScripts: true,
         additionalsParams: {
-          chartType: "vbar",
+          chartType: this.widgets.chartTypeCriteriaButton.value || '',
           type: "count",
           site: site,
           siteTitle: this.sites[site] || '',

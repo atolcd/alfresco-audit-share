@@ -39,7 +39,7 @@ function buildChart(params) {
 
     "bg_colour": "#FFFFFF",
 
-    "elements": buildBarChartElements(params, x_labels.labels),
+    "elements": buildChartElements(params, x_labels.labels),
 
     "x_axis": {
       "colour": gridColors["x-axis"],
@@ -59,9 +59,8 @@ function buildChart(params) {
   return bars;
 }
 
-function buildBarChartElements(params, labels) {
-  var elements = [],
-      max = 0,
+function buildChartElements(params, labels) {
+  var max = 0,
       values = [],
       label = getMessage("connection", "graph.label.");
 
@@ -69,10 +68,17 @@ function buildBarChartElements(params, labels) {
   for (var i=0, ii=params.values.length ; i<ii ; i++) {
     var value = params.values[i];
 
-    values.push({
+    var elt = {
       top: value,
       tip: label + " : " + value + "\n" + labels[i]
-    });
+    };
+
+    if (params.additionalsParams.chartType && params.additionalsParams.chartType == "line") {
+      elt.type = "dot";
+      elt.value = value;
+    }
+
+    values.push(elt);
 
     max = max > value ? max : value;
   }
@@ -108,16 +114,27 @@ function buildBarChartElements(params, labels) {
     }
   }
 
-  elements.push({
-    "type": "bar_glass",
-    "alpha": 0.75,
-    "colour": barChartColors["users"],
-    "text": label,
-    "font-size": 10,
-    "values": values
-  });
+  var element = {
+    'type': "bar_glass",
+    'alpha': 0.75,
+    'font-size': 10,
+    'colour': barChartColors["users"],
+    'text': label,
+    'values': values
+  };
 
-  return elements;
+  if (params.additionalsParams.chartType && params.additionalsParams.chartType == "line") {
+    element.type = "line";
+    element.width = 2;
+    element["dot-style"] = {
+      "type": "dot",
+      "dot-size": 3,
+      "halo-size": 1,
+      "colour": barChartColors["users"]
+    };
+  }
+
+  return [element];
 }
 
 function buildXAxisLabels(params) {
