@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -50,13 +52,44 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
 
     private ServletContext servletContext;
     // Store the "object" parameters to get for each module
-    private HashMap<String, String> moduleIds;
-    private HashMap<String, String[]> ignoredCases;
+    private static HashMap<String, String> moduleIds;
+    private static HashMap<String, String[]> ignoredCases;
+    private static Set<String> ignoredUrl;
     private static final Log logger = LogFactory.getLog(AuditFilter.class);
 
     // Identifiant utilisé en base pour identifier un audit sur le repo et non
     // sur un site.
     private static final String REPOSITORY_SITE = "/service";
+    
+    static {
+        // Urls exactes devant être filtrées
+        ignoredUrl = new HashSet<String>();
+        ignoredUrl.add("/share/page");
+        ignoredUrl.add("/share/page/console/");
+        
+        // Cas ignorés des sites.
+        ignoredCases = new HashMap<String, String[]>();
+        ignoredCases.put("wiki", new String[] { "create" });
+        ignoredCases.put("blog", new String[] { "postedit" });
+        ignoredCases.put("links", new String[] { "linkedit" });
+        ignoredCases.put("discussions", new String[] { "createtopic" });
+        ignoredCases.put("calendar", new String[] { "month", "week", "day" });
+        
+        // "Tableau" module -> paramètres
+        // Utilisé pour lire les paramètres d'audit
+        moduleIds = new HashMap<String, String>();
+        moduleIds.put("wiki", "title");
+        moduleIds.put("blog", "postId");
+        moduleIds.put("document", "nodeRef");
+        moduleIds.put("documentlibrary", "filter");
+        moduleIds.put("calendar", "view");
+        moduleIds.put("links", "linkId");
+        moduleIds.put("discussions", "topicId");
+        moduleIds.put("data", "list");
+        moduleIds.put("members", "");
+        moduleIds.put("dashboard", "");
+        moduleIds.put("search", "t");
+    }
 
     @Override
     public void destroy() {
@@ -64,28 +97,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
 
     @Override
     public void init(FilterConfig args) throws ServletException {
-        this.servletContext = args.getServletContext();
-        // "Tableau" module -> paramètres
-        // Utilisé pour lire les paramètres d'audit
-        this.moduleIds = new HashMap<String, String>();
-        this.moduleIds.put("wiki", "title");
-        this.moduleIds.put("blog", "postId");
-        this.moduleIds.put("document", "nodeRef");
-        this.moduleIds.put("documentlibrary", "filter");
-        this.moduleIds.put("calendar", "view");
-        this.moduleIds.put("links", "linkId");
-        this.moduleIds.put("discussions", "topicId");
-        this.moduleIds.put("data", "list");
-        this.moduleIds.put("members", "");
-        this.moduleIds.put("dashboard", "");
-        this.moduleIds.put("search", "t");
-
-        this.ignoredCases = new HashMap<String, String[]>();
-        ignoredCases.put("wiki", new String[] { "create" });
-        ignoredCases.put("blog", new String[] { "postedit" });
-        ignoredCases.put("links", new String[] { "linkedit" });
-        ignoredCases.put("discussions", new String[] { "createtopic" });
-        ignoredCases.put("calendar", new String[] { "month", "week", "day" });
+        this.servletContext = args.getServletContext(); 
     }
 
     private ApplicationContext getApplicationContext() {
@@ -120,37 +132,33 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         }
         User user = context.getUser();
         String requestURI = request.getRequestURI();
-        if (user != null && requestURI != null) {
+        if (user != null && requestURI != null && !ignoredUrl.contains(requestURI)) {
             try {
                 // Préparation du JSON à envoyer.
                 JSONObject auditSample = new JSONObject();
                 auditSample.put(AUDIT_ID, "0");
                 auditSample.put(AUDIT_USER_ID, user.getId());
 
-                // Audit de la console ??
-                if (requestURI.startsWith("/share/page/console/")) {
 
-                } else {
-                    String ref = request.getHeader("referer");
-                    if (requestURI.endsWith("/dologin") && (ref != null)) {
-                        requestURI = ref;
-                    }
-                    HashMap<String, String> auditData = getAuditData(request, user.getId(), requestURI);
-                    // Le parsing inclue parfois les paramètres lorsque le
-                    // chargement de la page est interrompu prématurément
-                    if ((auditData.get(KEY_MODULE).length() > 0) && (!auditData.get(KEY_ACTION).contains("?"))) {
-                        auditSample.put(AUDIT_SITE, auditData.get(KEY_SITE));
-                        auditSample.put(AUDIT_APP_NAME, auditData.get(KEY_MODULE));
-                        auditSample.put(AUDIT_ACTION_NAME, auditData.get(KEY_ACTION));
-                        auditSample.put(AUDIT_OBJECT, auditData.get(KEY_OBJECT));
-                        auditSample.put(AUDIT_TIME, Long.toString(System.currentTimeMillis()));
+                String ref = request.getHeader("referer");
+                if (requestURI.endsWith("/dologin") && (ref != null)) {
+                    requestURI = ref;
+                }
+                HashMap<String, String> auditData = getAuditData(request, user.getId(), requestURI);
+                // Le parsing inclue parfois les paramètres lorsque le
+                // chargement de la page est interrompu prématurément
+                if ((auditData.get(KEY_MODULE).length() > 0) && (!auditData.get(KEY_ACTION).contains("?"))) {
+                    auditSample.put(AUDIT_SITE, auditData.get(KEY_SITE));
+                    auditSample.put(AUDIT_APP_NAME, auditData.get(KEY_MODULE));
+                    auditSample.put(AUDIT_ACTION_NAME, auditData.get(KEY_ACTION));
+                    auditSample.put(AUDIT_OBJECT, auditData.get(KEY_OBJECT));
+                    auditSample.put(AUDIT_TIME, Long.toString(System.currentTimeMillis()));
 
-                        // Remote call for DB
-                        if (moduleIds.containsKey(auditSample.get(AUDIT_APP_NAME))) {
-                            remoteCall(request, auditSample);
-                        } else {
-                            logger.info("Ignored : " + requestURI);
-                        }
+                    // Remote call for DB
+                    if (moduleIds.containsKey(auditSample.get(AUDIT_APP_NAME))) {
+                        remoteCall(request, auditSample);
+                    } else {
+                        logger.info("Ignored : " + requestURI);
                     }
                 }
             } catch (Exception e) {
@@ -239,7 +247,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
             // On récupère l'identifiant de l'<<objet>> consulté à partir de son
             // module
             // En cas de null, on catch et on met une chaîne vide.
-            String obj = request.getParameter(this.moduleIds.get(urlData.get(KEY_MODULE)));
+            String obj = request.getParameter(moduleIds.get(urlData.get(KEY_MODULE)));
             if (obj != null) {
                 // On déplace le paramètre dans l'action pour faciliter les
                 // requêtes
@@ -294,6 +302,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
             for (int i = 0; i < urlTokens.length; i++) {
                 token = urlTokens[i];
                 newUrlTokens[i + j] = token;
+                // On simule la présence d'un site.
                 if (urlTokens[i].equals("page")) {
                     newUrlTokens[i + 1] = "site";
                     newUrlTokens[i + 2] = REPOSITORY_SITE;
@@ -306,7 +315,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
 
         boolean siteFlag = false;
         for (int i = 0; i < urlTokens.length; i++) {
-            if (urlTokens[i].equals("site") && !siteFlag) {
+            if ("site".equals(urlTokens[i]) && !siteFlag) {
                 siteFlag = true;
             }
             // On trouve le token "site" dans l'url, le prochain token est
