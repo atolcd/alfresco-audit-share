@@ -30,6 +30,7 @@
             <option value="wiki">${msg("graph.label.wiki")}</option>
             <option value="blog">${msg("graph.label.blog")}</option>
             <option value="discussions">${msg("graph.label.discussions")}</option>
+            <option value="all">${msg("graph.label.all")}</option>
           </select>
 
           <input type="button" class="criterias-button" id="action-criteria" name="${el}-action-criteria-button" value="${msg('label.menu.action')}${msg('label.read')}" />

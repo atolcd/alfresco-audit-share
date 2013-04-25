@@ -185,6 +185,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 			params.setSitesId(req.getParameter("sites"));
 			params.setActionName(req.getParameter("action"));
 			params.setAppName(req.getParameter("module"));
+			params.setAppNames(req.getParameter("modules"));
 			params.setDateFrom(dateFrom);
 			params.setDateTo(dateTo);
 			params.setSlicedDates(req.getParameter("dates"));

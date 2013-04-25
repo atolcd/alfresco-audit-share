@@ -61,9 +61,7 @@
       <where>
         <include refid="site_snippet"/>
         <include refid="time_snippet"/>
-        <if test="appName != null">
-            AND audit_app_name = #{appName}
-        </if>
+        <include refid="appName_snippet"/>
         <if test="actionName != null">
             AND audit_action_name = #{actionName}
         </if>
@@ -79,9 +77,7 @@
     <!-- Views Snippet -->
     <sql id="select_auditViewEntriesWhereSnippet">
       <where>
-        <if test="appName != null">
-            AND audit_app_name = #{appName}
-        </if>
+        <include refid="appName_snippet"/>
         <include refid="site_snippet"/>
         <include refid="time_snippet"/>
       </where>
@@ -94,6 +90,19 @@
       </if>
       <if test="dateTo > 0">
         <![CDATA[ AND audit_time < #{dateTo}]]>
+      </if>
+    </sql>
+
+    <!-- Snippet pour appName -->
+    <sql id="appName_snippet">
+      <if test="appName != null">
+          AND audit_app_name = #{appName}
+      </if>
+      <if test="appNames != null">
+        AND audit_app_name IN
+        <foreach item="item" collection="appNames" open="(" separator="," close=")">
+          #{item}
+        </foreach>
       </if>
     </sql>
 
@@ -133,6 +142,20 @@
         <if test="appName == 'discussions'">
             AND audit_action_name = 'topicview'
         </if>
+
+        <if test="appNames != null">
+          AND audit_app_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">#{item}</foreach>
+
+          AND audit_action_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">
+            <if test="item == 'document'">'details', 'download'</if>
+            <if test="item == 'wiki'">'page'</if>
+            <if test="item == 'blog'">'postview'</if>
+            <if test="item == 'discussions'">'topicview'</if>
+          </foreach>
+        </if>
+
         <include refid="time_snippet" />
         <include refid="site_snippet"/>
       </where>
@@ -161,8 +184,22 @@
         <if test="appName =='discussions'">
             AND audit_action_name = 'discussions-create'
         </if>
-      <include refid="time_snippet" />
-      <include refid="site_snippet"/>
+
+        <if test="appNames != null">
+          AND audit_app_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">#{item}</foreach>
+
+          AND audit_action_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">
+            <if test="item == 'document'">'file-added', 'create'</if>
+            <if test="item == 'wiki'">'create-post'</if>
+            <if test="item == 'blog'">'blog-create'</if>
+            <if test="item == 'discussions'">'discussions-create'</if>
+          </foreach>
+        </if>
+
+        <include refid="time_snippet" />
+        <include refid="site_snippet"/>
       </where>
     </sql>
 
@@ -190,8 +227,22 @@
         <if test="appName =='discussions'">
           AND audit_action_name = 'discussions-update'
         </if>
-      <include refid="time_snippet" />
-      <include refid="site_snippet"/>
+
+        <if test="appNames != null">
+          AND audit_app_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">#{item}</foreach>
+
+          AND audit_action_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">
+            <if test="item == 'document'">'update', 'file-updated', 'inline-edit'</if>
+            <if test="item == 'wiki'">'update-post'</if>
+            <if test="item == 'blog'">'blog-update'</if>
+            <if test="item == 'discussions'">'discussions-update'</if>
+          </foreach>
+        </if>
+
+        <include refid="time_snippet" />
+        <include refid="site_snippet"/>
       </where>
     </sql>
 
@@ -213,8 +264,22 @@
         <if test="appName == 'discussions'">
           AND audit_action_name = 'discussions-deleted'
         </if>
-      <include refid="time_snippet" />
-      <include refid="site_snippet"/>
+
+        <if test="appNames != null">
+          AND audit_app_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">#{item}</foreach>
+
+          AND audit_action_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">
+            <if test="item == 'document'">'file-deleted'</if>
+            <if test="item == 'wiki'">'delete-post'</if>
+            <if test="item == 'blog'">'blog-delete'</if>
+            <if test="item == 'discussions'">'discussions-deleted'</if>
+          </foreach>
+        </if>
+
+        <include refid="time_snippet" />
+        <include refid="site_snippet"/>
       </where>
     </sql>
 

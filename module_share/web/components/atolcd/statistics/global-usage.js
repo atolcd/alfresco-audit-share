@@ -256,7 +256,20 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         params += "&dates=" + dates;
       }
       if (module !== null) {
-        params += "&module=" + module;
+        if (module === "all") {
+          var moduleValues = [],
+              items = this.widgets.moduleCriteriaButton.getMenu().getItems();
+          for (var i=0, ii=items.length ; i<ii ; i++) {
+            var item = items[i];
+            if (item.value != "") {
+              moduleValues.push(item.value);
+            }
+          }
+
+          params += "&modules=" + moduleValues.join(',') + "&combined=true";
+        } else {
+          params += "&module=" + module;
+        }
       }
       if (site !== null) {
         if (site.indexOf(',') >= 0) {

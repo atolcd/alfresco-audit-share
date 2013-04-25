@@ -8,6 +8,7 @@ public class AuditQueryParameters {
 	private String siteId;
 	private List<String> sitesId;
 	private String appName;
+	private List<String> appNames;
 	private String actionName;
 	private String object;
 	private long dateFrom;
@@ -27,6 +28,7 @@ public class AuditQueryParameters {
 		siteId = null;
 		sitesId = null;
 		appName = null;
+		appNames = null;
 		actionName = null;
 		object = null;
 		dateFrom = 0;
@@ -35,11 +37,12 @@ public class AuditQueryParameters {
 		userId = null;
 	}
 
-	public AuditQueryParameters(String site, List<String> sites, String app, String action, String obj, long from, long to, String dates,
-			String user) {
+	public AuditQueryParameters(String site, List<String> sites, String app, List<String> apps, String action, String obj, long from,
+			long to, String dates, String user) {
 		siteId = site;
 		sitesId = sites;
 		appName = app;
+		appNames = apps;
 		actionName = action;
 		object = obj;
 		dateFrom = from;
@@ -52,19 +55,19 @@ public class AuditQueryParameters {
 		return sitesId;
 	}
 
-	public void setSitesId(List<String> sitesId) {
-		if (sitesId == null || (sitesId != null && sitesId.isEmpty())) {
+	public void setSitesId(List<String> _sitesId) {
+		if (_sitesId == null || (_sitesId != null && _sitesId.isEmpty())) {
 			this.sitesId = null;
 		} else {
-			this.sitesId = sitesId;
+			this.sitesId = _sitesId;
 		}
 	}
 
 	// Surcharge du set pour la construction à partir d'une String
-	public void setSitesId(String sitesId) {
-		if (sitesId != null) {
-			this.sitesId = new ArrayList<String>();
-			String[] sitesToken = sitesId.split(",");
+	public void setSitesId(String _sitesId) {
+		if (_sitesId != null) {
+			String[] sitesToken = _sitesId.split(",");
+			this.sitesId = new ArrayList<String>(sitesToken.length);
 			for (String token : sitesToken) {
 				this.sitesId.add(token);
 			}
@@ -83,8 +86,22 @@ public class AuditQueryParameters {
 		return appName;
 	}
 
-	public void setAppName(String appName) {
-		this.appName = appName;
+	public void setAppName(String _appName) {
+		this.appName = _appName;
+	}
+
+	public List<String> getAppNames() {
+		return appNames;
+	}
+
+	public void setAppNames(String _appNames) {
+		if (_appNames != null) {
+			String[] appNamesToken = _appNames.split(",");
+			this.appNames = new ArrayList<String>(appNamesToken.length);
+			for (String token : appNamesToken) {
+				this.appNames.add(token);
+			}
+		}
 	}
 
 	public String getActionName() {

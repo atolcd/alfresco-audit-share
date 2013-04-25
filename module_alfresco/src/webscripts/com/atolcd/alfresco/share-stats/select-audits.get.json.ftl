@@ -1,15 +1,24 @@
 <#escape x as jsonUtils.encodeJSONString(x)>
 <#-- Macro ensemble de stats -->
 <#macro auditCount auditItems>
-  "totalResults": ${auditItems?size?c},
+  "totalResults": <#if args.combined??>1<#else>${auditItems?size?c}</#if>,
   "items" :
   [
-    <#list auditItems as auditItem>
+    <#if args.combined??>
       {
-        "count": ${auditItem.count?c},
-        "target": "${auditItem.target}"
-      }<#if auditItem_has_next>,</#if>
-    </#list>
+        <#assign count = 0 />
+        <#list auditItems as auditItem><#assign count = (count + auditItem.count) /></#list>
+        "count": ${count},
+        "target": "${args.type!""}"
+      }
+    <#else>
+      <#list auditItems as auditItem>
+        {
+          "count": ${auditItem.count?c},
+          "target": "${auditItem.target}"
+        }<#if auditItem_has_next>,</#if>
+      </#list>
+    </#if>
   ]
 </#macro>
 
