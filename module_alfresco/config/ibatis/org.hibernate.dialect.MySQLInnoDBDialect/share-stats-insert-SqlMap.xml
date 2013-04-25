@@ -4,9 +4,9 @@
 
 <mapper namespace="alfresco.atolcd.audit.insert">
   <insert id="insertEntry" parameterType="AtolAuditEntry" useGeneratedKeys="true" keyProperty="id">
-      <include refid="alfresco.atolcd.audit.insert_AtolAuditEntry_AutoIncrement"/>
+    <include refid="alfresco.atolcd.audit.insert_AtolAuditEntry_AutoIncrement"/>
   </insert>
   <insert id="insertVolumetry" parameterType="AtolVolumetryEntry" useGeneratedKeys="true" keyProperty="id">
-      <include refid="alfresco.atolcd.audit.insert_volumetry_AutoIncrement"/>
+    <include refid="alfresco.atolcd.audit.insert_volumetry_AutoIncrement"/>
   </insert>
 </mapper>

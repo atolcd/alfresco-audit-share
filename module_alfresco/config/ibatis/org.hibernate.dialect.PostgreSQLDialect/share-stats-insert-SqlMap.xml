@@ -3,25 +3,21 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="alfresco.atolcd.audit.insert">
-    <insert id="insertEntry" parameterType="AtolAuditEntry" >
-    
-      <selectKey resultType="long" keyProperty="id" order="BEFORE">
-        select nextVal('share_stats_audit_entry_seq')
-      </selectKey>
-      
-      insert into share_stats_audit_entry (id,audit_user_id, audit_site, audit_app_name, audit_action_name, audit_object, audit_time)
-      values (#{id},#{auditUserId},#{auditSite},#{auditAppName},#{auditActionName},#{auditObject},#{auditTime})
-    
-    </insert>
-    
-    <insert id="insertVolumetry" parameterType="AtolVolumetryEntry">
-    
-      <selectKey resultType="long" keyProperty="id" order="BEFORE">
-        select nextVal('share_stats_site_volumetry_seq')
-      </selectKey>
-        
-      insert into share_stats_site_volumetry (id, site_id, site_size, folder_count, file_count, at_time)
-      values (#{id},#{siteId},#{siteSize},#{folderCount},#{fileCount},#{atTime})
-      
-    </insert> 
+  <insert id="insertEntry" parameterType="AtolAuditEntry" >
+    <selectKey resultType="long" keyProperty="id" order="BEFORE">
+      select nextVal('share_stats_audit_entry_seq')
+    </selectKey>
+
+    insert into share_stats_audit_entry (id, audit_user_id, audit_site, audit_app_name, audit_action_name, audit_object, audit_time)
+    values (#{id}, #{auditUserId}, #{auditSite}, #{auditAppName}, #{auditActionName}, #{auditObject}, #{auditTime})
+  </insert>
+
+  <insert id="insertVolumetry" parameterType="AtolVolumetryEntry">
+    <selectKey resultType="long" keyProperty="id" order="BEFORE">
+      select nextVal('share_stats_site_volumetry_seq')
+    </selectKey>
+
+    insert into share_stats_site_volumetry (id, site_id, site_size, folder_count, file_count, at_time)
+    values (#{id}, #{siteId}, #{siteSize}, #{folderCount}, #{fileCount}, #{atTime})
+  </insert>
 </mapper>
