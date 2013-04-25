@@ -47,9 +47,9 @@ function buildChart(params) {
   };
 
   if (params.additionalsParams.chartType == "vbar") {
-    bars.elements = buildBarChartElements(params, x_labels.labels);
+    bars.elements = buildSingleChartElements(params, x_labels.labels);
   } else if (params.additionalsParams.chartType == "line") {
-    bars.elements = buildLineChartElements(params, x_labels.labels);
+    bars.elements = buildSingleChartElements(params, x_labels.labels, params.additionalsParams.chartType);
   } else if (params.additionalsParams.chartType == "lines") {
     bars.elements = buildLinesChartElements(params, x_labels.labels);
   } else {
@@ -73,9 +73,8 @@ function buildChart(params) {
   return bars;
 }
 
-function buildBarChartElements(params, labels) {
+function buildSingleChartElements(params, labels, type) {
   var max = 0,
-      elements = [],
       values = [];
 
   // Boucle sur les éléments par date
@@ -87,25 +86,47 @@ function buildBarChartElements(params, labels) {
       tip += "\n" + getMessage("label.menu.site") + " " + params.sites[0];
     }
 
-    values.push({
+    var elt = {
       top: value,
       tip: tip
-    });
+    };
+
+    if (type && type == "line") {
+      if (value == 0) {
+        elt = null;
+      } else {
+        elt.type = "dot";
+        elt.value = value;
+      }
+    }
+
+    values.push(elt);
 
     max = max > value ? max : value;
   }
   // Mise à jour du maximum
   params.max = max ? roundMax(max) : 10;
 
-  elements.push({
+  var element = {
     "type": "bar_glass",
     "alpha": 0.75,
     "colour": barChartColors["volumetry"],
     "font-size": 10,
     "values": values
-  });
+  };
 
-  return elements;
+  if (type && type == "line") {
+    element.type = "line";
+    element.width = 2;
+    element["dot-style"] = {
+      "type": "dot",
+      "dot-size": 3,
+      "halo-size": 1,
+      "colour": barChartColors["volumetry"]
+    };
+  }
+
+  return [element];
 }
 
 function buildStackedBarChartElements(params, labels) {
@@ -156,52 +177,6 @@ function buildStackedBarChartElements(params, labels) {
     "font-size": 10,
     "values": values
   }];
-}
-
-function buildLineChartElements(params, labels) {
-  var max = 0,
-      elements = [],
-      values = [];
-
-  // Boucle sur les éléments par date
-  for (var i=0, ii=params.values.length ; i<ii ; i++) {
-    var value = roundNumber(params.values[i] / (1024 * 1024), 2);
-
-    var tip = labels[i] + "\n" + getMessage("volumetry", "graph.label.", getMessage("size.megabytes")) + " : " + value + " " + getMessage("size.megabytes");
-    if (params.sites && params.sites.length == 1) {
-      tip += "\n" + getMessage("label.menu.site") + " " + params.sites[0];
-    }
-
-    var value_obj = {
-      type: "dot",
-      value: value,
-      tip: tip
-    };
-
-    values.push((value === 0) ? null : value_obj);
-
-    max = max > value ? max : value;
-  }
-
-  // Mise à jour du maximum
-  params.max = max ? roundMax(max) : 10;
-
-  elements.push({
-    "type": "line",
-    "alpha": 0.75,
-    "font-size": 10,
-    "values": values,
-    "dot-style": {
-      "type": "dot",
-      "dot-size": 3,
-      "halo-size": 1,
-      "colour": barChartColors["volumetry"]
-    },
-    "width": 2,
-    "colour": barChartColors["volumetry"]
-  });
-
-  return elements;
 }
 
 function buildLinesChartElements(params, labels) {
