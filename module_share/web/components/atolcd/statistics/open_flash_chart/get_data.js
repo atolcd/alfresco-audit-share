@@ -243,11 +243,13 @@ function buildHBarChartElements(params, labels) {
       colour: i ? barChartColors["less-popular"] : barChartColors["most-popular"]
     };
 
-    value_obj["on-click"] = YAHOO.lang.substitute(urlTemplate[item.siteComponent] || "", {
+    item.url = YAHOO.lang.substitute(urlTemplate[item.siteComponent] || "", {
       site: item.site,
       nodeRef: item.nodeRef,
       id: encodeURIComponent(item.name)
     });
+
+    value_obj["on-click"] = "displayNodeDetailsPopup('" + escape(YAHOO.lang.JSON.stringify(item)) + "')";
 
     values.push(value_obj);
     labels.push(crop(params.items[ii - 1 - i].displayName));
@@ -262,6 +264,41 @@ function buildHBarChartElements(params, labels) {
   }];
 
   return elements;
+}
+
+function displayNodeDetailsPopup(itemStr) {
+  var item = YAHOO.lang.JSON.parse(unescape(itemStr));
+
+  // TODO: make something cleaner
+  var body = '<div class="node-details-popup">';
+  body += '<p><label>' + getMessage("label.popup.filename") + '</label>' + item.displayName + '</p>';
+  body += (item.siteTitle) ? '<p><label>' + getMessage("label.popup.type") + '</label>' + getMessage("site.component." + item.siteComponent) + '</p>' : '';
+  body += (item.siteTitle) ? '<p><label>' + getMessage("label.menu.site") + '</label>' + item.siteTitle + '</p>' : '';
+  body += '<p><label>' + getMessage("label.popup.hits") + '</label>' + item.popularity + '</p>';
+  body += '</div>';
+
+  Alfresco.util.PopupManager.displayPrompt({
+    title: item.displayName,
+    text: body,
+    close: true,
+    noEscape: true,
+    buttons: [{
+      text: getMessage("button.go-to-node-page"),
+      handler:{
+        fn: function(e, param) {
+          window.open(param.url);
+          this.destroy();
+        },
+        obj: item
+      }
+    }, {
+      text: getMessage("button.cancel"),
+      handler: function () {
+        this.destroy();
+      },
+      isDefault: true
+    }]
+  });
 }
 
 /**
