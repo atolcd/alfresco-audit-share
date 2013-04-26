@@ -1,22 +1,33 @@
+-- Copyright (C) 2013 Atol Conseils et Développements.
+-- http://www.atolcd.com/
 --
+-- This program is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU Lesser General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- This program is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU Lesser General Public License for more details.
+--
+-- You should have received a copy of the GNU Lesser General Public License
+-- along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 -- Title:      ShareStats Audit tables
 -- Database:   MySQL InnoDB
--- Since:      V3.4
--- Author:     Alexandre Nicolas
---
---
 
 CREATE SEQUENCE share_stats_audit_entry_seq START WITH 1 INCREMENT BY 1;
 CREATE TABLE share_stats_audit_entry
 (
-   id INT8 NOT NULL,
-   audit_user_id VARCHAR(255) NOT NULL,
-   audit_site VARCHAR(255),
-   audit_app_name VARCHAR(255) NOT NULL,
-   audit_action_name VARCHAR(255),
-   audit_object VARCHAR(255),
-   audit_time INT8 NOT NULL,
-   PRIMARY KEY (id)
+  id INT8 NOT NULL,
+  audit_user_id VARCHAR(255) NOT NULL,
+  audit_site VARCHAR(255),
+  audit_app_name VARCHAR(255) NOT NULL,
+  audit_action_name VARCHAR(255),
+  audit_object VARCHAR(255),
+  audit_time INT8 NOT NULL,
+  PRIMARY KEY (id)
 );
 CREATE INDEX idx_share_stats_alf_aud_ent_tm ON share_stats_audit_entry (audit_time);
 

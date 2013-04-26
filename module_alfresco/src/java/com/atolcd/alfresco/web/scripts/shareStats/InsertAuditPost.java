@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et DÃ©veloppements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.atolcd.alfresco.web.scripts.shareStats;
 
 import java.sql.SQLException;
@@ -29,9 +46,9 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
 
 	private static final String SITE_TO_FIND = "/service";
 	public static final String SITE_REPOSITORY = "_repository";
-
 	private static final String MODEL_SUCCESS = "success";
-	// SqlMapClientTemplate for ibatis calls
+
+	// SqlMapClientTemplate for MyBatis calls
 	private SqlSessionTemplate sqlSessionTemplate;
 	private SiteService siteService;
 
@@ -72,10 +89,11 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
 				}
 			}
 		} catch (InvalidNodeRefException invalidNodeRefException) {
-			// Le noeud n'existe pas/plus, on ne déclenche rien. Assainissement
-			// du log ...
+			// Node no longer exists
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (logger.isDebugEnabled()) {
+				logger.debug(e.getMessage(), e);
+			}
 			throw new WebScriptException("[ShareStats-DbInsert] Error in executeImpl function");
 		}
 		return model;
@@ -84,13 +102,13 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
 	public void insert(AuditEntry auditSample) throws SQLException, JSONException {
 		if (!auditSample.getAuditSite().isEmpty()) {
 			sqlSessionTemplate.insert(INSERT_ENTRY, auditSample);
-			logger.info("Insert ok : " + auditSample.toJSON());
+			logger.info("Entry successfully inserted: " + auditSample.toJSON());
 		}
 	}
 
 	public void getSiteFromObject(AuditEntry auditSample) {
-		// Dans le cas où le site est manquant (entrepôt documentaire), on tente
-		// de retrouver le site associé.
+		// Even if we are into the repository, we try to find the site of the
+		// document
 		if (auditSample.getAuditSite().equals(SITE_TO_FIND)) {
 			NodeRef nodeRef = new NodeRef(auditSample.getAuditObject());
 			SiteInfo siteInfo = siteService.getSite(nodeRef);
@@ -100,11 +118,10 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
 				auditSample.setAuditSite(SITE_REPOSITORY);
 			}
 		}
-
 	}
 
 	public void insertVolumetry(AtolVolumetryEntry atolVolumetryEntry) {
 		sqlSessionTemplate.insert(INSERT_VOLUMETRY, atolVolumetryEntry);
-		logger.info("Insert volumetrie ok ");
+		logger.info("Volumetry entry successfully inserted.");
 	}
 }

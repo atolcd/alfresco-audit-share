@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et Développements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.atolcd.alfresco.web.scripts.shareStats;
 
 import java.util.ArrayList;
@@ -23,10 +40,12 @@ import com.atolcd.alfresco.AuditQueryParameters;
 import com.atolcd.alfresco.helper.PermissionsHelper;
 
 public class SelectVolumetryGet extends DeclarativeWebScript implements InitializingBean {
+	// Logger
+	private static final Log logger = LogFactory.getLog(SelectVolumetryGet.class);
+
+	// SqlMapClientTemplate for MyBatis calls
 	private SqlSessionTemplate sqlSessionTemplate;
 	private SiteService siteService;
-	// logger
-	private static final Log logger = LogFactory.getLog(SelectVolumetryGet.class);
 
 	private static final String SELECT_VOLUMETRY = "alfresco.atolcd.audit.selectVolumetry";
 
@@ -64,7 +83,7 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 						siteIds = params.getSitesId();
 					}
 
-					// On travaille site par site
+					// Site by site
 					params.setSitesId(Collections.<String> emptyList());
 
 					for (int i = 0; i < dates.length - 1; i++) {
@@ -98,14 +117,15 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 
 			return model;
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (logger.isDebugEnabled()) {
+				logger.debug(e.getMessage(), e);
+			}
 			throw new WebScriptException("[ShareStats - SelectVolumetry] Error in executeImpl function");
 		}
 	}
 
 	public AuditQueryParameters buildParametersFromRequest(WebScriptRequest req) {
 		try {
-			// Probleme de long / null
 			String dateFrom = req.getParameter("from");
 			String dateTo = req.getParameter("to");
 
@@ -119,8 +139,7 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 			params.setSlicedDates(req.getParameter("dates"));
 			return params;
 		} catch (Exception e) {
-			logger.error("Erreur lors de la construction des parametres [select.java]");
-			e.printStackTrace();
+			logger.error("Error building parameters", e);
 			return null;
 		}
 	}

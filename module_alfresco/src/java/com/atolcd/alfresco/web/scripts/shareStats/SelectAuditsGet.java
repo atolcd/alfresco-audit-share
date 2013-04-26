@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et Dï¿½veloppements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.atolcd.alfresco.web.scripts.shareStats;
 
 import java.sql.SQLException;
@@ -33,7 +50,10 @@ import com.atolcd.alfresco.AuditQueryParameters;
 import com.atolcd.alfresco.helper.PermissionsHelper;
 
 public class SelectAuditsGet extends DeclarativeWebScript implements InitializingBean {
-	// SqlMapClientTemplate for ibatis calls
+	// Logger
+	private static final Log logger = LogFactory.getLog(SelectAuditsGet.class);
+
+	// SqlMapClientTemplate for MyBatis calls
 	private SqlSessionTemplate sqlSessionTemplate;
 	private NodeService nodeService;
 
@@ -50,9 +70,6 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 	static final QName PROP_CALENDAR_EVENT_WHAT = QName.createQName("http://www.alfresco.org/model/calendar", "whatEvent");
 	static final QName TYPE_LINK = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "link");
 	static final QName PROP_LINK_TITLE = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "title");
-
-	// logger
-	private static final Log logger = LogFactory.getLog(SelectAuditsGet.class);
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
 		this.sqlSessionTemplate = sqlSessionTemplate;
@@ -76,7 +93,6 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 				// Check for the sqlMapClientTemplate Bean
 				if (this.sqlSessionTemplate != null) {
 					// Get the input content given into the request.
-					// String jsonArg = req.getContent().getContent();
 					AuditQueryParameters params = buildParametersFromRequest(req);
 					String type = req.getParameter("type");
 					String stringLimit = req.getParameter("limit");
@@ -92,7 +108,9 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 
 			return model;
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (logger.isDebugEnabled()) {
+				logger.debug(e.getMessage(), e);
+			}
 			throw new WebScriptException("[ShareStats - SelectAudits] Error in executeImpl function");
 		}
 	}
@@ -133,7 +151,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 
 		Iterator<AuditObjectPopularity> iterator = auditObjectPopularityList.iterator();
 		int treatedItems = 0;
-		// On test si les éléments retournés existent toujours
+		// Verify if the returned items always exist
 		while (iterator.hasNext() && treatedItems < limit) {
 			AuditObjectPopularity auditObjectPopularity = iterator.next();
 			try {
@@ -147,7 +165,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 				}
 			} catch (AlfrescoRuntimeException e) {
 				iterator.remove();
-				logger.error(e);
+				logger.error(e.getMessage(), e);
 			}
 		}
 		limit = auditObjectPopularityList.size() > limit ? limit : auditObjectPopularityList.size();
@@ -176,7 +194,6 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 
 	public AuditQueryParameters buildParametersFromRequest(WebScriptRequest req) {
 		try {
-			// Probleme de long / null
 			String dateFrom = req.getParameter("from");
 			String dateTo = req.getParameter("to");
 
@@ -191,8 +208,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 			params.setSlicedDates(req.getParameter("dates"));
 			return params;
 		} catch (Exception e) {
-			logger.error("Erreur lors de la construction des parametres [select.java]");
-			e.printStackTrace();
+			logger.error("Error building parameters", e);
 			return null;
 		}
 	}
@@ -202,29 +218,28 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 
 		QName nodeType = nodeService.getType(nodeRef);
 		if (nodeType.equals(TYPE_DATALIST)) {
-			// DataList : titre
+			// DataList: use title
 			return (String) nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE);
 		} else if (nodeType.equals(ForumModel.TYPE_TOPIC)) {
-			// Discussion : on récupère le titre de l'enfant du même nom qui est
-			// la discussion principale
+			// Discussion: find first child that have the same name
 			NodeRef firstTopic = nodeService.getChildByName(nodeRef, ContentModel.ASSOC_CONTAINS, nodeName);
 			if (firstTopic != null) {
 				return (String) nodeService.getProperty(firstTopic, ContentModel.PROP_TITLE);
 			}
 		} else if (nodeType.equals(TYPE_LINK)) {
-			// Lien : titre du lien (modèle particulier)
+			// Link: use link title
 			return (String) nodeService.getProperty(nodeRef, PROP_LINK_TITLE);
 		} else if (nodeType.equals(TYPE_CALENDAR_EVENT)) {
-			// Evenement
+			// Event: use 'what' metadata
 			return (String) nodeService.getProperty(nodeRef, PROP_CALENDAR_EVENT_WHAT);
 		} else {
-			// Others : content, wiki, blog
+			// Others: content, wiki, blog
 			NodeRef parentRef = nodeService.getPrimaryParent(nodeRef).getParentRef();
 			if (parentRef != null) {
 				if (nodeService.hasAspect(parentRef, SiteModel.ASPECT_SITE_CONTAINER)) {
 					String parentName = (String) nodeService.getProperty(parentRef, ContentModel.PROP_NAME);
 					if (parentName.equals("blog") || parentName.equals("wiki")) {
-						// Blog ou Wiki
+						// For Blog or Wiki pages, we use the title
 						return (String) nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE);
 					}
 				}

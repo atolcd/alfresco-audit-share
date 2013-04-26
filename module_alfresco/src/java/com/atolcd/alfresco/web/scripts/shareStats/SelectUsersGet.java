@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et Développements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.atolcd.alfresco.web.scripts.shareStats;
 
 import java.util.ArrayList;
@@ -28,6 +45,9 @@ import com.atolcd.alfresco.AuditQueryParameters;
 import com.atolcd.alfresco.helper.PermissionsHelper;
 
 public class SelectUsersGet extends DeclarativeWebScript implements InitializingBean {
+	// Logger
+	private static final Log logger = LogFactory.getLog(SelectUsersGet.class);
+
 	private SqlSessionTemplate sqlSessionTemplate;
 	private NodeService nodeService;
 	private SiteService siteService;
@@ -39,9 +59,6 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	private static final String SELECT_CONNECTED_USERS = "alfresco.atolcd.audit.selectConnectedUsers";
 	private static final String SELECT_QNAME_ID = "alfresco.atolcd.audit.selectQNameId";
 	private static final String SELECT_SITES_MEMBERS = "alfresco.atolcd.audit.selectSiteMember";
-
-	// logger
-	private static final Log logger = LogFactory.getLog(SelectUsersGet.class);
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
 		this.sqlSessionTemplate = sqlSessionTemplate;
@@ -91,8 +108,10 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 
 			return model;
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new WebScriptException("[ShareStats - SelectAudits] Error in executeImpl function");
+			if (logger.isDebugEnabled()) {
+				logger.debug(e.getMessage(), e);
+			}
+			throw new WebScriptException("[ShareStats - SelectUsers] Error in executeImpl function");
 		}
 	}
 
@@ -134,10 +153,11 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 		List<String> users = new ArrayList<String>();
 		List<String> groups = new ArrayList<String>();
 
-		// Tous les membres de sites
+		// All site members
 		atolAuthorityParameters.setPersonQnameId(getPersonQnameId());
 		users = (List<String>) this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
-		// Tous les groupes de sites
+
+		// All groups of the site
 		atolAuthorityParameters.setPersonQnameId(getContainerQnameId());
 		groups = (List<String>) this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
 
@@ -159,8 +179,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 			if (site != null) {
 				params.setSite(site);
 			} else {
-				// On liste tous les sites, puis on ajoute le nom du groupe
-				// container
+				// Add the user's sites, plus the container group
 				List<SiteInfo> sitesInfo = siteService.listSites("", "");
 				if (sitesInfo.size() > 0) {
 					for (SiteInfo siteInfo : sitesInfo) {
@@ -173,8 +192,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 			params.setMemberQnameId(this.getMemberQnameId());
 			return params;
 		} catch (Exception e) {
-			logger.error("Erreur lors de la construction des parametres [buildAuthorityParametersFromRequest]");
-			e.printStackTrace();
+			logger.error("Error building parameters", e);
 			return null;
 		}
 	}
@@ -195,8 +213,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 			params.setSlicedDates(req.getParameter("dates"));
 			return params;
 		} catch (Exception e) {
-			logger.error("Erreur lors de la construction des parametres [select.java]");
-			e.printStackTrace();
+			logger.error("Error building parameters", e);
 			return null;
 		}
 	}

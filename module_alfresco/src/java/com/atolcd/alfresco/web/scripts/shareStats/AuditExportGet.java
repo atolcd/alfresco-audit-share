@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et D√©veloppements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.atolcd.alfresco.web.scripts.shareStats;
 
 import java.io.ByteArrayOutputStream;
@@ -12,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.site.SiteService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.extensions.surf.util.I18NUtil;
@@ -28,6 +47,8 @@ import com.atolcd.alfresco.helper.PermissionsHelper;
 import com.csvreader.CsvWriter;
 
 public class AuditExportGet extends AbstractWebScript implements InitializingBean {
+	// Logger
+	private static final Log logger = LogFactory.getLog(AuditExportGet.class);
 
 	private SelectAuditsGet wsSelectAudits;
 	private SiteService siteService;
@@ -46,15 +67,12 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 		Assert.notNull(siteService);
 	}
 
-	/**
-	 * 
-	 */
 	@Override
 	public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException {
 		try {
 			if (PermissionsHelper.isAuthorized(req)) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				Charset charset = Charset.forName("UTF-8");// ISO-8859-1
+				Charset charset = Charset.forName("UTF-8"); // ISO-8859-1
 				CsvWriter csv = new CsvWriter(baos, ',', charset);
 
 				Map<String, Object> model = new HashMap<String, Object>();
@@ -72,14 +90,16 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 
 				csv.close();
 				res.setHeader("Content-Disposition", "attachment; filename=\"export.csv\"");
-				res.setContentType("application/csv");// application/octet-stream
+				res.setContentType("application/csv"); // application/octet-stream
 				baos.writeTo(res.getOutputStream());
 			} else {
 				res.setStatus(Status.STATUS_UNAUTHORIZED);
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (logger.isDebugEnabled()) {
+				logger.debug(e.getMessage(), e);
+			}
 			res.reset();
 		}
 	}
@@ -87,9 +107,15 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 	/**
 	 * 
 	 * @param model
-	 *            Mod√®le dans lequel on √©crit
+	 *            Model for template rendering
 	 * @param csv
-	 *            CsvWriter utilis√© pour √©crire dans le mod√®le
+	 *            CsvWriter object used to add results into the model
+	 * @param params
+	 *            Audit query parameters
+	 * @param type
+	 *            Type of the export (name of the csv column)
+	 * @param interval
+	 *            Date interval
 	 * @throws SQLException
 	 * @throws JSONException
 	 * @throws IOException
@@ -97,15 +123,18 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 	@SuppressWarnings("unchecked")
 	public void buildCsvFromRequest(Map<String, Object> model, CsvWriter csv, AuditQueryParameters params, String type, String interval)
 			throws SQLException, JSONException, IOException {
-		// SÈlection de TOUS les audits.
+		// Selection of ALL audits
 		String dateRecord = null;
 		if (model.containsKey("dates")) {
 			csv.writeRecord(new String[] { I18NUtil.getMessage("csv.date"), I18NUtil.getMessage("csv.action"),
 					I18NUtil.getMessage("csv.count") });
 			List<List<AuditCount>> auditCountsLists = (List<List<AuditCount>>) model.get("dates");
-			// Actuellement, on ne dÈpasse pas 3 actions / graphique / export
+
+			// XXX: for the moment, no more than 3 actions per graphic per
+			// export
 			Map<String, Integer> actions = new HashMap<String, Integer>(3);
 			getAllActions(actions, auditCountsLists);
+
 			String[] slicedDates = params.getSlicedDates().split(",");
 			for (int i = 0; i < auditCountsLists.size(); i++) {
 				dateRecord = getStringDate(Long.parseLong(slicedDates[i]), interval);
@@ -133,8 +162,12 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 	/**
 	 * 
 	 * @param csv
-	 *            CsvWriter dans lequel on Ècrit
+	 *            CsvWriter object used to write results
 	 * @param auditCounts
+	 *            Audit results
+	 * @param date
+	 *            Date
+	 * @param actions
 	 * @throws IOException
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -185,10 +218,12 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 
 	/**
 	 * 
-	 * @param gc
-	 *            GrÈgorianCalendar dont on souhaite rÈcupÈrer la date
+	 * @param timestamp
+	 *            Date timestamp
+	 * @param dateInterval
+	 *            Date interval
 	 * 
-	 * @return date String
+	 * @return Date String
 	 */
 	public String getStringDate(long timestamp, String dateInterval) {
 		GregorianCalendar gc = new GregorianCalendar();

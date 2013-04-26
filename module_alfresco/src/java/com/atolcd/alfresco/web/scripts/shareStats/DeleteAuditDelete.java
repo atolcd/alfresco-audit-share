@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et DÃ©veloppements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.atolcd.alfresco.web.scripts.shareStats;
 
 import java.util.HashMap;
@@ -16,16 +33,15 @@ import org.springframework.util.Assert;
 import com.atolcd.alfresco.AuditQueryParameters;
 
 public class DeleteAuditDelete extends DeclarativeWebScript implements InitializingBean {
-	// SqlMapClientTemplate for ibatis calls
+	// Logger
+	private static final Log logger = LogFactory.getLog(DeleteAuditDelete.class);
+
+	// SqlMapClientTemplate for MyBatis calls
 	private static SqlSessionTemplate sqlSessionTemplate;
 
-	// Identifiant de la requête côté iBatis
+	// MyBatis query ids
 	private static final String DELETE_BY_PARAMETERS = "alfresco.atolcd.audit.deleteByParameters";
-	private static final String MSG_OK = "La suppression des audits s'est déroulée correctement.";
 	private static final String MODEL_SUCCESS = "success";
-
-	// logger
-	private static final Log logger = LogFactory.getLog(DeleteAuditDelete.class);
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
 		DeleteAuditDelete.sqlSessionTemplate = sqlSessionTemplate;
@@ -40,16 +56,19 @@ public class DeleteAuditDelete extends DeclarativeWebScript implements Initializ
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		Map<String, Object> model = new HashMap<String, Object>();
 
-		// TODO : A implémenter avec une interface administration
+		// TODO: To be implemented for an administration interface
 
 		model.put(MODEL_SUCCESS, true);
 		return model;
 	}
 
 	/**
-	 * Supprime des entrées d'audit
+	 * Supprime des entrÃ©es d'audit
 	 * 
-	 * @param auditEntries
+	 * @param from
+	 *            Date from (timestamp)
+	 * @param to
+	 *            Date to (timestamp)
 	 */
 	public static void deleteAuditEntries(long from, long to) {
 		AuditQueryParameters auditQueryParameters = new AuditQueryParameters();
@@ -57,7 +76,7 @@ public class DeleteAuditDelete extends DeclarativeWebScript implements Initializ
 		auditQueryParameters.setDateTo(to);
 		sqlSessionTemplate.delete(DELETE_BY_PARAMETERS, auditQueryParameters);
 		if (logger.isDebugEnabled()) {
-			logger.debug(MSG_OK);
+			logger.debug("Audits successfully deleted.");
 		}
 	}
 }

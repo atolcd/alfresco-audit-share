@@ -1,6 +1,24 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et DÃ©veloppements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 try {
-  // On parcourt tous les sites
-  var sitesNode =  search.luceneSearch('+PATH:"/app:company_home/st:sites/."');
+  // Find all sites
+  var sitesNode = search.luceneSearch('+PATH:"/app:company_home/st:sites/."');
   if (sitesNode && sitesNode.length == 1) {
     sitesNode = sitesNode[0];
     var success;
@@ -12,34 +30,32 @@ try {
         if (site) {
           var documentLibrary = site.getContainer("documentLibrary");
           if (documentLibrary) {
-            // Calcul de la volumétrie
             var volumetry = calculateVolumetry(documentLibrary);
 
-            // Stockage des informations en base
-            var timestamp = new Date().getTime();
-            success = sharestats.insertVolumetry(siteShortName, volumetry.siteSize, volumetry.foldersCount, volumetry.documentsCount, timestamp);
-            if(success){
-              logger.log("Le site '" + siteShortName + "' possède " + volumetry.documentsCount + " document(s), " + volumetry.foldersCount + " dossier(s) et une volumétrie de : " + Math.round(volumetry.siteSize / 1024 / 1024) + " Mo.");
+            // Insert data into database
+            success = sharestats.insertVolumetry(siteShortName, volumetry.siteSize, volumetry.foldersCount, volumetry.documentsCount, new Date().getTime());
+            if (success){
+              logger.log("Site: '" + siteShortName + "', documents count: " + volumetry.documentsCount + ", folders count: " + volumetry.foldersCount + ", volumetry: " + Math.round(volumetry.siteSize / 1024 / 1024) + " MB.");
             } else {
-              logger.log("Erreur pendant l'insertion de la volumetrie du site : " + siteShortName);
+              logger.log("An error occurred while inserting data from '" + siteShortName + "' site.");
             }
          }
           else {
-            logger.log("Le site " + siteShortName + " ne possède pas d'espace documentaire.");
+            logger.log("Document Library does not exist into the '" + siteShortName + "' site.");
           }
         }
         else {
-          logger.log("Impossible de récupérer le site : " + siteShortName);
+          logger.log("Cannot find site: " + siteShortName);
         }
       }
     }
   }
   else {
-    logger.log("Impossible de trouver l'espace 'Sites'");
+    logger.log("'Sites' folder cannot be find");
   }
 }
 catch(e) {
-  logger.log("Une erreur s'est produite pendant le calcul de la volumétrie des sites.");
+  logger.log("An error occurred while calculating sites volumetry.");
   logger.log(e);
 }
 
@@ -58,7 +74,7 @@ function calculateVolumetry(node) {
     }
   }
   else {
-    logger.log("Erreur paramètre : le noeud doit être un dossier.");
+    logger.log("Wrong parameter: the node must be a folder.");
   }
 
   return res;

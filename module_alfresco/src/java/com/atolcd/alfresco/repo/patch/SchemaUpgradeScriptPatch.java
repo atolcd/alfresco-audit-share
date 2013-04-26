@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et Développements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.atolcd.alfresco.repo.patch;
 
 import java.io.BufferedReader;
@@ -168,7 +185,7 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 	 * @return Returns an input stream onto the script, otherwise null
 	 */
 	@SuppressWarnings("rawtypes")
-	private InputStream getScriptInputStream( Class dialectClazz, String scriptUrl) throws Exception {
+	private InputStream getScriptInputStream(Class dialectClazz, String scriptUrl) throws Exception {
 		// replace the dialect placeholder
 		String dialectScriptUrl = scriptUrl.replaceAll(PLACEHOLDER_SCRIPT_DIALECT, dialectClazz.getName());
 		// get a handle on the resource
@@ -200,6 +217,7 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 	 *            the URL of the script to report. If this is null, the script
 	 *            is assumed to have been auto-generated.
 	 */
+	@SuppressWarnings("resource")
 	private void executeScriptFile(Configuration cfg, Connection connection, File scriptFile, String scriptUrl) throws Exception {
 		final Dialect dialect = Dialect.getDialect(cfg.getProperties());
 
@@ -290,7 +308,8 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 					if (args.length == 3 && (sepIndex = args[1].indexOf('.')) != -1) {
 						doBatch = true;
 						// Select the upper bound of the table column
-						String stmt = "SELECT MAX(" + args[1].substring(sepIndex + 1) + ") AS upper_limit FROM " + args[1].substring(0, sepIndex);
+						String stmt = "SELECT MAX(" + args[1].substring(sepIndex + 1) + ") AS upper_limit FROM "
+								+ args[1].substring(0, sepIndex);
 						Object fetchedVal = executeStatement(connection, stmt, "upper_limit", false, line, scriptFile);
 						if (fetchedVal instanceof Number) {
 							batchUpperLimit = ((Number) fetchedVal).intValue();
@@ -422,7 +441,8 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 	 * @param fetchColumnName
 	 *            the name of the column value to return
 	 */
-	private Object executeStatement(Connection connection, String sql, String fetchColumnName, boolean optional, int line, File file) throws Exception {
+	private Object executeStatement(Connection connection, String sql, String fetchColumnName, boolean optional, int line, File file)
+			throws Exception {
 		StringBuilder executedStatements = executedStatementsThreadLocal.get();
 		if (executedStatements == null) {
 			throw new IllegalArgumentException("The executedStatementsThreadLocal must be populated");
