@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et DÃ©veloppements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 // AtolStatistics namespace
 if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics = {}; }
 
@@ -30,13 +48,13 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
   YAHOO.extend(AtolStatistics.UserConnections, AtolStatistics.Tool, {
     /**
      * @attribute recentlyConnectedDelay
-     * Durée (en minutes) depuis laquelle on retrouve les utilisateurs récemments connectés
+     * DurÃ©e (en minutes) depuis laquelle on retrouve les utilisateurs rÃ©cemments connectÃ©s
      */
     recentlyConnectedDelay: 30,
 
     /**
      * @attribute headers
-     * Contient les éléments Dom des différents headers de la table sous le graphe
+     * Contient les Ã©lÃ©ments Dom des diffÃ©rents headers de la table sous le graphe
      */
     headers: [],
 
@@ -104,7 +122,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
      * @method prepareRecentlyConnectedUsersRequest
      */
     prepareRecentlyConnectedUsersRequest: function UserConnections_prepareRecentlyConnectedUsersRequest() {
-      // Récupération des variables de l'UI
+      // RÃ©cupÃ©ration des variables de l'UI
       var site = this.convertMenuValue(this.widgets.siteButton.value),
           currentDate = new Date(),
           params = "";
@@ -127,12 +145,12 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
      * @method prepareUserRequest
      */
     prepareUserRequest: function UserConnections_prepareUserRequest(type) {
-      // Récupération des variables de l'UI
+      // RÃ©cupÃ©ration des variables de l'UI
       var dateFilter = this.options.currentDateFilter,
         site = this.convertMenuValue(this.widgets.siteButton.value),
         params = "";
 
-      // Création du tableau d'intervalle de dates
+      // CrÃ©ation du tableau d'intervalle de dates
       tsArray = this.buildTimeStampArray();
       params = "?type=" + type;
       params += "&from=" + tsArray[0];
@@ -189,21 +207,21 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     },
 
     onSearch: function UserConnections_onSearch() {
-      // Récupération des variables de l'UI
+      // RÃ©cupÃ©ration des variables de l'UI
       var dateFilter = this.options.currentDateFilter,
         site = this.convertMenuValue(this.widgets.siteButton.value),
         tsString = "",
         params = "";
 
-      // Création du tableau d'intervalle de dates
+      // CrÃ©ation du tableau d'intervalle de dates
       if (dateFilter) {
         var tsArray = this.buildTimeStampArray();
-        //Mise à jour des labels
+        //Mise Ã  jour des labels
         this.updateUsersLabels(tsArray);
         tsString = tsArray.toString();
       }
 
-      // Création des paramètres et exécution de la requête
+      // CrÃ©ation des paramÃ¨tres et exÃ©cution de la requÃªte
       params = "?type=users-count";
       params += "&dates=" + tsString;
       if (site) {
@@ -240,8 +258,8 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     },
 
     /**
-     * @method displayGraph Affiche le requête suite à une requête Ajax
-     * @param response Réponse de la requête
+     * @method displayGraph Affiche le requÃªte suite Ã  une requÃªte Ajax
+     * @param response RÃ©ponse de la requÃªte
      */
     displayGraph: function UserConnections_displayGraph(response) {
       var additionalsParams, id, swf, chartTag;
@@ -260,7 +278,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         if (chartTag == "embed" || chartTag == "object") {
           swf.load(getUserFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
         } else {
-          // Création variables et attribut - GetFlashData défini dans get_data.js - id : Variables json pour ofc.
+          // CrÃ©ation variables et attribut - GetFlashData dÃ©fini dans get_data.js - id : Variables json pour ofc.
           var flashvars = {
             "get-data": "getUserFlashData",
             "id": escape(YAHOO.lang.JSON.stringify(response.json))
@@ -274,7 +292,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
               AllowScriptAccess: "always"
             };
 
-          // Création du graphique Flash.
+          // CrÃ©ation du graphique Flash.
           swfobject.embedSWF(this.options.pathToSwf, id, additionalsParams.width, additionalsParams.height, "9.0.0", "expressInstall.swf", flashvars, params, attributes);
         }
 
@@ -287,8 +305,8 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     },
 
     /**
-     * @method buildParams Construit une chaîne de caractère pour passer les arguments en GET
-     * @return string params argument à passer à la requête
+     * @method buildParams Construit une chaÃ®ne de caractÃ¨re pour passer les arguments en GET
+     * @return string params argument Ã  passer Ã  la requÃªte
      */
     buildParams: function UserConnections_buildParams() {
       // TODO:

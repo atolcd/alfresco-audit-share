@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et Développements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.atolcd.alfresco;
 
 import java.io.ByteArrayInputStream;
@@ -19,6 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.abdera.protocol.client.util.MethodHelper.Method;
 import org.apache.commons.httpclient.URIException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,39 +64,45 @@ import com.atolcd.alfresco.helper.AuditHelper;
 
 @SuppressWarnings("deprecation")
 public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
+    // Logger
+    private static final Log logger = LogFactory.getLog(ProxyAuditFilter.class);
+
     private ServletContext servletContext;
+
+    // XXX: externalize configuration?
+    public static final String SHARE_WEBAPP_NAME = "share";
+    public static final String ALFRESCO_ENDPOINT_ID = "alfresco";
+    public static final String SHORT_PROXY_URL = "/" + SHARE_WEBAPP_NAME + "/proxy/" + ALFRESCO_ENDPOINT_ID + "/";
 
     public static final String KEY_SITE = "site";
     public static final String KEY_MODULE = "module";
     public static final String KEY_ACTION = "action";
 
-    // Faux identifiant de site qui indiquant au webscript d'insertion que le
-    // site doit être recherché
-    // à partir de l'auditObject via le siteService avant insertion.
+    // Fake site id (for repository)
     public static final String TEMP_SITE = "/service";
 
-    // Uri parsées
-    private static final String URI_BLOG = "/share/proxy/alfresco/api/blog/";
-    private static final String URI_LINKS = "/share/proxy/alfresco/api/links/";
-    private static final String URI_DOWNLOAD = "/share/proxy/alfresco/api/node/content/";
+    // URIs parsed
+    private static final String URI_BLOG = SHORT_PROXY_URL + "api/blog/";
+    private static final String URI_LINKS = SHORT_PROXY_URL + "api/links/";
+    private static final String URI_DOWNLOAD = SHORT_PROXY_URL + "api/node/content/";
     private static final String URI_CALENDAR = "/calendar/create";
 
-    // Check Methode de la requête
-    private static final String URI_DISCUSSIONS = "/share/proxy/alfresco/api/forum/";
-    private static final String URI_WIKI = "/share/proxy/alfresco/slingshot/wiki/page/";
+    // Check the method of the request
+    private static final String URI_DISCUSSIONS = SHORT_PROXY_URL + "api/forum/";
+    private static final String URI_WIKI = SHORT_PROXY_URL + "slingshot/wiki/page/";
 
-    private static final String URI_DATALIST = "/share/proxy/alfresco/slingshot/datalists/item/";
-    private static final String URI_DATALIST_DELETE = "/share/proxy/alfresco/slingshot/datalists/action/item";
+    private static final String URI_DATALIST = SHORT_PROXY_URL + "slingshot/datalists/item/";
+    private static final String URI_DATALIST_DELETE = SHORT_PROXY_URL + "slingshot/datalists/action/item";
 
-    // Mise à jour à partir de formulaire
-    private static final String URI_NODE_UPDATE = "/share/proxy/alfresco/api/node/";
+    // Updated from form
+    private static final String URI_NODE_UPDATE = SHORT_PROXY_URL + "api/node/";
     private static final String FORMPROCESSOR = "/formprocessor";
 
-    // Repository et sites
-    private static final String URI_ACTION = "/share/proxy/alfresco/slingshot/doclib/action/files";
+    // Repository and sites
+    private static final String URI_ACTION = SHORT_PROXY_URL + "slingshot/doclib/action/files";
 
-    // Social
-    private static final String URI_SOCIAL_PUBLISHING = "/share/proxy/alfresco/api/publishing/queue";
+    // Social features
+    private static final String URI_SOCIAL_PUBLISHING = SHORT_PROXY_URL + "api/publishing/queue";
 
     private static final String GET = Method.GET.toString();
     private static final String POST = Method.POST.toString();
@@ -103,12 +128,12 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
         HttpServletRequest request = (HttpServletRequest) sReq;
         // HttpServletResponse response = (HttpServletResponse) sRes;
         RequestWrapper requestWrapper = new RequestWrapper(request);
-        // initialize a new request context
+        // Initialize a new request context
         RequestContext context = ThreadLocalRequestContext.getRequestContext();
 
         if (context == null) {
             try {
-                // perform a "silent" init - i.e. no user creation or remote
+                // Perform a "silent" init - i.e. no user creation or remote
                 // connections
                 context = RequestContextUtil.initRequestContext(getApplicationContext(), request, true);
                 try {
@@ -128,7 +153,6 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
 
         if (user != null) {
             try {
-                // Création de l'auditSample
                 JSONObject auditSample = new JSONObject();
                 auditSample.put(AUDIT_ID, "0");
                 auditSample.put(AUDIT_USER_ID, user.getId());
@@ -138,7 +162,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                 auditSample.put(AUDIT_OBJECT, "");
                 auditSample.put(AUDIT_TIME, Long.toString(System.currentTimeMillis()));
 
-                // Ne se déclenche que pour les docs
+                // For documents only
                 if (requestURI.endsWith("/doclib/activity") && request.getMethod().equals(POST)) {
                     String type = request.getContentType().split(";")[0];
                     if (type.equals("application/json")) {
@@ -160,8 +184,8 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                     }
                 } else if (requestURI.startsWith(URI_NODE_UPDATE) && requestURI.endsWith(FORMPROCESSOR)) {
                     JSONObject updatedData = new JSONObject(requestWrapper.getStringContent());
-                    // L'édition en ligne passe par le même formulaire, avec la
-                    // metadonnée cm_content
+                    // Online edit used the same form (plus the cm_content
+                    // metadata)
                     if (!updatedData.has("prop_cm_content")) {
                         auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
                         auditSample.put(AUDIT_OBJECT, getNodeRefFromUrl(requestURI, 1));
@@ -375,14 +399,6 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                         auditSample.put(AUDIT_OBJECT, items.getString(i));
                         remoteCall(request, auditSample);
                     }
-                    // partir sur un stockage plus conséquent des données ?
-                    // Stockage JSON et tout ?
-                    // {
-                    // "channelId":"workspace://SpacesStore/ab665024-e23e-4af5-8964-3f8c5c179a71",
-                    // "publishNodes":["workspace://SpacesStore/0caddbbe-eb7c-4bb6-b6fc-5b023b760b84"],
-                    // "statusUpdate":{"message":"Hrhrhrhrr","channelIds":["workspace://SpacesStore/b0bf5dbc-53a8-4653-b67a-a6c2b88f6cb2"],
-                    // "nodeRef":"workspace://SpacesStore/0caddbbe-eb7c-4bb6-b6fc-5b023b760b84"}
-                    // }
                 } else if (requestURI.indexOf("/ratings") != -1) {
                     auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
                     auditSample.put(AUDIT_SITE, TEMP_SITE);
@@ -398,8 +414,10 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                 }
 
             } catch (JSONException e) {
-                System.out.println("JSON Error during a remote call ...");
-                e.printStackTrace();
+                logger.error("JSON Error during a remote call ...");
+                if (logger.isDebugEnabled()) {
+                    logger.debug(e.getMessage(), e);
+                }
             }
         }
         chain.doFilter(requestWrapper, sRes);
@@ -412,17 +430,18 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
             connector = FrameworkUtil.getConnector(request.getSession(true), auditSample.getString(AUDIT_USER_ID),
                     AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
 
-            // Le webscript est appelé avec l'audit converti en JSON.
             ConnectorContext postContext = new ConnectorContext(null, buildDefaultHeaders());
             postContext.setMethod(HttpMethod.POST);
             postContext.setContentType("text/plain;charset=UTF-8");
             InputStream in = new ByteArrayInputStream(auditSample.toString().getBytes("UTF-8"));
 
-            // Appel au webscript
+            // Webscript call
             connector.call("/share-stats/insert-audit", postContext, in);
 
         } catch (ConnectorServiceException e) {
-            e.printStackTrace();
+            if (logger.isDebugEnabled()) {
+                logger.debug(e.getMessage(), e);
+            }
         }
     }
 
@@ -443,11 +462,15 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                         return (String) json.get("nodeRef");
                     }
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(e.getMessage(), e);
+                    }
                 }
             }
         } catch (ConnectorServiceException e) {
-            e.printStackTrace();
+            if (logger.isDebugEnabled()) {
+                logger.debug(e.getMessage(), e);
+            }
         }
 
         return objectId;
@@ -456,6 +479,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
     /**
      * 
      * @param url
+     * @param offset
      * @return nodeRef
      */
     public String getNodeRefFromUrl(String url, int offset) {
@@ -469,7 +493,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
 
     /**
      * 
-     * @param url
+     * @param urlTokens
      * @return
      */
     public HashMap<String, String> getUrlData(String[] urlTokens) {

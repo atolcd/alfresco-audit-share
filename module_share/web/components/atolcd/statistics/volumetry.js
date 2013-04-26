@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et DÃ©veloppements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 // AtolStatistics namespace
 if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics = {}; }
 
@@ -86,13 +104,13 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     },
 
     onSearch: function Volumetry_onSearch() {
-      // Récupération des variables de l'UI
+      // RÃ©cupÃ©ration des variables de l'UI
       var dateFilter = this.options.currentDateFilter,
           site = this.convertMenuValue(this.widgets.siteButton.value),
           tsString = "",
           params = "";
 
-      // Création du tableau d'intervalle de dates
+      // CrÃ©ation du tableau d'intervalle de dates
       if (dateFilter) {
         tsString = this.buildTimeStampArray().toString();
       }
@@ -106,7 +124,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         }
       }
 
-      // Création des paramètres et exécution de la requête
+      // CrÃ©ation des paramÃ¨tres et exÃ©cution de la requÃªte
       this.lastRequest.params = params;
       this.lastRequest.dateFilter = dateFilter;
 
@@ -164,8 +182,8 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     },
 
     /**
-     * @method displayGraph Affiche le requête suite à une requête Ajax
-     * @param response Réponse de la requête
+     * @method displayGraph Affiche le requÃªte suite Ã  une requÃªte Ajax
+     * @param response RÃ©ponse de la requÃªte
      */
     displayGraph: function Volumetry_displayGraph(response) {
       var additionalsParams, id, swf, chartTag;
@@ -185,7 +203,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         if (chartTag == "embed" || chartTag == "object") {
           swf.load(getVolumetryFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
         } else {
-          // Création variables et attribut - GetFlashData défini dans get_data.js - id : Variables json pour ofc.
+          // CrÃ©ation variables et attribut - GetFlashData dÃ©fini dans get_data.js - id : Variables json pour ofc.
           var flashvars = {
             "get-data": "getVolumetryFlashData",
             "id": escape(YAHOO.lang.JSON.stringify(response.json))
@@ -199,7 +217,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
               AllowScriptAccess: "always"
             };
 
-          // Création du graphique Flash.
+          // CrÃ©ation du graphique Flash.
           swfobject.embedSWF(this.options.pathToSwf, id, additionalsParams.width, additionalsParams.height, "9.0.0", "expressInstall.swf", flashvars, params, attributes);
         }
 

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et DÃ©veloppements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.atolcd.alfresco.helper;
 
 import org.json.JSONException;
@@ -7,10 +24,10 @@ import com.atolcd.alfresco.AuditFilterConstants;
 
 public class AuditHelper {
     /**
-     * Extrait l'action ayant déclenchée l'activité
+     * Extract the action that triggered the activity
      * 
      * @param json
-     * @return
+     * @return String Type
      * @throws JSONException
      */
     public static String extractActionFromActivity(JSONObject json) throws JSONException {
@@ -25,10 +42,10 @@ public class AuditHelper {
     }
 
     /**
-     * Extrait le module concerné par l'activité
+     * Extract the module concerned by the activity
      * 
      * @param json
-     * @return
+     * @return String Module
      * @throws JSONException
      */
     public static String extractModFromActivity(JSONObject json) throws JSONException {

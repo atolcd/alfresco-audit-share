@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et DÃ©veloppements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 // AtolStatistics namespace
 if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics = {}; AtolStatistics.dateFormatMasks = AtolStatistics.dateFormatMasks || {}; }
 
@@ -37,7 +55,7 @@ AtolStatistics.dateFormatMasks = {
   AtolStatistics.Tool = function Tool_constructor(htmlId) {
     AtolStatistics.Tool.superclass.constructor.apply(this, arguments);
 
-    // Surcharge de la classe Date. Récupère la semaine courante
+    // Surcharge de la classe Date. RÃ©cupÃ¨re la semaine courante
     Date.prototype.getWeek = function() {
      var onejan = new Date(this.getFullYear(), 0, 1);
      return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
@@ -57,14 +75,14 @@ AtolStatistics.dateFormatMasks = {
       /**
        * @attribute currentDateFilter
        * Filtre de date : days, weeks, months, years
-       * "weeks" par défaut
+       * "weeks" par dÃ©faut
        */
       currentDateFilter: "weeks"
     },
 
     /**
-     * Cache-Résultat de la dernière requête exécutée
-     * Utilisé pour l'export CSV
+     * Cache-RÃ©sultat de la derniÃ¨re requÃªte exÃ©cutÃ©e
+     * UtilisÃ© pour l'export CSV
      */
     lastRequest: {
       params: null,
@@ -75,8 +93,8 @@ AtolStatistics.dateFormatMasks = {
 
     /**
      * @attribute endDatesArray
-     * Dates de référence utilisée pour les graphiques
-     * Date présente par défaut
+     * Dates de rÃ©fÃ©rence utilisÃ©e pour les graphiques
+     * Date prÃ©sente par dÃ©faut
      */
     endDatesArray: [],
 
@@ -101,7 +119,7 @@ AtolStatistics.dateFormatMasks = {
     },
 
     loadSites: function loadSites() {
-      // Changement de style pour l'icône de chargement
+      // Changement de style pour l'icÃ´ne de chargement
       // this.widgets.siteButton.set("label", this.msg("label.sites.loading") + ' <span class="loading"></span>');
 
       if (this.options.siteId && this.options.siteId != "") {
@@ -193,7 +211,7 @@ AtolStatistics.dateFormatMasks = {
       this.widgets.siteButton = new YAHOO.widget.Button("site-criteria", btOpts);
 
       // Maj des infos du bouton
-      // Sélection de la 1ère entrée
+      // SÃ©lection de la 1Ã¨re entrÃ©e
       this.widgets.siteButton.set("label", menuButtons[0].text);
       this.widgets.siteButton.value = menuButtons[0].value;
       this.widgets.siteButton.set("selectedMenuItem", this.widgets.siteButton.getMenu().getItem(0));
@@ -203,7 +221,7 @@ AtolStatistics.dateFormatMasks = {
 
     /**
      * @method buildTimeStampArray Construit des intervalles de dates
-     * @return array Tableau contenant les différents intervalles de dates
+     * @return array Tableau contenant les diffÃ©rents intervalles de dates
      */
     buildTimeStampArray: function Tool_buildTimeStampArray() {
       var tsArray = [],
@@ -214,18 +232,18 @@ AtolStatistics.dateFormatMasks = {
         hasNext = null,
         res = "";
 
-      // Création de nouvelles dates à manipuler
+      // CrÃ©ation de nouvelles dates Ã  manipuler
       to = new Date(this.endDatesArray[this.options.currentDateFilter].getTime());
       from = new Date(this.endDatesArray[this.options.currentDateFilter].getTime());
 
-      // Créé les intervalles allant du mois de départ au mois d'arrivée INCLUS
+      // CrÃ©Ã© les intervalles allant du mois de dÃ©part au mois d'arrivÃ©e INCLUS
       if (this.options.currentDateFilter == "months") {
         tsArray.push(from.setDate(1));
         next = new Date(from);
         next.setDate(1);
         next.setDate(next.getDate() + 1);
 
-        // Date d'arrêt
+        // Date d'arrÃªt
         to.setDate(1);
         to.setMonth(to.getMonth() + 1);
 
@@ -240,14 +258,14 @@ AtolStatistics.dateFormatMasks = {
       // Selectionne par semaine suivant from et to.
       // Les semaines de "from" et "to" sont INCLUSES
       else if (this.options.currentDateFilter == "weeks") {
-        // On utilise la date de départ pour récupérer tous les jours de la semaine
+        // On utilise la date de dÃ©part pour rÃ©cupÃ©rer tous les jours de la semaine
         next = null, currentDay = to.getDay(), hasNext = false;
-        // Début de semaine
+        // DÃ©but de semaine
         from.setDate(to.getDate() - (currentDay - 1));
         next = new Date(from);
         tsArray.push(from.getTime());
 
-        // Date d'arrêt
+        // Date d'arrÃªt
         to.setMonth(from.getMonth());
         to.setDate(from.getDate() + 7);
 
@@ -258,22 +276,22 @@ AtolStatistics.dateFormatMasks = {
           next.setDate(next.getDate() + 1);
           hasNext = (to.getTime() > next.getTime());
         }
-        // Semaine suivante, on test au cas où on dépasse.
+        // Semaine suivante, on test au cas oÃ¹ on dÃ©passe.
         tsArray.push(next.getTime());
       }
-      // Créé les intervalles allant du jour de départ au jour d'arrivée INCLUS
+      // CrÃ©Ã© les intervalles allant du jour de dÃ©part au jour d'arrivÃ©e INCLUS
       else if (this.options.currentDateFilter == "days") {
-        // On ajoute la date de départ
+        // On ajoute la date de dÃ©part
         tsArray.push(from.getTime());
 
-        // On ajoute 1 jour à la date de fin, pour inclure le dernier jour selectionné.
+        // On ajoute 1 jour Ã  la date de fin, pour inclure le dernier jour selectionnÃ©.
         to.setDate(to.getDate() + 1);
 
-        // On récupère le jour suivant
+        // On rÃ©cupÃ¨re le jour suivant
         next = new Date(from);
         next.setHours(next.getHours() + 2);
 
-        // On vérifie qu'il ne dépasse pas la date de fin, on boucle
+        // On vÃ©rifie qu'il ne dÃ©passe pas la date de fin, on boucle
         hasNext = (to > next);
         while (hasNext) {
           tsArray.push(next.getTime());
@@ -282,7 +300,7 @@ AtolStatistics.dateFormatMasks = {
         }
         tsArray.push(to.getTime());
       } else if (this.options.currentDateFilter == "years") {
-        // On se place au début de l'année
+        // On se place au dÃ©but de l'annÃ©e
         from.setDate(1);
         from.setMonth(0);
         tsArray.push(from.getTime());
@@ -316,7 +334,7 @@ AtolStatistics.dateFormatMasks = {
 
       if (chartTag == "embed" || chartTag == "object") {
         swfobject.removeSWF(id);
-        // Le conteneur étant détruit, il faut le recréer ...
+        // Le conteneur Ã©tant dÃ©truit, il faut le recrÃ©er ...
         var newChartDiv = new YAHOO.util.Element(document.createElement("div"));
         newChartDiv.set("id", id);
         newChartDiv.appendTo(id + "-container");
@@ -345,12 +363,12 @@ AtolStatistics.dateFormatMasks = {
     /**
      * @method convertTimeStamp
      * @param ts Timestamp unix
-     * @param exclude boolean indiquant si le jour doit être exclu
+     * @param exclude boolean indiquant si le jour doit Ãªtre exclu
      * @return string Date au format jj/mm/aaaa
      */
     convertTimeStamp: function Tool_convertTimeStamp(ts, exclude) {
       var d = new Date(ts);
-      // retour un jour en arrière en cas d'exclude
+      // retour un jour en arriÃ¨re en cas d'exclude
       if (exclude) {
         d.setDate(d.getDate() - 1);
       }
@@ -378,9 +396,9 @@ AtolStatistics.dateFormatMasks = {
 
     /**
      * @method onChangeDateFilter
-     * @param e Event déclencheur
-     * @param args Composant déclencheur
-     * Gestionnaire click Jour / Semaine / Mois / Année
+     * @param e Event dÃ©clencheur
+     * @param args Composant dÃ©clencheur
+     * Gestionnaire click Jour / Semaine / Mois / AnnÃ©e
      */
     onChangeDateFilter: function Tool_OnChangeDateFilter(e, args) {
       if (e) Event.stopEvent(e);
@@ -392,9 +410,9 @@ AtolStatistics.dateFormatMasks = {
 
     /**
      * @method onChangeDateInterval
-     * @param e Event déclencheur
-     * @param args Composant déclencheur
-     * Gestionnaire click suivant / précédent
+     * @param e Event dÃ©clencheur
+     * @param args Composant dÃ©clencheur
+     * Gestionnaire click suivant / prÃ©cÃ©dent
      */
     onChangeDateInterval: function Tool_OnChangeDateInterval(e, args) {
       var coef = args.coef,

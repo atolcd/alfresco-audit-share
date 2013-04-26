@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et Développements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.atolcd.alfresco;
 
 import java.io.ByteArrayInputStream;
@@ -45,6 +62,9 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 @SuppressWarnings("deprecation")
 public class AuditFilter extends AuditFilterConstants implements Filter {
+    // Logger
+    private static final Log logger = LogFactory.getLog(AuditFilter.class);
+
     public static final String KEY_SITE = "site";
     public static final String KEY_MODULE = "module";
     public static final String KEY_OBJECT = "object";
@@ -55,21 +75,20 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
     private static HashMap<String, String> moduleIds;
     private static HashMap<String, String[]> ignoredCases;
     private static Set<String> ignoredUrl;
-    private static final Log logger = LogFactory.getLog(AuditFilter.class);
 
-    // Identifiant utilisé en base pour identifier un audit sur le repo et non
-    // sur un site.
+    // Id used to identify an audit (in the database) from the repository (and
+    // not from a site).
     private static final String REPOSITORY_SITE = "/service";
 
     static {
-        // Urls exactes devant être filtrées
+        // Exact URLs to be filtered
         ignoredUrl = new HashSet<String>();
         ignoredUrl.add("/share/page");
         ignoredUrl.add("/share/page/");
         ignoredUrl.add("/share/page/console");
         ignoredUrl.add("/share/page/console/");
 
-        // Cas ignorés des sites.
+        // Ignored cases (sites)
         ignoredCases = new HashMap<String, String[]>();
         ignoredCases.put("wiki", new String[] { "create" });
         ignoredCases.put("blog", new String[] { "postedit" });
@@ -77,8 +96,8 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         ignoredCases.put("discussions", new String[] { "createtopic" });
         ignoredCases.put("calendar", new String[] { "month", "week", "day" });
 
-        // "Tableau" module -> paramètres
-        // Utilisé pour lire les paramètres d'audit
+        // Array: 'module -> parameters'
+        // Used to read 'audit' settings
         moduleIds = new HashMap<String, String>();
         moduleIds.put("wiki", "title");
         moduleIds.put("blog", "postId");
@@ -113,12 +132,12 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         HttpServletRequest request = (HttpServletRequest) sReq;
         // HttpServletResponse response = (HttpServletResponse) sRes;
 
-        // initialize a new request context
+        // Initialize a new request context
         RequestContext context = ThreadLocalRequestContext.getRequestContext();
 
         if (context == null) {
             try {
-                // perform a "silent" init - i.e. no user creation or remote
+                // Perform a "silent" init - i.e. no user creation or remote
                 // connections
                 context = RequestContextUtil.initRequestContext(getApplicationContext(), request, true);
                 try {
@@ -136,7 +155,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         String requestURI = request.getRequestURI();
         if (user != null && requestURI != null && !ignoredUrl.contains(requestURI)) {
             try {
-                // Préparation du JSON à envoyer.
+                // Preparation of JSON to send.
                 JSONObject auditSample = new JSONObject();
                 auditSample.put(AUDIT_ID, "0");
                 auditSample.put(AUDIT_USER_ID, user.getId());
@@ -146,8 +165,8 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
                     requestURI = ref;
                 }
                 HashMap<String, String> auditData = getAuditData(request, user.getId(), requestURI);
-                // Le parsing inclue parfois les paramètres lorsque le
-                // chargement de la page est interrompu prématurément
+                // Parsing sometimes includes parameters when the page loading
+                // is interrupted prematurely
                 if ((auditData.get(KEY_MODULE).length() > 0) && (!auditData.get(KEY_ACTION).contains("?"))) {
                     auditSample.put(AUDIT_SITE, auditData.get(KEY_SITE));
                     auditSample.put(AUDIT_APP_NAME, auditData.get(KEY_MODULE));
@@ -159,12 +178,14 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
                     if (moduleIds.containsKey(auditSample.get(AUDIT_APP_NAME))) {
                         remoteCall(request, auditSample);
                     } else {
-                        logger.info("Ignored : " + requestURI);
+                        logger.info("Ignored: " + requestURI);
                     }
                 }
             } catch (Exception e) {
                 logger.error(" Error while auditing data in AuditFilter");
-                e.printStackTrace();
+                if (logger.isDebugEnabled()) {
+                    logger.debug(e.getMessage(), e);
+                }
             }
         }
         chain.doFilter(sReq, sRes);
@@ -176,17 +197,19 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         try {
             connector = FrameworkUtil.getConnector(request.getSession(true), auditSample.getString(AUDIT_USER_ID),
                     AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
-            // parameters = null, on passe par le inputstream.
-            // Le webscript est appelé avec l'audit converti en JSON.
+            // if (parameters == null), we use the 'inputstream'
+            // The webscript is called with the audit converted into JSON.
             ConnectorContext postContext = new ConnectorContext(null, buildDefaultHeaders());
             postContext.setMethod(HttpMethod.POST);
             postContext.setContentType("text/plain;charset=UTF-8");
             InputStream in = new ByteArrayInputStream(auditSample.toString().getBytes("UTF-8"));
 
-            // Appel au webscript - Response resp =
+            // Webscript call
             connector.call("/share-stats/insert-audit", postContext, in);
         } catch (ConnectorServiceException e) {
-            e.printStackTrace();
+            if (logger.isDebugEnabled()) {
+                logger.debug(e.getMessage(), e);
+            }
         }
     }
 
@@ -217,18 +240,22 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
                         return (String) json.get("nodeRef");
                     }
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(e.getMessage(), e);
+                    }
                 }
             }
         } catch (ConnectorServiceException e) {
-            e.printStackTrace();
+            if (logger.isDebugEnabled()) {
+                logger.debug(e.getMessage(), e);
+            }
         }
 
         return objectId;
     }
 
     /**
-     * Découpe l'url, analyse les morceaux, puis analyse les paramètres
+     * Cut and analysis the url and analysis parameters
      * 
      * @param request
      *            HttpServletRequest
@@ -245,13 +272,9 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         auditData.putAll(urlData);
 
         try {
-            // On récupère l'identifiant de l'<<objet>> consulté à partir de son
-            // module
-            // En cas de null, on catch et on met une chaîne vide.
+            // Retrieves the id of the <<objet>> viewed from its module
             String obj = request.getParameter(moduleIds.get(urlData.get(KEY_MODULE)));
             if (obj != null) {
-                // On déplace le paramètre dans l'action pour faciliter les
-                // requêtes
                 if (auditData.get(KEY_MODULE).equals("calendar")) {
                     auditData.put(KEY_ACTION, obj);
                     auditData.put(KEY_OBJECT, "");
@@ -282,7 +305,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
     }
 
     /**
-     * Parse l'url découpage afin d'en tirer les informations d'audit
+     * URL parsing
      * 
      * @param urlTokens
      * @param hasSite
@@ -294,23 +317,21 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         urlData.put(KEY_ACTION, "");
         urlData.put(KEY_SITE, "");
 
-        // Voir les effets de bord au retrait de traitement des url sans sites
         if (!hasSite) {
-            // On simule la présence d'un site en modifiant les morceaux d'url
             String[] newUrlTokens = new String[urlTokens.length + 2];
             int j = 0;
             String token;
             for (int i = 0; i < urlTokens.length; i++) {
                 token = urlTokens[i];
                 newUrlTokens[i + j] = token;
-                // On simule la présence d'un site.
+
                 if (urlTokens[i].equals("page")) {
                     newUrlTokens[i + 1] = "site";
                     newUrlTokens[i + 2] = REPOSITORY_SITE;
                     j = 2;
                 }
             }
-            // On recopie les nouveaux tokens
+
             urlTokens = newUrlTokens;
         }
 
@@ -318,20 +339,17 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         for (int i = 0; i < urlTokens.length; i++) {
             if ("site".equals(urlTokens[i]) && !siteFlag) {
                 siteFlag = true;
-            }
-            // On trouve le token "site" dans l'url, le prochain token est
-            // le nom du site
-            else if (siteFlag && (urlData.get(KEY_SITE).isEmpty()) && i < urlTokens.length) {
+            } else if (siteFlag && (urlData.get(KEY_SITE).isEmpty()) && i < urlTokens.length) {
                 urlData.put(KEY_SITE, urlTokens[i]);
                 String[] splittedModuleAction = urlTokens[i + 1].split("-");
-                // test pour site-members & site-groups
+                // "site-members" & "site-groups" test
                 if (splittedModuleAction[0].equals("site")) {
                     urlData.put(KEY_MODULE, MOD_MEMBERS);
                 } else {
                     urlData.put(KEY_MODULE, splittedModuleAction[0]);
                 }
 
-                // Test d'action (module-action; wiki-create par exemple)
+                // Action test (for example: module-action ; wiki-create)
                 if (splittedModuleAction.length > 1) {
                     urlData.put(KEY_ACTION, splittedModuleAction[1]);
                 } else if (splittedModuleAction.length == 1) {
@@ -342,7 +360,6 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
                         urlData.put(KEY_ACTION, splittedModuleAction[0]);
                         urlData.put(KEY_MODULE, "search");
                     } else {
-                        // On suppose que c'est une consultation
                         urlData.put(KEY_ACTION, "view");
                     }
                 }
@@ -353,10 +370,10 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
     }
 
     /**
-     * Filtre les données d'audit.
+     * Audit data filter
      * 
      * @param auditData
-     * @return
+     * @return HashMap
      */
     public HashMap<String, String> filter(HashMap<String, String> auditData) {
         String module = auditData.get(KEY_MODULE);
@@ -365,7 +382,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         if (module != null && action != null) {
             if (ignoredCases.containsKey(module)) {
                 if (contains(ignoredCases.get(module), action)) {
-                    // Ne sera pas audité si ne contient pas de site
+                    // No audited if it does not contain site
                     auditData.put(KEY_SITE, "");
                 }
             }
@@ -374,11 +391,11 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
     }
 
     /**
-     * Indique si une String est contenu dans un tableau de String
+     * Checks if a String is contained into an array
      * 
      * @param array
      * @param toFind
-     * @return
+     * @return boolean
      */
     public boolean contains(String[] array, String toFind) {
         boolean res = false;
