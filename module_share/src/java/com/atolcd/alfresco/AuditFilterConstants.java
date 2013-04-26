@@ -36,4 +36,6 @@ public class AuditFilterConstants {
     public static final String MOD_DATA = "data";
     public static final String MOD_MEMBERS = "members";
     public static final String MOD_DOCUMENT = "document";
+
+    public static final String SITE_REPOSITORY = "_repository";
 }

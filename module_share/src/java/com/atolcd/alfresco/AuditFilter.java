@@ -85,6 +85,10 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         ignoredUrl = new HashSet<String>();
         ignoredUrl.add("/share/page");
         ignoredUrl.add("/share/page/");
+        ignoredUrl.add("/share/page/dologin");
+        ignoredUrl.add("/share/page/dologin/");
+        ignoredUrl.add("/share/page/dologout");
+        ignoredUrl.add("/share/page/dologout/");
         ignoredUrl.add("/share/page/console");
         ignoredUrl.add("/share/page/console/");
 
@@ -336,10 +340,11 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         }
 
         boolean siteFlag = false;
+        int limit = urlTokens.length -1;
         for (int i = 0; i < urlTokens.length; i++) {
             if ("site".equals(urlTokens[i]) && !siteFlag) {
                 siteFlag = true;
-            } else if (siteFlag && (urlData.get(KEY_SITE).isEmpty()) && i < urlTokens.length) {
+            } else if (siteFlag && (urlData.get(KEY_SITE).isEmpty()) && i < limit) {
                 urlData.put(KEY_SITE, urlTokens[i]);
                 String[] splittedModuleAction = urlTokens[i + 1].split("-");
                 // "site-members" & "site-groups" test

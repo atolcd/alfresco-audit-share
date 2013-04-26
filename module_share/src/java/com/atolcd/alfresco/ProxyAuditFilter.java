@@ -100,6 +100,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
 
     // Repository and sites
     private static final String URI_ACTION = SHORT_PROXY_URL + "slingshot/doclib/action/files";
+    private static final String URI_UPLOAD = SHORT_PROXY_URL + "api/upload";
 
     // Social features
     private static final String URI_SOCIAL_PUBLISHING = SHORT_PROXY_URL + "api/publishing/queue";
@@ -206,6 +207,17 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                             auditSample.put(AUDIT_OBJECT, json.getString("nodeRef"));
                             remoteCall(request, auditSample);
                         }
+                    }
+                } else if (requestURI.equals(URI_UPLOAD)) {
+                    String s = requestWrapper.getStringContent();
+                    // Requête multipart ... on recherche si le paramètre siteId
+                    // est présent
+                    if (s.indexOf("Content-Disposition: form-data; name=\"siteId\"") == -1) {
+                        auditSample.put(AUDIT_SITE, SITE_REPOSITORY);
+                        auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
+                        auditSample.put(AUDIT_ACTION_NAME, "file-added");
+                        auditSample.put(AUDIT_OBJECT, ""); 
+                        remoteCall(request, auditSample);
                     }
                 } else if (requestURI.endsWith("/comments") || requestURI.endsWith("/replies")) {
                     // Comments & replies
