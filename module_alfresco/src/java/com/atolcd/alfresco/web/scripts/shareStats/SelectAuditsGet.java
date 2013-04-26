@@ -165,7 +165,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 				}
 			} catch (AlfrescoRuntimeException e) {
 				iterator.remove();
-				logger.error(e.getMessage(), e);
+				logger.warn(e.getMessage(), e);
 			}
 		}
 		limit = auditObjectPopularityList.size() > limit ? limit : auditObjectPopularityList.size();
