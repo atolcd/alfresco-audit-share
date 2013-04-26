@@ -69,11 +69,6 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
 
     loadSites: function RepoUsage_loadSites() {
       // Nothing to do
-    },
-
-    getTemplateUrl: function RepoUsage_getTemplateUrl(module) {
-      // Repository url
-      return window.location.protocol + "//" + window.location.host + Alfresco.constants.URL_PAGECONTEXT + "document-details?nodeRef={nodeRef}";
     }
   });
 })();

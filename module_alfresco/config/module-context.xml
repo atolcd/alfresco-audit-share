@@ -66,6 +66,7 @@
   <bean id="webscript.com.atolcd.alfresco.share-stats.select-audits.get" class="com.atolcd.alfresco.web.scripts.shareStats.SelectAuditsGet" parent="webscript">
     <property name="sqlSessionTemplate" ref="shareStatsQueriesSqlSessionClientTemplate"/>
     <property name="nodeService" ref="NodeService"/>
+    <property name="siteService" ref="SiteService" />
   </bean>
 
   <bean id="webscript.com.atolcd.alfresco.share-stats.update-audits.post" class="com.atolcd.alfresco.web.scripts.shareStats.UpdateAuditPost" parent="webscript">

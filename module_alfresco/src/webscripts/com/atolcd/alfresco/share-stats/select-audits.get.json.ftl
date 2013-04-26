@@ -52,6 +52,8 @@
             "popularity": ${auditItem.popularity?c},
             "nodeRef": "${auditItem.auditObject}",
             "site": "${auditItem.auditSite}",
+            "siteTitle": "${shareStatsutils.getSiteTitle(auditItem.auditSite)}",
+            "siteComponent": "${auditItem.siteComponent!""}",
             "name": "${auditItem.objectName}",
             "displayName": "${auditItem.objectDisplayName}"
           }<#if auditItem_has_next>,</#if>

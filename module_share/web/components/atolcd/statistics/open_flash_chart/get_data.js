@@ -232,29 +232,22 @@ function buildHBarChartElements(params, labels) {
 
   var elements = null,
       values = [],
-      module = params.additionalsParams.module,
       urlTemplate = params.additionalsParams.urlTemplate;
 
   for (var i=0, ii=params.items.length ; i<ii ; i++) {
     var item = params.items[i];
     var value_obj = {
-      tip: item.displayName + " : #val#",
+      tip: item.displayName + " : #val#" + ((item.siteTitle) ? "\n" + getMessage("label.menu.site") + item.siteTitle : ''),
       right: item.popularity,
       left: 0,
       colour: i ? barChartColors["less-popular"] : barChartColors["most-popular"]
     };
 
-    if (module == "document") {
-      value_obj["on-click"] = YAHOO.lang.substitute(urlTemplate, {
-        site: item.site,
-        nodeRef: item.nodeRef
-      });
-    } else if (module == "wiki" || module == "blog" || module == "discussions") {
-      value_obj["on-click"] = YAHOO.lang.substitute(urlTemplate, {
-        site: item.site,
-        id: encodeURIComponent(item.name)
-      });
-    }
+    value_obj["on-click"] = YAHOO.lang.substitute(urlTemplate[item.siteComponent] || "", {
+      site: item.site,
+      nodeRef: item.nodeRef,
+      id: encodeURIComponent(item.name)
+    });
 
     values.push(value_obj);
     labels.push(crop(params.items[ii - 1 - i].displayName));

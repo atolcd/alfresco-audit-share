@@ -22,6 +22,7 @@ import org.alfresco.repo.template.BaseTemplateProcessorExtension;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
@@ -62,6 +63,10 @@ public class ShareStatsUtils extends BaseTemplateProcessorExtension implements I
 	}
 
 	public String getSiteTitle(String shortName) {
-		return siteService.getSite(shortName).getTitle();
+		SiteInfo si = siteService.getSite(shortName);
+		if (si != null) {
+			return siteService.getSite(shortName).getTitle();
+		}
+		return "";
 	}
 }

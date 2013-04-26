@@ -195,24 +195,21 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
           width: "100%",
           from: from,
           to: to,
-          module: module,
-          urlTemplate : this.getTemplateUrl(module)
+          urlTemplate : this.getTemplateUrl()
         }
       });
     },
 
-    getTemplateUrl: function GlobalUsage_getTemplateUrl(module) {
+    getTemplateUrl: function GlobalUsage_getTemplateUrl() {
       var baseUrl = window.location.protocol + "//" + window.location.host + Alfresco.constants.URL_PAGECONTEXT + "site/{site}/";
-      if (module == "document") {
-        return baseUrl + "document-details?nodeRef={nodeRef}";
-      } else if (module == "wiki") {
-        return baseUrl + "wiki-page?title={id}&listViewLinkBack=true";
-      } else if (module == "blog") {
-        return baseUrl + "blog-postview?postId={id}&listViewLinkBack=true";
-      } else if (module == "discussions") {
-        return baseUrl + "discussions-topicview?topicId={id}&listViewLinkBack=true";
-      }
-      return "";
+
+      return templates = {
+        "documentLibrary" : baseUrl + "document-details?nodeRef={nodeRef}",
+        "wiki": baseUrl + "wiki-page?title={id}&listViewLinkBack=true",
+        "blog": baseUrl + "blog-postview?postId={id}&listViewLinkBack=true",
+        "discussions": baseUrl + "discussions-topicview?topicId={id}&listViewLinkBack=true",
+        "": window.location.protocol + "//" + window.location.host + Alfresco.constants.URL_PAGECONTEXT + "document-details?nodeRef={nodeRef}"
+      };
     },
 
     /**

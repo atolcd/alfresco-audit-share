@@ -30,6 +30,9 @@ import org.alfresco.model.ForumModel;
 import org.alfresco.repo.site.SiteModel;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.Path;
+import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,6 +59,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 	// SqlMapClientTemplate for MyBatis calls
 	private SqlSessionTemplate sqlSessionTemplate;
 	private NodeService nodeService;
+	private SiteService siteService;
 
 	private static final String SELECT_BY_VIEW = "alfresco.atolcd.audit.selectByRead";
 	private static final String SELECT_BY_CREATED = "alfresco.atolcd.audit.selectByCreated";
@@ -77,6 +81,10 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 
 	public void setNodeService(NodeService nodeService) {
 		this.nodeService = nodeService;
+	}
+
+	public void setSiteService(SiteService siteService) {
+		this.siteService = siteService;
 	}
 
 	@Override
@@ -161,6 +169,17 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 				} else {
 					auditObjectPopularity.setObjectName((String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME));
 					auditObjectPopularity.setObjectDisplayName(getPrettyDisplayname(nodeRef));
+
+					SiteInfo si = siteService.getSite(nodeRef);
+					if (si != null) {
+						// Find in which site component is this node
+						Path nodePath = nodeService.getPath(nodeRef);
+						if (nodePath.size() > 4) {
+							String siteContainerQName = nodeService.getPath(nodeRef).get(4).getElementString();
+							auditObjectPopularity.setSiteComponent(QName.createQName(siteContainerQName).getLocalName());
+						}
+					}
+
 					treatedItems++;
 				}
 			} catch (AlfrescoRuntimeException e) {

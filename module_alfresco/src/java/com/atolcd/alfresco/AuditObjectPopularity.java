@@ -23,6 +23,7 @@ public class AuditObjectPopularity {
 	private String objectName;
 	private String objectDisplayName;
 	private String auditSite;
+	private String siteComponent;
 
 	public AuditObjectPopularity() {
 
@@ -66,5 +67,13 @@ public class AuditObjectPopularity {
 
 	public void setAuditSite(String auditSite) {
 		this.auditSite = auditSite;
+	}
+
+	public String getSiteComponent() {
+		return siteComponent;
+	}
+
+	public void setSiteComponent(String siteComponent) {
+		this.siteComponent = siteComponent;
 	}
 }
