@@ -51,9 +51,9 @@
           <input type="button" class="criterias-button" id="action-criteria" name="${el}-action-criteria-button" value="${msg('label.menu.action')}${msg('label.read')}" />
           <select id="action-criteria-select" name="${el}-action-criteria-select">
             <option value="read">${msg("label.menu.action")}${msg("label.read")}</option>
-            <option value="created">${msg("label.menu.action")}${msg("label.created")}</option>
-            <option value="deleted">${msg("label.menu.action")}${msg("label.deleted")}</option>
             <option value="updated">${msg("label.menu.action")}${msg("label.updated")}</option>
+            <#--<option value="created">${msg("label.menu.action")}${msg("label.created")}</option>-->
+            <#--<option value="deleted">${msg("label.menu.action")}${msg("label.deleted")}</option>-->
           </select>
 
           <input type="button" class="criterias-button" id="site-criteria" name="${el}-site-criteria-button" value="${msg('graph.label.repository')}" />
