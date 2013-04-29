@@ -135,10 +135,10 @@ function buildSingleChartElements(params, labels, type) {
 
   if (type && type == "line") {
     element.type = "line";
-    element.width = 2;
+    element.width = 3;
     element["dot-style"] = {
       "type": "dot",
-      "dot-size": 3,
+      "dot-size": 4,
       "halo-size": 1,
       "colour": barChartColors["volumetry"]
     };
@@ -238,11 +238,11 @@ function buildLinesChartElements(params, labels) {
       "values": linesValues[siteValues].values,
       "dot-style": {
         "type": "dot",
-        "dot-size": 5,
+        "dot-size": 4,
         "halo-size": 1,
         "colour": colour
       },
-      "width": 4,
+      "width": 3,
       "colour": colour,
       "font-size": 10
     });
