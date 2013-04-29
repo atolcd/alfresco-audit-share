@@ -58,25 +58,23 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     onReady: function GlobalUsage_onReady() {
       AtolStatistics.GlobalUsage.superclass.onReady.call(this);
 
-      this.widgets.exportButton = Alfresco.util.createYUIButton(this, "export-button", this.onExport);
-      this.widgets.exportButton.set("disabled", true);
+      var me = this;
 
-      this.widgets.moduleCriteriaButton = new YAHOO.widget.Button("module-criteria", {
+      this.widgets.moduleCriteriaButton = new YAHOO.widget.Button(this.id + "-module-criteria", {
         type: "split",
-        menu: "module-criteria-select",
+        menu: this.id + "-module-criteria-select",
         lazyloadmenu: false
       });
       this.widgets.moduleCriteriaButton.value = "document";
 
-      this.widgets.actionCriteriaButton = new YAHOO.widget.Button("action-criteria", {
+      this.widgets.actionCriteriaButton = new YAHOO.widget.Button(this.id + "-action-criteria", {
         type: "split",
-        menu: "action-criteria-select",
+        menu: this.id + "-action-criteria-select",
         lazyloadmenu: false
       });
       this.widgets.actionCriteriaButton.value = "read";
 
       // Composants créé, on ajoute des listeners sur les menus.
-      var me = this;
       // Comportement du menu de filtre par Modules
       var onModulesMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
         var sText = p_aArgs[1].cfg.getProperty("text"),
@@ -105,8 +103,6 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       };
       this.widgets.actionCriteriaButton.getMenu().subscribe("click", onActionsMenuItemClick);
 
-      this.setupCurrentDates();
-
       // el, sType, fn, obj, overrideContext
       Event.addListener("home", "click", this.onResetDates, null, this);
       Event.addListener(this.id + "-by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
@@ -119,7 +115,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       this.loadSites();
     },
 
-    onExport: function GlobalUsage_onExport() {
+    onCSVExport: function GlobalUsage_onCSVExport() {
       if (this.lastRequest.params) {
         var params = this.lastRequest.params;
         params += "&interval=" + this.lastRequest.dateFilter;
@@ -161,7 +157,8 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
           tsString: tsString,
           target: "chart",
           height: "450",
-          width: "90%"
+          width: "90%",
+          chartId: this.id + '-chart'
         }
       });
     },

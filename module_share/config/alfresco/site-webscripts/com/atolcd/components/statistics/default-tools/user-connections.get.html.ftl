@@ -1,3 +1,5 @@
+<#import "/com/atolcd/components/statistics/statistics-tools.lib.ftl" as stats>
+
 <#--
  * Copyright (C) 2013 Atol Conseils et Développements.
  * http://www.atolcd.com/
@@ -32,16 +34,14 @@
   <div id="${el}-user-connections">
     <div class="yui-g">
       <div class="yui-u first">
-        <div class="title">
-          ${msg("label.title")}
-        </div>
+        <div class="title">${msg("label.title")}</div>
       </div>
       <div class="yui-u align-right">&nbsp;</div>
     </div>
     <div class="yui-g separator">
       <div class="header">
         <div id="criterias" class="criterias">
-          <label>${msg("label.menu.site")}</label><span class="criterias-button"><input type="button" id="site-criteria" name="${el}-site-criteria-button" value="" /></span>
+          <label>${msg("label.menu.site")}</label><span class="criterias-button"><input type="button" id="${el}-site-criteria" name="site-criteria-button" value="" /></span>
 
           <span class="criterias-button">
             <input type="button" id="chart-type-criteria" name="${el}-chart-type-criteria-button" value="${msg('graph.type.bar')}" />
@@ -50,6 +50,8 @@
               <option value="line">${msg("graph.type.line")}</option>
             </select>
           </span>
+
+          <@stats.renderExportButton el />
         </div>
       </div>
     </div>
@@ -57,39 +59,10 @@
     <div id="${el}-chart-body" class="main-chart">
       <div class="separator browsing">
           <div id="chart-prev" class="img-prev-arrow"></div>
-
-          <div class="yui-u filters">
-            <span id="home">
-              <span class="home-img" title="${msg('label.home')}"></span>
-            </span>
-            <span id="${el}-by-days">
-              <a href="#">${msg("label.byDay")}</a>
-            </span>
-            <span class="vb"> | </span>
-            <span id="${el}-by-weeks">
-              <a href="#">${msg("label.byWeek")}</a>
-            </span>
-            <span class="vb"> | </span>
-            <span id="${el}-by-months">
-              <a href="#">${msg("label.byMonth")}</a>
-            </span>
-            <span class="vb"> | </span>
-            <span id="${el}-by-years">
-              <a href="#">${msg("label.byYear")}</a>
-            </span>
-
-            <span class="export-button">
-              <span class="yui-button yui-push-button" id="${el}-export-button">
-                <span class="first-child"><button>${msg("button.export")}</button></span>
-              </span>
-            </span>
-          </div>
-
+          <@stats.renderDateFiltersMenu el />
           <div id="chart-next" class="img-next-arrow"></div>
       </div>
-      <div id="${el}-chart-container" class="chart-container">
-        <div class="chart" id="${el}-chart"></div>
-      </div>
+      <@stats.renderMainChartContainer el />
     </div>
 
     <div class="users-table-container">
@@ -100,12 +73,9 @@
           <th id="${el}-users-never-connected-header" class="last">${(msg("label.users.never-connected"))}</th>
         </tr>
         <tr>
-          <td id="${el}-users-recently-connected" class="users-list">
-          </td>
-          <td id="${el}-users-connected" class="users-list">
-          </td>
-          <td id="${el}-users-never-connected" class="users-list last">
-          </td>
+          <td id="${el}-users-recently-connected" class="users-list"></td>
+          <td id="${el}-users-connected" class="users-list"></td>
+          <td id="${el}-users-never-connected" class="users-list last"></td>
         </tr>
       </table>
     </div>

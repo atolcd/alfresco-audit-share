@@ -74,6 +74,8 @@ function buildBarChart(params) {
     }
   };
 
+  bars.tooltip = { "mouse": 2 };
+
   return bars;
 }
 

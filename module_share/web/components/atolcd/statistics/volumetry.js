@@ -55,11 +55,6 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       AtolStatistics.Volumetry.superclass.onReady.call(this);
 
       var me = this;
-      this.setupCurrentDates();
-
-      // Buttons - Check ?
-      this.widgets.exportButton = Alfresco.util.createYUIButton(this, "export-button", this.onExport);
-      this.widgets.exportButton.set("disabled", true);
 
       // Chart type button
       this.widgets.chartTypeCriteriaButton = new YAHOO.widget.Button("chart-type-criteria", {
@@ -92,7 +87,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       this.loadSites();
     },
 
-    onExport: function Volumetry_onExport() {
+    onCSVExport: function Volumetry_onCSVExport() {
       if (this.lastRequest.params) {
         var params = this.lastRequest.params;
         params += "&type=volumetry";
@@ -153,7 +148,8 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
           tsString: tsString,
           target: "chart",
           height: "450",
-          width: "90%"
+          width: "90%",
+          chartId: this.id + '-chart'
         }
       });
     },

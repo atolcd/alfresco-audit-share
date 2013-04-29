@@ -111,6 +111,28 @@ AtolStatistics.dateFormatMasks = {
      * @method onReady
      */
     onReady: function Tool_onReady() {
+      var me = this;
+      this.setupCurrentDates();
+
+      // Export button
+      this.widgets.exportButton = new YAHOO.widget.Button(this.id + "-export-button", {
+        type: "menu",
+        menu: this.id + "-export-button-select",
+        lazyloadmenu: false
+      });
+      this.widgets.exportButton.set("disabled", true);
+
+      var onExportMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
+        var value = p_aArgs[1].value;
+        // Get the function related to the clicked item
+        if (value && (typeof me[value] == "function")) {
+          me[value].call(me);
+        }
+      };
+      this.widgets.exportButton.getMenu().subscribe("click", onExportMenuItemClick);
+      Dom.addClass(this.widgets.exportButton.getMenu().element, "export-btn");
+
+
       Dom.addClass(this.id + "-by-" + this.options.currentDateFilter, "selected");
     },
 
@@ -208,7 +230,7 @@ AtolStatistics.dateFormatMasks = {
         btOpts.disabled = true;
       }
 
-      this.widgets.siteButton = new YAHOO.widget.Button("site-criteria", btOpts);
+      this.widgets.siteButton = new YAHOO.widget.Button(this.id + "-site-criteria", btOpts);
 
       // Maj des infos du bouton
       // Sélection de la 1ère entrée
@@ -462,6 +484,11 @@ AtolStatistics.dateFormatMasks = {
 
     execute: function Tool_execute() {
       this.onSearch();
+    },
+
+    onIMGExport: function Tool_onIMGExport() {
+      // call default OFC function
+      save_chart_image('{"additionalsParams":{"chartId": "' + this.id + '-chart"}}');
     }
   });
 })();

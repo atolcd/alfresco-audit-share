@@ -49,9 +49,9 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       AtolStatistics.RepoUsage.superclass.onReady.call(this);
 
       // site button
-      this.widgets.siteButton = new YAHOO.widget.Button("site-criteria", {
+      this.widgets.siteButton = new YAHOO.widget.Button(this.id + "-site-criteria", {
         type: "split",
-        menu: "site-criteria-select",
+        menu: this.id + "-site-criteria-select",
         lazyloadmenu: false
       });
 

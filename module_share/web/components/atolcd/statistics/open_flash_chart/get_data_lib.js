@@ -29,6 +29,34 @@ function get_random_color() {
   return color;
 }
 
+function save_chart_image(p) {
+  var params = YAHOO.lang.JSON.parse(p);
+  if (params.additionalsParams.chartId) {
+    var exportPage = window.open('', getMessage("label.export.img.chart.title"));
+    with(exportPage.document) {
+      var html = '';
+
+      html += '<html>';
+      html += '  <head>';
+      html += '    <title>' + getMessage("label.export.img.chart.title") + '</title>';
+      html += '  </head>';
+      html += '  <body>';
+      html += '    <img src="data:image/png;base64,' + $('#' + params.additionalsParams.chartId)[0].get_img_binary() + '" />';
+      html += '  </body>';
+      html += '</html>';
+
+      write(html);
+
+      // stop the 'loading...' message
+      exportPage.document.close();
+    }
+  }
+}
+
+function save_image(p) {
+  save_chart_image(p[0]);
+}
+
 /**
  * Construit les labels de l'axe des abscisses à partir des paramètres
  * @method buildBarChartXLabels
