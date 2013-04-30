@@ -41,12 +41,12 @@
     </div>
     <div class="yui-g separator">
       <div class="header">
-        <div id="criterias" class="criterias">
+        <div class="criterias">
           <label>${msg("label.menu.site")}</label><span class="criterias-button"><input type="button" id="${el}-site-criteria" name="site-criteria-button" value="" /></span>
 
           <span class="criterias-button">
-            <input type="button" id="chart-type-criteria" name="${el}-chart-type-criteria-button" value="${msg('graph.type.line')}" />
-            <select id="chart-type-criteria-select" name="${el}-chart-type-criteria-select">
+            <input type="button" id="${el}-chart-type-criteria" name="chart-type-criteria-button" value="${msg('graph.type.line')}" />
+            <select id="${el}-chart-type-criteria-select" name="chart-type-criteria-select">
               <option value="line">${msg("graph.type.line")}</option>
               <option value="bar">${msg("graph.type.bar")}</option>
             </select>
@@ -55,16 +55,16 @@
 
         <@stats.renderExportButton el />
       </div>
-      <div id="bar-stack-criteria-container">
-        <input id="bar_stack-criteria" type="checkbox"></input><label for="bar_stack-criteria">${msg("label.menu.use.bar_stack")}</label>
+      <div id="${el}-bar-stack-criteria-container" class="bar-stack-criteria-container">
+        <input id="${el}-bar_stack-criteria" type="checkbox"></input><label for="${el}-bar_stack-criteria">${msg("label.menu.use.bar_stack")}</label>
       </div>
     </div>
 
     <div id="${el}-chart-body" class="main-chart">
       <div class="separator browsing">
-          <div id="chart-prev" class="img-prev-arrow"></div>
+          <div id="${el}-chart-prev" class="img-prev-arrow" title="${msg('label.previous')}"></div>
           <@stats.renderDateFiltersMenu el />
-          <div id="chart-next" class="img-next-arrow"></div>
+          <div id="${el}-chart-next" class="img-next-arrow" title="${msg('label.next')}"></div>
       </div>
       <@stats.renderMainChartContainer el />
     </div>

@@ -18,7 +18,7 @@
 
 <#macro renderDateFiltersMenu el>
   <div class="yui-u separator filters">
-    <span id="home">
+    <span id="${el}-home" class="home">
       <span class="home-img" title="${msg('label.home')}"></span>
     </span>
     <span id="${el}-by-days">
@@ -54,7 +54,7 @@
 </#macro>
 
 <#macro renderPopularyTable el>
-  <table id="popularity-table">
+  <table class="popularity-table">
     <tr>
       <td class="table-bottom">
         <div id="${el}-mostread-container">

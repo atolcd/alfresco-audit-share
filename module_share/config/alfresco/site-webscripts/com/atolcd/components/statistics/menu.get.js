@@ -31,5 +31,4 @@ if (user.isAdmin) {
   }
 }
 
-
 model.showMenu = showMenu;

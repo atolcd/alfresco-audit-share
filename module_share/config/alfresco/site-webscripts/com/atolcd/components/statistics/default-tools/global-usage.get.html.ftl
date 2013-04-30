@@ -40,7 +40,7 @@
     </div>
     <div class="yui-g separator">
       <div class="header">
-        <div id="criterias" class="criterias">
+        <div class="criterias">
           <input type="button" class="criterias-button" id="${el}-module-criteria" name="module-criteria-button" value="${msg('graph.label.document')}" />
           <select id="${el}-module-criteria-select" name="module-criteria-select">
             <option value="document">${msg("graph.label.document")}</option>
@@ -69,8 +69,8 @@
 
     <div id="${el}-chart-body" class="main-chart">
       <div class="browsing">
-        <div id="chart-prev" class="img-prev-arrow" title="${msg('label.previous')}"></div>
-        <div id="chart-next" class="img-next-arrow" title="${msg('label.next')}"></div>
+        <div id="${el}-chart-prev" class="img-prev-arrow" title="${msg('label.previous')}"></div>
+        <div id="${el}-chart-next" class="img-next-arrow" title="${msg('label.next')}"></div>
       </div>
       <@stats.renderMainChartContainer el />
     </div>

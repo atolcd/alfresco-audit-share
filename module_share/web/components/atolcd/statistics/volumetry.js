@@ -57,9 +57,9 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       var me = this;
 
       // Chart type button
-      this.widgets.chartTypeCriteriaButton = new YAHOO.widget.Button("chart-type-criteria", {
+      this.widgets.chartTypeCriteriaButton = new YAHOO.widget.Button(this.id + "-chart-type-criteria", {
         type: "split",
-        menu: "chart-type-criteria-select",
+        menu: this.id + "-chart-type-criteria-select",
         lazyloadmenu: false
       });
       this.widgets.chartTypeCriteriaButton.value = "line";
@@ -75,14 +75,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       this.widgets.chartTypeCriteriaButton.getMenu().subscribe("click", onChartTypeMenuItemClick);
 
       // el, sType, fn, obj, overrideContext
-      Event.addListener("bar_stack-criteria", "click", this.onShowStackedBar, null, this);
-      Event.addListener("home", "click", this.onResetDates, null, this);
-      Event.addListener(this.id + "-by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
-      Event.addListener(this.id + "-by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
-      Event.addListener(this.id + "-by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
-      Event.addListener(this.id + "-by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
-      Event.addListener("chart-prev", "click", this.onChangeDateInterval, { coef: -1 }, this);
-      Event.addListener("chart-next", "click", this.onChangeDateInterval, { coef: 1 }, this);
+      Event.addListener(this.id + "-bar_stack-criteria", "click", this.onShowStackedBar, null, this);
 
       this.loadSites();
     },
@@ -124,7 +117,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       this.lastRequest.dateFilter = dateFilter;
 
       var chartType = "line";
-      if ((!site || site.indexOf(',') >= 0) && Dom.get("bar_stack-criteria").checked) {
+      if ((!site || site.indexOf(',') >= 0) && Dom.get(this.id + "-bar_stack-criteria").checked) {
         // multiple
         chartType = (this.widgets.chartTypeCriteriaButton.value == "bar") ? "bar_stack" : "lines";
       } else {
@@ -159,9 +152,9 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
           value = p_oItem.value;
 
       if (value == "" || value.indexOf(',') >= 0) { // Tous les sites
-        Dom.removeClass("bar-stack-criteria-container", "hidden");
+        Dom.removeClass(this.id + "-bar-stack-criteria-container", "hidden");
       } else {
-        Dom.addClass("bar-stack-criteria-container", "hidden");
+        Dom.addClass(this.id + "-bar-stack-criteria-container", "hidden");
       }
 
       this.widgets.siteButton.value = value;
@@ -171,7 +164,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
 
     createSiteMenu: function Volumetry_createSiteMenu(res, hideAllSiteEntry) {
       if (this.options.siteId && this.options.siteId != "") {
-        Dom.addClass("bar-stack-criteria-container", "hidden");
+        Dom.addClass(this.id + "-bar-stack-criteria-container", "hidden");
       }
 
       AtolStatistics.Volumetry.superclass.createSiteMenu.call(this, res, hideAllSiteEntry);

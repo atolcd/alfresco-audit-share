@@ -103,15 +103,6 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       };
       this.widgets.actionCriteriaButton.getMenu().subscribe("click", onActionsMenuItemClick);
 
-      // el, sType, fn, obj, overrideContext
-      Event.addListener("home", "click", this.onResetDates, null, this);
-      Event.addListener(this.id + "-by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
-      Event.addListener(this.id + "-by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
-      Event.addListener(this.id + "-by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
-      Event.addListener(this.id + "-by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
-      Event.addListener("chart-prev", "click", this.onChangeDateInterval, { coef: -1 }, this);
-      Event.addListener("chart-next", "click", this.onChangeDateInterval, { coef: 1 }, this);
-
       this.loadSites();
     },
 

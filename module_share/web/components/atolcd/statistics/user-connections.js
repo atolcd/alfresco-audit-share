@@ -70,9 +70,9 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       var me = this;
 
       // Chart type button
-      this.widgets.chartTypeCriteriaButton = new YAHOO.widget.Button("chart-type-criteria", {
+      this.widgets.chartTypeCriteriaButton = new YAHOO.widget.Button(this.id + "-chart-type-criteria", {
         type: "split",
-        menu: "chart-type-criteria-select",
+        menu: this.id + "-chart-type-criteria-select",
         lazyloadmenu: false
       });
 
@@ -86,14 +86,6 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       };
       this.widgets.chartTypeCriteriaButton.getMenu().subscribe("click", onChartTypeMenuItemClick);
 
-      // el, sType, fn, obj, overrideContext
-      Event.addListener("home", "click", this.onResetDates, null, this);
-      Event.addListener(this.id + "-by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
-      Event.addListener(this.id + "-by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
-      Event.addListener(this.id + "-by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
-      Event.addListener(this.id + "-by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
-      Event.addListener("chart-prev", "click", this.onChangeDateInterval, { coef: -1 }, this);
-      Event.addListener("chart-next", "click", this.onChangeDateInterval, { coef: 1 }, this);
 
       this.headers["users-connected"] = Dom.get(this.id + "-users-connected-header");
       this.headers["users-never-connected"] = Dom.get(this.id + "-users-never-connected-header");

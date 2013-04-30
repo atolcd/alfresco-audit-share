@@ -132,7 +132,16 @@ AtolStatistics.dateFormatMasks = {
       this.widgets.exportButton.getMenu().subscribe("click", onExportMenuItemClick);
       Dom.addClass(this.widgets.exportButton.getMenu().element, "export-btn");
 
+      // Default listeners
+      Event.addListener(this.id + "-home", "click", this.onResetDates, null, this);
+      Event.addListener(this.id + "-by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
+      Event.addListener(this.id + "-by-weeks", "click", this.onChangeDateFilter, { filter: "weeks" }, this);
+      Event.addListener(this.id + "-by-months", "click", this.onChangeDateFilter, { filter: "months" }, this);
+      Event.addListener(this.id + "-by-years", "click", this.onChangeDateFilter, { filter: "years" }, this);
+      Event.addListener(this.id + "-chart-prev", "click", this.onChangeDateInterval, { coef: -1 }, this);
+      Event.addListener(this.id + "-chart-next", "click", this.onChangeDateInterval, { coef: 1 }, this);
 
+      // Date filter
       Dom.addClass(this.id + "-by-" + this.options.currentDateFilter, "selected");
     },
 
