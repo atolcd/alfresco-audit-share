@@ -41,7 +41,7 @@ function save_chart_image(p) {
       html += '    <title>' + getMessage("label.export.img.chart.title") + '</title>';
       html += '  </head>';
       html += '  <body>';
-      html += '    <img src="data:image/png;base64,' + $('#' + params.additionalsParams.chartId)[0].get_img_binary() + '" />';
+      html += '    <img src="data:image/png;base64,' + document.getElementById(params.additionalsParams.chartId).get_img_binary() + '" />';
       html += '  </body>';
       html += '</html>';
 

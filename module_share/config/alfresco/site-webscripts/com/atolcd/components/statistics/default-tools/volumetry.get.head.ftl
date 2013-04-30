@@ -22,7 +22,6 @@
 <@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/statistics-tool.css" />
 <@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/volumetry.css" />
 
-<@script type="text/javascript" src="${page.url.context}/res/jquery/jquery-1.6.2.js"></@script>
 <@script type="text/javascript" src="${page.url.context}/res/yui/calendar/calendar.js"></@script>
 <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/statistics-tool.js"></@script>
 <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/volumetry.js"></@script>
