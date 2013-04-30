@@ -129,14 +129,26 @@ AtolStatistics.dateFormatMasks = {
       this.widgets.exportButton.set("disabled", true);
 
       var onExportMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
-        var value = p_aArgs[1].value;
+        var value = p_aArgs[1].value,
+            isDisabled = p_aArgs[1].cfg.getProperty("disabled");
         // Get the function related to the clicked item
-        if (value && (typeof me[value] == "function")) {
+        if (!isDisabled && value && (typeof me[value] == "function")) {
           me[value].call(me);
         }
       };
       this.widgets.exportButton.getMenu().subscribe("click", onExportMenuItemClick);
       Dom.addClass(this.widgets.exportButton.getMenu().element, "export-button");
+
+      // Disable "export as image" item for IE7 and under
+      if (YAHOO.env.ua.ie && ((!document.documentMode && YAHOO.env.ua.ie<8) || document.documentMode < 8)) {
+        var items = this.widgets.exportButton.getMenu().getItems();
+        for (var i=0, ii=items.length ; i<ii ; i++) {
+          if (items[i].value == "onIMGExport") {
+            items[i].cfg.setProperty("disabled", true);
+            break;
+          }
+        }
+      }
 
       // Default listeners
       Event.addListener(this.id + "-home", "click", this.onResetDates, null, this);
