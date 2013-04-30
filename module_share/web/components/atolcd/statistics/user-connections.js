@@ -48,13 +48,13 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
   YAHOO.extend(AtolStatistics.UserConnections, AtolStatistics.Tool, {
     /**
      * @attribute recentlyConnectedDelay
-     * Durée (en minutes) depuis laquelle on retrouve les utilisateurs récemments connectés
+     * Period (minutes)
+     * Period that defined when a user is considered as "recently connected"
      */
     recentlyConnectedDelay: 30,
 
     /**
      * @attribute headers
-     * Contient les éléments Dom des différents headers de la table sous le graphe
      */
     headers: [],
 
@@ -86,7 +86,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       };
       this.widgets.chartTypeCriteriaButton.getMenu().subscribe("click", onChartTypeMenuItemClick);
 
-
+      // headers
       this.headers["users-connected"] = Dom.get(this.id + "-users-connected-header");
       this.headers["users-never-connected"] = Dom.get(this.id + "-users-never-connected-header");
       this.headers["users-recently-connected"] = Dom.get(this.id + "-users-recently-connected-header");
@@ -100,16 +100,13 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         params += "&type=users";
         params += "&values=" + this.lastRequest.values.toString();
         params += "&interval=" + this.lastRequest.dateFilter;
-        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params; // ?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data));//JSON.stringify
+        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params; // ?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data)); // JSON.stringify
         window.open(url);
       }
     },
 
-    /**
-     * @method prepareRecentlyConnectedUsersRequest
-     */
     prepareRecentlyConnectedUsersRequest: function UserConnections_prepareRecentlyConnectedUsersRequest() {
-      // Récupération des variables de l'UI
+      // Retrieve variables from UI
       var site = this.convertMenuValue(this.widgets.siteButton.value),
           currentDate = new Date(),
           params = "";
@@ -128,16 +125,13 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       this.executeUserRequest(params, "users-recently-connected");
     },
 
-    /**
-     * @method prepareUserRequest
-     */
     prepareUserRequest: function UserConnections_prepareUserRequest(type) {
-      // Récupération des variables de l'UI
+      // Retrieve variables from UI
       var dateFilter = this.options.currentDateFilter,
-        site = this.convertMenuValue(this.widgets.siteButton.value),
-        params = "";
+          site = this.convertMenuValue(this.widgets.siteButton.value),
+          params = "";
 
-      // Création du tableau d'intervalle de dates
+      // Date range table
       tsArray = this.buildTimeStampArray();
       params = "?type=" + type;
       params += "&from=" + tsArray[0];
@@ -153,9 +147,6 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       this.executeUserRequest(params, type);
     },
 
-    /**
-     * @method executeUserRequest
-     */
     executeUserRequest: function UserConnections_executeUserRequest(params, type) {
       var displayUsers = function (response) {
         var users = response.json.items,
@@ -194,21 +185,21 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     },
 
     onSearch: function UserConnections_onSearch() {
-      // Récupération des variables de l'UI
+      // Retrieve variables from UI
       var dateFilter = this.options.currentDateFilter,
         site = this.convertMenuValue(this.widgets.siteButton.value),
         tsString = "",
         params = "";
 
-      // Création du tableau d'intervalle de dates
+      // Date range table
       if (dateFilter) {
         var tsArray = this.buildTimeStampArray();
-        //Mise à jour des labels
+        // Labels update
         this.updateUsersLabels(tsArray);
         tsString = tsArray.toString();
       }
 
-      // Création des paramètres et exécution de la requête
+      // Build query parameters
       params = "?type=users-count";
       params += "&dates=" + tsString;
       if (site) {
@@ -225,7 +216,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       Alfresco.util.Ajax.jsonGet({
         url: url,
         successCallback: {
-          fn: this.displayGraph,
+          fn: this.displayUserGraph,
           scope: this
         },
         failureMessage: this.msg("label.popup.query.error"),
@@ -242,59 +233,16 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
           chartId: this.id + '-chart'
         }
       });
+    },
 
+    displayUserGraph: function UserConnections_displayUserGraph(response) {
+      this.displayGraph(response, "getUserFlashData");
     },
 
     /**
-     * @method displayGraph Affiche le requête suite à une requête Ajax
-     * @param response Réponse de la requête
-     */
-    displayGraph: function UserConnections_displayGraph(response) {
-      var additionalsParams, id, swf, chartTag;
-
-      additionalsParams = response.config.additionalsParams;
-      id = this.id + "-" + additionalsParams.target;
-      swf = Dom.get(id);
-      chartTag = swf.tagName.toLowerCase();
-
-      if (response.json) {
-        this.widgets.exportButton.set("disabled", false);
-        response.json.currentFilter = this.options.currentDateFilter;
-        response.json.additionalsParams = additionalsParams;
-        this.lastRequest.values = response.json.values;
-
-        if (chartTag == "embed" || chartTag == "object") {
-          swf.load(getUserFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
-        } else {
-          // Création variables et attribut - GetFlashData défini dans get_data.js - id : Variables json pour ofc.
-          var flashvars = {
-            "get-data": "getUserFlashData",
-            "id": escape(YAHOO.lang.JSON.stringify(response.json))
-          },
-            params = {
-              wmode: "opaque"
-            },
-            // /!\ pour IE
-            attributes = {
-              salign: "l",
-              AllowScriptAccess: "always"
-            };
-
-          // Création du graphique Flash.
-          swfobject.embedSWF(this.options.pathToSwf, id, additionalsParams.width, additionalsParams.height, "9.0.0", "expressInstall.swf", flashvars, params, attributes);
-        }
-
-      } else {
-        // On remove le SWF courant.
-        this.removeGraph(id);
-        Dom.get(id).innerHTML = this.msg("message.empty");
-        this.widgets.exportButton.set("disabled", true);
-      }
-    },
-
-    /**
-     * @method buildParams Construit une chaîne de caractère pour passer les arguments en GET
-     * @return string params argument à passer à la requête
+     * @method buildParams
+     *         This function is used to build GET query request
+     * @return string - url params
      */
     buildParams: function UserConnections_buildParams() {
       // TODO:

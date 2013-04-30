@@ -74,8 +74,8 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       });
       this.widgets.actionCriteriaButton.value = "read";
 
-      // Composants créé, on ajoute des listeners sur les menus.
-      // Comportement du menu de filtre par Modules
+      // Listeners on menu click
+      // "Module" filter
       var onModulesMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
         var sText = p_aArgs[1].cfg.getProperty("text"),
             value = p_aArgs[1].value;
@@ -92,7 +92,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         Dom.addClass(this.widgets.moduleCriteriaButton.getMenu().getItem(itemsCount - 1).element, "menu-separator");
       }
 
-      // Comportement du menu de filtre par Actions
+      // "Action" filter
       var onActionsMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
         var sText = p_aArgs[1].cfg.getProperty("text"),
             value = p_aArgs[1].value;
@@ -116,7 +116,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
     },
 
     onSearch: function GlobalUsage_onSearch() {
-      // Récupération des variables de l'UI
+      // Retrieve variables from UI
       var action = this.convertMenuValue(this.widgets.actionCriteriaButton.value),
           module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
           dateFilter = this.options.currentDateFilter,
@@ -124,12 +124,12 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
           type = action,
           tsString = "";
 
-      // Création du tableau d'intervalle de dates
+      // Date range table
       if (dateFilter) {
         tsString = this.buildTimeStampArray().toString();
       }
 
-      // Création des paramètres et exécution de la requête
+      // Build query parameters
       this.lastRequest.params = this.buildParams(module, site, tsString, type);
       this.lastRequest.dateFilter = dateFilter;
 
@@ -137,7 +137,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       Alfresco.util.Ajax.jsonGet({
         url: url,
         successCallback: {
-          fn: this.displayGraph,
+          fn: this.displayGlobalUsageGraph,
           scope: this
         },
         failureMessage: this.msg("label.popup.query.error"),
@@ -163,14 +163,14 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
           to = tsArray[tsArray.length - 1],
           params = null;
 
-      // Création des paramètres et exécution de la requête
+      // Build query parameters
       params = this.buildParams(module, site, null, type, from, to, this.options.limit);
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-audits" + params;
       Alfresco.util.Ajax.jsonGet({
         url: url,
         successCallback: {
-          fn: this.displayGraph,
+          fn: this.displayGlobalUsageGraph,
           scope: this
         },
         failureMessage: this.msg("label.popup.query.error"),
@@ -200,63 +200,22 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       };
     },
 
-    /**
-     * @method displayGraph Affiche le requête suite à une requête Ajax
-     * @param response Réponse de la requête
-     */
-    displayGraph: function GlobalUsage_displayGraph(response) {
-      var additionalsParams, id, swf, chartTag;
-
-      additionalsParams = response.config.additionalsParams;
-      id = this.id + "-" + additionalsParams.target;
-      swf = Dom.get(id);
-      chartTag = swf.tagName.toLowerCase();
-
-      if (response.json) {
-        this.widgets.exportButton.set("disabled", false);
-        response.json.currentFilter = this.options.currentDateFilter;
-        response.json.additionalsParams = additionalsParams;
-
-        if (chartTag == "embed" || chartTag == "object") {
-          swf.load(getFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
-        } else {
-          // Création variables et attributs - GetFlashData défini dans get_data.js - id : Variables json pour ofc.
-          var flashvars = {
-            "get-data": "getFlashData",
-            "id": escape(YAHOO.lang.JSON.stringify(response.json))
-          },
-            params = {
-              wmode: "opaque"
-            },
-            // /!\ pour IE
-            attributes = {
-              salign: "l",
-              AllowScriptAccess: "always"
-            };
-
-          // Création du graphique Flash.
-          swfobject.embedSWF(this.options.pathToSwf, id, additionalsParams.width, additionalsParams.height, "9.0.0", "expressInstall.swf", flashvars, params, attributes);
-        }
-
-      } else {
-        // On remove le SWF courant.
-        this.removeGraph(id);
-        Dom.get(id).innerHTML = this.msg("message.empty");
-        this.widgets.exportButton.set("disabled", true);
-      }
+    displayGlobalUsageGraph: function GlobalUsage_displayGlobalUsageGraph(response) {
+      this.displayGraph(response, "getFlashData");
     },
 
     /**
-     * @method buildParams Construit une chaîne de caractère pour passer les arguments en GET
-     * @param from Timestamp unix (string) de la date minimum
-     * @param to Timestamp unix (string) de la date maximum
-     * @param action Action selectionnée dans l'UI  --> Useless ?
-     * @param module Module selectionné dans l'UI
-     * @param dates Ensemble des tranches de dates dans le cas d'une recherche par date
-     * @param type Type de requête à effectuer
-     * @param limit Limite de résultats
+     * @method buildParams
+     *         This function is used to build GET query request
+     *
+     * @param from Timestamp (string) - date from
+     * @param to Timestamp (string) - date to
+     * @param module - selected module
+     * @param dates - selected dates
+     * @param type - query type
+     * @param limit - results limit
 
-     * @return string params argument à passer à la requête
+     * @return string - url params
      */
     buildParams: function GlobalUsage_buildParams(module, site, dates, type, from, to, limit) {
       var params = "?type=" + type;

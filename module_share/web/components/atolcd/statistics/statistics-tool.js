@@ -55,7 +55,7 @@ AtolStatistics.dateFormatMasks = {
   AtolStatistics.Tool = function Tool_constructor(htmlId) {
     AtolStatistics.Tool.superclass.constructor.apply(this, arguments);
 
-    // Surcharge de la classe Date. Récupère la semaine courante
+    // @Override getWeek() date function
     Date.prototype.getWeek = function() {
      var onejan = new Date(this.getFullYear(), 0, 1);
      return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
@@ -67,22 +67,27 @@ AtolStatistics.dateFormatMasks = {
   YAHOO.extend(AtolStatistics.Tool, Alfresco.component.Base, {
     options: {
       /**
-       * @attribute pathToSwf
-       * Chemin vers le fichier swf d'Open Flash Chart
+       * @option pathToSwf
+       *
+       * Path to Open Flash Chart swf file
+       * http://teethgrinder.co.uk/open-flash-chart-2/
        */
       pathToSwf: "open-flash-chart.swf",
 
       /**
-       * @attribute currentDateFilter
-       * Filtre de date : days, weeks, months, years
-       * "weeks" par défaut
+       * @option currentDateFilter
+       *
+       * Current date filter: "days", "weeks", "months" or "years"
+       * default value: "weeks"
        */
       currentDateFilter: "weeks"
     },
 
     /**
-     * Cache-Résultat de la dernière requête exécutée
-     * Utilisé pour l'export CSV
+     * @attribute lastRequest
+     *
+     * Cache (last executed query)
+     * Use for CSV export
      */
     lastRequest: {
       params: null,
@@ -93,14 +98,15 @@ AtolStatistics.dateFormatMasks = {
 
     /**
      * @attribute endDatesArray
-     * Dates de référence utilisée pour les graphiques
-     * Date présente par défaut
+     *
+     * Dates used by the charts
      */
     endDatesArray: [],
 
     /**
      * @attribute sites
-     * Informations sur les sites (id/titre).
+     *
+     * Sites informations (id / title)
      */
     sites: {},
 
@@ -130,7 +136,7 @@ AtolStatistics.dateFormatMasks = {
         }
       };
       this.widgets.exportButton.getMenu().subscribe("click", onExportMenuItemClick);
-      Dom.addClass(this.widgets.exportButton.getMenu().element, "export-btn");
+      Dom.addClass(this.widgets.exportButton.getMenu().element, "export-button");
 
       // Default listeners
       Event.addListener(this.id + "-home", "click", this.onResetDates, null, this);
@@ -150,7 +156,7 @@ AtolStatistics.dateFormatMasks = {
     },
 
     loadSites: function loadSites() {
-      // Changement de style pour l'icône de chargement
+      // Loading icon
       // this.widgets.siteButton.set("label", this.msg("label.sites.loading") + ' <span class="loading"></span>');
 
       if (this.options.siteId && this.options.siteId != "") {
@@ -211,8 +217,9 @@ AtolStatistics.dateFormatMasks = {
           }
         });
 
-        // Stockage des sites
+        // We store sites informations (id / title)
         siteIds.push(current_site.name);
+
         this.sites[current_site.name] = current_site.title;
       }
 
@@ -241,8 +248,7 @@ AtolStatistics.dateFormatMasks = {
 
       this.widgets.siteButton = new YAHOO.widget.Button(this.id + "-site-criteria", btOpts);
 
-      // Maj des infos du bouton
-      // Sélection de la 1ère entrée
+      // First item selection
       this.widgets.siteButton.set("label", menuButtons[0].text);
       this.widgets.siteButton.value = menuButtons[0].value;
       this.widgets.siteButton.set("selectedMenuItem", this.widgets.siteButton.getMenu().getItem(0));
@@ -250,10 +256,50 @@ AtolStatistics.dateFormatMasks = {
       this.execute();
     },
 
-    /**
-     * @method buildTimeStampArray Construit des intervalles de dates
-     * @return array Tableau contenant les différents intervalles de dates
-     */
+    displayGraph: function Tool_displayGraph(response, fn) {
+      var additionalsParams, id, swf, chartTag;
+
+      additionalsParams = response.config.additionalsParams;
+      id = this.id + "-" + additionalsParams.target;
+      swf = Dom.get(id);
+      chartTag = swf.tagName.toLowerCase();
+
+      if (response.json) {
+        this.widgets.exportButton.set("disabled", false);
+        response.json.currentFilter = this.options.currentDateFilter;
+        response.json.additionalsParams = additionalsParams;
+        this.lastRequest.values = response.json.values;
+
+        if (chartTag == "embed" || chartTag == "object") {
+          swf.load(eval(fn + "('" + escape(YAHOO.lang.JSON.stringify(response.json)) + "')"));
+        } else {
+          // function "GetFlashData" is defined into the get_data.js file
+          // "id" parameter: parameters for OFC
+          var flashvars = {
+            "get-data": fn,
+            "id": escape(YAHOO.lang.JSON.stringify(response.json))
+          },
+            params = {
+              wmode: "opaque"
+            },
+            // /!\ for IE
+            attributes = {
+              salign: "l",
+              AllowScriptAccess: "always"
+            };
+
+          // Chart rendering (using flash)
+          swfobject.embedSWF(this.options.pathToSwf, id, additionalsParams.width, additionalsParams.height, "9.0.0", "expressInstall.swf", flashvars, params, attributes);
+        }
+
+      } else {
+        // Remove current Flash object (swf)
+        this.removeGraph(id);
+        Dom.get(id).innerHTML = this.msg("message.empty"); // use default Share message
+        this.widgets.exportButton.set("disabled", true);
+      }
+    },
+
     buildTimeStampArray: function Tool_buildTimeStampArray() {
       var tsArray = [],
         from = null,
@@ -263,18 +309,17 @@ AtolStatistics.dateFormatMasks = {
         hasNext = null,
         res = "";
 
-      // Création de nouvelles dates à manipuler
       to = new Date(this.endDatesArray[this.options.currentDateFilter].getTime());
       from = new Date(this.endDatesArray[this.options.currentDateFilter].getTime());
 
-      // Créé les intervalles allant du mois de départ au mois d'arrivée INCLUS
+      // Creating date intervals from starting month to the ending month INCLUDED
       if (this.options.currentDateFilter == "months") {
         tsArray.push(from.setDate(1));
         next = new Date(from);
         next.setDate(1);
         next.setDate(next.getDate() + 1);
 
-        // Date d'arrêt
+        // "to" date
         to.setDate(1);
         to.setMonth(to.getMonth() + 1);
 
@@ -286,17 +331,15 @@ AtolStatistics.dateFormatMasks = {
         }
         tsArray.push(next.getTime());
       }
-      // Selectionne par semaine suivant from et to.
-      // Les semaines de "from" et "to" sont INCLUSES
       else if (this.options.currentDateFilter == "weeks") {
-        // On utilise la date de départ pour récupérer tous les jours de la semaine
         next = null, currentDay = to.getDay(), hasNext = false;
-        // Début de semaine
+
+        // Beginning of the week
         from.setDate(to.getDate() - (currentDay - 1));
         next = new Date(from);
         tsArray.push(from.getTime());
 
-        // Date d'arrêt
+        // "to" date
         to.setMonth(from.getMonth());
         to.setDate(from.getDate() + 7);
 
@@ -307,22 +350,22 @@ AtolStatistics.dateFormatMasks = {
           next.setDate(next.getDate() + 1);
           hasNext = (to.getTime() > next.getTime());
         }
-        // Semaine suivante, on test au cas où on dépasse.
+
+        // Next week?
         tsArray.push(next.getTime());
       }
-      // Créé les intervalles allant du jour de départ au jour d'arrivée INCLUS
       else if (this.options.currentDateFilter == "days") {
-        // On ajoute la date de départ
+        // "from" date
         tsArray.push(from.getTime());
 
-        // On ajoute 1 jour à la date de fin, pour inclure le dernier jour selectionné.
+        // "end" date
         to.setDate(to.getDate() + 1);
 
-        // On récupère le jour suivant
+        // next day
         next = new Date(from);
         next.setHours(next.getHours() + 2);
 
-        // On vérifie qu'il ne dépasse pas la date de fin, on boucle
+        // We check if we don't exceed the end date, we loop
         hasNext = (to > next);
         while (hasNext) {
           tsArray.push(next.getTime());
@@ -331,7 +374,7 @@ AtolStatistics.dateFormatMasks = {
         }
         tsArray.push(to.getTime());
       } else if (this.options.currentDateFilter == "years") {
-        // On se place au début de l'année
+        // Beginning of the year
         from.setDate(1);
         from.setMonth(0);
         tsArray.push(from.getTime());
@@ -354,10 +397,6 @@ AtolStatistics.dateFormatMasks = {
       return tsArray;
     },
 
-    /**
-     * @method removeGraph
-     * @return boolean
-     */
     removeGraph: function Tool_removeGraph(id) {
       var swf = Dom.get(id),
         chartTag = swf.tagName.toLowerCase(),
@@ -365,7 +404,8 @@ AtolStatistics.dateFormatMasks = {
 
       if (chartTag == "embed" || chartTag == "object") {
         swfobject.removeSWF(id);
-        // Le conteneur étant détruit, il faut le recréer ...
+
+        // We need to recreate the container
         var newChartDiv = new YAHOO.util.Element(document.createElement("div"));
         newChartDiv.set("id", id);
         newChartDiv.appendTo(id + "-container");
@@ -375,48 +415,6 @@ AtolStatistics.dateFormatMasks = {
       return res;
     },
 
-
-    /**
-     * @method convertDate
-     * @param d Date au format jj/mm/aaaa
-     * @return integer Timestamp unix de la date
-     */
-    convertDate: function Tool_convertDate(d) {
-      var res = 0;
-      if (d.length > 0) {
-        var dateArray = d.split('/');
-        var dateToReturn = new Date(dateArray[2], dateArray[1] - 1, dateArray[0], 0, 0, 0);
-        res = dateToReturn.getTime();
-      }
-      return res;
-    },
-
-    /**
-     * @method convertTimeStamp
-     * @param ts Timestamp unix
-     * @param exclude boolean indiquant si le jour doit être exclu
-     * @return string Date au format jj/mm/aaaa
-     */
-    convertTimeStamp: function Tool_convertTimeStamp(ts, exclude) {
-      var d = new Date(ts);
-      // retour un jour en arrière en cas d'exclude
-      if (exclude) {
-        d.setDate(d.getDate() - 1);
-      }
-
-      var month = (d.getMonth() + 1).toString(),
-        day = d.getDate().toString(),
-        year = d.getFullYear().toString();
-
-      return day + "/" + month + "/" + year;
-    },
-
-    /**
-     * Transforme les valeurs en cas de "" ou de undefined
-     * @method convertMenuValue
-     * @param val String Valeur du bouton
-     * @return string Valeur "convertie"
-     */
     convertMenuValue: function Tool_convertMenuValue(val) {
       var res = null;
       if (val !== undefined && val !== "") {
@@ -425,12 +423,6 @@ AtolStatistics.dateFormatMasks = {
       return res;
     },
 
-    /**
-     * @method onChangeDateFilter
-     * @param e Event déclencheur
-     * @param args Composant déclencheur
-     * Gestionnaire click Jour / Semaine / Mois / Année
-     */
     onChangeDateFilter: function Tool_OnChangeDateFilter(e, args) {
       if (e) Event.stopEvent(e);
       Dom.removeClass(this.id + "-by-" + this.options.currentDateFilter, "selected");
@@ -439,33 +431,30 @@ AtolStatistics.dateFormatMasks = {
       this.execute();
     },
 
-    /**
-     * @method onChangeDateInterval
-     * @param e Event déclencheur
-     * @param args Composant déclencheur
-     * Gestionnaire click suivant / précédent
-     */
     onChangeDateInterval: function Tool_OnChangeDateInterval(e, args) {
       var coef = args.coef,
-        currentDate = new Date(),
-        dateFilter = this.options.currentDateFilter,
-        newDate = new Date(this.endDatesArray[dateFilter]);
+          currentDate = new Date(),
+          dateFilter = this.options.currentDateFilter,
+          newDate = new Date(this.endDatesArray[dateFilter]);
 
       Event.stopEvent(e);
 
       switch (dateFilter) {
-      case "days":
-        newDate.setDate(this.endDatesArray[dateFilter].getDate() + (1 * coef));
-        break;
-      case "weeks":
-        newDate.setDate(this.endDatesArray[dateFilter].getDate() + (7 * coef));
-        break;
-      case "months":
-        newDate.setMonth(this.endDatesArray[dateFilter].getMonth() + (1 * coef));
-        break;
-      case "years":
-        newDate.setFullYear(this.endDatesArray[dateFilter].getFullYear() + (1 * coef));
-        break;
+        case "days":
+          newDate.setDate(this.endDatesArray[dateFilter].getDate() + (1 * coef));
+          break;
+
+        case "weeks":
+          newDate.setDate(this.endDatesArray[dateFilter].getDate() + (7 * coef));
+          break;
+
+        case "months":
+          newDate.setMonth(this.endDatesArray[dateFilter].getMonth() + (1 * coef));
+          break;
+
+        case "years":
+          newDate.setFullYear(this.endDatesArray[dateFilter].getFullYear() + (1 * coef));
+          break;
       }
 
       this.endDatesArray[dateFilter] = newDate;

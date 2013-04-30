@@ -18,7 +18,7 @@
 
 function getVolumetryFlashData(param) {
   var params = YAHOO.lang.JSON.parse(unescape(param)),
-    jsonChart = null;
+      jsonChart = null;
 
   jsonChart = buildChart(params);
 
@@ -41,11 +41,6 @@ function buildTitle(params) {
   return title;
 }
 
-/**
- * @method buildBarChart
- * @param params JSON Parameters from query
- * @return JSON Bar Chart Data
- */
 function buildChart(params) {
   params.max = 0;
   var x_labels = buildXAxisLabels(params);
@@ -95,7 +90,6 @@ function buildSingleChartElements(params, labels, type) {
   var max = 0,
       values = [];
 
-  // Boucle sur les éléments par date
   for (var i=0, ii=params.values.length ; i<ii ; i++) {
     var value = roundNumber(params.values[i] / (1024 * 1024), 2);
 
@@ -122,7 +116,8 @@ function buildSingleChartElements(params, labels, type) {
 
     max = max > value ? max : value;
   }
-  // Mise à jour du maximum
+
+  // Update "max" value
   params.max = max ? roundMax(max) : 10;
 
   var element = {
@@ -150,7 +145,6 @@ function buildSingleChartElements(params, labels, type) {
 function buildStackedBarChartElements(params, labels) {
   var max = 0, values = [];
 
-  // Boucle sur les éléments par date
   for (var i=0, ii=params.stackedValues.length ; i < ii; i++) {
     var stackedValue = params.stackedValues[i]
         valueTab = [];
@@ -168,8 +162,7 @@ function buildStackedBarChartElements(params, labels) {
         value_obj.tip += getMessage("graph.label.global.volumetry") + " #total# Mo";
       }
       else {
-        // value_obj.tip = "i=" + i + " - j=" + j;
-        // HACK : les tooltips se cumulent lors de l'affichage quand toutes les valeurs sont vides
+        // HACK: resolves "tooltips" display problems
         if (params.values[i] == 0 && j == 0) {
           value_obj.tip = getMessage("label.graph.no-data");
         }
@@ -184,9 +177,8 @@ function buildStackedBarChartElements(params, labels) {
     max = max > total ? max : total;
   }
 
-  // Mise à jour du maximum
+  // Update "max" value
   params.max = max ? roundMax(max) : 10;
-
 
   return [{
     "type": "bar_stack",
@@ -250,7 +242,7 @@ function buildLinesChartElements(params, labels) {
     cpt ++;
   }
 
-  // Mise à jour du maximum
+  // Update "max" value
   params.max = max ? roundMax(max) : 10;
 
   return lines;
@@ -266,24 +258,6 @@ function buildXAxisLabels(params) {
   return labelConfiguration;
 }
 
-/**
- * Retourne la traduction du message donné. Peut être prefixé.
- * @method getMessage
- * @param messageId Identifiant du message à traduire
- * @prefix Optionnel - Préfixe du message
- */
-function getMessage(messageId, prefix) {
-  var msg = (prefix) ? prefix + messageId : messageId;
-  var res = Alfresco.util.message.call(null, msg, "AtolStatistics.Volumetry", Array.prototype.slice.call(arguments).slice(2));
-  res = (res.search("graph.label") == 0) ? messageId : res;
-  return res;
-}
-
-/**
- * "Arrondi" la valeur max du graphique pour y mettre des valeurs rondes
- * @method roundMax
- * @param integer max
- */
 function roundMax(max) {
   var new_max = max,
       coef = 1;
@@ -309,14 +283,16 @@ function roundMax(max) {
   return new_max * coef;
 }
 
-/**
- * Arrondit le nombre number avec la précision digits après la virgule
- * @method roundNumber
- * @param number Nombre à arrondir
- * @param digits Nombre de chiffres après la virgule
- */
 function roundNumber(number, digits) {
   var multiple = Math.pow(10, digits);
   var rndedNum = Math.round(number * multiple) / multiple;
   return rndedNum;
+}
+
+
+function getMessage(messageId, prefix) {
+  var msg = (prefix) ? prefix + messageId : messageId;
+  var res = Alfresco.util.message.call(null, msg, "AtolStatistics.Volumetry", Array.prototype.slice.call(arguments).slice(2));
+  res = (res.search("graph.label") == 0) ? messageId : res;
+  return res;
 }

@@ -74,7 +74,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       };
       this.widgets.chartTypeCriteriaButton.getMenu().subscribe("click", onChartTypeMenuItemClick);
 
-      // el, sType, fn, obj, overrideContext
+      // Stacked charts
       Event.addListener(this.id + "-bar_stack-criteria", "click", this.onShowStackedBar, null, this);
 
       this.loadSites();
@@ -86,19 +86,19 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         params += "&type=volumetry";
         params += "&values=" + this.lastRequest.values.toString();
         params += "&interval=" + this.lastRequest.dateFilter;
-        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params; // ?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data));//JSON.stringify
+        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params; // ?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data)); // JSON.stringify
         window.open(url);
       }
     },
 
     onSearch: function Volumetry_onSearch() {
-      // Récupération des variables de l'UI
+      // Retrieve variables from UI
       var dateFilter = this.options.currentDateFilter,
           site = this.convertMenuValue(this.widgets.siteButton.value),
           tsString = "",
           params = "";
 
-      // Création du tableau d'intervalle de dates
+      // Date range table
       if (dateFilter) {
         tsString = this.buildTimeStampArray().toString();
       }
@@ -112,7 +112,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
         }
       }
 
-      // Création des paramètres et exécution de la requête
+      // Build query parameters
       this.lastRequest.params = params;
       this.lastRequest.dateFilter = dateFilter;
 
@@ -129,7 +129,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       Alfresco.util.Ajax.jsonGet({
         url: url,
         successCallback: {
-          fn: this.displayGraph,
+          fn: this.displayVolumetryGraph,
           scope: this
         },
         failureMessage: this.msg("label.popup.query.error"),
@@ -151,7 +151,7 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       var sText = p_oItem.cfg.getProperty("text"),
           value = p_oItem.value;
 
-      if (value == "" || value.indexOf(',') >= 0) { // Tous les sites
+      if (value == "" || value.indexOf(',') >= 0) { // All sites
         Dom.removeClass(this.id + "-bar-stack-criteria-container", "hidden");
       } else {
         Dom.addClass(this.id + "-bar-stack-criteria-container", "hidden");
@@ -170,56 +170,13 @@ if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics 
       AtolStatistics.Volumetry.superclass.createSiteMenu.call(this, res, hideAllSiteEntry);
     },
 
-    /**
-     * @method displayGraph Affiche le requête suite à une requête Ajax
-     * @param response Réponse de la requête
-     */
-    displayGraph: function Volumetry_displayGraph(response) {
-      var additionalsParams, id, swf, chartTag;
-
-      additionalsParams = response.config.additionalsParams;
-      id = this.id + "-" + additionalsParams.target;
-      swf = Dom.get(id);
-      chartTag = swf.tagName.toLowerCase();
-
-      if (response.json) {
-        this.widgets.exportButton.set("disabled", false);
-        this.lastRequest.values = response.json.values;
-
-        response.json.currentFilter = this.options.currentDateFilter;
-        response.json.additionalsParams = additionalsParams;
-
-        if (chartTag == "embed" || chartTag == "object") {
-          swf.load(getVolumetryFlashData(escape(YAHOO.lang.JSON.stringify(response.json))));
-        } else {
-          // Création variables et attribut - GetFlashData défini dans get_data.js - id : Variables json pour ofc.
-          var flashvars = {
-            "get-data": "getVolumetryFlashData",
-            "id": escape(YAHOO.lang.JSON.stringify(response.json))
-          },
-            params = {
-              wmode: "opaque"
-            },
-            // /!\ pour IE
-            attributes = {
-              salign: "l",
-              AllowScriptAccess: "always"
-            };
-
-          // Création du graphique Flash.
-          swfobject.embedSWF(this.options.pathToSwf, id, additionalsParams.width, additionalsParams.height, "9.0.0", "expressInstall.swf", flashvars, params, attributes);
-        }
-
-      } else {
-        // On remove le SWF courant.
-        this.removeGraph(id);
-        Dom.get(id).innerHTML = this.msg("message.empty");
-        this.widgets.exportButton.set("disabled", true);
-      }
+    displayVolumetryGraph: function Volumetry_displayVolumetryGraph(response) {
+      this.displayGraph(response, "getVolumetryFlashData");
     },
 
     onShowStackedBar: function Volumetry_onShowStackedBar() {
       this.execute();
     }
+
   });
 })();

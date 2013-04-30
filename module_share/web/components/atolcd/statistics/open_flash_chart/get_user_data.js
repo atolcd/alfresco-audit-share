@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Atol Conseils et Développements.
+ * Copyright (C) 2013 Atol Conseils et DÃ©veloppements.
  * http://www.atolcd.com/
  *
  * This program is free software: you can redistribute it and/or modify
@@ -41,11 +41,6 @@ function buildTitle(params) {
   return title;
 }
 
-/**
- * @method buildBarChart
- * @param params JSON Parameters from query
- * @return JSON Bar Chart Data
- */
 function buildChart(params) {
   params.max = 0;
   var x_labels = buildXAxisLabels(params);
@@ -56,7 +51,6 @@ function buildChart(params) {
     },
 
     "bg_colour": "#FFFFFF",
-
     "elements": buildChartElements(params, x_labels.labels),
 
     "x_axis": {
@@ -70,7 +64,7 @@ function buildChart(params) {
       "colour": gridColors["y-grid"],
       "grid-colour": gridColors["y-grid"],
       "offset": 0,
-      "max": params.max + params.max / 10 // Petite marge
+      "max": params.max + params.max / 10
     }
   };
 
@@ -82,7 +76,6 @@ function buildChartElements(params, labels) {
       values = [],
       label = getMessage("connection", "graph.label.");
 
-  // Boucle sur les éléments par date
   for (var i=0, ii=params.values.length ; i<ii ; i++) {
     var value = params.values[i];
 
@@ -101,7 +94,7 @@ function buildChartElements(params, labels) {
     max = max > value ? max : value;
   }
 
-  // Mise à jour du maximum
+  // Update "max" value
   var new_max = max,
       coef = 1;
 
@@ -115,9 +108,8 @@ function buildChartElements(params, labels) {
     }
 
     new_max = Math.ceil(max);
-    // Pas
+    // step
     params.step = (new_max < 5 && new_max > 1 && coef > 1) ? coef / 2 : coef;
-    // Maximum trop importante pour les valeurs proche de 1x ou 2x.
     if (coef > 1) {
       if (max > 1 && max < 1.5) {
         params.max = new_max * coef * 0.75;
@@ -166,12 +158,7 @@ function buildXAxisLabels(params) {
   return labelConfiguration;
 }
 
-/**
- * Retourne la traduction du message donné. Peut être prefixé.
- * @method getMessage
- * @param messageId Identifiant du message à traduire
- * @prefix Optionnel - Préfixe du message
- */
+
 function getMessage(messageId, prefix) {
   var msg = (prefix) ? prefix + messageId : messageId;
   var res = Alfresco.util.message.call(null, msg, "AtolStatistics.UserConnections", Array.prototype.slice.call(arguments).slice(2));

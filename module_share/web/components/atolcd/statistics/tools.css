@@ -42,7 +42,7 @@
 }
 
 .tools-link h2 {
-  background: transparent url(../../images/expanded.png) no-repeat scroll 0% 50%;
+  background: transparent url("../../images/expanded.png") no-repeat scroll 0% 50%;
   margin-top: 1em;
   padding-left: 1em;
   font-size: 123.1%;

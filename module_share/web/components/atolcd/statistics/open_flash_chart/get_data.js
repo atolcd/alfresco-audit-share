@@ -33,19 +33,10 @@ function getFlashData(param) {
   return YAHOO.lang.JSON.stringify(jsonChart);
 };
 
-/**
- * Retourn une couleur aléatoirement
- * @method get_random_color
- */
 function buildTitle(params) {
   return getMessage(params.additionalsParams.type, "graph.title.") + buildDateTitle(params);
 }
 
-/**
- * @method buildBarChart
- * @param params JSON Parameters from query
- * @return JSON Bar Chart Data
- */
 function buildBarChart(params) {
   params.max = 0;
   var x_labels = buildXAxisLabels(params);
@@ -56,7 +47,6 @@ function buildBarChart(params) {
     },
 
     "bg_colour": "#FFFFFF",
-
     "elements": buildBarChartElements(params, x_labels.labels),
 
     "x_axis": {
@@ -70,7 +60,7 @@ function buildBarChart(params) {
       "colour": gridColors["y-axis"],
       "grid-colour": gridColors["y-grid"],
       "offset": 0,
-      "max": params.max + params.max / 10 //Petite marge
+      "max": params.max + params.max / 10
     }
   };
 
@@ -81,21 +71,17 @@ function buildBarChart(params) {
 
 function buildBarChartElements(params, labels) {
   var elements = [],
-    pItems = params.items,
-    pItemsLength = pItems.length,
-    max = 0;
+      treatedElements = [],
+      pItemsLength = params.items.length,
+      max = 0;
 
-  var treatedElements = [];
-  // Boucle sur les éléments par date
-  for (var i = 0; i < pItemsLength; i++) {
-    var items = pItems[i];
+  for (var i=0 ; i<pItemsLength ; i++) {
+    var items = params.items[i];
     if (items.totalResults > 0) {
-      //Boucles sur les différents éléments d'une date précise
       for (var j = 0, jj = items.totalResults; j < jj; j++) {
         var target = items.items[j].target,
-          count = items.items[j].count;
+            count = items.items[j].count;
 
-        // Test si l'élément a déjà été traité
         if (treatedElements[target] == undefined) {
           treatedElements[target] = [];
           treatedElements[target][i] = count;
@@ -112,9 +98,9 @@ function buildBarChartElements(params, labels) {
     }
   }
 
-  // Mise à jour du maximum
+  // Update "max" value
   var new_max = max,
-    coef = 1;
+      coef = 1;
 
   if (max == 0) {
     params.max = 9;
@@ -126,9 +112,8 @@ function buildBarChartElements(params, labels) {
     }
 
     new_max = Math.ceil(max);
-    // Pas
+    // step
     params.step = (new_max < 5 && new_max > 1 && coef > 1) ? coef / 2 : coef;
-    // Maximum trop importante pour les valeurs proche de 1x ou 2x.
     if (coef > 1) {
       if (max > 1 && max < 1.5) {
         params.max = new_max * coef * 0.75;
@@ -143,13 +128,11 @@ function buildBarChartElements(params, labels) {
     }
   }
 
-  // Modifier values
   for (key in treatedElements) {
     var values = [],
         value_obj = {},
         label = getMessage(key, "graph.label.");
 
-    // Vérification des valeurs non remplies
     for (var j = 0; j < pItemsLength; j++) {
       if (!treatedElements[key][j]) {
         treatedElements[key][j] = 0;
@@ -271,7 +254,7 @@ function buildHBarChartElements(params, labels) {
 function displayNodeDetailsPopup(itemStr) {
   var item = YAHOO.lang.JSON.parse(unescape(itemStr));
 
-  // TODO: make something cleaner
+  // TODO: make something cleaner?
   var body = '<div class="node-details-popup">';
   body += '<p><label>' + getMessage("label.popup.filename") + '</label>' + item.displayName + '</p>';
   body += (item.siteTitle) ? '<p><label>' + getMessage("label.popup.type") + '</label>' + getMessage("site.component." + item.siteComponent) + '</p>' : '';
@@ -303,12 +286,7 @@ function displayNodeDetailsPopup(itemStr) {
   });
 }
 
-/**
- * Retourne la traduction du message donné. Peut être prefixé.
- * @method getMessage
- * @param messageId Identifiant du message à traduire
- * @prefix Optionnel - Préfixe du message
- */
+
 function getMessage(messageId, prefix) {
   var msg = (prefix) ? prefix + messageId : messageId;
   var res = Alfresco.util.message.call(null, msg, "AtolStatistics.GlobalUsage", Array.prototype.slice.call(arguments).slice(2));

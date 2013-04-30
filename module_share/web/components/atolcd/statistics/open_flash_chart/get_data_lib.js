@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Atol Conseils et Développements.
+ * Copyright (C) 2013 Atol Conseils et DÃ©veloppements.
  * http://www.atolcd.com/
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,10 +16,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Retourn une couleur aléatoirement
- * @method get_random_color
- */
 function get_random_color() {
   var letters = '0123456789ABCDEF'.split('');
   var color = '#';
@@ -32,7 +28,7 @@ function get_random_color() {
 function save_chart_image(p) {
   var params = YAHOO.lang.JSON.parse(p);
   if (params.additionalsParams.chartId) {
-    var exportPage = window.open('', getMessage("label.export.img.chart.title"));
+    var exportPage = window.open('', 'chart_exported_as_image');
     with(exportPage.document) {
       var html = '';
 
@@ -57,11 +53,6 @@ function save_image(p) {
   save_chart_image(p[0]);
 }
 
-/**
- * Construit les labels de l'axe des abscisses à partir des paramètres
- * @method buildBarChartXLabels
- * @param object params
- */
 function buildBarChartXLabels(params) {
   var labels = [],
       timeType = params.currentFilter,
@@ -99,21 +90,11 @@ function buildBarChartXLabels(params) {
   return labels;
 }
 
-/**
- * Configure la rotation des labels sur l'axe des X
- * @param o
- * @param params
- */
 function addRotation(o, params){
-  // Filtre par heures de la journée. Les labels de chevauchent sur les "petits" écrans.
+  // labels rotation (45 degrees)
   if (params.currentFilter == "days"){ o.rotate = -45; }
 }
 
-/**
- * Construit un intitulé de date suivant les paramètres
- * @method buildDateTitle
- * @param object params
- */
 function buildDateTitle(params) {
   var title = "",
       timeType = params.currentFilter,
@@ -142,20 +123,15 @@ function buildDateTitle(params) {
   return title;
 }
 
-// Anciennes couleurs
-// "#0077BF" => Bleu - Lectures
-// "#7CBC28" => Vert - Créations
-// "#EC9304" => Orange - Updates
-// "#EE1C2F" => Rouge - Suppressions
 var red = "#EE1C2F",
-  blue = "#19ABEA",lightBlue = "#1B9EFC",darkBlue = "#1B5AF9",
-  green = "#7CBC28", darkGreen = "#0A9200",
-  orange = "#FF9900", lightOrange = "#FFC600", darkOrange = "#FF692B",
-  gray = "#C1C1C1", mediumGray = "#DFDFDF";
+    blue = "#19ABEA",lightBlue = "#1B9EFC",darkBlue = "#1B5AF9",
+    green = "#7CBC28", darkGreen = "#0A9200",
+    orange = "#FF9900", lightOrange = "#FFC600", darkOrange = "#FF692B",
+    gray = "#C1C1C1", mediumGray = "#DFDFDF";
 
-// Couleurs utilisés par les graphiques
+// Colors used by charts
 var barChartColors = [],
-  gridColors = [];
+    gridColors = [];
 
 // Blog
 barChartColors["blog.postview"] = blue;
@@ -163,7 +139,7 @@ barChartColors["blog.blog-create"] = darkGreen;
 barChartColors["blog.blog-delete"] = red;
 barChartColors["blog.blog-update"] = orange;
 
-// Espace document
+// Document Library
 barChartColors["document.details"] = blue;
 barChartColors["document.download"] = darkBlue;
 barChartColors["document.create"] = green;
@@ -191,7 +167,7 @@ barChartColors["users"] = blue;
 barChartColors["most-popular"] = red;
 barChartColors["less-popular"] = blue;
 
-// Grilles
+// Grids
 gridColors["x-axis"] = gray;
 gridColors["y-axis"] = gray;
 gridColors["x-grid"] = mediumGray;
