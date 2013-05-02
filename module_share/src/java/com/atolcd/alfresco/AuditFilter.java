@@ -340,7 +340,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         }
 
         boolean siteFlag = false;
-        int limit = urlTokens.length -1;
+        int limit = urlTokens.length - 1;
         for (int i = 0; i < urlTokens.length; i++) {
             if ("site".equals(urlTokens[i]) && !siteFlag) {
                 siteFlag = true;

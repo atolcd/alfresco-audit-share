@@ -208,17 +208,20 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                             remoteCall(request, auditSample);
                         }
                     }
-                } else if (requestURI.equals(URI_UPLOAD)) {
-                    String s = requestWrapper.getStringContent();
+
+                    // } else if (requestURI.equals(URI_UPLOAD)) {
+                    // String s = requestWrapper.getStringContent();
                     // Requête multipart ... on recherche si le paramètre siteId
                     // est présent
-                    if (s.indexOf("Content-Disposition: form-data; name=\"siteId\"") == -1) {
-                        auditSample.put(AUDIT_SITE, SITE_REPOSITORY);
-                        auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
-                        auditSample.put(AUDIT_ACTION_NAME, "file-added");
-                        auditSample.put(AUDIT_OBJECT, ""); 
-                        remoteCall(request, auditSample);
-                    }
+                    // if
+                    // (s.indexOf("Content-Disposition: form-data; name=\"siteId\"")
+                    // == -1) {
+                    // auditSample.put(AUDIT_SITE, SITE_REPOSITORY);
+                    // auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
+                    // auditSample.put(AUDIT_ACTION_NAME, "file-added");
+                    // auditSample.put(AUDIT_OBJECT, "");
+                    // remoteCall(request, auditSample);
+                    // }
                 } else if (requestURI.endsWith("/comments") || requestURI.endsWith("/replies")) {
                     // Comments & replies
                     String[] urlTokens = request.getHeader("referer").toString().split("/");
