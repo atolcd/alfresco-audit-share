@@ -17,54 +17,56 @@
  */
 
 (function() {
-  var defaultOnUploadCompleteData = Alfresco.FlashUpload.prototype.onUploadCompleteData;
+  if (Alfresco.FlashUpload) {
+    var defaultOnUploadCompleteData = Alfresco.FlashUpload.prototype.onUploadCompleteData;
 
-  Alfresco.FlashUpload.prototype.onUploadCompleteData = function FlashUpload_onUploadCompleteData(event) {
-    if (defaultOnUploadCompleteData) {
-      // Call default 'onUploadCompleteData' function
-      defaultOnUploadCompleteData.apply(this, arguments);
-    }
+    Alfresco.FlashUpload.prototype.onUploadCompleteData = function FlashUpload_onUploadCompleteData(event) {
+      if (defaultOnUploadCompleteData) {
+        // Call default 'onUploadCompleteData' function
+        defaultOnUploadCompleteData.apply(this, arguments);
+      }
 
-    // Only on repository files (we use doclib activities in sites)
-    if (!this.showConfig.siteId) {
-      try {
-        var params = {
-          auditSite: AtolStatistics.constants.SITE_REPOSITORY,
-          auditAppName: "document",
-          auditActionName: "file-added"
-        };
+      // Only on repository files (we use doclib activities in sites)
+      if (!this.showConfig.siteId) {
+        try {
+          var params = {
+            auditSite: AtolStatistics.constants.SITE_REPOSITORY,
+            auditAppName: "document",
+            auditActionName: "file-added"
+          };
 
-        // File id
-        var id = event.id.split("file").reverse()[0];
-        if (isNaN(id)) { id = "0"; }
-        params.id = id + '';
+          // File id
+          var id = event.id.split("file").reverse()[0];
+          if (isNaN(id)) { id = "0"; }
+          params.id = id + '';
 
-        var json = Alfresco.util.parseJSON(event.data);
-        if (json) {
-          // Add nodeRef
-          params.auditObject = json.nodeRef;
-        }
-
-        var getSiteSuccessHandler = function(res, obj) {
-          if (res.json.siteShortName) {
-            // Finally, we are on a site
-            obj.auditSite = res.json.siteShortName;
+          var json = Alfresco.util.parseJSON(event.data);
+          if (json) {
+            // Add nodeRef
+            params.auditObject = json.nodeRef;
           }
 
-          // Insert audit (AJAX call)
-          AtolStatistics.util.insertAuditRemoteCall(obj);
-        }
+          var getSiteSuccessHandler = function(res, obj) {
+            if (res.json.siteShortName) {
+              // Finally, we are on a site
+              obj.auditSite = res.json.siteShortName;
+            }
 
-        // Verify if we are into a site (/Company Hom/Sites/{siteShortName}/documentLibrary/...)
-        Alfresco.util.Ajax.jsonGet({
-          url: Alfresco.constants.PROXY_URI + "share-stats/get-site/node/" + params.auditObject.replace('://', '/'),
-          successCallback: {
-            fn: getSiteSuccessHandler,
-            scope: this,
-            obj: params
+            // Insert audit (AJAX call)
+            AtolStatistics.util.insertAuditRemoteCall(obj);
           }
-        });
-      } catch (e) {}
-    }
-  };
+
+          // Verify if we are into a site (/Company Hom/Sites/{siteShortName}/documentLibrary/...)
+          Alfresco.util.Ajax.jsonGet({
+            url: Alfresco.constants.PROXY_URI + "share-stats/get-site/node/" + params.auditObject.replace('://', '/'),
+            successCallback: {
+              fn: getSiteSuccessHandler,
+              scope: this,
+              obj: params
+            }
+          });
+        } catch (e) {}
+      }
+    };
+  }
 })();

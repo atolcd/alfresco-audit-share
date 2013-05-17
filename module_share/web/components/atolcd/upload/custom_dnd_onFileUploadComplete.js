@@ -17,85 +17,87 @@
  */
 
 (function() {
-  var defaultApplyConfig = Alfresco.DNDUpload.prototype._applyConfig;
+  if (Alfresco.DNDUpload) {
+    var defaultApplyConfig = Alfresco.DNDUpload.prototype._applyConfig;
 
-  Alfresco.DNDUpload.prototype._applyConfig = function DNDUpload__applyConfig() {
-    if (defaultApplyConfig) {
-      // Call default '_applyConfig' function
-      defaultApplyConfig.apply(this, arguments);
-    }
+    Alfresco.DNDUpload.prototype._applyConfig = function DNDUpload__applyConfig() {
+      if (defaultApplyConfig) {
+        // Call default '_applyConfig' function
+        defaultApplyConfig.apply(this, arguments);
+      }
 
-    // onFileUploadComplete callback
-    var onFileUploadCompleteCallback = {
-      fn: this.onFileUploadComplete,
-      scope: this
+      // onFileUploadComplete callback
+      var onFileUploadCompleteCallback = {
+        fn: this.onFileUploadComplete,
+        scope: this
+      };
+
+      // Check if there is already a 'FileUploadCompleteCallback' defined
+      if (this.showConfig.onFileUploadComplete) {
+        var currentOnFileUploadCompleteCallback = this.showConfig.onFileUploadComplete;
+        onFileUploadCompleteCallback.obj = currentOnFileUploadCompleteCallback;
+      }
+
+      // Set the new callback
+      this.showConfig.onFileUploadComplete = onFileUploadCompleteCallback;
     };
 
-    // Check if there is already a 'FileUploadCompleteCallback' defined
-    if (this.showConfig.onFileUploadComplete) {
-      var currentOnFileUploadCompleteCallback = this.showConfig.onFileUploadComplete;
-      onFileUploadCompleteCallback.obj = currentOnFileUploadCompleteCallback;
-    }
+    Alfresco.DNDUpload.prototype.onFileUploadComplete = function DNDUpload__onFileUploadComplete(objComplete, defaultCallback) {
+      // If exists, call default 'onFileUploadComplete' first
+      if (defaultCallback && typeof defaultCallback.fn == "function") {
+         // Call the onFileUploadComplete callback in the correct scope
+         defaultCallback.fn.call((typeof defaultCallback.scope == "object" ? defaultCallback.scope : this), objComplete, defaultCallback.obj);
+      }
 
-    // Set the new callback
-    this.showConfig.onFileUploadComplete = onFileUploadCompleteCallback;
-  };
-
-  Alfresco.DNDUpload.prototype.onFileUploadComplete = function DNDUpload__onFileUploadComplete(objComplete, defaultCallback) {
-    // If exists, call default 'onFileUploadComplete' first
-    if (defaultCallback && typeof defaultCallback.fn == "function") {
-       // Call the onFileUploadComplete callback in the correct scope
-       defaultCallback.fn.call((typeof defaultCallback.scope == "object" ? defaultCallback.scope : this), objComplete, defaultCallback.obj);
-    }
-
-    // Only on repository files (we use doclib activities in sites)
-    if (!this.showConfig.siteId) {
-      try {
-        var success = objComplete.successful.length;
-        if (success > 0) {
-          var params = {
-            id: "0",
-            auditSite: AtolStatistics.constants.SITE_REPOSITORY,
-            auditAppName: "document",
-            auditActionName: "file-added"
-          };
+      // Only on repository files (we use doclib activities in sites)
+      if (!this.showConfig.siteId) {
+        try {
+          var success = objComplete.successful.length;
+          if (success > 0) {
+            var params = {
+              id: "0",
+              auditSite: AtolStatistics.constants.SITE_REPOSITORY,
+              auditAppName: "document",
+              auditActionName: "file-added"
+            };
 
 
-          var getSiteSuccessHandler = function(res, args) {
-            var params = args.params;
+            var getSiteSuccessHandler = function(res, args) {
+              var params = args.params;
 
-            if (res.json.siteShortName) {
-              // Finally, we are on a site
-              params.auditSite = res.json.siteShortName;
-            }
+              if (res.json.siteShortName) {
+                // Finally, we are on a site
+                params.auditSite = res.json.siteShortName;
+              }
 
-            for (var i=0 ; i<args.success ; i++) {
-              // File nodeRef
-              params.auditObject = args.objComplete.successful[i].nodeRef;
+              for (var i=0 ; i<args.success ; i++) {
+                // File nodeRef
+                params.auditObject = args.objComplete.successful[i].nodeRef;
 
-              // Insert audit (AJAX call)
-              AtolStatistics.util.insertAuditRemoteCall(params);
-            }
-          }
-
-          // We add files into the same folder so we do only one call
-          var firstNodeRef = objComplete.successful[0].nodeRef;
-
-          // Verify if we are into a site (/Company Hom/Sites/{siteShortName}/documentLibrary/...)
-          Alfresco.util.Ajax.jsonGet({
-            url: Alfresco.constants.PROXY_URI + "share-stats/get-site/node/" + firstNodeRef.replace('://', '/'),
-            successCallback: {
-              fn: getSiteSuccessHandler,
-              scope: this,
-              obj: {
-                params: params,
-                success: success,
-                objComplete: objComplete
+                // Insert audit (AJAX call)
+                AtolStatistics.util.insertAuditRemoteCall(params);
               }
             }
-          });
-        }
-      } catch (e) {}
-    }
-  };
+
+            // We add files into the same folder so we do only one call
+            var firstNodeRef = objComplete.successful[0].nodeRef;
+
+            // Verify if we are into a site (/Company Hom/Sites/{siteShortName}/documentLibrary/...)
+            Alfresco.util.Ajax.jsonGet({
+              url: Alfresco.constants.PROXY_URI + "share-stats/get-site/node/" + firstNodeRef.replace('://', '/'),
+              successCallback: {
+                fn: getSiteSuccessHandler,
+                scope: this,
+                obj: {
+                  params: params,
+                  success: success,
+                  objComplete: objComplete
+                }
+              }
+            });
+          }
+        } catch (e) {}
+      }
+    };
+  }
 })();
