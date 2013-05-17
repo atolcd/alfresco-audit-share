@@ -20,8 +20,10 @@
   var defaultOnUploadCompleteData = Alfresco.FlashUpload.prototype.onUploadCompleteData;
 
   Alfresco.FlashUpload.prototype.onUploadCompleteData = function FlashUpload_onUploadCompleteData(event) {
-    // Call default 'onUploadCompleteData' function
-    defaultOnUploadCompleteData.apply(this, arguments);
+    if (defaultOnUploadCompleteData) {
+      // Call default 'onUploadCompleteData' function
+      defaultOnUploadCompleteData.apply(this, arguments);
+    }
 
     // Only on repository files (we use doclib activities in sites)
     if (!this.showConfig.siteId) {
@@ -43,8 +45,25 @@
           params.auditObject = json.nodeRef;
         }
 
-        // AJAX call
-        AtolStatistics.util.insertAuditRemoteCall(params);
+        var getSiteSuccessHandler = function(res, obj) {
+          if (res.json.siteShortName) {
+            // Finally, we are on a site
+            obj.auditSite = res.json.siteShortName;
+          }
+
+          // Insert audit (AJAX call)
+          AtolStatistics.util.insertAuditRemoteCall(obj);
+        }
+
+        // Verify if we are into a site (/Company Hom/Sites/{siteShortName}/documentLibrary/...)
+        Alfresco.util.Ajax.jsonGet({
+          url: Alfresco.constants.PROXY_URI + "share-stats/get-site/node/" + params.auditObject.replace('://', '/'),
+          successCallback: {
+            fn: getSiteSuccessHandler,
+            scope: this,
+            obj: params
+          }
+        });
       } catch (e) {}
     }
   };

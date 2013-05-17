@@ -20,8 +20,8 @@
   var defaultOnUploadSuccess = Alfresco.HtmlUpload.prototype.onUploadSuccess;
 
   Alfresco.HtmlUpload.prototype.onUploadSuccess = function HtmlUpload_onUploadSuccess(response) {
-    // Call default 'onUploadSuccess' function
     if (defaultOnUploadSuccess) {
+      // Call default 'onUploadSuccess' function
       defaultOnUploadSuccess.apply(this, arguments);
     }
 
@@ -36,8 +36,25 @@
           auditObject: response.nodeRef
         };
 
-        // AJAX call
-        AtolStatistics.util.insertAuditRemoteCall(params);
+        var getSiteSuccessHandler = function(res, obj) {
+          if (res.json.siteShortName) {
+            // Finally, we are on a site
+            obj.auditSite = res.json.siteShortName;
+          }
+
+          // Insert audit (AJAX call)
+          AtolStatistics.util.insertAuditRemoteCall(obj);
+        }
+
+        // Verify if we are into a site (/Company Hom/Sites/{siteShortName}/documentLibrary/...)
+        Alfresco.util.Ajax.jsonGet({
+          url: Alfresco.constants.PROXY_URI + "share-stats/get-site/node/" + params.auditObject.replace('://', '/'),
+          successCallback: {
+            fn: getSiteSuccessHandler,
+            scope: this,
+            obj: params
+          }
+        });
       } catch (e) {}
     }
   };

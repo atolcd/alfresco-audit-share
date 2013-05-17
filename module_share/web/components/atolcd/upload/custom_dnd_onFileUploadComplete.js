@@ -20,8 +20,10 @@
   var defaultApplyConfig = Alfresco.DNDUpload.prototype._applyConfig;
 
   Alfresco.DNDUpload.prototype._applyConfig = function DNDUpload__applyConfig() {
-    // Call default '_applyConfig' function
-    defaultApplyConfig.apply(this, arguments);
+    if (defaultApplyConfig) {
+      // Call default '_applyConfig' function
+      defaultApplyConfig.apply(this, arguments);
+    }
 
     // onFileUploadComplete callback
     var onFileUploadCompleteCallback = {
@@ -58,15 +60,40 @@
             auditActionName: "file-added"
           };
 
-          for (var i=0 ; i<success ; i++) {
-            var file = objComplete.successful[i];
 
-            // File params
-            params.auditObject = file.nodeRef;
+          var getSiteSuccessHandler = function(res, args) {
+            var params = args.params;
 
-            // AJAX call
-            AtolStatistics.util.insertAuditRemoteCall(params);
+            if (res.json.siteShortName) {
+              // Finally, we are on a site
+              params.auditSite = res.json.siteShortName;
+            }
+
+            for (var i=0 ; i<args.success ; i++) {
+              // File nodeRef
+              params.auditObject = args.objComplete.successful[i].nodeRef;
+
+              // Insert audit (AJAX call)
+              AtolStatistics.util.insertAuditRemoteCall(params);
+            }
           }
+
+          // We add files into the same folder so we do only one call
+          var firstNodeRef = objComplete.successful[0].nodeRef;
+
+          // Verify if we are into a site (/Company Hom/Sites/{siteShortName}/documentLibrary/...)
+          Alfresco.util.Ajax.jsonGet({
+            url: Alfresco.constants.PROXY_URI + "share-stats/get-site/node/" + firstNodeRef.replace('://', '/'),
+            successCallback: {
+              fn: getSiteSuccessHandler,
+              scope: this,
+              obj: {
+                params: params,
+                success: success,
+                objComplete: objComplete
+              }
+            }
+          });
         }
       } catch (e) {}
     }

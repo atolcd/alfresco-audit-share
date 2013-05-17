@@ -63,10 +63,18 @@ public class ShareStatsUtils extends BaseTemplateProcessorExtension implements I
 	}
 
 	public String getSiteTitle(String shortName) {
-		SiteInfo si = siteService.getSite(shortName);
+		SiteInfo si = this.siteService.getSite(shortName);
 		if (si != null) {
-			return siteService.getSite(shortName).getTitle();
+			return si.getTitle();
 		}
 		return "";
+	}
+
+	public String getDocumentSite(String documentRef) {
+		SiteInfo si = this.siteService.getSite(new NodeRef(documentRef));
+		if (si != null) {
+			return si.getShortName();
+		}
+		return null;
 	}
 }
