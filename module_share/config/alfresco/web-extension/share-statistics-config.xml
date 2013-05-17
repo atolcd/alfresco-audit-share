@@ -48,7 +48,11 @@
    <!-- Document Library Custom Code config section -->
    <config evaluator="string-compare" condition="DocLibCustom">
       <dependencies>
+         <js src="/components/atolcd/upload/insert-audit-request.lib.js" />
+
          <js src="/components/atolcd/upload/custom_flash_onUploadCompleteData.js" />
+         <js src="/components/atolcd/upload/custom_html_onUploadSuccess.js" />
+         <js src="/components/atolcd/upload/custom_dnd_onFileUploadComplete.js" />
       </dependencies>
    </config>
 

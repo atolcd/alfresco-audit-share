@@ -17,31 +17,24 @@
  */
 
 (function() {
-  var defaultOnUploadCompleteData = Alfresco.FlashUpload.prototype.onUploadCompleteData;
+  var defaultOnUploadSuccess = Alfresco.HtmlUpload.prototype.onUploadSuccess;
 
-  Alfresco.FlashUpload.prototype.onUploadCompleteData = function FlashUpload_onUploadCompleteData(event) {
-    // Call default 'onUploadCompleteData' function
-    defaultOnUploadCompleteData.apply(this, arguments);
+  Alfresco.HtmlUpload.prototype.onUploadSuccess = function HtmlUpload_onUploadSuccess(response) {
+    // Call default 'onUploadSuccess' function
+    if (defaultOnUploadSuccess) {
+      defaultOnUploadSuccess.apply(this, arguments);
+    }
 
     // Only on repository files (we use doclib activities in sites)
-    if (!this.showConfig.siteId) {
+    if (!this.widgets.siteId.value) {
       try {
         var params = {
+          id: "0",
           auditSite: AtolStatistics.constants.SITE_REPOSITORY,
           auditAppName: "document",
-          auditActionName: "file-added"
+          auditActionName: "file-added",
+          auditObject: response.nodeRef
         };
-
-        // File id
-        var id = event.id.split("file").reverse()[0];
-        if (isNaN(id)) { id = "0"; }
-        params.id = id + '';
-
-        var json = Alfresco.util.parseJSON(event.data);
-        if (json) {
-          // Add nodeRef
-          params.auditObject = json.nodeRef;
-        }
 
         // AJAX call
         AtolStatistics.util.insertAuditRemoteCall(params);

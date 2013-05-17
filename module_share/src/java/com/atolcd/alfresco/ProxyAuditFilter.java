@@ -163,7 +163,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                 auditSample.put(AUDIT_OBJECT, "");
                 auditSample.put(AUDIT_TIME, Long.toString(System.currentTimeMillis()));
 
-                // For documents only
+                // For documents only (only in sites!)
                 if (requestURI.endsWith("/doclib/activity") && request.getMethod().equals(POST)) {
                     String type = request.getContentType().split(";")[0];
                     if (type.equals("application/json")) {
@@ -208,20 +208,9 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                             remoteCall(request, auditSample);
                         }
                     }
-
-                    // } else if (requestURI.equals(URI_UPLOAD)) {
-                    // String s = requestWrapper.getStringContent();
-                    // Requête multipart ... on recherche si le paramètre siteId
-                    // est présent
-                    // if
-                    // (s.indexOf("Content-Disposition: form-data; name=\"siteId\"")
-                    // == -1) {
-                    // auditSample.put(AUDIT_SITE, SITE_REPOSITORY);
-                    // auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
-                    // auditSample.put(AUDIT_ACTION_NAME, "file-added");
-                    // auditSample.put(AUDIT_OBJECT, "");
-                    // remoteCall(request, auditSample);
-                    // }
+                } else if (requestURI.equals(URI_UPLOAD)) {
+                    // XXX: issue with big files
+                    // Nothing to do - Insert request is done in JavaScript
                 } else if (requestURI.endsWith("/comments") || requestURI.endsWith("/replies")) {
                     // Comments & replies
                     String[] urlTokens = request.getHeader("referer").toString().split("/");

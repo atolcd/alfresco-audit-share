@@ -17,16 +17,16 @@
  */
 package com.atolcd.alfresco;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.StringWriter;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -80,43 +80,32 @@ public class RequestWrapper extends HttpServletRequestWrapper {
         return inputStream;
     }
 
-    public void buildStringContent() {
-        StringBuilder stringBuilder = new StringBuilder();
-        BufferedReader bufferedReader = null;
+    public String buildStringContent() {
         try {
             // First read of the request
             InputStream inputStream = this.getRequest().getInputStream();
             if (inputStream != null) {
-                bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                char[] charBuffer = new char[128];
-                int bytesRead = -1;
-                while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
-                    stringBuilder.append(charBuffer, 0, bytesRead);
+                StringWriter writer = new StringWriter();
+                String encoding = getCharacterEncoding();
+                if (encoding == null) {
+                    encoding = "UTF-8";
                 }
-            } else {
-                stringBuilder.append("");
+
+                IOUtils.copy(inputStream, writer, encoding);
+                return writer.toString();
             }
         } catch (IOException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }
-        } finally {
-            if (bufferedReader != null) {
-                try {
-                    bufferedReader.close();
-                } catch (IOException iox) {
-                    // ignore
-                }
-            }
         }
-        // Save the request as string
-        this.stringRequest = stringBuilder.toString();
 
+        return "";
     }
 
     public String getStringContent() {
         if (this.stringRequest.isEmpty()) {
-            this.buildStringContent();
+            this.stringRequest = this.buildStringContent();
         }
         return this.stringRequest;
     }
