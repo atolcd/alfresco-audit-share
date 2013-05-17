@@ -44,4 +44,12 @@
          <uri-template id="statisticspage">/statistics/{pageid}</uri-template>
       </uri-templates>
    </config>
+
+   <!-- Document Library Custom Code config section -->
+   <config evaluator="string-compare" condition="DocLibCustom">
+      <dependencies>
+         <js src="/components/atolcd/upload/custom_flash_onUploadCompleteData.js" />
+      </dependencies>
+   </config>
+
 </alfresco-config>
