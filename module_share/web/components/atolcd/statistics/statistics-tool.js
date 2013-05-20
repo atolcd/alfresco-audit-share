@@ -17,7 +17,10 @@
  */
 
 // AtolStatistics namespace
-if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics = {}; AtolStatistics.dateFormatMasks = AtolStatistics.dateFormatMasks || {}; }
+if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistics = {}; }
+
+// AtolStatistics top-level dateFormatMasks namespace.
+AtolStatistics.dateFormatMasks = AtolStatistics.dateFormatMasks || {};
 
 AtolStatistics.dateFormatMasks = {
   fullDate: Alfresco.util.message("statistics.date-format.fullDate"),

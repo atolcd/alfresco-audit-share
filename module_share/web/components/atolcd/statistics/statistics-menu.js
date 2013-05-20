@@ -17,7 +17,10 @@
  */
 
 // AtolStatistics namespace
-if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics = {}; AtolStatistics.module = AtolStatistics.module || {}; }
+if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistics = {}; }
+
+// AtolStatistics top-level module namespace.
+AtolStatistics.module = AtolStatistics.module || {};
 
 (function() {
   AtolStatistics.module.Menu = function(htmlId) {

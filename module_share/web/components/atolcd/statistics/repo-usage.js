@@ -17,7 +17,7 @@
  */
 
 // AtolStatistics namespace
-if (typeof AtolStatistics == undefined || !AtolStatistics) { var AtolStatistics = {}; }
+if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistics = {}; }
 
 /**
  * RepoUsage tool component.

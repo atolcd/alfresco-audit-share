@@ -17,9 +17,7 @@
  */
 
 // AtolStatistics namespace
-if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
-  var AtolStatistics = {};
-}
+if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistics = {}; }
 
 // AtolStatistics top-level util namespace.
 AtolStatistics.util = AtolStatistics.util || {};
