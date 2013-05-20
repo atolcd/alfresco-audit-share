@@ -58,7 +58,7 @@
               id: "0",
               auditSite: AtolStatistics.constants.SITE_REPOSITORY,
               auditAppName: "document",
-              auditActionName: "file-added"
+              auditActionName: "file-added" // it cannot be a "file updated" event with DnD
             };
 
 

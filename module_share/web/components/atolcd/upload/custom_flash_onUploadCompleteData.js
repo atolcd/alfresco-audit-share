@@ -52,13 +52,18 @@
               obj.auditSite = res.json.siteShortName;
             }
 
+            // Only way to know if this is a file update
+            if (typeof res.json.isFileCreation != "undefined" && res.json.isFileCreation == false) {
+              params.auditActionName = "file-updated";
+            }
+
             // Insert audit (AJAX call)
             AtolStatistics.util.insertAuditRemoteCall(obj);
           }
 
           // Verify if we are into a site (/Company Hom/Sites/{siteShortName}/documentLibrary/...)
           Alfresco.util.Ajax.jsonGet({
-            url: Alfresco.constants.PROXY_URI + "share-stats/get-site/node/" + params.auditObject.replace('://', '/'),
+            url: Alfresco.constants.PROXY_URI + "share-stats/get-site/node/" + params.auditObject.replace('://', '/') + "?checkDates=true",
             successCallback: {
               fn: getSiteSuccessHandler,
               scope: this,
