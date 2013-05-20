@@ -82,7 +82,7 @@
             // We add files into the same folder so we do only one call
             var firstNodeRef = objComplete.successful[0].nodeRef;
 
-            // Verify if we are into a site (/Company Hom/Sites/{siteShortName}/documentLibrary/...)
+            // Verify if we are into a site (/Company Home/Sites/{siteShortName}/documentLibrary/...)
             Alfresco.util.Ajax.jsonGet({
               url: Alfresco.constants.PROXY_URI + "share-stats/get-site/node/" + firstNodeRef.replace('://', '/'),
               successCallback: {

@@ -29,7 +29,7 @@ AtolStatistics.constants.SITE_REPOSITORY = "_repository";
 
 
 (function() {
-  AtolStatistics.util.insertAuditRemoteCall = function AtolStatistics_insertAuditRemoteCall(params) {
+  AtolStatistics.util.insertAuditRemoteCall = function AtolStatistics_insertAuditRemoteCall(params, callback) {
     // AJAX call
     // Request body example:
     /*
@@ -53,23 +53,39 @@ AtolStatistics.constants.SITE_REPOSITORY = "_repository";
       requestContentType: "text/plain;charset=UTF-8",
       dataStr: YAHOO.lang.JSON.stringify(params),
       successCallback: {
-        fn: function(res, obj) {
+        fn: function(res, args) {
           if (Alfresco.logger.isDebugEnabled()){
-            Alfresco.logger.debug("[Share-stats] Audit correctly inserted for file: " + obj.auditObject || '');
+            Alfresco.logger.debug("[Share-stats] Audit correctly inserted for file: " + args.params.auditObject || '');
+          }
+
+          // Call callback
+          if (args.callback) {
+            args.callback.defaultCallback.apply(args.callback.scope, args.callback.arguments);
           }
         },
         scope: this,
-        obj: params
+        obj: {
+          params: params,
+          callback: callback
+        }
       },
       failureCallback: {
-        fn: function(res, obj) {
+        fn: function(res, args) {
           if (Alfresco.logger.isDebugEnabled()){
-            Alfresco.logger.debug("[Share-stats] Audit insert has failed for file: " + obj.auditObject || '');
+            Alfresco.logger.debug("[Share-stats] Audit insert has failed for file: " + args.params.auditObject || '');
             Alfresco.logger.debug(res.serverResponse.responseText || '');
+          }
+
+          // Call callback
+          if (args.callback) {
+            args.callback.defaultCallback.apply(args.callback.scope, args.callback.arguments);
           }
         },
         scope: this,
-        obj: params
+        obj: {
+          params: params,
+          callback: callback
+        }
       }
     });
   };

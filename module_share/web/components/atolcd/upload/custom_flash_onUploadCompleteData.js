@@ -61,7 +61,7 @@
             AtolStatistics.util.insertAuditRemoteCall(obj);
           }
 
-          // Verify if we are into a site (/Company Hom/Sites/{siteShortName}/documentLibrary/...)
+          // Verify if we are into a site (/Company Home/Sites/{siteShortName}/documentLibrary/...)
           Alfresco.util.Ajax.jsonGet({
             url: Alfresco.constants.PROXY_URI + "share-stats/get-site/node/" + params.auditObject.replace('://', '/') + "?checkDates=true",
             successCallback: {
