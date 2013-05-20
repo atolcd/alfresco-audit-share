@@ -29,5 +29,56 @@
         </customization>
       </customizations>
     </module>
+
+    <!-- Repository upload/update audits -->
+    <module>
+      <id>Enable repository upload audits</id>
+      <auto-deploy>true</auto-deploy>
+      <components>
+        <!-- Document Library -->
+        <component>
+          <scope>template</scope>
+          <region-id>html-upload</region-id>
+          <source-id>repository</source-id>
+          <sub-components>
+            <sub-component id="html-upload-dependencies">
+              <url>/components/statistics/repository/upload-dependencies/documentLibrary/html</url>
+            </sub-component>
+          </sub-components>
+        </component>
+        <component>
+          <scope>template</scope>
+          <region-id>flash-upload</region-id>
+          <source-id>repository</source-id>
+          <sub-components>
+            <sub-component id="flash-upload-dependencies">
+              <url>/components/statistics/repository/upload-dependencies/documentLibrary/flash</url>
+            </sub-component>
+          </sub-components>
+        </component>
+        <component>
+          <scope>template</scope>
+          <region-id>dnd-upload</region-id>
+          <source-id>repository</source-id>
+          <sub-components>
+            <sub-component id="dnd-upload-dependencies">
+              <url>/components/statistics/repository/upload-dependencies/documentLibrary/dnd</url>
+            </sub-component>
+          </sub-components>
+        </component>
+
+        <!-- Document Details - Override onNewVersionUploadCompleteCustom function -->
+        <component>
+          <scope>template</scope>
+          <region-id>document-actions</region-id>
+          <source-id>document-details</source-id>
+          <sub-components>
+            <sub-component id="html-upload-dependencies">
+              <url>/components/statistics/repository/upload-dependencies/document-details</url>
+            </sub-component>
+          </sub-components>
+        </component>
+      </components>
+    </module>
   </modules>
 </extension>
