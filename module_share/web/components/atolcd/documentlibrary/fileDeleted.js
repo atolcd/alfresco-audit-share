@@ -22,15 +22,15 @@
     if (layer && layer == 'fileDeleted') {
       if (args.length > 1) {
         var res = args[1];
-        // 'simple' deletion into the repository
-        if (!res.multiple && !Alfresco.constants.SITE) {
+        // Repository file deletions
+        if (!Alfresco.constants.SITE) {
           try {
             var params = {
               id: "0",
               auditSite: AtolStatistics.constants.SITE_REPOSITORY,
               auditAppName: "document",
               auditActionName: "file-deleted",
-              auditObject: '' /*res.path.split('/').reverse()[0]*/
+              auditObject: ''
             };
 
             AtolStatistics.util.insertAuditRemoteCall(params);

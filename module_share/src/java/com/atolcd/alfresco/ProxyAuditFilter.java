@@ -183,14 +183,13 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
 
                                     remoteCall(request, auditSample);
                                 }
-                            } else if ("files-added".equals(activityType)) {
-                                // multiple file uploads (5 or more)
-
+                            } else if ("files-added".equals(activityType) || "files-deleted".equals(activityType)) {
+                                // multiple file uploads/deletions (5 or more)
                                 Integer fileCount = activityFeed.getInt("fileCount");
                                 if (fileCount != null && fileCount > 0) {
                                     auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
                                     auditSample.put(AUDIT_SITE, activityFeed.getString("site"));
-                                    auditSample.put(AUDIT_ACTION_NAME, "file-added");
+                                    auditSample.put(AUDIT_ACTION_NAME, "file-" + activityType.split("-")[1]);
                                     auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
                                     // auditSample.put(AUDIT_OBJECT, "");
 
@@ -358,20 +357,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                         remoteCall(request, auditSample);
                     }
                 } else if (requestURI.startsWith(URI_ACTION)) {
-                    String alfMethod = request.getParameter("alf_method");
-                    if ("delete".equals(alfMethod)) {
-                        JSONObject params = new JSONObject(requestWrapper.getStringContent());
-                        JSONArray nodeRefs = params.getJSONArray("nodeRefs");
-                        auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
-                        auditSample.put(AUDIT_SITE, TEMP_SITE);
-                        auditSample.put(AUDIT_ACTION_NAME, "file-deleted");
-
-                        for (int i = 0; i < nodeRefs.length(); i++) {
-                            auditSample.put(AUDIT_OBJECT, nodeRefs.getString(i));
-
-                            remoteCall(request, auditSample);
-                        }
-                    }
+                    // XXX: done in JavaScript
                 } else if (requestURI.endsWith("memberships") && method.equals(GET)) {
 
                     String type = request.getParameter("authorityType");
