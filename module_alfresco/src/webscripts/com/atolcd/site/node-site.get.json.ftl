@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<#-- 20 seconds -->
-<#assign delay = 1000*20 />
+<#-- 10 seconds -->
+<#assign delay = 1000*10 />
 
 <#escape x as jsonUtils.encodeJSONString(x)>
   {
