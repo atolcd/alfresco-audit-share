@@ -171,17 +171,33 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                         JSONObject activityFeed = new JSONObject(requestWrapper.getStringContent());
 
                         String activityType = activityFeed.getString("type");
-                        if (activityType != null
-                                && ("file-added".equals(activityType) || "file-updated".equals(activityType) || "file-deleted"
-                                        .equals(activityType))) {
-                            if (activityFeed.has("nodeRef")) {
-                                auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
-                                auditSample.put(AUDIT_SITE, activityFeed.getString("site"));
-                                auditSample.put(AUDIT_ACTION_NAME, activityType);
-                                auditSample.put(AUDIT_OBJECT, activityFeed.getString("nodeRef"));
-                                auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
+                        if (activityType != null) {
+                            if ("file-added".equals(activityType) || "file-updated".equals(activityType)
+                                    || "file-deleted".equals(activityType)) {
+                                if (activityFeed.has("nodeRef")) {
+                                    auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
+                                    auditSample.put(AUDIT_SITE, activityFeed.getString("site"));
+                                    auditSample.put(AUDIT_ACTION_NAME, activityType);
+                                    auditSample.put(AUDIT_OBJECT, activityFeed.getString("nodeRef"));
+                                    auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
 
-                                remoteCall(request, auditSample);
+                                    remoteCall(request, auditSample);
+                                }
+                            } else if ("files-added".equals(activityType)) {
+                                // multiple file uploads (5 or more)
+
+                                Integer fileCount = activityFeed.getInt("fileCount");
+                                if (fileCount != null && fileCount > 0) {
+                                    auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
+                                    auditSample.put(AUDIT_SITE, activityFeed.getString("site"));
+                                    auditSample.put(AUDIT_ACTION_NAME, "file-added");
+                                    auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
+                                    // auditSample.put(AUDIT_OBJECT, "");
+
+                                    for (int i = 0; i < fileCount; i++) {
+                                        remoteCall(request, auditSample);
+                                    }
+                                }
                             }
                         }
                     }
