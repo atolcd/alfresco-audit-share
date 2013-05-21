@@ -16,6 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 -->
 
+<#-- 20 seconds -->
+<#assign delay = 1000*20 />
+
 <#escape x as jsonUtils.encodeJSONString(x)>
   {
     <#if url.templateArgs.store_type?? && url.templateArgs.store_id?? && url.templateArgs.id??>
@@ -25,7 +28,12 @@
         <#-- HACK to know if it's a file creation or an update -->
         <#assign node = companyhome.nodeByReference[nodeRef]!"" />
         <#if node?has_content>
-          , "isFileCreation": ${(node.properties["cm:created"]?datetime == node.properties["cm:modified"]?datetime)?string}
+          , "isFileCreation": ${(dateCompare(node.properties["cm:created"], node.properties["cm:modified"], delay) == 1)?string}
+        </#if>
+        <#if args.debug??>
+        , "name": "${node.name}"
+        , "created": "${node.properties["cm:created"]?string("dd/MM/yyyy HH:mm:ss:SSS")}"
+        , "modified": "${node.properties["cm:modified"]?string("dd/MM/yyyy HH:mm:ss:SSS")}"
         </#if>
       </#if>
     </#if>
