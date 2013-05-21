@@ -25,17 +25,16 @@
         this.fileUpload.hide();
       }
 
-      // Only on repository files (we use doclib activities in sites)
-      if (!this.options.siteId) {
-        try {
-          var params = {
-            id: "0",
-            auditSite: AtolStatistics.constants.SITE_REPOSITORY,
-            auditAppName: "document",
-            auditActionName: "file-updated",
-            auditObject: complete.successful[0].nodeRef
-          };
+      try {
+        var params = {
+          id: "0",
+          auditSite: (this.options.siteId) ? this.options.siteId : AtolStatistics.constants.SITE_REPOSITORY,
+          auditAppName: "document",
+          auditActionName: "file-updated",
+          auditObject: complete.successful[0].nodeRef
+        };
 
+        if (!this.options.siteId) {
           var getSiteSuccessHandler = function(res, args) {
             if (res.json.siteShortName) {
               // Finally, we are on a site
@@ -75,11 +74,16 @@
               }
             }
           });
-        } catch (e) {}
-      } else {
-        // Call default 'onNewVersionUploadCompleteCustom' function
-        defaultOnNewVersionUploadCompleteCustom.apply(this, arguments);
-      }
+        } else {
+          // Insert audit (AJAX call)
+          // Call default 'onNewVersionUploadCompleteCustom' function
+          AtolStatistics.util.insertAuditRemoteCall(params, {
+            defaultCallback: defaultOnNewVersionUploadCompleteCustom,
+            arguments: arguments,
+            scope: this
+          });
+        }
+      } catch (e) {}
     };
   }
 })();
