@@ -30,9 +30,9 @@
       </customizations>
     </module>
 
-    <!-- Repository upload/update audits -->
+    <!-- Repository upload/update audit -->
     <module>
-      <id>Enable repository upload audits</id>
+      <id>Enable repository upload audit</id>
       <auto-deploy>true</auto-deploy>
       <components>
         <!-- Document Library -->
@@ -73,8 +73,27 @@
           <region-id>document-actions</region-id>
           <source-id>document-details</source-id>
           <sub-components>
-            <sub-component id="html-upload-dependencies">
-              <url>/components/statistics/repository/upload-dependencies/document-details</url>
+            <sub-component id="document-details-dependencies">
+              <url>/components/statistics/repository/document-details-dependencies</url>
+            </sub-component>
+          </sub-components>
+        </component>
+      </components>
+    </module>
+
+    <!-- Repository deletion audit -->
+    <module>
+      <id>Enable repository deletion audit</id>
+      <auto-deploy>true</auto-deploy>
+      <components>
+        <!-- Document Library -->
+        <component>
+          <scope>template</scope>
+          <region-id>documentlist</region-id>
+          <source-id>repository</source-id>
+          <sub-components>
+            <sub-component id="doclib-dependencies">
+              <url>/components/statistics/repository/doclib-dependencies</url>
             </sub-component>
           </sub-components>
         </component>

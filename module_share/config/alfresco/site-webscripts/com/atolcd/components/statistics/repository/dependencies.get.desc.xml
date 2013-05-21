@@ -17,8 +17,8 @@
 -->
 
 <webscript>
-  <shortname>Upload customization JS dependencies</shortname>
+  <shortname>Add additional JavaScript dependencies</shortname>
   <url>/components/statistics/repository/upload-dependencies/documentLibrary/{uploadType}</url>
-  <url>/components/statistics/repository/upload-dependencies/document-details</url>
+  <url>/components/statistics/repository/{component}</url>
   <family>statistics</family>
 </webscript>

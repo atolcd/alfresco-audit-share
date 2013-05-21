@@ -31,8 +31,10 @@
   <#elseif url.templateArgs.uploadType == "dnd">
     <@myscript type="text/javascript" src="${url.context}/res/components/atolcd/upload/custom_dnd_onFileUploadComplete.js" group="upload" addGrp=addGroupToDependencies />
   </#if>
-<#else>
+<#elseif url.templateArgs.component?? && url.templateArgs.component == "document-details-dependencies">
   <@myscript type="text/javascript" src="${url.context}/res/components/atolcd/document-details/custom_onNewVersionUploadCompleteCustom.js" group="documentlibrary" addGrp=addGroupToDependencies />
+<#elseif url.templateArgs.component?? && url.templateArgs.component == "doclib-dependencies">
+  <@myscript type="text/javascript" src="${url.context}/res/components/atolcd/documentlibrary/fileDeleted.js" group="documentlibrary" addGrp=addGroupToDependencies />
 </#if>
 
 <#-- JavaScript minimisation via YUI Compressor -->
