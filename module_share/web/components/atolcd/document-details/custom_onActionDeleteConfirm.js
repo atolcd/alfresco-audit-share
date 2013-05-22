@@ -18,20 +18,16 @@
 
 (function() {
   if (Alfresco.DocumentActions) {
-    var defaultOnNewVersionUploadCompleteCustom = Alfresco.DocumentActions.prototype.onNewVersionUploadCompleteCustom;
+    var default_onActionDeleteConfirm = Alfresco.DocumentActions.prototype._onActionDeleteConfirm;
 
-    Alfresco.DocumentActions.prototype.onNewVersionUploadCompleteCustom = function DocumentActions_onNewVersionUploadCompleteCustom(complete) {
-      if (this.fileUpload) {
-        this.fileUpload.hide();
-      }
-
+    Alfresco.DocumentActions.prototype._onActionDeleteConfirm = function DocumentActions__onActionDeleteConfirm(asset) {
       try {
         var params = {
           id: "0",
           auditSite: (this.options.siteId) ? this.options.siteId : AtolStatistics.constants.SITE_REPOSITORY,
           auditAppName: "document",
-          auditActionName: "file-updated",
-          auditObject: complete.successful[0].nodeRef
+          auditActionName: "file-deleted",
+          auditObject: asset.nodeRef
         };
 
         if (!this.options.siteId) {
@@ -42,7 +38,7 @@
             }
 
             // Insert audit (AJAX call)
-            // Call default 'onNewVersionUploadCompleteCustom' function
+            // Call default '_onActionDeleteConfirm' function
             AtolStatistics.util.insertAuditRemoteCall(args.params, {
               defaultCallback: args.defaultCallback,
               arguments: args.arguments,
@@ -58,27 +54,27 @@
               scope: this,
               obj: {
                 params: params,
-                defaultCallback: defaultOnNewVersionUploadCompleteCustom,
+                defaultCallback: default_onActionDeleteConfirm,
                 arguments: arguments
               }
             },
             failureCallback: {
               fn: function(res, args) {
-                // Call default 'onNewVersionUploadCompleteCustom' function
+                // Call default '_onActionDeleteConfirm' function
                 args.defaultCallback.apply(this, args.arguments);
               },
               scope: this,
               obj: {
-                defaultCallback: defaultOnNewVersionUploadCompleteCustom,
+                defaultCallback: default_onActionDeleteConfirm,
                 arguments: arguments
               }
             }
           });
         } else {
           // Insert audit (AJAX call)
-          // Call default 'onNewVersionUploadCompleteCustom' function
+          // Call default '_onActionDeleteConfirm' function
           AtolStatistics.util.insertAuditRemoteCall(params, {
-            defaultCallback: defaultOnNewVersionUploadCompleteCustom,
+            defaultCallback: default_onActionDeleteConfirm,
             arguments: arguments,
             scope: this
           });
