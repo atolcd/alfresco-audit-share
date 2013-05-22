@@ -132,6 +132,8 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
         // Initialize a new request context
         RequestContext context = ThreadLocalRequestContext.getRequestContext();
 
+        String referer = request.getHeader("referer");
+
         if (context == null) {
             try {
                 // Perform a "silent" init - i.e. no user creation or remote
@@ -172,7 +174,8 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
 
                         String activityType = activityFeed.getString("type");
                         if (activityType != null) {
-                            if ("file-added".equals(activityType) || "file-updated".equals(activityType)
+                            if ("file-added".equals(activityType)
+                                    || ("file-updated".equals(activityType) && (referer != null && !referer.contains("document-details"))) // Done in JavaScript on "document-details" page
                                     || "file-deleted".equals(activityType)) {
                                 if (activityFeed.has("nodeRef")) {
                                     auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
