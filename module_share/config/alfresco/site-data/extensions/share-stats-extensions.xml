@@ -30,12 +30,13 @@
       </customizations>
     </module>
 
-    <!-- Repository upload/update audit -->
+    <!-- JavaScript audit tools -->
     <module>
-      <id>Enable repository upload audit</id>
+      <id>Enable JavaScript audit tools</id>
       <auto-deploy>true</auto-deploy>
       <components>
         <!-- Document Library -->
+        <!-- upload -->
         <component>
           <scope>template</scope>
           <region-id>html-upload</region-id>
@@ -67,26 +68,7 @@
           </sub-components>
         </component>
 
-        <!-- Document Details - Override onNewVersionUploadCompleteCustom function -->
-        <component>
-          <scope>template</scope>
-          <region-id>document-actions</region-id>
-          <source-id>document-details</source-id>
-          <sub-components>
-            <sub-component id="document-details-dependencies">
-              <url>/components/statistics/repository/document-details-dependencies</url>
-            </sub-component>
-          </sub-components>
-        </component>
-      </components>
-    </module>
-
-    <!-- Repository deletion audit -->
-    <module>
-      <id>Enable repository deletion audit</id>
-      <auto-deploy>true</auto-deploy>
-      <components>
-        <!-- Document Library -->
+        <!-- deletions -->
         <component>
           <scope>template</scope>
           <region-id>documentlist</region-id>
@@ -94,6 +76,19 @@
           <sub-components>
             <sub-component id="doclib-dependencies">
               <url>/components/statistics/repository/doclib-dependencies</url>
+            </sub-component>
+          </sub-components>
+        </component>
+
+        <!-- Document Details -->
+        <!-- onNewVersionUploadCompleteCustom and onActionDeleteConfirm function overrides -->
+        <component>
+          <scope>template</scope>
+          <region-id>document-actions</region-id>
+          <source-id>document-details</source-id>
+          <sub-components>
+            <sub-component id="document-details-dependencies">
+              <url>/components/statistics/repository/document-details-dependencies</url>
             </sub-component>
           </sub-components>
         </component>
