@@ -1,0 +1,6 @@
+<webscript>
+  <shortname>Admin Console Statistics Tool</shortname>
+  <description>Administration Console - Statistics Tool</description>
+  <url>/components/console/statistics</url>
+  <family>admin-console</family>
+</webscript>
