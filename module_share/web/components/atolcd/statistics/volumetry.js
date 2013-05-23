@@ -112,6 +112,11 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         }
       }
 
+      // Stacked values ?
+      if (!this.options.siteId && !Dom.hasClass(this.id + "-bar-stack-criteria-container", "hidden") && (Dom.get(this.id + "-bar_stack-criteria").checked == true)) {
+        params += "&stacked=true";
+      }
+
       // Build query parameters
       this.lastRequest.params = params;
       this.lastRequest.dateFilter = dateFilter;
@@ -177,6 +182,5 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
     onShowStackedBar: function Volumetry_onShowStackedBar() {
       this.execute();
     }
-
   });
 })();

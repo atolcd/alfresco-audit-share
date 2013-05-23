@@ -33,7 +33,7 @@
         <#if site_has_next>,</#if>
       </#list>
     ]
-    <#if args.sites?? || (!args.site?? && !args.sites??)>
+    <#if args.stacked?? || (!args.site?? && !args.sites??)>
       , "stackedValues":
       [
         <#list stackedValues?sort as sv>
