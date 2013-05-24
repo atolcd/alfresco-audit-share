@@ -24,7 +24,7 @@
   <bean id="share-statistics.resources" class="org.springframework.extensions.surf.util.ResourceBundleBootstrapComponent">
     <property name="resourceBundles">
       <list>
-        <value>alfresco.messages.share-stats</value>
+        <value>alfresco.messages.auditshare</value>
       </list>
     </property>
   </bean>
@@ -33,7 +33,7 @@
     <property name="configService" ref="web.config" />
     <property name="configs">
       <list>
-        <value>classpath:alfresco/web-extension/share-statistics-config.xml</value>
+        <value>classpath:alfresco/web-extension/auditshare-config.xml</value>
       </list>
     </property>
   </bean>

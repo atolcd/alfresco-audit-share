@@ -47,7 +47,7 @@ AtolStatistics.module = AtolStatistics.module || {};
       this.widgets.menuButton = new YAHOO.widget.Button({
         id: container.id + "-menu",
         type: "menu",
-        label: this.msg("link.site-stats"),
+        label: this.msg("header.auditshare.label"),
         menu: menu,
         lazyloadmenu: true,
         container: container.id
