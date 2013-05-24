@@ -22,11 +22,17 @@
     "values":
     [
       <#if values?size !=0>
+        <#assign maxCount = 0 />
         <#list values as value>
-        ${value?c}<#if value_has_next>,</#if>
+          <#if value?c?number gt maxCount>
+            <#assign maxCount = value?c?number />
+          </#if>
+
+          ${value?c}<#if value_has_next>,</#if>
         </#list>
       </#if>
     ],
+    "maxCount": ${maxCount?c},
     "sites" : [
       <#list sites as site>
         "${shareStatsutils.getSiteTitle(site)}"
@@ -36,15 +42,21 @@
     <#if args.stacked?? || (!args.site?? && !args.sites??)>
       , "stackedValues":
       [
+        <#assign maxLocal = 0 />
         <#list stackedValues?sort as sv>
           [
             <#list sv.value as val>
+              <#if val?c?number gt maxLocal>
+                <#assign maxLocal = val?c?number />
+              </#if>
+
               ${val?c}<#if val_has_next>,</#if>
             </#list>
           ]
           <#if sv_has_next>,</#if>
         </#list>
       ]
+      , "maxLocal": ${maxLocal?c}
     </#if>
   </#if>
 }

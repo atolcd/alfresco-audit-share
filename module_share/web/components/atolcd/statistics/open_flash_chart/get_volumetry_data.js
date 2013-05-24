@@ -59,27 +59,35 @@ function buildChart(params) {
     }
   };
 
+  var max = params.maxCount,
+      steps = 10;
+
   if (params.additionalsParams.chartType == "vbar") {
     bars.elements = buildSingleChartElements(params, x_labels.labels);
   } else if (params.additionalsParams.chartType == "line") {
     bars.elements = buildSingleChartElements(params, x_labels.labels, params.additionalsParams.chartType);
   } else if (params.additionalsParams.chartType == "lines") {
+    max = params.maxLocal;
     bars.elements = buildLinesChartElements(params, x_labels.labels);
   } else {
     bars.elements = buildStackedBarChartElements(params, x_labels.labels);
     bars.tooltip = { "mouse": 2 };
   }
 
+  // Max value ?
+  var maxInfo = AtolStatistics.util.formatFileSize(max);
+  max = maxInfo.value ? roundMax(maxInfo.value, steps) : 10;
+
   bars["y_axis"] = {
-    "steps": params.max / 10,
+    "steps": Math.ceil(max / steps),
     "colour": gridColors["y-axis"],
     "grid-colour": gridColors["y-grid"],
     "offset": 0,
-    "max": params.max
+    "max": max
   };
 
   bars["y_legend"] = {
-    "text": getMessage("volumetry", "graph.label.", getMessage("size.megabytes")),
+    "text": getMessage("volumetry", "graph.label.", maxInfo.message),
     "style": "{font-size: 12px; color: #778877}"
   };
 
@@ -87,13 +95,13 @@ function buildChart(params) {
 }
 
 function buildSingleChartElements(params, labels, type) {
-  var max = 0,
-      values = [];
+  var values = [],
+      maxInfo = AtolStatistics.util.formatFileSize(params.maxCount);
 
   for (var i=0, ii=params.values.length ; i<ii ; i++) {
-    var value = roundNumber(params.values[i] / (1024 * 1024), 2);
+    var value = roundNumber(params.values[i] / maxInfo.unitValue, 2);
 
-    var tip = labels[i] + "\n" + getMessage("volumetry", "graph.label.", getMessage("size.megabytes")) + " : " + value + " " + getMessage("size.megabytes");
+    var tip = labels[i] + "\n" + getMessage("volumetry", "graph.label.", maxInfo.message) + " : " + value + " " + maxInfo.message;
     if (params.sites && params.sites.length == 1) {
       tip += "\n" + getMessage("label.menu.site") + " " + params.sites[0];
     }
@@ -113,12 +121,7 @@ function buildSingleChartElements(params, labels, type) {
     }
 
     values.push(elt);
-
-    max = max > value ? max : value;
   }
-
-  // Update "max" value
-  params.max = max ? roundMax(max) : 10;
 
   var element = {
     "type": "bar_glass",
@@ -143,23 +146,24 @@ function buildSingleChartElements(params, labels, type) {
 }
 
 function buildStackedBarChartElements(params, labels) {
-  var max = 0, values = [];
+  var values = [],
+      maxInfo = AtolStatistics.util.formatFileSize(params.maxCount);
 
   for (var i=0, ii=params.stackedValues.length ; i < ii; i++) {
     var stackedValue = params.stackedValues[i]
         valueTab = [];
 
     for (var j=0, jj=stackedValue.length ; j<jj ; j++) {
-      var value = roundNumber(stackedValue[j] / (1024 * 1024), 2);
+      var value = roundNumber(stackedValue[j] / maxInfo.unitValue, 2);
       var value_obj = {
         val: value
       };
 
       if (value > 0) {
         value_obj.tip = labels[i] + "\n\n";
-        value_obj.tip += getMessage("volumetry", "graph.label.", getMessage("size.megabytes")) + " : " + value + " " + getMessage("size.megabytes") + "\n";
+        value_obj.tip += getMessage("volumetry", "graph.label.", maxInfo.message) + " : " + value + " " + maxInfo.message + "\n";
         value_obj.tip += getMessage("label.menu.site") + " " + params.sites[j] + "\n\n";
-        value_obj.tip += getMessage("graph.label.global.volumetry") + " #total# Mo";
+        value_obj.tip += getMessage("graph.label.global.volumetry") + " #total# " + maxInfo.message;
       }
       else {
         // HACK: resolves "tooltips" display problems
@@ -172,14 +176,7 @@ function buildStackedBarChartElements(params, labels) {
     }
 
     values.push(valueTab);
-
-    var total = roundNumber(params.values[i] / (1024 * 1024), 2);
-    max = max > total ? max : total;
   }
-
-  // Update "max" value
-  params.max = max ? roundMax(max) : 10;
-
   return [{
     "type": "bar_stack",
     "alpha": 0.7,
@@ -190,12 +187,14 @@ function buildStackedBarChartElements(params, labels) {
 }
 
 function buildLinesChartElements(params, labels) {
-  var max = 0, lines = [], linesValues = {};
+  var lines = [],
+      linesValues = {},
+      maxInfo = AtolStatistics.util.formatFileSize(params.maxLocal);
 
   for (var i=0, ii=params.stackedValues.length ; i < ii; i++) {
     var periodValues = params.stackedValues[i];
     for (var j=0, jj=periodValues.length ; j<jj ; j++) {
-      var dotValue = roundNumber(periodValues[j] / (1024 * 1024), 2);
+      var dotValue = roundNumber(periodValues[j] / maxInfo.unitValue, 2);
       if (!linesValues[j]) {
         linesValues[j] = {
           siteTitle: params.sites[j],
@@ -210,16 +209,13 @@ function buildLinesChartElements(params, labels) {
         dot.value = dotValue;
         dot.tip = labels[i] + "\n\n";
         dot.tip += getMessage("label.menu.site") + " " + params.sites[j];
-        dot.tip += "\n" + getMessage("volumetry", "graph.label.", getMessage("size.megabytes")) + " : " + dotValue + getMessage("size.megabytes");
+        dot.tip += "\n" + getMessage("volumetry", "graph.label.", maxInfo.message) + " : " + dotValue + " " + maxInfo.message;
       } else {
         dot = null;
       }
 
       linesValues[j].values.push(dot);
     }
-
-    var total = roundNumber(params.values[i] / (1024 * 1024), 2);
-    max = max > total ? max : total;
   }
 
   var cpt = 0;
@@ -242,9 +238,6 @@ function buildLinesChartElements(params, labels) {
     cpt ++;
   }
 
-  // Update "max" value
-  params.max = max ? roundMax(max) : 10;
-
   return lines;
 }
 
@@ -258,29 +251,21 @@ function buildXAxisLabels(params) {
   return labelConfiguration;
 }
 
-function roundMax(max) {
-  var new_max = max,
-      coef = 1;
+function roundMax(max, steps) {
+  var step = max / steps,
+      ceil = 1;
 
-  while (new_max >= 10) {
-    new_max = new_max / 10;
-    coef = coef * 10;
-  }
-
-  new_max = new_max.toPrecision(2);
-
-  if (new_max > 7.5) {
-    new_max = 10;
-    step = 1;
-  } else if (new_max > 5) {
-    new_max = 7.5;
-  } else if (new_max > 2.5) {
-    new_max = 5;
+  if (max < steps) {
+    ceil = roundNumber(step, 2);
+    return roundNumber((ceil * steps) + roundNumber(ceil, 2), 1);
+  } else if (step < steps) {
+    ceil = Math.ceil(step);
+    return (ceil * steps);
   } else {
-    new_max = 2.5;
+    ceil = Math.ceil(step);
+    return (ceil * steps) + (Math.ceil(ceil / steps) * 5);
   }
 
-  return new_max * coef;
 }
 
 function roundNumber(number, digits) {
