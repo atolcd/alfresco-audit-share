@@ -72,8 +72,10 @@ Example (at 1:00 PM and 9:00 PM every day): `share.stats.sites.volumetry.trigger
 
 
 ![Header](/documentation/header.png "Header")   
-![Module deployment](/documentation/module-deployment.png "Module deployment")   
+
 ![Volumetry by site](/documentation/site-volumetry-by-site.png "Volumetry by site")   
+
+![Module deployment](/documentation/module-deployment.png "Module deployment")   
 
 
 LICENSE
