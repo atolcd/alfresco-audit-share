@@ -176,8 +176,16 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 		try {
 			AtolAuthorityParameters params = new AtolAuthorityParameters();
 			String site = req.getParameter("site");
+			String sites = req.getParameter("sites");
 			if (site != null) {
+				// One site
 				params.setSite(site);
+			} else if (sites != null) {
+				// Several sites
+				String[] sitesToken = sites.split(",");
+				for (String siteId : sitesToken) {
+					params.setSite(siteId);
+				}
 			} else {
 				// Add the user's sites, plus the container group
 				List<SiteInfo> sitesInfo = siteService.listSites("", "");
