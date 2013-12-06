@@ -77,4 +77,5 @@
 
     <@stats.renderPopularyTable el />
   </div>
+  <@stats.renderAtolFooter />
 </div>

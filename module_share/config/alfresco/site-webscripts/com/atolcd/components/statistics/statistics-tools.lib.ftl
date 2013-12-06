@@ -69,3 +69,11 @@
     </tr>
   </table>
 </#macro>
+
+<#macro renderAtolFooter>
+  <div class="yui-g footer-atol">
+    <a href="http://www.atolcd.com" target="_blank" title="Atol Conseils & Développements">
+      <img src="${page.url.context}/res/components/atolcd/statistics/img/atolcd.png" alt="Atol C&D" class="footer-atol-img" />&nbsp;<span class="footer-atol-text">${msg("developped.by.atolcd")}</span>
+    </a>
+  </div>
+</#macro>

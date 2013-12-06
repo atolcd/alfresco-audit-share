@@ -69,4 +69,5 @@
       <@stats.renderMainChartContainer el />
     </div>
   </div>
+  <@stats.renderAtolFooter />
 </div>

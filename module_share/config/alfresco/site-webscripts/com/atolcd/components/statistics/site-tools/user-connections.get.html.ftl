@@ -80,4 +80,5 @@
       </table>
     </div>
   </div>
+  <@stats.renderAtolFooter />
 </div>
