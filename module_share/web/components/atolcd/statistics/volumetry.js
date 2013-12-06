@@ -106,9 +106,16 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       params = "?dates=" + tsString;
       if (site) {
         if (site.indexOf(',') >= 0) {
-          params += "&sites=" + site;
+          // Encode site ids
+          var sites = [],
+              sitesArray = site.split(',');
+          for (var i=0, ii=sitesArray.length ; i<ii ; i++) {
+            sites.push(encodeURIComponent(sitesArray[i]));
+          }
+
+          params += "&sites=" + sites.join(',');
         } else {
-          params += "&site=" + site;
+          params += "&site=" + encodeURIComponent(site);
         }
       }
 
