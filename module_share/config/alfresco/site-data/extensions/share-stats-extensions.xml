@@ -20,8 +20,15 @@
   <modules>
     <!-- Site collaboration navigation -->
     <module>
-      <id>Add statistics component into the site navigation</id>
+      <id>AuditShare - Add statistics component into the site navigation</id>
+      <version>1.0.0</version>
       <auto-deploy>true</auto-deploy>
+      <evaluator type="site.module.evaluator">
+        <params>
+          <sites>.*</sites>
+          <sitePresets>.*</sitePresets>
+        </params>
+      </evaluator>
       <customizations>
         <customization>
           <targetPackageRoot>org.alfresco.components.navigation</targetPackageRoot>
@@ -32,7 +39,8 @@
 
     <!-- JavaScript audit tools -->
     <module>
-      <id>Enable JavaScript audit tools</id>
+      <id>AuditShare - Enable JavaScript audit tools</id>
+      <version>1.0.0</version>
       <auto-deploy>true</auto-deploy>
       <components>
         <!-- Document Library -->

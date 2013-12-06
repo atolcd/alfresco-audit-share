@@ -19,7 +19,8 @@
 <extension>
   <modules>
     <module>
-      <id>Statistics Menu</id>
+      <id>AuditShare - Statistics Menu</id>
+      <version>1.0.0</version>
       <auto-deploy>true</auto-deploy>
       <components>
         <component>
