@@ -22,18 +22,21 @@
       <id>AuditShare - Statistics Menu</id>
       <version>1.0.0</version>
       <auto-deploy>true</auto-deploy>
-      <components>
-        <component>
-          <scope>global</scope>
-          <region-id>header</region-id>
-          <source-id>global</source-id>
-          <sub-components>
-            <sub-component id="share-statistics-menu">
-              <url>/components/statistics/menu</url>
-            </sub-component>
-          </sub-components>
-        </component>
-      </components>
+      <customizations>
+        <!-- To add AuditShare header -->
+        <customization>
+          <targetPackageRoot>org.alfresco.share.header</targetPackageRoot>
+          <sourcePackageRoot>com.atolcd.share.header.menu</sourcePackageRoot>
+        </customization>
+
+        <!-- For resources (CSS; JS, ...) -->
+        <customization>
+          <targetPackageRoot>org.alfresco.components.head</targetPackageRoot>
+          <sourcePackageRoot>com.atolcd.share.header.menu</sourcePackageRoot>
+        </customization>
+      </customizations>
+      <configurations>
+      </configurations>
     </module>
   </modules>
 </extension>

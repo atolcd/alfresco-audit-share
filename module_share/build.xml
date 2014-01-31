@@ -72,7 +72,7 @@
   <!-- Compile -->
   <target name="compile" depends="mkdirs">
     <mkdir dir="${build.dir}/classes" />
-    <javac debug="on" classpathref="class.path" srcdir="${source.dir}/java" destdir="${build.dir}/classes" />
+    <javac debug="on" classpathref="class.path" srcdir="${source.dir}/java" destdir="${build.dir}/classes" source="${version.source}" target="${version.classe}" encoding="${compile.encoding}" />
   </target>
 
   <!-- Package JAR -->

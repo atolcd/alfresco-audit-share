@@ -20,26 +20,25 @@
 
 <@templateHeader>
   <#if userIsAllowed?? && userIsAllowed>
+    <@markup id="resizer">
     <script type="text/javascript">//<![CDATA[
       new Alfresco.widget.Resizer("Statistics").setOptions(
       {
          initialWidth: 200
       });
     //]]></script>
+    </@>
   </#if>
 </@>
 
 <@templateBody>
+   <@markup id="alf-hd">
    <div id="alf-hd">
-      <@region id="header" scope="global" />
-      <#if page.url.templateArgs.site?? && page.url.templateArgs.site?has_content>
-        <@region id="site-title" scope="template" />
-        <@region id="navigation" scope="template" />
-      <#else>
-        <@region id="title" scope="template" />
-      </#if>
+     <@region scope="global" id="share-header" chromeless="true" />
    </div>
+   </@>
 
+   <@markup id="bd">
    <div id="bd">
       <#if userIsAllowed?? && userIsAllowed>
       <div class="yui-t1" id="alfresco-statistics">
@@ -56,10 +55,13 @@
         <@region id="unauthorized" scope="template" />
       </#if>
    </div>
+   </@>
 </@>
 
 <@templateFooter>
+   <@markup id="alf-ft">
    <div id="alf-ft">
       <@region id="footer" scope="global" />
    </div>
+   </@>
 </@>

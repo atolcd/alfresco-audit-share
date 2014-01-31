@@ -30,9 +30,10 @@
         </params>
       </evaluator>
       <customizations>
+        <!-- Add AuditShare component into the site navigation -->
         <customization>
-          <targetPackageRoot>org.alfresco.components.navigation</targetPackageRoot>
-          <sourcePackageRoot>com.atolcd.components.navigation</sourcePackageRoot>
+          <targetPackageRoot>org.alfresco.share.header</targetPackageRoot>
+          <sourcePackageRoot>com.atolcd.share.header</sourcePackageRoot>
         </customization>
       </customizations>
     </module>
@@ -44,7 +45,7 @@
       <auto-deploy>true</auto-deploy>
       <components>
         <!-- Document Library -->
-        <!-- upload -->
+        <!-- Upload -->
         <component>
           <scope>template</scope>
           <region-id>html-upload</region-id>
@@ -76,10 +77,22 @@
           </sub-components>
         </component>
 
-        <!-- deletions -->
+        <!-- Deletions -->
         <component>
           <scope>template</scope>
           <region-id>documentlist</region-id>
+          <source-id>repository</source-id>
+          <sub-components>
+            <sub-component id="doclib-dependencies">
+              <url>/components/statistics/repository/doclib-dependencies</url>
+            </sub-component>
+          </sub-components>
+        </component>
+
+        <!-- For new Alfresco 4.2 versions -->
+        <component>
+          <scope>template</scope>
+          <region-id>documentlist_v2</region-id>
           <source-id>repository</source-id>
           <sub-components>
             <sub-component id="doclib-dependencies">

@@ -17,19 +17,30 @@
  */
 
 /* Menu */
-.header .yui-menu-button.statistics-menu .first-child {
-  background-image: url("./img/global-usage.png");
-  background-position: 50% 4px !important;
+.alfresco-share .dijitIcon.dijitMenuItemIcon.global-usage {
+  background: url("./img/global-usage.png");
+  background-repeat: no-repeat;
+  height: 20px;
+  width: 20px;
 }
 
-.header .yuimenu .bd li.global-usage .yuimenuitemlabel {
-  background-image: url("./img/global-usage.png");
+.alfresco-share .dijitIcon.dijitMenuItemIcon.volumetry {
+  background: url("./img/volumetry.png");
+  background-repeat: no-repeat;
+  height: 20px;
+  width: 20px;
 }
 
-.header .yuimenu .bd li.volumetry .yuimenuitemlabel {
-  background-image: url("./img/volumetry.png");
+.alfresco-share .dijitIcon.dijitMenuItemIcon.user-connections {
+  background: url("./img/user-connections.png");
+  background-repeat: no-repeat;
+  height: 20px;
+  width: 20px;
 }
 
-.header .yuimenu .bd li.user-connections .yuimenuitemlabel {
-  background-image: url("./img/user-connections.png");
+.alfresco-share .dijitIcon.dijitMenuItemIcon.repo-usage {
+  background: url("./img/repo-usage.png");
+  background-repeat: no-repeat;
+  height: 20px;
+  width: 20px;
 }

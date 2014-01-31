@@ -14,10 +14,9 @@
    <context-param>
       <description>Spring config file location</description>
       <param-name>contextConfigLocation</param-name>
-      <param-value>/WEB-INF/classes/web-application-config.xml</param-value>
+      <param-value>classpath:web-application-config.xml</param-value>
    </context-param>
 
-   
   <!-- ATOL: Audit filters -->
   <filter>
     <description>Filtre général pour l'audit</description>
@@ -47,8 +46,7 @@
   </filter-mapping>
   
   <!-- ATOL: Audit filters -->
-   
-   
+
    <filter>
       <description>Set HTTP cache Expires header 30 days forward for a mapping.</description>
       <filter-name>CacheExpiresFilter</filter-name>
@@ -81,7 +79,19 @@
          <param-value>alfresco</param-value>
       </init-param>
    </filter>
-   
+
+   <filter>
+      <description>Share CSRF Token filter. Checks for a session based CSRF token in request headers (or form parameters) based on config.</description>
+      <filter-name>CSRF Token Filter</filter-name>
+      <filter-class>org.alfresco.web.site.servlet.CSRFFilter</filter-class>
+   </filter>
+
+   <filter>
+      <description>Share Security Headers filter. Adds security response headers based on config.</description>
+      <filter-name>Security Headers Filter</filter-name>
+      <filter-class>org.alfresco.web.site.servlet.SecurityHeadersFilter</filter-class>
+   </filter>
+
    <filter-mapping>
       <filter-name>CacheExpiresFilter</filter-name>
       <url-pattern>*.jpg</url-pattern>
@@ -117,7 +127,47 @@
       <filter-name>Authentication Filter</filter-name>
       <url-pattern>/proxy/*</url-pattern>
    </filter-mapping>
-   
+
+   <filter-mapping>
+      <filter-name>CSRF Token Filter</filter-name>
+      <url-pattern>/page/*</url-pattern>
+   </filter-mapping>
+
+   <filter-mapping>
+      <filter-name>CSRF Token Filter</filter-name>
+      <url-pattern>/p/*</url-pattern>
+   </filter-mapping>
+
+   <filter-mapping>
+      <filter-name>CSRF Token Filter</filter-name>
+      <url-pattern>/proxy/*</url-pattern>
+   </filter-mapping>
+
+   <filter-mapping>
+      <filter-name>CSRF Token Filter</filter-name>
+      <url-pattern>/service/*</url-pattern>
+   </filter-mapping>
+
+   <filter-mapping>
+      <filter-name>Security Headers Filter</filter-name>
+      <url-pattern>/page/*</url-pattern>
+   </filter-mapping>
+
+   <filter-mapping>
+      <filter-name>Security Headers Filter</filter-name>
+      <url-pattern>/p/*</url-pattern>
+   </filter-mapping>
+
+   <filter-mapping>
+      <filter-name>Security Headers Filter</filter-name>
+      <url-pattern>/proxy/*</url-pattern>
+   </filter-mapping>
+
+   <filter-mapping>
+      <filter-name>Security Headers Filter</filter-name>
+      <url-pattern>/service/*</url-pattern>
+   </filter-mapping>
+
    <filter-mapping>
       <filter-name>UrlRewriteFilter</filter-name>
       <url-pattern>/proxy/*</url-pattern>
@@ -169,6 +219,10 @@
       <init-param>
          <param-name>contextAttribute</param-name>
          <param-value>org.springframework.web.context.WebApplicationContext.ROOT</param-value>
+      </init-param>
+      <init-param>
+         <param-name>dispatchOptionsRequest</param-name>
+         <param-value>true</param-value>
       </init-param>
       <load-on-startup>1</load-on-startup>
    </servlet>

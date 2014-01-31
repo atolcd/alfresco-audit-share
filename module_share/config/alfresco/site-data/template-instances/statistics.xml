@@ -24,24 +24,6 @@
   </properties>
   <components>
 
-    <!-- Title -->
-    <component>
-      <region-id>title</region-id>
-      <url>/components/title/statistics</url>
-    </component>
-
-    <!-- Site: Title -->
-    <component>
-      <region-id>site-title</region-id>
-      <url>/components/title/collaboration-title</url>
-    </component>
-
-    <!-- Site: Navigation -->
-    <component>
-      <region-id>navigation</region-id>
-      <url>/components/navigation/collaboration-navigation</url>
-    </component>
-
     <!-- Tools -->
     <component>
       <region-id>tools</region-id>

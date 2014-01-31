@@ -86,12 +86,7 @@ public class RequestWrapper extends HttpServletRequestWrapper {
             InputStream inputStream = this.getRequest().getInputStream();
             if (inputStream != null) {
                 StringWriter writer = new StringWriter();
-                String encoding = getCharacterEncoding();
-                if (encoding == null) {
-                    encoding = "UTF-8";
-                }
-
-                IOUtils.copy(inputStream, writer, encoding);
+                IOUtils.copy(inputStream, writer);
                 return writer.toString();
             }
         } catch (IOException e) {
