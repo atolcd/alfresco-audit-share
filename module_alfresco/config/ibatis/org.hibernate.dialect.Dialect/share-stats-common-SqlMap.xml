@@ -439,7 +439,7 @@
               #{item}
           </foreach>
           </if>
-        );
+        )
     </select>
 
     <select id="selectVolumetry" parameterType="AtolAuditQueryParameters" resultType="long">
