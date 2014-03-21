@@ -101,13 +101,13 @@
 
 
   <!-- Java Helpers -->
-  <bean id="SearchHelper" class="com.atolcd.alfresco.helper.SearchHelper">
-    <property name="searchService" ref="SearchService"/>
+  <bean id="shareStatsSearchHelper" class="com.atolcd.alfresco.helper.SearchHelper">
+    <property name="searchService" ref="SearchService" />
   </bean>
 
-  <bean id="PermissionsHelper" class="com.atolcd.alfresco.helper.PermissionsHelper">
-    <property name="siteService" ref="SiteService"/>
-    <property name="authorityService" ref="AuthorityService"/>
+  <bean id="shareStatsPermissionsHelper" class="com.atolcd.alfresco.helper.PermissionsHelper">
+    <property name="siteService" ref="SiteService" />
+    <property name="authorityService" ref="AuthorityService" />
   </bean>
 
 

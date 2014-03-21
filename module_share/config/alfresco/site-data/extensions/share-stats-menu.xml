@@ -29,7 +29,7 @@
           <sourcePackageRoot>com.atolcd.share.header.menu</sourcePackageRoot>
         </customization>
 
-        <!-- For resources (CSS; JS, ...) -->
+        <!-- For resources (CSS, JS, ...) -->
         <customization>
           <targetPackageRoot>org.alfresco.components.head</targetPackageRoot>
           <sourcePackageRoot>com.atolcd.share.header.menu</sourcePackageRoot>

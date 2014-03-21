@@ -107,5 +107,5 @@ if (showMenu) {
   var headerMenu = widgetUtils.findObject(model.jsonModel, "id", "HEADER_APP_MENU_BAR");
   if (headerMenu) {
     headerMenu.config.widgets.push(auditShareHeaderMenu);
-}
+  }
 }
