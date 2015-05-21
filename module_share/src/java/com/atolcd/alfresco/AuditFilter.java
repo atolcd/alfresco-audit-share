@@ -49,6 +49,7 @@ import org.springframework.extensions.surf.exception.ConnectorServiceException;
 import org.springframework.extensions.surf.exception.RequestContextException;
 import org.springframework.extensions.surf.exception.ResourceLoaderException;
 import org.springframework.extensions.surf.exception.UserFactoryException;
+import org.springframework.extensions.surf.site.AuthenticationUtil;
 import org.springframework.extensions.surf.support.AlfrescoUserFactory;
 import org.springframework.extensions.surf.support.ThreadLocalRequestContext;
 import org.springframework.extensions.surf.util.I18NUtil;
@@ -57,7 +58,6 @@ import org.springframework.extensions.webscripts.connector.Connector;
 import org.springframework.extensions.webscripts.connector.ConnectorContext;
 import org.springframework.extensions.webscripts.connector.HttpMethod;
 import org.springframework.extensions.webscripts.connector.Response;
-import org.springframework.extensions.webscripts.connector.User;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 @SuppressWarnings("deprecation")
@@ -155,20 +155,26 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
                 throw new ServletException(ex);
             }
         }
-        User user = context.getUser();
+
+        String userId = AuthenticationUtil.getUserId(request);
+        if (userId == null || userId.trim().length() == 0) {
+            userId = request.getRemoteUser();
+        }
+
         String requestURI = request.getRequestURI();
-        if (user != null && requestURI != null && !ignoredUrl.contains(requestURI)) {
+
+        if ((userId != null && userId.trim().length() > 0) && (requestURI != null && requestURI.trim().length() > 0) && !ignoredUrl.contains(requestURI)) {
             try {
                 // Preparation of JSON to send.
                 JSONObject auditSample = new JSONObject();
                 auditSample.put(AUDIT_ID, "0");
-                auditSample.put(AUDIT_USER_ID, user.getId());
+                auditSample.put(AUDIT_USER_ID, userId);
 
                 String ref = request.getHeader("referer");
                 if (requestURI.endsWith("/dologin") && (ref != null)) {
                     requestURI = ref;
                 }
-                HashMap<String, String> auditData = getAuditData(request, user.getId(), requestURI);
+                HashMap<String, String> auditData = getAuditData(request, userId, requestURI);
                 // Parsing sometimes includes parameters when the page loading
                 // is interrupted prematurely
                 if ((auditData.get(KEY_MODULE).length() > 0) && (!auditData.get(KEY_ACTION).contains("?"))) {
@@ -260,7 +266,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
 
     /**
      * Cut and analysis the url and analysis parameters
-     * 
+     *
      * @param request
      *            HttpServletRequest
      * @param requestURL
@@ -310,7 +316,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
 
     /**
      * URL parsing
-     * 
+     *
      * @param urlTokens
      * @param hasSite
      * @return HashMap
@@ -376,7 +382,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
 
     /**
      * Audit data filter
-     * 
+     *
      * @param auditData
      * @return HashMap
      */
@@ -397,7 +403,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
 
     /**
      * Checks if a String is contained into an array
-     * 
+     *
      * @param array
      * @param toFind
      * @return boolean
@@ -416,7 +422,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
      * Helper to build a map of the default headers for script requests - we
      * send over the current users locale so it can be respected by any
      * appropriate REST APIs.
-     * 
+     *
      * @return map of headers
      */
     private static Map<String, String> buildDefaultHeaders() {
