@@ -21,11 +21,11 @@
     var defaultOnNewVersionUploadCompleteCustom = Alfresco.DocumentActions.prototype.onNewVersionUploadCompleteCustom;
 
     Alfresco.DocumentActions.prototype.onNewVersionUploadCompleteCustom = function DocumentActions_onNewVersionUploadCompleteCustom(complete) {
-      if (this.fileUpload) {
-        this.fileUpload.hide();
-      }
-
       try {
+        if (this.fileUpload && this.fileUpload.uploader && this.fileUpload.uploader.hide) {
+          this.fileUpload.hide();
+        }
+
         var params = {
           id: "0",
           auditSite: (this.options.siteId) ? this.options.siteId : AtolStatistics.constants.SITE_REPOSITORY,
@@ -83,7 +83,10 @@
             scope: this
           });
         }
-      } catch (e) {}
+      } catch (e) {
+        // Call default 'onNewVersionUploadCompleteCustom' function
+        defaultOnNewVersionUploadCompleteCustom.apply(this, arguments);
+      }
     };
   }
 })();
