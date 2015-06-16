@@ -110,8 +110,16 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
 		// Even if we are into the repository, we try to find the site of the
 		// document
 		if (auditSample.getAuditSite().equals(SITE_TO_FIND)) {
-			NodeRef nodeRef = new NodeRef(auditSample.getAuditObject());
-			SiteInfo siteInfo = siteService.getSite(nodeRef);
+			SiteInfo siteInfo = null;
+			try {
+				NodeRef nodeRef = new NodeRef(auditSample.getAuditObject());
+				siteInfo = siteService.getSite(nodeRef);
+			} catch (Exception e){
+				if (logger.isDebugEnabled()) {
+					logger.debug(e.getMessage(), e);
+				}
+			}
+
 			if (siteInfo != null) {
 				auditSample.setAuditSite(siteInfo.getShortName());
 			} else {
