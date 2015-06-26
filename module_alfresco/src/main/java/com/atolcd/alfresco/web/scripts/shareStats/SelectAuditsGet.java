@@ -151,10 +151,9 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AuditObjectPopularity> selectByPopularity(AuditQueryParameters params, String query, int limit) {
 		List<AuditObjectPopularity> auditObjectPopularityList = new ArrayList<AuditObjectPopularity>();
-		auditObjectPopularityList = (List<AuditObjectPopularity>) sqlSessionTemplate.selectList(query, params);
+		auditObjectPopularityList = sqlSessionTemplate.selectList(query, params);
 		logger.info("Performing " + query + " ... ");
 
 		Iterator<AuditObjectPopularity> iterator = auditObjectPopularityList.iterator();
@@ -191,7 +190,6 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 		return auditObjectPopularityList.subList(0, limit);
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<List<AuditCount>> selectByDate(AuditQueryParameters params, String query) {
 		String[] dates = params.getSlicedDates().split(",");
 		List<List<AuditCount>> auditCount = new ArrayList<List<AuditCount>>();
@@ -199,16 +197,15 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 			params.setDateFrom(dates[i]);
 			params.setDateTo(dates[i + 1]);
 			List<AuditCount> auditSample = new ArrayList<AuditCount>();
-			auditSample = (List<AuditCount>) sqlSessionTemplate.selectList(query, params);
+			auditSample = sqlSessionTemplate.selectList(query, params);
 			auditCount.add(auditSample);
 		}
 		logger.info("Performing " + query + " ... ");
 		return auditCount;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AuditEntry> selectEntriesToUpdate() {
-		return (List<AuditEntry>) sqlSessionTemplate.selectList(SELECT_TO_UPDATE);
+		return sqlSessionTemplate.selectList(SELECT_TO_UPDATE);
 	}
 
 	public AuditQueryParameters buildParametersFromRequest(WebScriptRequest req) {

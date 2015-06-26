@@ -85,6 +85,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
     private static final String URI_BLOG = SHORT_PROXY_URL + "api/blog/";
     private static final String URI_LINKS = SHORT_PROXY_URL + "api/links/";
     private static final String URI_DOWNLOAD = SHORT_PROXY_URL + "api/node/content/";
+    private static final String URI_DOWNLOAD_2 = SHORT_PROXY_URL + "slingshot/node/content/";
     private static final String URI_CALENDAR = "/calendar/create";
 
     // Check the method of the request
@@ -349,7 +350,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
 
                         remoteCall(request, auditSample);
                     }
-                } else if (requestURI.startsWith(URI_DOWNLOAD)) {
+                } else if (requestURI.startsWith(URI_DOWNLOAD) || requestURI.startsWith(URI_DOWNLOAD_2)) {
                     String a = request.getParameter("a");
                     if (a != null && !a.isEmpty()) {
                         auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
