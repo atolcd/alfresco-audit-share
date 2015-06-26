@@ -1,2 +1,4 @@
-build
-dist
+target
+.settings
+.project
+.classpath
