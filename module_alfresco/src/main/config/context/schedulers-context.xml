@@ -29,7 +29,7 @@
         <entry key="scriptLocation">
           <bean class="org.alfresco.repo.jscript.ClasspathScriptLocation">
             <constructor-arg>
-              <value>alfresco/module/auditshare-module-alfresco/scripts/schedulers/sites_volumetry.js</value>
+              <value>alfresco/module/${groupId}.${artifactId}/scripts/schedulers/sites_volumetry.js</value>
             </constructor-arg>
           </bean>
         </entry>

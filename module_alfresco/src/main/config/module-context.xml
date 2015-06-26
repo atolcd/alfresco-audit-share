@@ -19,7 +19,7 @@
 -->
 
 <beans>
-  <import resource="classpath:alfresco/module/auditshare-module-alfresco/context/schedulers-context.xml" />
+  <import resource="classpath:alfresco/module/${groupId}.${artifactId}/context/schedulers-context.xml" />
 
   <!-- Module configuration properties -->
   <bean name="shareStatsConfigProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -28,7 +28,7 @@
     </property>
     <property name="locations">
       <list>
-        <value>classpath:alfresco/module/auditshare-module-alfresco/share-stats-config.properties</value>
+        <value>classpath:alfresco/module/${groupId}.${artifactId}/share-stats-config.properties</value>
       </list>
     </property>
   </bean>
@@ -40,14 +40,14 @@
     <property name="resourceLoader" ref="dialectResourceLoader"/>
     <property name="dataSource" ref="dataSource"/>
     <property name="configLocation">
-        <value>classpath:alfresco/module/auditshare-module-alfresco/ibatis/share-stats-SqlMapConfig.xml</value>
+        <value>classpath:alfresco/module/${groupId}.${artifactId}/ibatis/share-stats-SqlMapConfig.xml</value>
     </property>
   </bean>
 
   <bean id="alfrescoShareStatsResourceBundles" class="org.alfresco.i18n.ResourceBundleBootstrapComponent">
     <property name="resourceBundles">
       <list>
-        <value>alfresco.module.auditshare-module-alfresco.messages.share-stats</value>
+        <value>alfresco.messages.share-stats</value>
       </list>
     </property>
   </bean>
@@ -141,7 +141,7 @@
 
   <!-- Patch: database tables creation -->
   <bean id="patch.db-V3.4-ShareStats-ExtraTables" class="com.atolcd.alfresco.repo.patch.SchemaUpgradeScriptPatch" parent="module.baseComponent" >
-    <property name="moduleId" value="auditshare-module-alfresco" />
+    <property name="moduleId" value="${groupId}.${artifactId}" />
     <property name="name" value="Création des tables d'audit concernant les statistiques des sites Share" />
     <property name="description" value="" />
     <property name="executeOnceOnly" value="true" />
@@ -159,7 +159,7 @@
       <ref bean="global-properties" />
     </property>
     <property name="scriptUrl">
-      <value>classpath:alfresco/module/auditshare-module-alfresco/dbscripts/create/${db.script.dialect}/AlfrescoCreate-ShareStatsAuditTables.sql</value>
+      <value>classpath:alfresco/module/${groupId}.${artifactId}/dbscripts/create/${db.script.dialect}/AlfrescoCreate-ShareStatsAuditTables.sql</value>
     </property>
   </bean>
 </beans>
