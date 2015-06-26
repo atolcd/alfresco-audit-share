@@ -31,5 +31,6 @@
 
   <modules>
     <module>module_alfresco</module>
+    <module>module_share</module>
   </modules>
 </project>

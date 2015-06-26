@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.atolcd.alfresco</groupId>
+    <artifactId>auditshare</artifactId>
+    <version>1.4.5-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>auditshare-share</artifactId>
+  <packaging>amp</packaging>
+  <name>AuditShare - Share</name>
+  <description>AuditShare Share project</description>
+
+  <build>
+    <finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.0</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.atolcd.alfresco</groupId>
+        <artifactId>amp-maven-plugin</artifactId>
+        <version>${alfresco-maven.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <shareModule>true</shareModule>
+          <moduleProperties>
+            <property>
+              <name>module.title</name>
+              <value>${project.name}</value>
+            </property>
+            <property>
+              <name>module.description</name>
+              <value>${project.description}</value>
+            </property>
+            <!-- Module aliases -->
+            <property>
+              <name>module.aliases</name>
+              <value>auditshare-module-share</value>
+            </property>
+          </moduleProperties>
+          <filemappingProperties>
+            <property>
+              <name>/WEB-INF</name>
+              <value>/WEB-INF</value>
+            </property>
+          </filemappingProperties>
+          <rootDirectory>${project.basedir}/src/main/webapp</rootDirectory>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>yuicompressor-maven-plugin</artifactId>
+        <version>1.3.2</version>
+        <executions>
+          <execution>
+            <id>compressyui</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>compress</goal>
+            </goals>
+            <configuration>
+              <sourceDirectory>${project.basedir}/src/main/web</sourceDirectory>
+              <outputDirectory>${project.build.directory}/web</outputDirectory>
+              <excludeResources>true</excludeResources>
+              <excludeWarSourceDirectory>true</excludeWarSourceDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <targetPath>alfresco</targetPath>
+      </resource>
+    </resources>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.alfresco</groupId>
+      <artifactId>share</artifactId>
+      <version>${alfresco.version}</version>
+      <classifier>classes</classifier>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+</project>
