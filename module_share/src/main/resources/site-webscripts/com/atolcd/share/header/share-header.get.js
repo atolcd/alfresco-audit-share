@@ -16,7 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-if (page.url.templateArgs.site != null) {
+if (page.url.templateArgs.site != null && page.id != "search" && page.id != "advsearch") {
   // We are in the context of a site, so call the repository to see if the user is site manager or not
   var userIsSiteManager = false;
 
