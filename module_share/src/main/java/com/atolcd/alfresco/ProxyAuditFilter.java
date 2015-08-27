@@ -49,6 +49,7 @@ import org.springframework.extensions.surf.exception.ConnectorServiceException;
 import org.springframework.extensions.surf.exception.RequestContextException;
 import org.springframework.extensions.surf.exception.ResourceLoaderException;
 import org.springframework.extensions.surf.exception.UserFactoryException;
+import org.springframework.extensions.surf.site.AuthenticationUtil;
 import org.springframework.extensions.surf.support.AlfrescoUserFactory;
 import org.springframework.extensions.surf.support.ThreadLocalRequestContext;
 import org.springframework.extensions.surf.util.I18NUtil;
@@ -57,7 +58,6 @@ import org.springframework.extensions.webscripts.connector.Connector;
 import org.springframework.extensions.webscripts.connector.ConnectorContext;
 import org.springframework.extensions.webscripts.connector.HttpMethod;
 import org.springframework.extensions.webscripts.connector.Response;
-import org.springframework.extensions.webscripts.connector.User;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.atolcd.alfresco.helper.AuditHelper;
@@ -150,15 +150,20 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                 throw new ServletException(ex);
             }
         }
-        User user = context.getUser();
+
+        String userId = AuthenticationUtil.getUserId(request);
+        if (userId == null || userId.trim().length() == 0) {
+            userId = request.getRemoteUser();
+        }
+
         String requestURI = request.getRequestURI();
         String method = request.getMethod().toUpperCase();
 
-        if (user != null) {
+        if (userId != null && userId.trim().length() > 0) {
             try {
                 JSONObject auditSample = new JSONObject();
                 auditSample.put(AUDIT_ID, "0");
-                auditSample.put(AUDIT_USER_ID, user.getId());
+                auditSample.put(AUDIT_USER_ID, userId);
                 auditSample.put(AUDIT_SITE, "");
                 auditSample.put(AUDIT_APP_NAME, "");
                 auditSample.put(AUDIT_ACTION_NAME, "");
@@ -257,7 +262,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                             auditSample.put(AUDIT_ACTION_NAME, "create-post");
                         }
 
-                        String auditObject = getNodeRefRemoteCall(request, user.getId(), siteId, MOD_WIKI, wikiPageId);
+                        String auditObject = getNodeRefRemoteCall(request, userId, siteId, MOD_WIKI, wikiPageId);
                         auditSample.put(AUDIT_OBJECT, auditObject);
 
                         // Remote call
@@ -311,7 +316,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
 
                         String[] urlTokens = requestURI.split("/");
                         String discussionId = urlTokens[urlTokens.length - 1];
-                        String auditObject = getNodeRefRemoteCall(request, user.getId(), siteId, "discussions", discussionId);
+                        String auditObject = getNodeRefRemoteCall(request, userId, siteId, "discussions", discussionId);
                         auditSample.put(AUDIT_OBJECT, auditObject);
 
                         remoteCall(request, auditSample);
@@ -344,7 +349,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                         auditSample.put(AUDIT_SITE, siteId);
                         auditSample.put(AUDIT_ACTION_NAME, "links-update");
 
-                        String auditObject = getNodeRefRemoteCall(request, user.getId(), siteId, MOD_LINKS, urlTokens[urlTokens.length - 1]);
+                        String auditObject = getNodeRefRemoteCall(request, userId, siteId, MOD_LINKS, urlTokens[urlTokens.length - 1]);
                         auditSample.put(AUDIT_OBJECT, auditObject);
 
                         remoteCall(request, auditSample);
