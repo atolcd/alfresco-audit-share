@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.atolcd.alfresco</groupId>
-  <artifactId>auditshare</artifactId>
+  <artifactId>auditshare-42X</artifactId>
   <version>1.4.5-SNAPSHOT</version>
   <packaging>pom</packaging>
 
