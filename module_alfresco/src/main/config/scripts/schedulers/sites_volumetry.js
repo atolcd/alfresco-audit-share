@@ -24,7 +24,7 @@ try {
     var success;
     for (var i=0, ii=sitesNode.children.length ; i<ii ; i++) {
       var siteNode = sitesNode.children[i];
-      if (siteNode.typeShort == "st:site") {
+      if (siteNode.isSubType("st:site")) {
         var siteShortName = siteNode.name,
             site = siteService.getSite(siteShortName);
         if (site) {
