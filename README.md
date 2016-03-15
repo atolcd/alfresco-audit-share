@@ -6,8 +6,8 @@ This app displays sites and repository usage info: number of created/read/update
 In sites, others informations are "audited" concerning wiki, blog and discussions components but also users connected and sites volumetry.   
 
 Works with:  
- - Alfresco Community 4.x
- - Alfresco Enterprise 4.x
+ - Alfresco Community 5.x
+ - Alfresco Enterprise 5.x
 
 
 Building the module
