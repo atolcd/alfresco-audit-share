@@ -8191,9 +8191,10 @@
 
     /* jshint ignore:end */
 
-    if (typeof define === 'function' && define.amd) {
+    /*if (typeof define === 'function' && define.amd) {
         define("c3", ["d3"], function () { return c3; });
-    } else if ('undefined' !== typeof exports && 'undefined' !== typeof module) {
+    } else */
+    if ('undefined' !== typeof exports && 'undefined' !== typeof module) {
         module.exports = c3;
     } else {
         window.c3 = c3;
