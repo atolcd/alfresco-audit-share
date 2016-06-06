@@ -1,0 +1,44 @@
+---
+classes:
+  - atolcd::alfresco::postgresql
+  - alfresco::solr
+
+alfresco::version:    '4.2.4'
+
+tomcat::version:      '7'
+
+atolcd::alfresco::modules::repo_module_stable:
+  com.atolcd.alfresco.repository:
+    version: '4.2.4'
+    project: 'atolcd-alfresco'
+  com.atolcd.alfresco.localsolr:
+    version: '4.2.4'
+    project: 'atolcd-alfresco'
+  javascript-console-repo:
+    version: '0.6.0'
+  com.atolcd.alfresco.support-tools-42X:
+    version: '1.8'
+    project: 'support-tools-42X'
+
+atolcd::alfresco::modules::share_module_stable:
+  com.atolcd.alfresco.share:
+    version: '4.2.4'
+    project: 'atolcd-alfresco'
+  javascript-console-share:
+    version: '0.6.0'
+
+atolcd::alfresco::modules::repo_module:
+  com.atolcd.alfresco.auditshare-42X-repo:
+    source: '/root/com.atolcd.alfresco.auditshare-42X-repo-1.4.7-SNAPSHOT.amp'
+
+atolcd::alfresco::modules::share_module:
+  com.atolcd.alfresco.auditshare-42X-share:
+    source: '/root/com.atolcd.alfresco.auditshare-42X-share-1.4.7-SNAPSHOT.amp'
+
+alfresco::params:
+  #mail
+  'mail.from.default':           'alfresco@atolcd.com'
+
+atolcd::tomcat::javaopts:
+ debug:
+   value: '-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n'

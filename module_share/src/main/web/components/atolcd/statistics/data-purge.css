@@ -1,0 +1,107 @@
+/*
+ * Copyright (C) 2013 Atol Conseils et Développements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.statistic-tool .title {
+    font-size: 123.1%;
+    font-weight: bold;
+    padding-bottom: .5em;
+}
+
+.statistic-tool .purge_period-criteria-container .from-calendar-container {
+    display: none;
+    float: left;
+    left: 295px;
+    z-index: 1;
+    position: absolute;
+}
+
+.statistic-tool .purge_period-criteria-container .to-calendar-container {
+    display: none;
+    position: absolute;
+    float: left;
+    left: 470px;
+    z-index: 1;
+}
+
+.statistic-tool .purge_period-criteria-container .period-from-calendar {
+  cursor: pointer;
+}
+
+.statistic-tool .purge_period-criteria-container .period-to-calendar {
+  cursor: pointer;
+}
+
+.statistic-tool .purge_period-criteria-container .field-period-select {
+  width: 6em;
+}
+
+.statistic-tool .purge_period-criteria-container .from-period-format{
+  font-size: 0.7em;
+  color: #aaa;
+  margin-left: 3.7em;
+}
+
+.statistic-tool .purge_period-criteria-container .to-period-format{
+  font-size: 0.7em;
+  color: #aaa;
+  margin-left: 13.2em;
+}
+
+.statistic-tool .purge_period-criteria-container .space-label{
+  margin-left: 1.5em;
+}
+
+.statistic-tool .purge_period-criteria-container .to-label{
+  margin-left: 1em;
+}
+
+.statistic-tool .purge_period-criteria-container .checkbox-all-criteria {
+  margin-left: 1em;
+}
+
+.statistic-tool .purge_period-criteria-container .criteria-label {
+  margin-left: 0.3em;
+}
+
+.statistic-tool .criterias .repository-label {
+  margin-left: 0.3em;
+  color: #333;
+  padding-bottom: 0.2em;
+  font-family: Open Sans Bold, Arial, sans-serif;
+  font-weight: normal;
+}
+
+.statistic-tool .criterias-button {
+  cursor: pointer;
+}
+
+.statistic-tool .criterias .repository-checkbox {
+  margin-left: 0.5em;
+}
+
+/* Popup */
+.yui-module .bd .node-details-popup {
+  min-width: 500px;
+  text-align: center;
+}
+.yui-module  .bd .node-details-popup label {
+  margin-left: 20px;
+}
+.yui-module  .bd .node-details-popup label {
+  font-weight: bold;
+}

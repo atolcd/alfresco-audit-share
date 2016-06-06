@@ -1,5 +1,8 @@
 <#import "/com/atolcd/components/statistics/statistics-tools.lib.ftl" as stats>
 
+<#include "/org/alfresco/components/component.head.inc">
+<#include "/com/atolcd/components/statistics/chart-ressources.lib.ftl">
+
 <#--
  * Copyright (C) 2013 Atol Conseils et Développements.
  * http://www.atolcd.com/
@@ -20,54 +23,61 @@
 
 <#assign el = args.htmlid?html />
 
-<script type="text/javascript">//<![CDATA[
-  new AtolStatistics.Volumetry("${args.htmlid?js_string}").setOptions({
-      pathToSwf: "${page.url.context}/res/components/atolcd/statistics/open_flash_chart/open-flash-chart.swf",
-      siteId: "${page.url.templateArgs.site!""}",
-      currentUser: "${user.name?js_string}",
-      isAdmin: ${user.isAdmin?string},
-      currentDateFilter: "months"
-    }
-  ).setMessages(${messages});
-//]]></script>
+<@markup id="css" >
+   <#-- CSS Dependencies -->
+   <@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/volumetry.css" group="auditShare"/>
+</@>
 
-<div id="${el}-body" class="statistic-tool">
-  <div id="${el}-volumetry">
-    <div class="yui-g">
-      <div class="yui-u first">
-        <div class="title">${msg("label.title")}</div>
-      </div>
-      <div class="yui-u align-right">&nbsp;</div>
-    </div>
-    <div class="yui-g separator">
-      <div class="header">
-        <div class="criterias">
-          <label>${msg("label.menu.site")}</label><span class="criterias-button"><input type="button" id="${el}-site-criteria" name="site-criteria-button" value="" /></span>
+<@markup id="js">
+   <#-- JavaScript Dependencies -->
+   <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/volumetry.js" group="auditShare"/>
+</@>
 
-          <span class="criterias-button">
-            <input type="button" id="${el}-chart-type-criteria" name="chart-type-criteria-button" value="${msg('graph.type.line')}" />
-            <select id="${el}-chart-type-criteria-select" name="chart-type-criteria-select">
-              <option value="line">${msg("graph.type.line")}</option>
-              <option value="bar">${msg("graph.type.bar")}</option>
-            </select>
-          </span>
+<@markup id="widgets">
+   <@createWidgets group="auditShare"/>
+</@>
+
+<@uniqueIdDiv>
+   <@markup id="html">
+      <div id="${el}-body" class="statistic-tool">
+        <div id="${el}-volumetry">
+          <div class="yui-g">
+            <div class="yui-u first">
+              <div class="title">${msg("label.title")}</div>
+            </div>
+            <div class="yui-u align-right">&nbsp;</div>
+          </div>
+          <div class="yui-g separator">
+            <div class="header">
+              <div class="criterias">
+                <label>${msg("label.menu.site")}</label><span class="criterias-button"><input type="button" id="${el}-site-criteria" name="site-criteria-button" value="" /></span>
+
+                <span class="criterias-button">
+                  <input type="button" id="${el}-chart-type-criteria" name="chart-type-criteria-button" value="${msg('graph.type.line')}" />
+                  <select id="${el}-chart-type-criteria-select" name="chart-type-criteria-select">
+                    <option value="line">${msg("graph.type.line")}</option>
+                    <option value="bar">${msg("graph.type.bar")}</option>
+                  </select>
+                </span>
+              </div>
+
+              <@stats.renderExportButton el />
+            </div>
+            <div id="${el}-bar-stack-criteria-container" class="bar-stack-criteria-container">
+              <input id="${el}-bar_stack-criteria" type="checkbox"></input><label for="${el}-bar_stack-criteria">${msg("label.menu.use.bar_stack")}</label>
+            </div>
+          </div>
+
+          <div id="${el}-chart-body" class="main-chart">
+            <div class="separator browsing">
+                <div id="${el}-chart-prev" class="img-prev-arrow" title="${msg('label.previous')}"></div>
+                <@stats.renderDateFiltersMenu el />
+                <div id="${el}-chart-next" class="img-next-arrow" title="${msg('label.next')}"></div>
+            </div>
+            <@stats.renderMainChartContainer el />
+          </div>
         </div>
-
-        <@stats.renderExportButton el />
+        <@stats.renderAtolFooter />
       </div>
-      <div id="${el}-bar-stack-criteria-container" class="bar-stack-criteria-container">
-        <input id="${el}-bar_stack-criteria" type="checkbox"></input><label for="${el}-bar_stack-criteria">${msg("label.menu.use.bar_stack")}</label>
-      </div>
-    </div>
-
-    <div id="${el}-chart-body" class="main-chart">
-      <div class="separator browsing">
-          <div id="${el}-chart-prev" class="img-prev-arrow" title="${msg('label.previous')}"></div>
-          <@stats.renderDateFiltersMenu el />
-          <div id="${el}-chart-next" class="img-next-arrow" title="${msg('label.next')}"></div>
-      </div>
-      <@stats.renderMainChartContainer el />
-    </div>
-  </div>
-  <@stats.renderAtolFooter />
-</div>
+   </@>
+</@>

@@ -127,14 +127,6 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
   YAHOO.extend(AtolStatistics.Tool, Alfresco.component.Base, {
     options: {
       /**
-       * @option pathToSwf
-       *
-       * Path to Open Flash Chart swf file
-       * http://teethgrinder.co.uk/open-flash-chart-2/
-       */
-      pathToSwf: "open-flash-chart.swf",
-
-      /**
        * @option currentDateFilter
        *
        * Current date filter: "days", "weeks", "months" or "years"
@@ -177,6 +169,34 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
      * @method onReady
      */
     onReady: function Tool_onReady() {
+      // Disable all of the DIV of the page for IE8 and under
+      if (YAHOO.env.ua.ie && ((!document.documentMode && YAHOO.env.ua.ie < 9) || document.documentMode < 9)) {
+        if (Dom.get("alfresco-statistics")) {
+          YAHOO.util.Dom.setStyle('alfresco-statistics', 'display', 'none');
+        }
+
+        var body = '<div class="node-details-popup">';
+        body += '<p><label>' + this.getMessage("label.compatibility-popup.textBegin") + '</label></p>';
+        body += '<p><label>' + this.getMessage("label.compatibility-popup.textEnd") + '</label></p>';
+        body += '</div>';
+
+        // Call the Pop-up
+        Alfresco.util.PopupManager.displayPrompt({
+          title: this.getMessage("label.compatibility-popup.title"),
+          text: body,
+          close: true,
+          noEscape: true,
+          buttons: [{
+            text: this.getMessage("button.ok"),
+            handler: function () {
+              this.destroy();
+            },
+            isDefault: true
+          }]
+        });
+        return false;
+      }
+
       var me = this;
       this.setupCurrentDates();
 
@@ -199,17 +219,6 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
       this.widgets.exportButton.getMenu().subscribe("click", onExportMenuItemClick);
       Dom.addClass(this.widgets.exportButton.getMenu().element, "export-button");
 
-      // Disable "export as image" item for IE7 and under
-      if (YAHOO.env.ua.ie && ((!document.documentMode && YAHOO.env.ua.ie<8) || document.documentMode < 8)) {
-        var items = this.widgets.exportButton.getMenu().getItems();
-        for (var i=0, ii=items.length ; i<ii ; i++) {
-          if (items[i].value == "onIMGExport") {
-            items[i].cfg.setProperty("disabled", true);
-            break;
-          }
-        }
-      }
-
       // Default listeners
       Event.addListener(this.id + "-home", "click", this.onResetDates, null, this);
       Event.addListener(this.id + "-by-days", "click", this.onChangeDateFilter, { filter: "days" }, this);
@@ -221,6 +230,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
 
       // Date filter
       Dom.addClass(this.id + "-by-" + this.options.currentDateFilter, "selected");
+      return true;
     },
 
     onSearch: function Tool_onSearch() {
@@ -328,50 +338,6 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
       this.execute();
     },
 
-    displayGraph: function Tool_displayGraph(response, fn) {
-      var additionalsParams, id, swf, chartTag;
-
-      additionalsParams = response.config.additionalsParams;
-      id = this.id + "-" + additionalsParams.target;
-      swf = Dom.get(id);
-      chartTag = swf.tagName.toLowerCase();
-
-      if (response.json) {
-        this.widgets.exportButton.set("disabled", false);
-        response.json.currentFilter = this.options.currentDateFilter;
-        response.json.additionalsParams = additionalsParams;
-        this.lastRequest.values = response.json.values;
-
-        if (chartTag == "embed" || chartTag == "object") {
-          swf.load(eval(fn + "('" + escape(YAHOO.lang.JSON.stringify(response.json)) + "')"));
-        } else {
-          // function "GetFlashData" is defined into the get_data.js file
-          // "id" parameter: parameters for OFC
-          var flashvars = {
-            "get-data": fn,
-            "id": escape(YAHOO.lang.JSON.stringify(response.json))
-          },
-            params = {
-              wmode: "opaque"
-            },
-            // /!\ for IE
-            attributes = {
-              salign: "l",
-              AllowScriptAccess: "always"
-            };
-
-          // Chart rendering (using flash)
-          swfobject.embedSWF(this.options.pathToSwf, id, additionalsParams.width, additionalsParams.height, "9.0.0", "expressInstall.swf", flashvars, params, attributes);
-        }
-
-      } else {
-        // Remove current Flash object (swf)
-        this.removeGraph(id);
-        Dom.get(id).innerHTML = this.msg("message.empty"); // use default Share message
-        this.widgets.exportButton.set("disabled", true);
-      }
-    },
-
     buildTimeStampArray: function Tool_buildTimeStampArray() {
       var tsArray = [],
         from = null,
@@ -469,24 +435,6 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
       return tsArray;
     },
 
-    removeGraph: function Tool_removeGraph(id) {
-      var swf = Dom.get(id),
-        chartTag = swf.tagName.toLowerCase(),
-        res = false;
-
-      if (chartTag == "embed" || chartTag == "object") {
-        swfobject.removeSWF(id);
-
-        // We need to recreate the container
-        var newChartDiv = new YAHOO.util.Element(document.createElement("div"));
-        newChartDiv.set("id", id);
-        newChartDiv.appendTo(id + "-container");
-        res = true;
-      }
-
-      return res;
-    },
-
     convertMenuValue: function Tool_convertMenuValue(val) {
       var res = null;
       if (val !== undefined && val !== "") {
@@ -556,9 +504,145 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
       this.onSearch();
     },
 
+    // For build correctly the X axis of all charts
+    buildBarChartXLabels: function Tool_buildBarChartXLabels(params, currentSizeMin) {
+      var labels = [],
+          timeType = params.currentFilter,
+          slicedDates = params.additionalsParams.tsString.split(","),
+          truncateLabels = false;
+
+      if (currentSizeMin && params.chartDomId) {
+        var chartElt = document.getElementById(params.chartDomId);
+        if (chartElt && chartElt.clientWidth <= currentSizeMin) {
+          truncateLabels = true;
+        }
+      }
+
+      switch (timeType) {
+        case "years":
+          for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+            labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.fullMonth); // default: mmmm
+            if (truncateLabels) {
+              labels[i] = labels[i].substring(0,3);
+            }
+          }
+          break;
+
+        case "months":
+          for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+            labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.shortDay); // default: dd/mm
+            if (truncateLabels) {
+              labels[i] = labels[i].substring(0,2);
+            }
+          }
+          break;
+
+        case "weeks":
+          for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+            labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.mediumDay); // default: dddd dd/mm
+            if (truncateLabels) {
+              labels[i] = labels[i].substring(0,3);
+            }
+          }
+          break;
+
+        case "days":
+          for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+            var timestamp = parseInt(slicedDates[i], 10),
+                h1 = Alfresco.thirdparty.dateFormat(new Date(timestamp), AtolStatistics.dateFormatMasks.shortHour), // default: HH'h'
+                h2 = Alfresco.thirdparty.dateFormat(new Date(timestamp + (2 * 60 * 60 * 1000)), AtolStatistics.dateFormatMasks.shortHour); // + 2 hours
+
+            labels[i] = h1 + " - " + h2;
+          }
+          break;
+      }
+      return labels;
+    },
+
+    // For build date title of user-connection and volumetry charts
+    buildDateTitle: function Tool_buildDateTitle(params) {
+      var title = "",
+          timeType = params.currentFilter,
+          slicedDates = params.additionalsParams.tsString.split(","),
+          from = new Date(parseInt(slicedDates[0], 10));
+
+      switch (timeType) {
+        case "years":
+          title = this.getMessage(timeType, "graph.title.date.", from.getFullYear());
+          break;
+
+        case "months":
+          var m = Alfresco.thirdparty.dateFormat(from, AtolStatistics.dateFormatMasks.fullMonth);
+          title = this.getMessage(timeType, "graph.title.date.", m, from.getFullYear());
+          break;
+
+        case "weeks":
+          title = this.getMessage(timeType, "graph.title.date.", from.getWeek(), from.getFullYear());
+          break;
+
+        case "days":
+          title = this.getMessage(timeType, "graph.title.date.", Alfresco.thirdparty.dateFormat(from, AtolStatistics.dateFormatMasks.shortDate));
+          break;
+      }
+
+      return title;
+    },
+
+    buildTitle: function Tool_buildTitle(params) {
+      var title = "",
+          site = params.additionalsParams.site,
+          siteTitle = params.additionalsParams.siteTitle || '';
+
+      if (site && site.indexOf(',') == -1) {
+        var opt = '"' + ((siteTitle != "") ? siteTitle : site) + '"';
+        title = this.getMessage("site", "graph.title.", opt);
+      } else {
+        title = this.getMessage("all", "graph.title.");
+      }
+
+      title += this.buildDateTitle(params);
+      return title;
+    },
+
+    exportChartAsImage: function Tool_exportChartAsImage(theChart) { // Export with Canvg library
+      var wrapper = document.getElementById(theChart.element.id),
+        svg = wrapper.querySelector("svg"),
+        svgData = null;
+
+      if (window.XMLSerializer) {
+        svgData = (new XMLSerializer()).serializeToString(svg);
+      } else if (svg.xml) {
+        svgData = svg.xml;
+      }
+
+      if (svgData) {
+        var mycanvas = document.createElement('canvas');
+        canvg(mycanvas, svgData);
+
+        if (YAHOO.env.ua.ie) {
+          var myIEWindow = window.open("", "");
+          myIEWindow.document.write("<image src='" + mycanvas.toDataURL("image/png") + "'/>");
+          myIEWindow.focus();
+        } else {
+          var a = document.createElement("a"),
+            chartTitle = theChart.element.querySelector("text.c3-title");
+
+          // The PNG file take the C3 Chart title when it exists
+          if (chartTitle) {
+            a.download = chartTitle.innerHTML;
+          } else {
+            a.download = "chart.png";
+          }
+
+          a.href = mycanvas.toDataURL("image/png");
+          document.body.appendChild(a); // /!\ For FireFox
+          a.click();
+        }
+      }
+    },
+
     onIMGExport: function Tool_onIMGExport() {
-      // call default OFC function
-      save_chart_image('{"additionalsParams":{"chartId": "' + this.id + '-chart"}}');
+      // Empty because it will be overridden
     }
   });
 })();
