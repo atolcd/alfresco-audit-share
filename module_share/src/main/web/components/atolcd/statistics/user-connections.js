@@ -36,7 +36,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
   /**
    * UserConnections constructor.
    *
-   * @param {String} htmlId The HTML id of the parent element
+   * @param {String}
+   *          htmlId The HTML id of the parent element
    * @return {AtolStatistics.UserConnections} The new UserConnections instance
    * @constructor
    */
@@ -47,9 +48,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
   YAHOO.extend(AtolStatistics.UserConnections, AtolStatistics.Tool, {
     /**
-     * @attribute recentlyConnectedDelay
-     * Period (minutes)
-     * Period that defined when a user is considered as "recently connected"
+     * @attribute recentlyConnectedDelay Period (minutes) Period that defined
+     *            when a user is considered as "recently connected"
      */
     recentlyConnectedDelay: 30,
 
@@ -59,8 +59,9 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
     headers: [],
 
     /**
-     * Fired by YUI when parent element is available for scripting.
-     * Component initialisation, including instantiation of YUI widgets and event listener binding.
+     * Fired by YUI when parent element is available for scripting. Component
+     * initialisation, including instantiation of YUI widgets and event listener
+     * binding.
      *
      * @method onReady
      */
@@ -100,10 +101,12 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         params += "&type=users";
         params += "&values=" + this.lastRequest.values.toString();
         params += "&interval=" + this.lastRequest.dateFilter;
-        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params; // ?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data)); // JSON.stringify
+        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params;
+
         window.open(url);
       }
     },
+
 
     prepareRecentlyConnectedUsersRequest: function UserConnections_prepareRecentlyConnectedUsersRequest() {
       // Retrieve variables from UI
@@ -247,22 +250,67 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           type: "count",
           site: site,
           siteTitle: this.sites[site] || '',
-          tsString: tsString,
-          target: "chart",
-          height: "450",
-          width: "90%",
-          chartId: this.id + '-chart'
+          tsString: tsString
         }
       });
     },
 
+    // Chart Displaying with C3
     displayUserGraph: function UserConnections_displayUserGraph(response) {
-      this.displayGraph(response, "getUserFlashData");
+      var displayParameters = {
+        currentFilter: this.options.currentDateFilter,
+        additionalsParams: response.config.additionalsParams
+      },
+      chartDomId = this.id + "-chart",
+      labelUserConnection = this.msg("tool.user-connections.label"),
+      chartArguments = {
+          bindto: '#' + chartDomId,
+          data: {
+            columns: [
+              [labelUserConnection].concat(response.json.values)
+            ]
+          },
+          legend: {
+            position: 'inset'
+          },
+          size: {
+            height: 450
+          },
+          grid: {
+            x: { show: true },
+            y: { show: true }
+          },
+          title: {
+            text: buildTitle(displayParameters)
+          },
+          point: { show: false },
+          axis: {
+            x: {
+              type: 'category',
+              categories: buildBarChartXLabels(displayParameters),
+            },
+            y: {
+              tick: { format: d3.format(",d") }
+            },
+          }
+      }
+
+      switch (displayParameters.additionalsParams.chartType) {
+        default :
+        case "bar":
+          chartArguments.data.type = 'bar';
+        break;
+        case "line":
+          chartArguments.point.show = true;
+        break;
+      };
+
+      // build chart
+      this.userChart = c3.generate(chartArguments);
     },
 
     /**
-     * @method buildParams
-     *         This function is used to build GET query request
+     * @method buildParams This function is used to build GET query request
      * @return string - url params
      */
     buildParams: function UserConnections_buildParams() {
@@ -283,7 +331,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           connectedLabel = this.msg("label.users.connected.today");
           neverConnectedLabel = this.msg("label.users.never-connected.today");
         } else {
-          var day = dateFormat(date, AtolStatistics.dateFormatMasks.mediumDay); // dddd dd/mm
+          var day = dateFormat(date, AtolStatistics.dateFormatMasks.mediumDay); // dddd
+                                                                                // dd/mm
           connectedLabel = this.msg("label.users.connected." + this.options.currentDateFilter, day);
           neverConnectedLabel = this.msg("label.users.never-connected." + this.options.currentDateFilter, day);
         }
@@ -298,7 +347,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         break;
 
       case "months":
-        var month = dateFormat(new Date(tsArray[0]), AtolStatistics.dateFormatMasks.monthYear); // mmmm yyyy
+        var month = dateFormat(new Date(tsArray[0]), AtolStatistics.dateFormatMasks.monthYear); // mmmm
+                                                                                                // yyyy
         connectedLabel = this.msg("label.users.connected." + this.options.currentDateFilter, month);
         neverConnectedLabel = this.msg("label.users.never-connected." + this.options.currentDateFilter, month);
         break;

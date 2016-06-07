@@ -18,6 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 -->
 
+<!-- D3 and C3 loading -->
+<script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/C3/d3.js"></script>
+<script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/C3/c3.js"></script>
+<link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/C3/c3.css" >
+
 <!-- Admin Console for Share Stats Tool -->
 <@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/statistics-tool.css" />
 <@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/user-connections.css" />
