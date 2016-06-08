@@ -70,6 +70,15 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
       var me = this;
 
+      // Disable PNG export for the Connection charts
+      var elements = this.widgets.exportButton.getMenu().getItems();
+      for (var i=0, ii=elements.length ; i<ii ; i++) {
+        if (elements[i].value == "onIMGExport") {
+          elements[i].cfg.setProperty("disabled", true);
+          break;
+        }
+      }
+
       // Chart type button
       this.widgets.chartTypeCriteriaButton = new YAHOO.widget.Button(this.id + "-chart-type-criteria", {
         type: "split",
@@ -99,7 +108,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       if (this.lastRequest.params) {
         var params = this.lastRequest.params;
         params += "&type=users";
-        params += "&values=" + this.lastRequest.values.toString();
+        params += "&values=" + String(this.lastRequest.values);
         params += "&interval=" + this.lastRequest.dateFilter;
         var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params;
 
@@ -257,56 +266,67 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
     // Chart Displaying with C3
     displayUserGraph: function UserConnections_displayUserGraph(response) {
-      var displayParameters = {
-        currentFilter: this.options.currentDateFilter,
-        additionalsParams: response.config.additionalsParams
-      },
-      chartDomId = this.id + "-chart",
-      labelUserConnection = this.msg("tool.user-connections.label"),
-      chartArguments = {
-          bindto: '#' + chartDomId,
-          data: {
-            columns: [
-              [labelUserConnection].concat(response.json.values)
-            ]
+      if (response.json) {
+        var displayParameters = {
+            currentFilter: this.options.currentDateFilter,
+            additionalsParams: response.config.additionalsParams
           },
-          legend: {
-            position: 'inset'
-          },
-          size: {
-            height: 450
-          },
-          grid: {
-            x: { show: true },
-            y: { show: true }
-          },
-          title: {
-            text: buildTitle(displayParameters)
-          },
-          point: { show: false },
-          axis: {
-            x: {
-              type: 'category',
-              categories: buildBarChartXLabels(displayParameters),
-            },
-            y: {
-              tick: { format: d3.format(",d") }
-            },
+          chartDomId = this.id + "-chart",
+          labelUserConnection = this.msg("tool.user-connections.label"),
+          chartArguments = {
+              bindto: '#' + chartDomId,
+              data: {
+                columns: [
+                  [labelUserConnection].concat(response.json.values)
+                ]
+              },
+              legend: {
+                position: 'inset'
+              },
+              size: {
+                height: 450
+              },
+              grid: {
+                x: { show: true },
+                y: { show: true }
+              },
+              title: {
+                text: buildTitle(displayParameters)
+              },
+              point: { show: false },
+              axis: {
+                x: {
+                  type: 'category',
+                  categories: buildBarChartXLabels(displayParameters),
+                },
+                y: {
+                  tick: { format: d3.format(",d") }
+                },
+              }
           }
+
+          switch (displayParameters.additionalsParams.chartType) {
+            default :
+            case "bar":
+              chartArguments.data.type = 'bar';
+            break;
+            case "line":
+              chartArguments.point.show = true;
+            break;
+          };
+
+          // Recovery of the connection values and reactivation of the export button
+          this.lastRequest.values = response.json.values;
+          this.widgets.exportButton.set("disabled", false);
+
+          // build chart
+          this.userChart = c3.generate(chartArguments);
+      } else {
+        if (this.userChart) {
+          this.userChart.unload(); // chart unloading
+        }
+        this.widgets.exportButton.set("disabled", true);
       }
-
-      switch (displayParameters.additionalsParams.chartType) {
-        default :
-        case "bar":
-          chartArguments.data.type = 'bar';
-        break;
-        case "line":
-          chartArguments.point.show = true;
-        break;
-      };
-
-      // build chart
-      this.userChart = c3.generate(chartArguments);
     },
 
     /**
