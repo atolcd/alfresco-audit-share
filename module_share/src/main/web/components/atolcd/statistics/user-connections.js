@@ -269,12 +269,12 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       if (response.json) {
         var displayParameters = {
             currentFilter: this.options.currentDateFilter,
-            additionalsParams: response.config.additionalsParams
+            additionalsParams: response.config.additionalsParams,
+            chartDomId: this.id + "-chart"
           },
-          chartDomId = this.id + "-chart",
           labelUserConnection = this.msg("tool.user-connections.label"),
           chartArguments = {
-              bindto: '#' + chartDomId,
+              bindto: '#' + displayParameters.chartDomId,
               data: {
                 columns: [
                   [labelUserConnection].concat(response.json.values)
@@ -297,7 +297,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
               axis: {
                 x: {
                   type: 'category',
-                  categories: buildBarChartXLabels(displayParameters),
+                  categories: buildBarChartXLabels(displayParameters, this.options.chartLabelSizeMin),
                 },
                 y: {
                   tick: { format: d3.format(",d") }

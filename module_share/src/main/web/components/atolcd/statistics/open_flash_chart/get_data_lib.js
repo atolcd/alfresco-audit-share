@@ -53,27 +53,44 @@ function save_image(p) {
   save_chart_image(p[0]);
 }
 
-function buildBarChartXLabels(params) {
+function buildBarChartXLabels(params, currentSizeMin) {
   var labels = [],
       timeType = params.currentFilter,
-      slicedDates = params.additionalsParams.tsString.split(",");
+      slicedDates = params.additionalsParams.tsString.split(","),
+      truncateLabels = false;
+
+  if (currentSizeMin && params.chartDomId) {
+    var chartElt = document.getElementById(params.chartDomId);
+    if (chartElt && chartElt.clientWidth <= currentSizeMin) {
+      truncateLabels = true;
+    }
+  }
 
   switch (timeType) {
     case "years":
       for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
         labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.fullMonth); // default: mmmm
+        if (truncateLabels) {
+          labels[i] = labels[i].substring(0,3);
+        }
       }
       break;
 
     case "months":
       for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
         labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.shortDay); // default: dd/mm
+        if (truncateLabels) {
+          labels[i] = labels[i].substring(0,2);
+        }
       }
       break;
 
     case "weeks":
       for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
         labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.mediumDay); // default: dddd dd/mm
+        if (truncateLabels) {
+          labels[i] = labels[i].substring(0,3);
+        }
       }
       break;
 
