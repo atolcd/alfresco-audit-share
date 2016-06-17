@@ -18,7 +18,7 @@
 
 try {
   // Find all sites
-  var sitesNode = search.luceneSearch('+PATH:"/app:company_home/st:sites/."');
+  var sitesNode = search.selectNodes("/app:company_home/st:sites/.");
   if (sitesNode && sitesNode.length == 1) {
     sitesNode = sitesNode[0];
     var success;
