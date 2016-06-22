@@ -43,6 +43,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
    */
   AtolStatistics.UserConnections = function UserConnections_constructor(htmlId) {
     AtolStatistics.UserConnections.superclass.constructor.call(this, "AtolStatistics.UserConnections", htmlId, ["button", "container", "json"]);
+    Event.addListener(window, 'resize', this.onWindowResize, this, true);
     return this;
   };
 
@@ -264,6 +265,19 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       });
     },
 
+    onWindowResize: function UserConnections_onWindowResize() {
+      if (this.userChart) {
+        var resizeParameters = {
+          currentFilter: this.options.currentDateFilter,
+          additionalsParams: {
+            tsString: this.buildTimeStampArray().toString()
+          },
+          chartDomId: this.id + '-chart'
+        };
+        this.userChart.categories(buildBarChartXLabels(resizeParameters, this.options.chartLabelSizeMin));
+      }
+    },
+
     // Chart Displaying with C3
     displayUserGraph: function UserConnections_displayUserGraph(response) {
       if (response.json) {
@@ -298,12 +312,16 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
                 x: {
                   type: 'category',
                   categories: buildBarChartXLabels(displayParameters, this.options.chartLabelSizeMin),
+                  tick: {
+                    multiline: false,
+                    outer: false
+                  }
                 },
                 y: {
                   tick: { format: d3.format(",d") }
-                },
+                }
               }
-          }
+          };
 
           switch (displayParameters.additionalsParams.chartType) {
             default :

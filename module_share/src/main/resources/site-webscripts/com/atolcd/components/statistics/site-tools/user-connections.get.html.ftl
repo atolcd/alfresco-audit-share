@@ -25,7 +25,7 @@
       siteId: "${page.url.templateArgs.site!""}",
       currentUser: "${user.name?js_string}",
       isAdmin: ${user.isAdmin?string},
-      chartLabelSizeMin: 700
+      chartLabelSizeMin: 850
     }
   ).setMessages(${messages});
 //]]></script>
