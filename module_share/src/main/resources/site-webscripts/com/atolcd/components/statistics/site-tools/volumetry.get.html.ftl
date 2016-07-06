@@ -26,7 +26,8 @@
       siteId: "${page.url.templateArgs.site!""}",
       currentUser: "${user.name?js_string}",
       isAdmin: ${user.isAdmin?string},
-      currentDateFilter: "months"
+      currentDateFilter: "months",
+      chartLabelSizeMin: 850
     }
   ).setMessages(${messages});
 //]]></script>
