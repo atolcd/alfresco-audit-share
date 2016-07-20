@@ -58,12 +58,12 @@
     <tr>
       <td class="table-bottom">
         <div id="${el}-mostread-container">
-          <div  id="${el}-mostread"></div>
+          <div id="${el}-mostread" class="my-popularity-chart"></div>
         </div>
       </td>
       <td class="table-bottom">
         <div id="${el}-mostupdated-container">
-          <div id="${el}-mostupdated"></div>
+          <div id="${el}-mostupdated" class="my-popularity-chart"></div>
         </div>
       </td>
     </tr>

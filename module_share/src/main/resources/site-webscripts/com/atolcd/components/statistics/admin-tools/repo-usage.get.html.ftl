@@ -22,11 +22,11 @@
 
 <script type="text/javascript">//<![CDATA[
   new AtolStatistics.RepoUsage("${args.htmlid?js_string}").setOptions({
-      pathToSwf: "${page.url.context}/res/components/atolcd/statistics/open_flash_chart/open-flash-chart.swf",
       siteId: "${page.url.templateArgs.site!""}",
       currentUser: "${user.name?js_string}",
       isAdmin: ${user.isAdmin?string},
-      limit: 10
+      limit: 10,
+      chartLabelSizeMin: 850
     }
   ).setMessages(${messages});
 //]]></script>

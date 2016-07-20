@@ -41,9 +41,11 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
    */
   AtolStatistics.GlobalUsage = function GlobalUsage_constructor(htmlId) {
     AtolStatistics.GlobalUsage.superclass.constructor.call(this, "AtolStatistics.GlobalUsage", htmlId, ["button", "container", "json"]);
+    Event.addListener(window, 'resize', this.onWindowResize, this, true);
 
     // Default values
     this.options.limit = 5;
+    this.popularityCharts = {};
 
     return this;
   };
@@ -55,16 +57,27 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
      *
      * @method onReady
      */
+
     onReady: function GlobalUsage_onReady() {
       AtolStatistics.GlobalUsage.superclass.onReady.call(this);
 
       var me = this;
+
+      // Disable PNG export for the Connection charts
+      elements = this.widgets.exportButton.getMenu().getItems();
+      for (var i=0, ii=elements.length ; i<ii ; i++) {
+        if (elements[i].value == "onIMGExport") {
+          elements[i].cfg.setProperty("disabled", true);
+          break;
+        }
+      }
 
       this.widgets.moduleCriteriaButton = new YAHOO.widget.Button(this.id + "-module-criteria", {
         type: "split",
         menu: this.id + "-module-criteria-select",
         lazyloadmenu: false
       });
+      this.widgets.moduleCriteriaButton.getMenu().cfg.setProperty("zIndex", 4);
       this.widgets.moduleCriteriaButton.value = "document";
 
       this.widgets.actionCriteriaButton = new YAHOO.widget.Button(this.id + "-action-criteria", {
@@ -115,14 +128,14 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       }
     },
 
+
     onSearch: function GlobalUsage_onSearch() {
       // Retrieve variables from UI
       var action = this.convertMenuValue(this.widgets.actionCriteriaButton.value),
           module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
           dateFilter = this.options.currentDateFilter,
           site = this.convertMenuValue(this.widgets.siteButton.value),
-          type = action,
-          tsString = "";
+          type = action;
 
       // Date range table
       if (dateFilter) {
@@ -143,22 +156,144 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         failureMessage: this.msg("label.popup.query.error"),
         execScripts: true,
         additionalsParams: {
-          chartType: "vbar",
+          chartType: "bar",
           type: type,
-          tsString: tsString,
-          target: "chart",
-          height: "450",
-          width: "90%",
-          chartId: this.id + '-chart'
+          tsString: tsString
         }
       });
     },
+
+    // Refresh the chart page after resizing
+    onWindowResize: function GlobalUsage_onWindowResize() {
+      if (this.globalChart) {
+        var resizeParameters = {
+          currentFilter: this.options.currentDateFilter,
+          additionalsParams: {
+            tsString: this.buildTimeStampArray().toString()
+          },
+          chartDomId: this.id + '-chart'
+        };
+        this.globalChart.categories(buildBarChartXLabels(resizeParameters, this.options.chartLabelSizeMin));
+      }
+
+      // Remove the last width attribute of the svg tag. /!\ Because the width resizing is not native on FireFox /!\
+      if (this.popularityCharts) {
+        for (var chartId in this.popularityCharts) {
+          var theChart = this.popularityCharts[chartId];
+          if (theChart.element && theChart.element.firstChild) {
+            theChart.element.firstChild.removeAttribute("width");
+          }
+        }
+      }
+    },
+
+    // Display the main graph
+    displayGlobalUsageGraph: function GlobalUsage_displayGlobalUsageGraph(response) {
+      if (response.json) {
+        var displayParameters = {
+            currentFilter: this.options.currentDateFilter,
+            additionalsParams: response.config.additionalsParams,
+            chartDomId: this.id + "-chart"
+          },
+          chartArguments = {
+              bindto: '#' + displayParameters.chartDomId,
+              data: {
+                columns: [],
+                type: 'bar',
+                colors: {}
+              },
+              legend: {
+                position: 'inset'
+              },
+              size: {
+                height: 450
+              },
+              grid: {
+                x: { show: true },
+                y: { show: true }
+              },
+              title: {
+                text: buildTitle(displayParameters)
+              },
+              point: { show: false },
+              axis: {
+                x: {
+                  type: 'category',
+                  categories: buildBarChartXLabels(displayParameters, this.options.chartLabelSizeMin),
+                  tick: {
+                    multiline: false,
+                    outer: false
+                  }
+                },
+                y: {
+                  tick: { format: d3.format(",d") }
+                }
+              }
+          };
+
+        // Recovery datas for graph displaying
+        var jsonResults = [];
+        for (var i = 0 ; i < response.json.items.length ; i++) {
+          var jsonItem = response.json.items[i];
+          if (jsonItem.totalResults > 0) {
+            for (var j = 0, jj = jsonItem.totalResults; j < jj; j++) {
+              var labelParam = jsonItem.items[j].target,
+                max = 0;
+
+              if (!jsonResults[labelParam]) {
+                jsonResults[labelParam] = [];
+                jsonResults[labelParam][i] = jsonItem.items[j].count;
+
+                if (jsonResults[labelParam][i] > max) {
+                  max = jsonResults[labelParam][i];
+                }
+              } else {
+                jsonResults[labelParam][i] = jsonItem.items[j].count;
+                if (jsonResults[labelParam][i] > max) {
+                  max = jsonResults[labelParam][i];
+                }
+              }
+            }
+          }
+        }
+
+        for (resultId in jsonResults) {
+          var value_obj = [getMessage(resultId, "graph.label.")];
+          for (var j = 0; j < response.json.items.length; j++) {
+            if (!jsonResults[resultId][j]) {
+              jsonResults[resultId][j] = 0;
+            }
+          }
+
+          for (var i = 0, ii = jsonResults[resultId].length; i < ii; i++) {
+            value_obj.push(jsonResults[resultId][i]);
+          }
+          chartArguments.data.colors[value_obj[0]] = barChartColors[resultId];
+          chartArguments.data.columns.push(value_obj);
+        }
+
+          // Recovery of the connection values and reactivation of the export button
+          this.widgets.exportButton.set("disabled", false);
+
+          // build chart
+          this.globalChart = c3.generate(chartArguments);
+
+      } else {
+        if (this.globalChart) {
+          this.globalChart.unload(); // chart unloading
+        }
+        this.widgets.exportButton.set("disabled", true);
+      }
+    },
+
+
 
     getByPopularity: function GlobalUsage_getByPopularity(type) {
       var site = this.convertMenuValue(this.widgets.siteButton.value),
           module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
           dateFilter = this.options.currentDateFilter,
           tsArray = this.buildTimeStampArray(),
+          tsString = tsArray.toString(),
           from = tsArray[0],
           to = tsArray[tsArray.length - 1],
           params = null;
@@ -170,38 +305,76 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       Alfresco.util.Ajax.jsonGet({
         url: url,
         successCallback: {
-          fn: this.displayGlobalUsageGraph,
+          fn: this.displayPopularityGraph,
           scope: this
         },
         failureMessage: this.msg("label.popup.query.error"),
         execScripts: true,
         additionalsParams: {
-          chartType: "hbar",
+          chartType: "bar",
           type: type,
-          target: type,
-          height: "" + ((this.options.limit * 22) + 50),
-          width: "100%",
-          from: from,
-          to: to,
-          urlTemplate : this.getTemplateUrl()
+          tsString: tsString
         }
       });
     },
 
-    getTemplateUrl: function GlobalUsage_getTemplateUrl() {
-      var baseUrl = window.location.protocol + "//" + window.location.host + Alfresco.constants.URL_PAGECONTEXT + "site/{site}/";
+    // Display the two smallest graphs
+    displayPopularityGraph: function GlobalUsage_displayPopularityGraph(response) {
+      if (response.json) {
+        var displayParameters = {
+          currentFilter: this.options.currentDateFilter
+        },
 
-      return templates = {
-        "documentLibrary" : baseUrl + "document-details?nodeRef={nodeRef}",
-        "wiki": baseUrl + "wiki-page?title={id}&listViewLinkBack=true",
-        "blog": baseUrl + "blog-postview?postId={id}&listViewLinkBack=true",
-        "discussions": baseUrl + "discussions-topicview?topicId={id}&listViewLinkBack=true",
-        "": window.location.protocol + "//" + window.location.host + Alfresco.constants.URL_PAGECONTEXT + "document-details?nodeRef={nodeRef}"
-      };
-    },
+        chartsPopularityArguments = {
+          data: {
+            columns: [],
+            type: 'bar'
+          },
+          size: {
+            height: 200
+          },
+          grid: {
+            x: { show: true },
+            y: { show: true }
+          },
+          title: {},
+          point: { show: false },
+          axis: {
+            rotated: true,
+            x: {
+              type: 'category',
+              categories: [],
+              tick: {
+                multiline: false,
+                outer: false
+              }
+            },
+            y: {
+              tick: { format: d3.format(",d") }
+            }
+          }
+        };
 
-    displayGlobalUsageGraph: function GlobalUsage_displayGlobalUsageGraph(response) {
-      this.displayGraph(response, "getFlashData");
+        // Generation of the charts
+        for (var i=0, ii=response.json.items.length ; i<ii ; i++) {
+          var value_obj = [response.json.items[i].displayName];
+
+          chartsPopularityArguments.bindto = '#' + this.id + '-' + response.config.additionalsParams.type;
+
+          value_obj.push(response.json.items[i].popularity);
+          chartsPopularityArguments.data.columns.push(value_obj);
+          chartsPopularityArguments.axis.x.categories.push(value_obj[0].substring(0,0));
+        }
+        chartsPopularityArguments.title.text = (i > 1) ? getMessage(response.config.additionalsParams.type, "graph.label.", response.json.items.length) :
+            getMessage(response.config.additionalsParams.type, "graph.label.", "");
+
+        this.popularityCharts[response.config.additionalsParams.type] = c3.generate(chartsPopularityArguments);
+      } else {
+        if (this.popularityCharts[response.config.additionalsParams.type]) {
+          this.popularityCharts[response.config.additionalsParams.type].unload(); // chart unloading
+        }
+        this.widgets.exportButton.set("disabled", true);
+      }
     },
 
     /**
