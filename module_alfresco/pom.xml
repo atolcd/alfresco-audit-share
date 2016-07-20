@@ -42,7 +42,7 @@
             <!-- Module aliases -->
             <property>
               <name>module.aliases</name>
-              <value>auditshare-module-alfresco, com.atolcd.alfresco.auditshare-repo</value>
+              <value>auditshare-module-alfresco, com.atolcd.alfresco.auditshare-repo, com.atolcd.alfresco.auditshare-42X-repo</value>
             </property>
           </moduleProperties>
         </configuration>

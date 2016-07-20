@@ -43,7 +43,7 @@
             <!-- Module aliases -->
             <property>
               <name>module.aliases</name>
-              <value>auditshare-module-share, com.atolcd.alfresco.auditshare-share</value>
+              <value>auditshare-module-share, com.atolcd.alfresco.auditshare-share, com.atolcd.alfresco.auditshare-42X-share</value>
             </property>
           </moduleProperties>
           <filemappingProperties>
