@@ -42,9 +42,9 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
   AtolStatistics.GlobalUsage = function GlobalUsage_constructor(htmlId) {
     AtolStatistics.GlobalUsage.superclass.constructor.call(this, "AtolStatistics.GlobalUsage", htmlId, ["button", "container", "json"]);
     Event.addListener(window, 'resize', this.onWindowResize, this, true);
-
     // Default values
     this.options.limit = 5;
+    this.options.popularity = 25;
     this.popularityCharts = {};
 
     return this;
@@ -128,7 +128,6 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       }
     },
 
-
     onSearch: function GlobalUsage_onSearch() {
       // Retrieve variables from UI
       var action = this.convertMenuValue(this.widgets.actionCriteriaButton.value),
@@ -202,9 +201,6 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
                 type: 'bar',
                 colors: {}
               },
-              legend: {
-                position: 'inset'
-              },
               size: {
                 height: 450
               },
@@ -216,6 +212,9 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
                 text: buildTitle(displayParameters)
               },
               point: { show: false },
+              tooltip: {
+                grouped: false
+              },
               axis: {
                 x: {
                   type: 'category',
@@ -286,8 +285,6 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       }
     },
 
-
-
     getByPopularity: function GlobalUsage_getByPopularity(type) {
       var site = this.convertMenuValue(this.widgets.siteButton.value),
           module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
@@ -313,22 +310,79 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         additionalsParams: {
           chartType: "bar",
           type: type,
-          tsString: tsString
+          tsString: tsString,
+          urlTemplate : this.getTemplateUrl()
         }
       });
+    },
+
+    getTemplateUrl: function GlobalUsage_getTemplateUrl() {
+      var baseUrl = window.location.protocol + "//" + window.location.host + Alfresco.constants.URL_PAGECONTEXT + "site/{site}/";
+
+      return templates = {
+        "documentLibrary" : baseUrl + "document-details?nodeRef={nodeRef}",
+        "wiki": baseUrl + "wiki-page?title={id}&listViewLinkBack=true",
+        "blog": baseUrl + "blog-postview?postId={id}&listViewLinkBack=true",
+        "discussions": baseUrl + "discussions-topicview?topicId={id}&listViewLinkBack=true",
+        "": window.location.protocol + "//" + window.location.host + Alfresco.constants.URL_PAGECONTEXT + "document-details?nodeRef={nodeRef}"
+      };
     },
 
     // Display the two smallest graphs
     displayPopularityGraph: function GlobalUsage_displayPopularityGraph(response) {
       if (response.json) {
         var displayParameters = {
-          currentFilter: this.options.currentDateFilter
+          currentFilter: this.options.currentDateFilter,
+          additionalsParams: response.config.additionalsParams
         },
-
+        colors = ['#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78', '#2ca02c',
+                  '#98df8a', '#d62728', '#ff9896', '#9467bd', '#c5b0d5'],
         chartsPopularityArguments = {
           data: {
-            columns: [],
-            type: 'bar'
+            json: [],
+            keys: {},
+            type: 'bar',
+            color: function (color, d) {
+              return colors[d.x];
+            },
+            onclick: function(barParams) {
+              var item = response.json.items[barParams.x];
+
+              // TODO: make something cleaner?
+              var body = '<div class="node-details-popup">';
+              body += '<p><label>' + getMessage("label.popup.filename") + '</label>' + item.name + '</p>';
+              body += (item.siteTitle) ? '<p><label>' + getMessage("label.popup.type") + '</label>' + getMessage("site.component." + item.siteComponent) + '</p>' : '';
+              body += (item.siteTitle) ? '<p><label>' + getMessage("label.menu.site") + '</label>' + item.siteTitle + '</p>' : '';
+              body += '<p><label>' + getMessage("label.popup.hits") + '</label>' + item.popularity + '</p>';
+              body += '</div>';
+
+              Alfresco.util.PopupManager.displayPrompt({
+                title: item.name,
+                text: body,
+                close: true,
+                noEscape: true,
+                buttons: [{
+                  text: getMessage("button.go-to-node-page"),
+                  handler:{
+                    fn: function() {
+                      var url = YAHOO.lang.substitute(displayParameters.additionalsParams.urlTemplate[item.siteComponent], {
+                        nodeRef : item.nodeRef,
+                        site : item.site
+                      });
+                      window.open(url);
+                      this.destroy();
+                    },
+                    obj: item
+                  }
+                }, {
+                  text: getMessage("button.cancel"),
+                  handler: function () {
+                    this.destroy();
+                  },
+                  isDefault: true
+                }]
+              });
+            }
           },
           size: {
             height: 200
@@ -352,19 +406,37 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
             y: {
               tick: { format: d3.format(",d") }
             }
+          },
+          tooltip: {
+            grouped: false,
+            contents: function (barParams, defaultTitleFormat, defaultValueFormat, color) {
+              barParams[0].name = response.json.items[barParams[0].x].name;
+              return this.getTooltipContent(barParams, defaultTitleFormat, defaultValueFormat, color);
+            },
+            format: {
+              title: function (d) {
+                return (response.json.items[d].siteTitle) ? getMessage("label.menu.site") + response.json.items[d].siteTitle : response.json.items[d].name;
+              }
+            }
+          },
+          legend: {
+            show: false
           }
         };
 
         // Generation of the charts
+        chartsPopularityArguments.bindto = '#' + this.id + '-' + response.config.additionalsParams.type;
+
+        var value_obj = {};
         for (var i=0, ii=response.json.items.length ; i<ii ; i++) {
-          var value_obj = [response.json.items[i].displayName];
-
-          chartsPopularityArguments.bindto = '#' + this.id + '-' + response.config.additionalsParams.type;
-
-          value_obj.push(response.json.items[i].popularity);
-          chartsPopularityArguments.data.columns.push(value_obj);
-          chartsPopularityArguments.axis.x.categories.push(value_obj[0].substring(0,0));
+          value_obj = response.json.items[i];
+          chartsPopularityArguments.data.json.push(value_obj);
+          if (chartsPopularityArguments.data.json[i].displayName.length > this.options.popularity) {
+            chartsPopularityArguments.data.json[i].displayName = chartsPopularityArguments.data.json[i].displayName.substr(0, this.options.popularity) + " ...";
+          }
         }
+        chartsPopularityArguments.data.keys = {x: 'displayName', value: ['popularity']};
+
         chartsPopularityArguments.title.text = (i > 1) ? getMessage(response.config.additionalsParams.type, "graph.label.", response.json.items.length) :
             getMessage(response.config.additionalsParams.type, "graph.label.", "");
 
