@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.atolcd.alfresco</groupId>
-    <artifactId>auditshare-50X</artifactId>
+    <artifactId>auditshare-51X</artifactId>
     <version>1.5.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>auditshare-50X-repo</artifactId>
+  <artifactId>auditshare-51X-repo</artifactId>
   <packaging>amp</packaging>
   <name>AuditShare - Repository</name>
   <description>AuditShare repository project</description>
@@ -42,7 +42,7 @@
             <!-- Module aliases -->
             <property>
               <name>module.aliases</name>
-              <value>auditshare-module-alfresco, com.atolcd.alfresco.auditshare-repo, com.atolcd.alfresco.auditshare-42X-repo</value>
+              <value>auditshare-module-alfresco, com.atolcd.alfresco.auditshare-repo, com.atolcd.alfresco.auditshare-42X-repo, com.atolcd.alfresco.auditshare-50X-repo</value>
             </property>
           </moduleProperties>
         </configuration>
