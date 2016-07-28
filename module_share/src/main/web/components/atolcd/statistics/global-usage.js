@@ -339,6 +339,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
                   '#98df8a', '#d62728', '#ff9896', '#9467bd', '#c5b0d5'],
         chartsPopularityArguments = {
           data: {
+            selection: { enabled: true },
             json: [],
             keys: {},
             type: 'bar',
