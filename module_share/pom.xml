@@ -77,6 +77,7 @@
         <configuration>
           <excludes>
             <exclude>**/C3/*</exclude>
+            <exclude>**/html2canvas/**</exclude>
           </excludes>
         </configuration>
       </plugin>
