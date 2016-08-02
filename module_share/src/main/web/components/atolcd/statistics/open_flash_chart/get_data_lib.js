@@ -16,15 +16,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-function get_random_color() {
-  var letters = '0123456789ABCDEF'.split('');
-  var color = '#';
-  for (var i = 0; i < 6; i++) {
-    color += letters[Math.round(Math.random() * 15)];
-  }
-  return color;
-}
-
 function buildBarChartXLabels(params, currentSizeMin) {
   var labels = [],
       timeType = params.currentFilter,
@@ -77,11 +68,6 @@ function buildBarChartXLabels(params, currentSizeMin) {
       break;
   }
   return labels;
-}
-
-function addRotation(o, params){
-  // labels rotation (45 degrees)
-  if (params.currentFilter == "days"){ o.rotate = -45; }
 }
 
 function buildDateTitle(params) {
@@ -161,8 +147,3 @@ gridColors["x-axis"] = gray;
 gridColors["y-axis"] = gray;
 gridColors["x-grid"] = mediumGray;
 gridColors["y-grid"] = mediumGray;
-
-
-var barStackedChartColors = {};
-barStackedChartColors.defaultColors = ["#FF6201", "#75C7BB", "#D6191F", "#7CA900", "#373121", "#EB9B00", "#58C3F0", "#7D7B6A", "#EA2673", "#BCA8D0",
-                                       "#8D625B", "#FFD370", "#009285", "#1B9EFC", "#0A9200", "#FF9900", "#C6E56F", "#755A04", "#80001B", "#291309"];

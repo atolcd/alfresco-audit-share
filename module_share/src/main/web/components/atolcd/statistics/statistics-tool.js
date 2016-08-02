@@ -127,14 +127,6 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
   YAHOO.extend(AtolStatistics.Tool, Alfresco.component.Base, {
     options: {
       /**
-       * @option pathToSwf
-       *
-       * Path to Open Flash Chart swf file
-       * http://teethgrinder.co.uk/open-flash-chart-2/
-       */
-      pathToSwf: "open-flash-chart.swf",
-
-      /**
        * @option currentDateFilter
        *
        * Current date filter: "days", "weeks", "months" or "years"
@@ -328,50 +320,6 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
       this.execute();
     },
 
-    displayGraph: function Tool_displayGraph(response, fn) {
-      var additionalsParams, id, swf, chartTag;
-
-      additionalsParams = response.config.additionalsParams;
-      id = this.id + "-" + additionalsParams.target;
-      swf = Dom.get(id);
-      chartTag = swf.tagName.toLowerCase();
-
-      if (response.json) {
-        this.widgets.exportButton.set("disabled", false);
-        response.json.currentFilter = this.options.currentDateFilter;
-        response.json.additionalsParams = additionalsParams;
-        this.lastRequest.values = response.json.values;
-
-        if (chartTag == "embed" || chartTag == "object") {
-          swf.load(eval(fn + "('" + escape(YAHOO.lang.JSON.stringify(response.json)) + "')"));
-        } else {
-          // function "GetFlashData" is defined into the get_data.js file
-          // "id" parameter: parameters for OFC
-          var flashvars = {
-            "get-data": fn,
-            "id": escape(YAHOO.lang.JSON.stringify(response.json))
-          },
-            params = {
-              wmode: "opaque"
-            },
-            // /!\ for IE
-            attributes = {
-              salign: "l",
-              AllowScriptAccess: "always"
-            };
-
-          // Chart rendering (using flash)
-          swfobject.embedSWF(this.options.pathToSwf, id, additionalsParams.width, additionalsParams.height, "9.0.0", "expressInstall.swf", flashvars, params, attributes);
-        }
-
-      } else {
-        // Remove current Flash object (swf)
-        this.removeGraph(id);
-        Dom.get(id).innerHTML = this.msg("message.empty"); // use default Share message
-        this.widgets.exportButton.set("disabled", true);
-      }
-    },
-
     buildTimeStampArray: function Tool_buildTimeStampArray() {
       var tsArray = [],
         from = null,
@@ -467,24 +415,6 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
       }
 
       return tsArray;
-    },
-
-    removeGraph: function Tool_removeGraph(id) {
-      var swf = Dom.get(id),
-        chartTag = swf.tagName.toLowerCase(),
-        res = false;
-
-      if (chartTag == "embed" || chartTag == "object") {
-        swfobject.removeSWF(id);
-
-        // We need to recreate the container
-        var newChartDiv = new YAHOO.util.Element(document.createElement("div"));
-        newChartDiv.set("id", id);
-        newChartDiv.appendTo(id + "-container");
-        res = true;
-      }
-
-      return res;
     },
 
     convertMenuValue: function Tool_convertMenuValue(val) {

@@ -16,15 +16,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-function getVolumetryFlashData(param) {
-  var params = YAHOO.lang.JSON.parse(unescape(param)),
-      jsonChart = null;
-
-  jsonChart = buildChart(params);
-
-  return YAHOO.lang.JSON.stringify(jsonChart);
-};
-
 function buildTitle(params) {
   var title = "",
       site = params.additionalsParams.site,
