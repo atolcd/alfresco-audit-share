@@ -63,15 +63,6 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
       var me = this;
 
-      // Disable PNG export for the Connection charts
-      elements = this.widgets.exportButton.getMenu().getItems();
-      for (var i=0, ii=elements.length ; i<ii ; i++) {
-        if (elements[i].value == "onIMGExport") {
-          elements[i].cfg.setProperty("disabled", true);
-          break;
-        }
-      }
-
       this.widgets.moduleCriteriaButton = new YAHOO.widget.Button(this.id + "-module-criteria", {
         type: "split",
         menu: this.id + "-module-criteria-select",
@@ -125,6 +116,13 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         params += "&interval=" + this.lastRequest.dateFilter;
         var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params;
         window.open(url);
+      }
+    },
+
+    // Export a chart as a PNG image
+    onIMGExport: function GlobalUsage_onIMGExport() {
+      if (this.globalChart) {
+        this.exportChartAsImage(this.globalChart);
       }
     },
 

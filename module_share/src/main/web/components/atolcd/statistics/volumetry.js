@@ -42,6 +42,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
   AtolStatistics.Volumetry = function Volumetry_constructor(htmlId) {
     AtolStatistics.Volumetry.superclass.constructor.call(this, "AtolStatistics.Volumetry", htmlId, ["button", "container", "json"]);
     Event.addListener(window, 'resize', this.onWindowResize, this, true);
+
     return this;
   };
 
@@ -55,16 +56,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
     onReady: function Volumetry_onReady() {
       AtolStatistics.Volumetry.superclass.onReady.call(this);
 
-      var me = this,
-
-      // Disable PNG export for the Connection charts
-      elements = this.widgets.exportButton.getMenu().getItems();
-      for (var i=0, ii=elements.length ; i<ii ; i++) {
-        if (elements[i].value == "onIMGExport") {
-          elements[i].cfg.setProperty("disabled", true);
-          break;
-        }
-      }
+      var me = this;
 
       // Chart type button
       this.widgets.chartTypeCriteriaButton = new YAHOO.widget.Button(this.id + "-chart-type-criteria", {
@@ -97,6 +89,13 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         params += "&interval=" + this.lastRequest.dateFilter;
         var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + params; // ?json=" + escape(YAHOO.lang.JSON.stringify(this.lastRequest.data)); // JSON.stringify
         window.open(url);
+      }
+    },
+
+    // Export a chart as a PNG image
+    onIMGExport: function GlobalUsage_onIMGExport() {
+      if (this.volumetryChart) {
+        this.exportChartAsImage(this.volumetryChart);
       }
     },
 

@@ -44,6 +44,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
   AtolStatistics.UserConnections = function UserConnections_constructor(htmlId) {
     AtolStatistics.UserConnections.superclass.constructor.call(this, "AtolStatistics.UserConnections", htmlId, ["button", "container", "json"]);
     Event.addListener(window, 'resize', this.onWindowResize, this, true);
+
     return this;
   };
 
@@ -70,15 +71,6 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       AtolStatistics.UserConnections.superclass.onReady.call(this);
 
       var me = this;
-
-      // Disable PNG export for the Connection charts
-      var elements = this.widgets.exportButton.getMenu().getItems();
-      for (var i=0, ii=elements.length ; i<ii ; i++) {
-        if (elements[i].value == "onIMGExport") {
-          elements[i].cfg.setProperty("disabled", true);
-          break;
-        }
-      }
 
       // Chart type button
       this.widgets.chartTypeCriteriaButton = new YAHOO.widget.Button(this.id + "-chart-type-criteria", {
@@ -117,6 +109,12 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       }
     },
 
+    // Export a chart as a PNG image
+    onIMGExport: function GlobalUsage_onIMGExport() {
+      if (this.userChart) {
+        this.exportChartAsImage(this.userChart);
+      }
+    },
 
     prepareRecentlyConnectedUsersRequest: function UserConnections_prepareRecentlyConnectedUsersRequest() {
       // Retrieve variables from UI
@@ -293,9 +291,6 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
                 columns: [
                   [labelUserConnection].concat(response.json.values)
                 ]
-              },
-              legend: {
-                position: 'inset'
               },
               size: {
                 height: 450

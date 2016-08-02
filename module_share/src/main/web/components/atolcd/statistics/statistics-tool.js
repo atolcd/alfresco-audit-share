@@ -199,8 +199,8 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
       this.widgets.exportButton.getMenu().subscribe("click", onExportMenuItemClick);
       Dom.addClass(this.widgets.exportButton.getMenu().element, "export-button");
 
-      // Disable "export as image" item for IE7 and under
-      if (YAHOO.env.ua.ie && ((!document.documentMode && YAHOO.env.ua.ie<8) || document.documentMode < 8)) {
+      // Disable "export as image" item for IE8 and under
+      if (YAHOO.env.ua.ie && ((!document.documentMode && YAHOO.env.ua.ie < 9) || document.documentMode < 9)) {
         var items = this.widgets.exportButton.getMenu().getItems();
         for (var i=0, ii=items.length ; i<ii ; i++) {
           if (items[i].value == "onIMGExport") {
@@ -556,9 +556,45 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
       this.onSearch();
     },
 
+    exportChartAsImage: function Tool_exportChartAsImage(theChart) { // Export with Canvg library
+      var wrapper = document.getElementById(theChart.element.id),
+        svg = wrapper.querySelector("svg"),
+        svgData = null;
+
+      if (window.XMLSerializer) {
+        svgData = (new XMLSerializer()).serializeToString(svg);
+      } else if (svg.xml) {
+        svgData = svg.xml;
+      }
+
+      if (svgData) {
+        var mycanvas = document.createElement('canvas');
+        canvg(mycanvas, svgData);
+
+        if (YAHOO.env.ua.ie) {
+          var myIEWindow = window.open("", "");
+          myIEWindow.document.write("<image src='" + mycanvas.toDataURL("image/png") + "'/>");
+          myIEWindow.focus();
+        } else {
+          var a = document.createElement("a"),
+            chartTitle = theChart.element.querySelector("text.c3-title");
+
+          // The PNG file take the C3 Chart title when it exists
+          if (chartTitle) {
+            a.download = chartTitle.innerHTML;
+          } else {
+            a.download = "chart.png";
+          }
+
+          a.href = mycanvas.toDataURL("image/png");
+          document.body.appendChild(a); // /!\ For FireFox
+          a.click();
+        }
+      }
+    },
+
     onIMGExport: function Tool_onIMGExport() {
-      // call default OFC function
-      save_chart_image('{"additionalsParams":{"chartId": "' + this.id + '-chart"}}');
+      // Empty because it will be overridden
     }
   });
 })();
