@@ -1,4 +1,5 @@
 <#include "/org/alfresco/components/component.head.inc">
+<#include "/com/atolcd/components/statistics/chart-ressources.lib.ftl">
 
 <#--
  * Copyright (C) 2013 Atol Conseils et Développements.
@@ -18,22 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<!-- D3 and C3 loading -->
-<script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/C3/d3.js"></script>
-<script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/C3/c3.js"></script>
-<link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/C3/c3.css" >
-
-<!-- Canvg loading -->
-<script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/canvg/rgbcolor.js"></script>
-<script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/canvg/StackBlur.js"></script>
-<script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/canvg/canvg.js"></script>
-
 <!-- Admin Console for Share Stats Tool -->
-<@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/statistics-tool.css" />
 <@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/user-connections.css" />
-
-<@script type="text/javascript" src="${page.url.context}/res/yui/calendar/calendar.js"></@script>
-<@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/statistics-tool.js"></@script>
 <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/user-connections.js"></@script>
 
 <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/open_flash_chart/get_user_data.js"></@script>
