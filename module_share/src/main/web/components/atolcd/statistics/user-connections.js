@@ -272,8 +272,15 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           },
           chartDomId: this.id + '-chart'
         };
-        this.userChart.categories(buildBarChartXLabels(resizeParameters, this.options.chartLabelSizeMin));
+        this.userChart.categories(this.buildBarChartXLabels(resizeParameters, this.options.chartLabelSizeMin));
       }
+    },
+
+    getMessage: function UserConnections_getMessage(messageId, prefix) {
+      var msg = (prefix) ? prefix + messageId : messageId;
+      var res = Alfresco.util.message.call(null, msg, "AtolStatistics.UserConnections", Array.prototype.slice.call(arguments).slice(2));
+      res = (res.search("graph.label") == 0) ? messageId : res;
+      return res;
     },
 
     // Chart Displaying with C3
@@ -300,13 +307,13 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
                 y: { show: true }
               },
               title: {
-                text: buildTitle(displayParameters)
+                text: this.buildTitle(displayParameters)
               },
               point: { show: false },
               axis: {
                 x: {
                   type: 'category',
-                  categories: buildBarChartXLabels(displayParameters, this.options.chartLabelSizeMin),
+                  categories: this.buildBarChartXLabels(displayParameters, this.options.chartLabelSizeMin),
                   tick: {
                     multiline: false,
                     outer: false

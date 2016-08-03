@@ -486,6 +486,106 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
       this.onSearch();
     },
 
+    // For build correctly the X axis of all charts
+    buildBarChartXLabels: function Tool_buildBarChartXLabels(params, currentSizeMin) {
+      var labels = [],
+          timeType = params.currentFilter,
+          slicedDates = params.additionalsParams.tsString.split(","),
+          truncateLabels = false;
+
+      if (currentSizeMin && params.chartDomId) {
+        var chartElt = document.getElementById(params.chartDomId);
+        if (chartElt && chartElt.clientWidth <= currentSizeMin) {
+          truncateLabels = true;
+        }
+      }
+
+      switch (timeType) {
+        case "years":
+          for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+            labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.fullMonth); // default: mmmm
+            if (truncateLabels) {
+              labels[i] = labels[i].substring(0,3);
+            }
+          }
+          break;
+
+        case "months":
+          for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+            labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.shortDay); // default: dd/mm
+            if (truncateLabels) {
+              labels[i] = labels[i].substring(0,2);
+            }
+          }
+          break;
+
+        case "weeks":
+          for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+            labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.mediumDay); // default: dddd dd/mm
+            if (truncateLabels) {
+              labels[i] = labels[i].substring(0,3);
+            }
+          }
+          break;
+
+        case "days":
+          for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+            var timestamp = parseInt(slicedDates[i], 10),
+                h1 = Alfresco.thirdparty.dateFormat(new Date(timestamp), AtolStatistics.dateFormatMasks.shortHour), // default: HH'h'
+                h2 = Alfresco.thirdparty.dateFormat(new Date(timestamp + (2 * 60 * 60 * 1000)), AtolStatistics.dateFormatMasks.shortHour); // + 2 hours
+
+            labels[i] = h1 + " - " + h2;
+          }
+          break;
+      }
+      return labels;
+    },
+
+    // For build date title of user-connection and volumetry charts
+    buildDateTitle: function Tool_buildDateTitle(params) {
+      var title = "",
+          timeType = params.currentFilter,
+          slicedDates = params.additionalsParams.tsString.split(","),
+          from = new Date(parseInt(slicedDates[0], 10));
+
+      switch (timeType) {
+        case "years":
+          title = this.getMessage(timeType, "graph.title.date.", from.getFullYear());
+          break;
+
+        case "months":
+          var m = Alfresco.thirdparty.dateFormat(from, AtolStatistics.dateFormatMasks.fullMonth);
+          title = this.getMessage(timeType, "graph.title.date.", m, from.getFullYear());
+          break;
+
+        case "weeks":
+          title = this.getMessage(timeType, "graph.title.date.", from.getWeek(), from.getFullYear());
+          break;
+
+        case "days":
+          title = this.getMessage(timeType, "graph.title.date.", Alfresco.thirdparty.dateFormat(from, AtolStatistics.dateFormatMasks.shortDate));
+          break;
+      }
+
+      return title;
+    },
+
+    buildTitle: function Tool_buildTitle(params) {
+      var title = "",
+          site = params.additionalsParams.site,
+          siteTitle = params.additionalsParams.siteTitle || '';
+
+      if (site && site.indexOf(',') == -1) {
+        var opt = '"' + ((siteTitle != "") ? siteTitle : site) + '"';
+        title = this.getMessage("site", "graph.title.", opt);
+      } else {
+        title = this.getMessage("all", "graph.title.");
+      }
+
+      title += this.buildDateTitle(params);
+      return title;
+    },
+
     exportChartAsImage: function Tool_exportChartAsImage(theChart) { // Export with Canvg library
       var wrapper = document.getElementById(theChart.element.id),
         svg = wrapper.querySelector("svg"),

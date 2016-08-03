@@ -22,6 +22,3 @@
 <!-- Admin Console for Share Stats Tool -->
 <@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/volumetry.css" />
 <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/volumetry.js"></@script>
-
-<@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/open_flash_chart/get_volumetry_data.js"></@script>
-<@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/open_flash_chart/get_data_lib.js"></@script>

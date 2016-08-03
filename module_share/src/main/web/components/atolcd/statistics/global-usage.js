@@ -46,6 +46,48 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
     this.options.limit = 5;
     this.options.popularity = 25;
     this.popularityCharts = {};
+    this.options.barChartColors = [];
+
+    // Declaration of the colors used by charts
+    var red = "#EE1C2F",
+      blue = "#19ABEA",lightBlue = "#1B9EFC",darkBlue = "#1B5AF9",
+      green = "#7CBC28", darkGreen = "#0A9200",
+      orange = "#FF9900", lightOrange = "#FFC600", darkOrange = "#FF692B",
+      gray = "#C1C1C1", mediumGray = "#DFDFDF";
+
+    // Blog
+    this.options.barChartColors["blog.postview"] = blue;
+    this.options.barChartColors["blog.blog-create"] = darkGreen;
+    this.options.barChartColors["blog.blog-delete"] = red;
+    this.options.barChartColors["blog.blog-update"] = orange;
+
+    // Document Library
+    this.options.barChartColors["document.details"] = blue;
+    this.options.barChartColors["document.download"] = darkBlue;
+    this.options.barChartColors["document.create"] = green;
+    this.options.barChartColors["document.file-added"] = darkGreen;
+    this.options.barChartColors["document.file-deleted"] = red;
+    this.options.barChartColors["document.file-updated"] = darkOrange;
+    this.options.barChartColors["document.inline-edit"] = lightOrange;
+    this.options.barChartColors["document.update"] = orange;
+
+    // Wiki
+    this.options.barChartColors["wiki.page"] = blue;
+    this.options.barChartColors["wiki.create-post"] = darkGreen;
+    this.options.barChartColors["wiki.delete-post"] = red;
+    this.options.barChartColors["wiki.update-post"] = orange;
+
+    // Discussions
+    this.options.barChartColors["discussions.topicview"] = blue;
+    this.options.barChartColors["discussions.discussions-create"] = darkGreen;
+    this.options.barChartColors["discussions.discussions-deleted"] = red;
+    this.options.barChartColors["discussions.discussions-update"] = orange;
+
+    // Charts
+    this.options.barChartColors["volumetry"] = blue;
+    this.options.barChartColors["users"] = blue;
+    this.options.barChartColors["most-popular"] = red;
+    this.options.barChartColors["less-popular"] = blue;
 
     return this;
   };
@@ -170,7 +212,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           },
           chartDomId: this.id + '-chart'
         };
-        this.globalChart.categories(buildBarChartXLabels(resizeParameters, this.options.chartLabelSizeMin));
+        this.globalChart.categories(this.buildBarChartXLabels(resizeParameters, this.options.chartLabelSizeMin));
       }
 
       // Remove the last width attribute of the svg tag. /!\ Because the width resizing is not native on FireFox /!\
@@ -182,6 +224,13 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           }
         }
       }
+    },
+
+    getMessage: function GlobalUsage_getMessage(messageId, prefix) {
+      var msg = (prefix) ? prefix + messageId : messageId;
+      var res = Alfresco.util.message.call(null, msg, "AtolStatistics.GlobalUsage", Array.prototype.slice.call(arguments).slice(2));
+      res = (res.search("graph.label") == 0) ? messageId : res;
+      return res;
     },
 
     // Display the main graph
@@ -207,7 +256,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
                 y: { show: true }
               },
               title: {
-                text: buildTitle(displayParameters)
+                text: this.getMessage(displayParameters.additionalsParams.type, "graph.title.") + this.buildDateTitle(displayParameters)
               },
               point: { show: false },
               tooltip: {
@@ -216,7 +265,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
               axis: {
                 x: {
                   type: 'category',
-                  categories: buildBarChartXLabels(displayParameters, this.options.chartLabelSizeMin),
+                  categories: this.buildBarChartXLabels(displayParameters, this.options.chartLabelSizeMin),
                   tick: {
                     multiline: false,
                     outer: false
@@ -230,6 +279,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
         // Recovery datas for graph displaying
         var jsonResults = [];
+
         for (var i = 0 ; i < response.json.items.length ; i++) {
           var jsonItem = response.json.items[i];
           if (jsonItem.totalResults > 0) {
@@ -255,7 +305,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         }
 
         for (resultId in jsonResults) {
-          var value_obj = [getMessage(resultId, "graph.label.")];
+          var value_obj = [this.getMessage(resultId, "graph.label.")];
           for (var j = 0; j < response.json.items.length; j++) {
             if (!jsonResults[resultId][j]) {
               jsonResults[resultId][j] = 0;
@@ -265,7 +315,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           for (var i = 0, ii = jsonResults[resultId].length; i < ii; i++) {
             value_obj.push(jsonResults[resultId][i]);
           }
-          chartArguments.data.colors[value_obj[0]] = barChartColors[resultId];
+          chartArguments.data.colors[value_obj[0]] = this.options.barChartColors[resultId];
           chartArguments.data.columns.push(value_obj);
         }
 
@@ -333,6 +383,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           currentFilter: this.options.currentDateFilter,
           additionalsParams: response.config.additionalsParams
         },
+        me = this,
         colors = ['#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78', '#2ca02c',
                   '#98df8a', '#d62728', '#ff9896', '#9467bd', '#c5b0d5'],
         chartsPopularityArguments = {
@@ -349,10 +400,10 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
               // TODO: make something cleaner?
               var body = '<div class="node-details-popup">';
-              body += '<p><label>' + getMessage("label.popup.filename") + '</label>' + item.name + '</p>';
-              body += (item.siteTitle) ? '<p><label>' + getMessage("label.popup.type") + '</label>' + getMessage("site.component." + item.siteComponent) + '</p>' : '';
-              body += (item.siteTitle) ? '<p><label>' + getMessage("label.menu.site") + '</label>' + item.siteTitle + '</p>' : '';
-              body += '<p><label>' + getMessage("label.popup.hits") + '</label>' + item.popularity + '</p>';
+              body += '<p><label>' + me.getMessage("label.popup.filename") + '</label>' + item.name + '</p>';
+              body += (item.siteTitle) ? '<p><label>' + me.getMessage("label.popup.type") + '</label>' + me.getMessage("site.component." + item.siteComponent) + '</p>' : '';
+              body += (item.siteTitle) ? '<p><label>' + me.getMessage("label.menu.site") + '</label>' + item.siteTitle + '</p>' : '';
+              body += '<p><label>' + me.getMessage("label.popup.hits") + '</label>' + item.popularity + '</p>';
               body += '</div>';
 
               Alfresco.util.PopupManager.displayPrompt({
@@ -361,7 +412,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
                 close: true,
                 noEscape: true,
                 buttons: [{
-                  text: getMessage("button.go-to-node-page"),
+                  text: me.getMessage("button.go-to-node-page"),
                   handler:{
                     fn: function() {
                       var url = YAHOO.lang.substitute(displayParameters.additionalsParams.urlTemplate[item.siteComponent], {
@@ -374,7 +425,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
                     obj: item
                   }
                 }, {
-                  text: getMessage("button.cancel"),
+                  text: me.getMessage("button.cancel"),
                   handler: function () {
                     this.destroy();
                   },
@@ -414,7 +465,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
             },
             format: {
               title: function (d) {
-                return (response.json.items[d].siteTitle) ? getMessage("label.menu.site") + response.json.items[d].siteTitle : response.json.items[d].name;
+                return (response.json.items[d].siteTitle) ? me.getMessage("label.menu.site") + response.json.items[d].siteTitle : response.json.items[d].name;
               }
             }
           },
@@ -436,8 +487,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         }
         chartsPopularityArguments.data.keys = {x: 'displayName', value: ['popularity']};
 
-        chartsPopularityArguments.title.text = (i > 1) ? getMessage(response.config.additionalsParams.type, "graph.label.", response.json.items.length) :
-            getMessage(response.config.additionalsParams.type, "graph.label.", "");
+        chartsPopularityArguments.title.text = (i > 1) ? this.getMessage(response.config.additionalsParams.type, "graph.label.", response.json.items.length) :
+            this.getMessage(response.config.additionalsParams.type, "graph.label.", "");
 
         this.popularityCharts[response.config.additionalsParams.type] = c3.generate(chartsPopularityArguments);
       } else {
