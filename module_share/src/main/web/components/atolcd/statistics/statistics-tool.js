@@ -169,6 +169,34 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
      * @method onReady
      */
     onReady: function Tool_onReady() {
+      // Disable all of the DIV of the page for IE8 and under
+      if (YAHOO.env.ua.ie && ((!document.documentMode && YAHOO.env.ua.ie < 9) || document.documentMode < 9)) {
+        if (Dom.get("alfresco-statistics")) {
+          YAHOO.util.Dom.setStyle('alfresco-statistics', 'display', 'none');
+        }
+
+        var body = '<div class="node-details-popup">';
+        body += '<p><label>' + this.getMessage("label.compatibility-popup.textBegin") + '</label></p>';
+        body += '<p><label>' + this.getMessage("label.compatibility-popup.textEnd") + '</label></p>';
+        body += '</div>';
+
+        // Call the Pop-up
+        Alfresco.util.PopupManager.displayPrompt({
+          title: this.getMessage("label.compatibility-popup.title"),
+          text: body,
+          close: true,
+          noEscape: true,
+          buttons: [{
+            text: this.getMessage("button.ok"),
+            handler: function () {
+              this.destroy();
+            },
+            isDefault: true
+          }]
+        });
+        return;
+      }
+
       var me = this;
       this.setupCurrentDates();
 
@@ -190,17 +218,6 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
       };
       this.widgets.exportButton.getMenu().subscribe("click", onExportMenuItemClick);
       Dom.addClass(this.widgets.exportButton.getMenu().element, "export-button");
-
-      // Disable "export as image" item for IE8 and under
-      if (YAHOO.env.ua.ie && ((!document.documentMode && YAHOO.env.ua.ie < 9) || document.documentMode < 9)) {
-        var items = this.widgets.exportButton.getMenu().getItems();
-        for (var i=0, ii=items.length ; i<ii ; i++) {
-          if (items[i].value == "onIMGExport") {
-            items[i].cfg.setProperty("disabled", true);
-            break;
-          }
-        }
-      }
 
       // Default listeners
       Event.addListener(this.id + "-home", "click", this.onResetDates, null, this);
