@@ -68,7 +68,11 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
      * @method onReady
      */
     onReady: function UserConnections_onReady() {
-      AtolStatistics.UserConnections.superclass.onReady.call(this);
+      var userConnectionExecute = AtolStatistics.UserConnections.superclass.onReady.call(this);
+
+      if (!userConnectionExecute) {
+        return;
+      }
 
       var me = this;
 

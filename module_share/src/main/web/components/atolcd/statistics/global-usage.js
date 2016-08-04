@@ -101,7 +101,11 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
      */
 
     onReady: function GlobalUsage_onReady() {
-      AtolStatistics.GlobalUsage.superclass.onReady.call(this);
+      var globalExecute = AtolStatistics.GlobalUsage.superclass.onReady.call(this);
+
+      if (!globalExecute) {
+        return;
+      }
 
       var me = this;
 

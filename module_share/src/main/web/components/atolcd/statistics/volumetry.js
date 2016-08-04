@@ -54,7 +54,11 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
      * @method onReady
      */
     onReady: function Volumetry_onReady() {
-      AtolStatistics.Volumetry.superclass.onReady.call(this);
+      var volumetryExecute = AtolStatistics.Volumetry.superclass.onReady.call(this);
+
+      if (!volumetryExecute) {
+        return;
+      }
 
       var me = this;
 

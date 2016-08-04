@@ -194,7 +194,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
             isDefault: true
           }]
         });
-        return;
+        return false;
       }
 
       var me = this;
@@ -230,6 +230,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
 
       // Date filter
       Dom.addClass(this.id + "-by-" + this.options.currentDateFilter, "selected");
+      return true;
     },
 
     onSearch: function Tool_onSearch() {
