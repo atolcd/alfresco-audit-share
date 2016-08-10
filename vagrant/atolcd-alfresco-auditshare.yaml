@@ -1,0 +1,50 @@
+---
+classes:
+  - atolcd::alfresco::mysql
+  - alfresco::solr
+  - atolcd::tomcat::javaopts
+
+alfresco::version:    '5.0.3'
+
+tomcat::version:      '7'
+
+java::package: 'openjdk-7-jdk'
+java::java_alternative: 'java-1.7.0-openjdk-amd64'
+java::java_alternative_path: '/usr/lib/jvm/java-7-openjdk-amd64/bin/java'
+
+atolcd::alfresco::modules::repo_module_stable:
+  com.atolcd.alfresco.repository:
+    version: '5.0.3'
+    project: 'atolcd-alfresco'
+  com.atolcd.alfresco.localsolr:
+    version: '5.0.3'
+    project: 'atolcd-alfresco'
+  javascript-console-repo:
+    version: '1.0'
+  com.atolcd.alfresco.support-tools-50X:
+    version: '1.8'
+    project: 'support-tools-50X'
+
+atolcd::alfresco::modules::share_module_stable:
+  com.atolcd.alfresco.share:
+    version: '5.0.3'
+    project: 'atolcd-alfresco'
+  javascript-console-share:
+    version: '1.0'
+
+atolcd::alfresco::modules::repo_module:
+  com.atolcd.alfresco.auditshare-50X-repo:
+    source: '/root/com.atolcd.alfresco.auditshare-50X-repo-1.5.1-SNAPSHOT.amp'
+
+atolcd::alfresco::modules::share_module:
+  com.atolcd.alfresco.auditshare-50X-share:
+    source: '/root/com.atolcd.alfresco.auditshare-50X-share-1.5.1-SNAPSHOT.amp'
+
+alfresco::params:
+  #mail
+  'mail.from.default':           'alfresco@atolcd.com'
+  'index.subsystem.name':        'solr4'
+
+atolcd::tomcat::javaopts:
+ debug:
+   value: '-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n'
