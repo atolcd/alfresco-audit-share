@@ -1,4 +1,4 @@
-<!--
+/*
  * Copyright (C) 2013 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -14,12 +14,21 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
--->
+ */
 
-<webscript>
-  <shortname>Audits statistics deletion</shortname>
-  <description>Delete audit and volumetry statistics data into the database</description>
-  <url>/share-stats/delete-audits</url>
-  <format default="json"/>
-  <authentication>admin</authentication>
-</webscript>
+function main() {
+  var dataPurge = {
+    id : "DataPurge",
+    name : "AtolStatistics.DataPurge",
+    options : {
+      siteId: page.url.templateArgs.site || "",
+      currentUser: user.name,
+      isAdmin: user.isAdmin,
+      chartLabelSizeMin: 850
+    }
+  };
+
+  model.widgets = [dataPurge];
+}
+
+main();

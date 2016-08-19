@@ -47,6 +47,10 @@
   </select>
 </#macro>
 
+<#macro renderPurgeButton el>
+  <input type="button" class="criterias-button" id="${el}-purge-button" name="purge-button" value="${msg('button.purge')}" />
+</#macro>
+
 <#macro renderMainChartContainer el>
   <div id="${el}-chart-container" class="chart-container">
     <div class="chart" id="${el}-chart"></div>

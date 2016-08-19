@@ -102,6 +102,27 @@ if (showMenu) {
         }
       }
     );
+
+    auditShareHeaderMenu.config.widgets.push(
+      {
+        name: "alfresco/menus/AlfMenuGroup",
+        config: {
+          label: "header.auditshare.group.data-purge.label",
+          widgets: [
+            {
+              id: "HEADER_AUDIT_SHARE_DATA_PURGE",
+              name: "alfresco/header/AlfMenuItem",
+              config: {
+                id: "HEADER_AUDIT_SHARE_DATA_PURGE",
+                label: "header.data-purge.label",
+                iconClass: "data-purge",
+                targetUrl: "statistics/share-stats/data-purge"
+              }
+            }
+          ]
+        }
+      }
+    );
   }
 
   var headerMenu = widgetUtils.findObject(model.jsonModel, "id", "HEADER_APP_MENU_BAR");

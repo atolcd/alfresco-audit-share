@@ -17,9 +17,8 @@
 -->
 
 <webscript>
-  <shortname>Audits statistics deletion</shortname>
-  <description>Delete audit and volumetry statistics data into the database</description>
-  <url>/share-stats/delete-audits</url>
-  <format default="json"/>
-  <authentication>admin</authentication>
+  <shortname>Administration of the data purge</shortname>
+  <description>Administration of the data purge</description>
+  <url>/components/console/data-purge</url>
+  <family>admin-stats</family>
 </webscript>
