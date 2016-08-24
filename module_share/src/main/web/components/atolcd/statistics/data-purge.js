@@ -59,8 +59,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
       var me = this;
 
-      // Event on purge button
-      Event.addListener(this.id + "-purge-button", "click", this.onPurgeButtonClick, this, true);
+      // Purge button
+      this.widgets.purgeButton = Alfresco.util.createYUIButton(this, "purge-button", this.onPurgeButtonClick);
 
       // Event on repository checkbox
       Event.addListener(this.id + "-repository_purge-criteria", "click", this.execute, null, this);
@@ -102,6 +102,51 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         Dom.addClass(this.widgets.tableCriteriaButton.getMenu().getItem(itemsCount - 1).element, "menu-separator");
       }
 
+      this.widgets.fromCalendar = new YAHOO.widget.Calendar("fromCalendar", this.id + "-from-calendar", { title:this.getMessage("label.menu.calendar_start_title"), close:true });
+      this.widgets.toCalendar = new YAHOO.widget.Calendar("toCalendar", this.id + "-to-calendar", { title:this.getMessage("label.menu.calendar_end_title"), close:true });
+
+      // For the calendar labels localization
+      Alfresco.util.calI18nParams(this.widgets.fromCalendar);
+      Alfresco.util.calI18nParams(this.widgets.toCalendar);
+
+      this.widgets.fromCalendar.render();
+      this.widgets.toCalendar.render();
+
+      // Listener to show Calendar when the buttons are clicked
+      Event.addListener(this.id + "-period-from-calendar_img", "click", this.widgets.fromCalendar.show, this.widgets.fromCalendar, true);
+      Event.addListener(this.id + "-period-to-calendar_img", "click", this.widgets.toCalendar.show, this.widgets.toCalendar, true);
+
+      // Put the select dates in the textfields
+      this.widgets.fromCalendar.selectEvent.subscribe(function (p_sType, p_aArgs) {
+      var selectDate;
+      if (p_aArgs) {
+        selectDate = p_aArgs[0][0];
+        if (selectDate[1].toString().length == 1) {
+          selectDate[1] = '0' + selectDate[1];
+        }
+        if (selectDate[2].toString().length == 1) {
+            selectDate[2] = '0' + selectDate[2];
+        }
+        document.getElementById(me.id + "-period-from").value = selectDate[2] + '/' + selectDate[1] + '/' + selectDate[0];
+      }
+      me.widgets.fromCalendar.hide();
+    });
+
+    this.widgets.toCalendar.selectEvent.subscribe(function (p_sType, p_aArgs) {
+      var selectDate;
+      if (p_aArgs) {
+        selectDate = p_aArgs[0][0];
+        if (selectDate[1].toString().length == 1) {
+          selectDate[1] = '0' + selectDate[1];
+        }
+        if (selectDate[2].toString().length == 1) {
+            selectDate[2] = '0' + selectDate[2];
+        }
+        document.getElementById(me.id + "-period-to").value = selectDate[2] + '/' + selectDate[1] + '/' + selectDate[0];
+      }
+      me.widgets.toCalendar.hide();
+    });
+
       this.loadSites();
     },
 
@@ -116,6 +161,28 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
         Alfresco.util.PopupManager.displayPrompt({
           title: this.getMessage("label.popup.empty_title"),
+          text: body,
+          close: true,
+          noEscape: true,
+          buttons: [{
+            text: this.getMessage("button.ok"),
+            handler: function () {
+              this.destroy();
+            },
+            isDefault: true
+          }]
+        });
+        return false;
+      }
+
+      // Ensure that the end date is before the start one
+      if (this.convertDateToTimeStamp(document.getElementById(this.id + "-period-from").value) > this.convertDateToTimeStamp(document.getElementById(this.id + "-period-to").value)) {
+        var body = '<div class="node-details-popup">';
+        body += '<p><label>' + me.getMessage("label.popup.date_failure") + '</label></p>';
+        body += '</div>';
+
+        Alfresco.util.PopupManager.displayPrompt({
+          title: this.getMessage("label.popup.date_failure_title"),
           text: body,
           close: true,
           noEscape: true,
@@ -187,11 +254,15 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       if (Dom.get(this.id + "-purge_all-criteria").checked) {
         document.getElementById(this.id + "-period-from").disabled = true;
         document.getElementById(this.id + "-period-to").disabled = true;
+        document.getElementById(this.id + "-period-from-calendar_img").style.visibility = "hidden";
+        document.getElementById(this.id + "-period-to-calendar_img").style.visibility = "hidden";
         document.getElementById(this.id + "-period-from").value = '';
         document.getElementById(this.id + "-period-to").value = '';
       } else {
         document.getElementById(this.id + "-period-from").disabled = false;
         document.getElementById(this.id + "-period-to").disabled = false;
+        document.getElementById(this.id + "-period-from-calendar_img").style.visibility = "visible";
+        document.getElementById(this.id + "-period-to-calendar_img").style.visibility = "visible";
       }
 
       // Retrieve variables from interface

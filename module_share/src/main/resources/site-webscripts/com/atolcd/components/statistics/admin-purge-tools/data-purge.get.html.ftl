@@ -56,23 +56,33 @@
                   <option value="volumetry">${msg("purge-db.label.volumetry")}</option>
                   <option value="all">${msg("purge-db.label.all")}</option>
                 </select>
-
                 <input type="button" class="criterias-button" id="${el}-site-criteria" name="site-criteria-button" value="" />
+                <input id="${el}-repository_purge-criteria" class="repository-checkbox" title="${msg("label.menu.repository_tooltip")}" type="checkbox"></input><span class="repository-label" for="${el}-repository_purge-criteria">${msg("label.menu.repository_purge")}</span>
                <@stats.renderExportButton el />
               </div>
-
-              <div id="${el}-repository-purge-criteria-container" class="repository-purge-criteria-container">
-                <br /><br /><input id="${el}-repository_purge-criteria" type="checkbox"></input><label for="${el}-repository_purge-criteria">${msg("label.menu.repository_purge")}</label>
-              </div>
-
               <div id="${el}-purge_period-criteria-container" class="purge_period-criteria-container">
-                <br /><br /><label>${msg("label.menu.period")}</label><br /><br />
-                <label>${msg("label.menu.from")}</label><span class="period-fields"><input type="text" id="${el}-period-from" name="period-from-field" value="" /></span><label>   </label>
-                <label>${msg("label.menu.to")}</label><span class="period-fields"><input type="text" id="${el}-period-to" name="period-to-field" value="" /></span><label>   </label>
-                <input id="${el}-purge_all-criteria" type="checkbox"></input><label for="${el}-purge_all-criteria">${msg("label.menu.purgeall")}</label>
+                <br /><br /><label>${msg("label.menu.period")}</label>
+                <div>
+                  <br /><label class="from-label">${msg("label.menu.from")}</label>
+                  <input type="text" id="${el}-period-from" name="period-from-field" class="field-period-select" maxlength="10" value="" />
+                  <a id="${el}-period-from-calendar_img">
+                    <img src="/share/res/components/atolcd/statistics/img/calendar.png" class="period-from-calendar" title="${msg("label.menu.calendar_start_title")}">
+                  </a>
+                  <div id="${el}-from-calendar" class="from-calendar-container"></div>
+                  <label class="to-label">${msg("label.menu.to")}</label>
+                  <input type="text" id="${el}-period-to" name="period-to-field" class="field-period-select" maxlength="10" value="" />
+                  <a id="${el}-period-to-calendar_img">
+                    <img src="/share/res/components/atolcd/statistics/img/calendar.png" class="period-to-calendar" title="${msg("label.menu.calendar_end_title")}">
+                  </a>
+                  <div id="${el}-to-calendar" class="to-calendar-container"></div>
+                  <input id="${el}-purge_all-criteria" class="checkbox-all-criteria" type="checkbox"></input><label class="criteria-label" for="${el}-purge_all-criteria">${msg("label.menu.purgeall")}</label>
+                </div>
+                <div class="period-info">
+                  <label class="from-period-format">${msg("label.menu.date_format")}</label>
+                  <label class="to-period-format">${msg("label.menu.date_format")}</label>
+                </div>
+                <br /><br /><@stats.renderPurgeButton el />
               </div>
-
-              <br /><br /><@stats.renderPurgeButton el />
             </div>
           </div>
         </div>
