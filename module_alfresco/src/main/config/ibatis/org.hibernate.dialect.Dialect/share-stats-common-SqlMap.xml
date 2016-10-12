@@ -479,12 +479,38 @@
     </update>
 
 
-    <delete id="deleteByParameters" parameterType="AtolAuditQueryParameters">
+    <delete id="deleteAuditByParameters" parameterType="AtolAuditQueryParameters">
       delete
       from
-        share_stats_audit_entry
+      share_stats_audit_entry
       <where>
         <include refid="time_snippet"/>
+        <include refid="site_snippet"/>
       </where>
     </delete>
+
+    <delete id="deleteVolumetryByParameters" parameterType="AtolAuditQueryParameters">
+      delete
+      from
+      share_stats_site_volumetry
+      <where>
+        <if test="dateFrom > 0">
+          AND <![CDATA[at_time >= #{dateFrom}]]>
+        </if>
+        <if test="dateTo > 0">
+          AND <![CDATA[at_time < #{dateTo}]]>
+        </if>
+
+        <if test="siteId != null">
+          AND site_id = #{siteId}
+        </if>
+        <if test="sitesId != null">
+          AND site_id IN
+          <foreach item="item" collection="sitesId" open="(" separator="," close=")">
+            #{item}
+          </foreach>
+        </if>
+      </where>
+    </delete>
+
 </mapper>

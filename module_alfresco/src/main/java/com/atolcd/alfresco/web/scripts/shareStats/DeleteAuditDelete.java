@@ -27,6 +27,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
+import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.util.Assert;
 
@@ -40,7 +41,8 @@ public class DeleteAuditDelete extends DeclarativeWebScript implements Initializ
 	private static SqlSessionTemplate sqlSessionTemplate;
 
 	// MyBatis query ids
-	private static final String DELETE_BY_PARAMETERS = "alfresco.atolcd.audit.deleteByParameters";
+	private static final String DELETE_AUDIT_BY_PARAMETERS = "alfresco.atolcd.audit.deleteAuditByParameters";
+	private static final String DELETE_VOLUMETRY_BY_PARAMETERS = "alfresco.atolcd.audit.deleteVolumetryByParameters";
 	private static final String MODEL_SUCCESS = "success";
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
@@ -55,28 +57,90 @@ public class DeleteAuditDelete extends DeclarativeWebScript implements Initializ
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		Map<String, Object> model = new HashMap<String, Object>();
+		model.put(MODEL_SUCCESS, false);
+		try {
+			// Check for the sqlMapClientTemplate Bean
+			if (this.sqlSessionTemplate != null) {
+				String purgeTable = req.getParameter("purgeTable");
+				AuditQueryParameters auditQueryParameters = buildParametersFromRequest(req);
 
-		// TODO: To be implemented for an administration interface
+				if (auditQueryParameters != null) {
+					if ("audit_entry".equals(purgeTable)) {
+						deleteAuditEntries(auditQueryParameters.getDateFrom(), auditQueryParameters.getDateTo(),
+						    auditQueryParameters.getSiteId());
+						model.put(MODEL_SUCCESS, true);
 
-		model.put(MODEL_SUCCESS, true);
+					} else if ("volumetry".equals(purgeTable)) {
+						deleteVolumetryEntries(auditQueryParameters.getDateFrom(), auditQueryParameters.getDateTo(),
+						    auditQueryParameters.getSiteId());
+						model.put(MODEL_SUCCESS, true);
+
+					} else if ("all".equals(purgeTable) || purgeTable == null) {
+						deleteAuditEntries(auditQueryParameters.getDateFrom(), auditQueryParameters.getDateTo(),
+						    auditQueryParameters.getSiteId());
+						deleteVolumetryEntries(auditQueryParameters.getDateFrom(), auditQueryParameters.getDateTo(),
+						    auditQueryParameters.getSiteId());
+						model.put(MODEL_SUCCESS, true);
+					}
+				}
+			}
+		} catch (Exception e) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(e.getMessage(), e);
+			}
+			throw new WebScriptException("[ShareStats-DbDelete] Error in executeImpl function");
+		}
 		return model;
 	}
 
 	/**
 	 * Supprime des entrées d'audit
-	 * 
+	 *
 	 * @param from
-	 *            Date from (timestamp)
+	 *          Date from (timestamp)
 	 * @param to
-	 *            Date to (timestamp)
+	 *          Date to (timestamp)
+	 * @param site
+	 *          Site
 	 */
-	public static void deleteAuditEntries(long from, long to) {
+	public static void deleteAuditEntries(long from, long to, String site) {
 		AuditQueryParameters auditQueryParameters = new AuditQueryParameters();
 		auditQueryParameters.setDateFrom(from);
 		auditQueryParameters.setDateTo(to);
-		sqlSessionTemplate.delete(DELETE_BY_PARAMETERS, auditQueryParameters);
+		auditQueryParameters.setSiteId(site);
+		sqlSessionTemplate.delete(DELETE_AUDIT_BY_PARAMETERS, auditQueryParameters);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Audits successfully deleted.");
+		}
+	}
+
+	// For delete volumetry entries
+	public void deleteVolumetryEntries(long from, long to, String site) {
+		AuditQueryParameters auditQueryParameters = new AuditQueryParameters();
+		auditQueryParameters.setDateFrom(from);
+		auditQueryParameters.setDateTo(to);
+		auditQueryParameters.setSiteId(site);
+		sqlSessionTemplate.delete(DELETE_VOLUMETRY_BY_PARAMETERS, auditQueryParameters);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Volumetry successfully deleted.");
+		}
+	}
+
+	// Recovery the webscript parameters
+	public AuditQueryParameters buildParametersFromRequest(WebScriptRequest req) {
+		try {
+			String dateFrom = req.getParameter("from");
+			String dateTo = req.getParameter("to");
+
+			AuditQueryParameters params = new AuditQueryParameters();
+			params.setSiteId(req.getParameter("site"));
+			params.setSitesId(req.getParameter("sites"));
+			params.setDateFrom(dateFrom);
+			params.setDateTo(dateTo);
+			return params;
+		} catch (Exception e) {
+			logger.error("Error building parameters", e);
+			return null;
 		}
 	}
 }
