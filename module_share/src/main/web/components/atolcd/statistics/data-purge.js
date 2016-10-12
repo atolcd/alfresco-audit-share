@@ -232,11 +232,18 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       return res;
     },
 
-    convertDateToTimeStamp: function DataPurge_convertDateToTimeStamp(dateString) {
+    convertDateToTimeStamp: function DataPurge_convertDateToTimeStamp(dateString, timeString) {
       var dateTimeParts = dateString.split(' '),
-          dateParts = dateTimeParts[0].split('/');
+          dateParts = dateTimeParts[0].split('/'),
+          d = null;
 
-      return new Date(dateParts[2], parseInt(dateParts[1], 10) - 1, dateParts[0]).getTime();
+      if (timeString) {
+        var timeParts = timeString.split(':');
+        d = new Date(dateParts[2], parseInt(dateParts[1], 10) - 1, dateParts[0] || 0, timeParts[0] || 0, timeParts[1] || 0, timeParts[2] || 0, timeParts[3] || 0).getTime();
+      } else {
+        d = new Date(dateParts[2], parseInt(dateParts[1], 10) - 1, dateParts[0]).getTime();
+      }
+      return d;
     },
 
     onSearch: function DataPurge_onSearch() {
@@ -268,8 +275,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       // Retrieve variables from interface
       if (this.options.purgeAuthorized) {
         var purgeTable = this.convertMenuValue(this.widgets.tableCriteriaButton.value),
-            from = this.convertDateToTimeStamp(document.getElementById(this.id + "-period-from").value),
-            to = this.convertDateToTimeStamp(document.getElementById(this.id + "-period-to").value),
+            from = this.convertDateToTimeStamp(document.getElementById(this.id + "-period-from").value, "00:00:00:001"),
+            to = this.convertDateToTimeStamp(document.getElementById(this.id + "-period-to").value,"23:59:59:999"),
             site = this.convertMenuValue(this.widgets.siteButton.value);
 
         // Build query parameters
