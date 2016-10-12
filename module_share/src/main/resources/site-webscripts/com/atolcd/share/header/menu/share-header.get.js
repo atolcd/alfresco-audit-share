@@ -107,7 +107,7 @@ if (showMenu) {
       {
         name: "alfresco/menus/AlfMenuGroup",
         config: {
-          label: "header.auditshare.group.data-purge.label",
+          label: "header.auditshare.group.tools.label",
           widgets: [
             {
               id: "HEADER_AUDIT_SHARE_DATA_PURGE",
