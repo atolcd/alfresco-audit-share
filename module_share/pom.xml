@@ -74,6 +74,11 @@
             </configuration>
           </execution>
         </executions>
+        <configuration>
+          <excludes>
+            <exclude>**/C3/*</exclude>
+          </excludes>
+        </configuration>
       </plugin>
     </plugins>
     <resources>

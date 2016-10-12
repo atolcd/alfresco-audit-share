@@ -47,6 +47,10 @@
   </select>
 </#macro>
 
+<#macro renderPurgeButton el>
+  <input type="button" class="criterias-button" id="${el}-purge-button" name="purge-button" value="${msg('button.purge')}" />
+</#macro>
+
 <#macro renderMainChartContainer el>
   <div id="${el}-chart-container" class="chart-container">
     <div class="chart" id="${el}-chart"></div>
@@ -58,12 +62,12 @@
     <tr>
       <td class="table-bottom">
         <div id="${el}-mostread-container">
-          <div  id="${el}-mostread"></div>
+          <div id="${el}-mostread" class="my-popularity-chart"></div>
         </div>
       </td>
       <td class="table-bottom">
         <div id="${el}-mostupdated-container">
-          <div id="${el}-mostupdated"></div>
+          <div id="${el}-mostupdated" class="my-popularity-chart"></div>
         </div>
       </td>
     </tr>

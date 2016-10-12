@@ -46,6 +46,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
   YAHOO.extend(AtolStatistics.RepoUsage, AtolStatistics.GlobalUsage, {
     onReady: function RepoUsage_onReady() {
+
       AtolStatistics.RepoUsage.superclass.onReady.call(this);
 
       // site button
