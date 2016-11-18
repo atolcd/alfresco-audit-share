@@ -31,7 +31,7 @@
   </typeAliases>
 
   <mappers>
-    <mapper resource="alfresco/module/${groupId}.${artifactId}/ibatis/#resource.dialect#/share-stats-concat-SqlMap.xml"/>
+    <mapper resource="alfresco/module/${groupId}.${artifactId}/ibatis/#resource.dialect#/share-stats-select-SqlMap.xml"/>
     <mapper resource="alfresco/module/${groupId}.${artifactId}/ibatis/#resource.dialect#/share-stats-common-SqlMap.xml"/>
     <mapper resource="alfresco/module/${groupId}.${artifactId}/ibatis/#resource.dialect#/share-stats-insert-SqlMap.xml"/>
   </mappers>

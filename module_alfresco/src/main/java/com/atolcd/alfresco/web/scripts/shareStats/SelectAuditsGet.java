@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Atol Conseils et D�veloppements.
+ * Copyright (C) 2013 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
  * This program is free software: you can redistribute it and/or modify
@@ -53,215 +53,221 @@ import com.atolcd.alfresco.AuditQueryParameters;
 import com.atolcd.alfresco.helper.PermissionsHelper;
 
 public class SelectAuditsGet extends DeclarativeWebScript implements InitializingBean {
-	// Logger
-	private static final Log logger = LogFactory.getLog(SelectAuditsGet.class);
+  // Logger
+  private static final Log logger = LogFactory.getLog(SelectAuditsGet.class);
 
-	// SqlMapClientTemplate for MyBatis calls
-	private SqlSessionTemplate sqlSessionTemplate;
-	private NodeService nodeService;
-	private SiteService siteService;
+  // SqlMapClientTemplate for MyBatis calls
+  private SqlSessionTemplate sqlSessionTemplate;
+  private NodeService nodeService;
+  private SiteService siteService;
+  private int limitMostReadOrUpdate;
 
-	private static final String SELECT_BY_VIEW = "alfresco.atolcd.audit.selectByRead";
-	private static final String SELECT_BY_CREATED = "alfresco.atolcd.audit.selectByCreated";
-	private static final String SELECT_BY_UPDATED = "alfresco.atolcd.audit.selectByUpdated";
-	private static final String SELECT_BY_DELETED = "alfresco.atolcd.audit.selectByDeleted";
-	private static final String SELECT_BY_MOSTREAD = "alfresco.atolcd.audit.selectByMostRead";
-	private static final String SELECT_BY_MOSTUPDATED = "alfresco.atolcd.audit.selectByMostUpdated";
-	private static final String SELECT_TO_UPDATE = "alfresco.atolcd.audit.selectEntriesToUpdate";
+  private static final String SELECT_BY_VIEW = "alfresco.atolcd.audit.selectByRead";
+  private static final String SELECT_BY_CREATED = "alfresco.atolcd.audit.selectByCreated";
+  private static final String SELECT_BY_UPDATED = "alfresco.atolcd.audit.selectByUpdated";
+  private static final String SELECT_BY_DELETED = "alfresco.atolcd.audit.selectByDeleted";
+  private static final String SELECT_BY_MOSTREAD = "alfresco.atolcd.audit.selectByMostRead";
+  private static final String SELECT_BY_MOSTUPDATED = "alfresco.atolcd.audit.selectByMostUpdated";
+  private static final String SELECT_TO_UPDATE = "alfresco.atolcd.audit.selectEntriesToUpdate";
 
-	static final QName TYPE_DATALIST = QName.createQName("http://www.alfresco.org/model/datalist/1.0", "dataList");
-	static final QName TYPE_CALENDAR_EVENT = QName.createQName("http://www.alfresco.org/model/calendar", "calendarEvent");
-	static final QName PROP_CALENDAR_EVENT_WHAT = QName.createQName("http://www.alfresco.org/model/calendar", "whatEvent");
-	static final QName TYPE_LINK = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "link");
-	static final QName PROP_LINK_TITLE = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "title");
+  static final QName TYPE_DATALIST = QName.createQName("http://www.alfresco.org/model/datalist/1.0", "dataList");
+  static final QName TYPE_CALENDAR_EVENT = QName.createQName("http://www.alfresco.org/model/calendar", "calendarEvent");
+  static final QName PROP_CALENDAR_EVENT_WHAT = QName.createQName("http://www.alfresco.org/model/calendar", "whatEvent");
+  static final QName TYPE_LINK = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "link");
+  static final QName PROP_LINK_TITLE = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "title");
 
-	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-		this.sqlSessionTemplate = sqlSessionTemplate;
-	}
+  public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+    this.sqlSessionTemplate = sqlSessionTemplate;
+  }
 
-	public void setNodeService(NodeService nodeService) {
-		this.nodeService = nodeService;
-	}
+  public void setNodeService(NodeService nodeService) {
+    this.nodeService = nodeService;
+  }
 
-	public void setSiteService(SiteService siteService) {
-		this.siteService = siteService;
-	}
+  public void setSiteService(SiteService siteService) {
+    this.siteService = siteService;
+  }
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.sqlSessionTemplate);
-		Assert.notNull(this.nodeService);
-	}
+  public int getLimitMostReadOrUpdate() {
+    return limitMostReadOrUpdate;
+  }
 
-	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		try {
-			Map<String, Object> model = new HashMap<String, Object>();
-			if (PermissionsHelper.isAuthorized(req)) {
-				// Check for the sqlMapClientTemplate Bean
-				if (this.sqlSessionTemplate != null) {
-					// Get the input content given into the request.
-					AuditQueryParameters params = buildParametersFromRequest(req);
-					String type = req.getParameter("type");
-					String stringLimit = req.getParameter("limit");
-					int limit = 0;
-					if (stringLimit != null && !stringLimit.isEmpty()) {
-						limit = Integer.parseInt(stringLimit);
-					}
-					checkForQuery(model, params, type, limit);
-				}
-			} else {
-				status.setCode(Status.STATUS_UNAUTHORIZED);
-			}
+  public void setLimitMostReadOrUpdate(int limitMostReadOrUpdate) {
+    this.limitMostReadOrUpdate = limitMostReadOrUpdate;
+  }
 
-			return model;
-		} catch (Exception e) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(e.getMessage(), e);
-			}
-			throw new WebScriptException("[ShareStats - SelectAudits] Error in executeImpl function");
-		}
-	}
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    Assert.notNull(this.sqlSessionTemplate);
+    Assert.notNull(this.nodeService);
+  }
 
-	public void checkForQuery(Map<String, Object> model, AuditQueryParameters params, String type) throws SQLException, JSONException {
-		checkForQuery(model, params, type, 0);
-	}
+  @Override
+  protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    try {
+      Map<String, Object> model = new HashMap<String, Object>();
+      if (PermissionsHelper.isAuthorized(req)) {
+        // Check for the sqlMapClientTemplate Bean
+        if (this.sqlSessionTemplate != null) {
+          // Get the input content given into the request.
+          AuditQueryParameters params = buildParametersFromRequest(req);
+          String type = req.getParameter("type");
+          String stringLimit = req.getParameter("limit");
 
-	public void checkForQuery(Map<String, Object> model, AuditQueryParameters params, String type, int limit) throws SQLException,
-			JSONException {
-		switch (queryType.valueOf(type)) {
-		case read:
-			model.put("dates", selectByDate(params, SELECT_BY_VIEW));
-			break;
-		case created:
-			model.put("dates", selectByDate(params, SELECT_BY_CREATED));
-			break;
-		case deleted:
-			model.put("dates", selectByDate(params, SELECT_BY_DELETED));
-			break;
-		case updated:
-			model.put("dates", selectByDate(params, SELECT_BY_UPDATED));
-			break;
-		case mostread:
-			model.put("popularity", selectByPopularity(params, SELECT_BY_MOSTREAD, limit));
-			break;
-		case mostupdated:
-			model.put("popularity", selectByPopularity(params, SELECT_BY_MOSTUPDATED, limit));
-			break;
-		}
-	}
+          //Check if limit exist
+          if (stringLimit != null && !stringLimit.isEmpty()) {
+            this.limitMostReadOrUpdate = Integer.parseInt(stringLimit);
+          }
 
-	public List<AuditObjectPopularity> selectByPopularity(AuditQueryParameters params, String query, int limit) {
-		List<AuditObjectPopularity> auditObjectPopularityList = new ArrayList<AuditObjectPopularity>();
-		auditObjectPopularityList = sqlSessionTemplate.selectList(query, params);
-		logger.info("Performing " + query + " ... ");
+          params.setLimit(limitMostReadOrUpdate);
+          checkForQuery(model, params, type);
+        }
+      } else {
+        status.setCode(Status.STATUS_UNAUTHORIZED);
+      }
 
-		Iterator<AuditObjectPopularity> iterator = auditObjectPopularityList.iterator();
-		int treatedItems = 0;
-		// Verify if the returned items always exist
-		while (iterator.hasNext() && treatedItems < limit) {
-			AuditObjectPopularity auditObjectPopularity = iterator.next();
-			try {
-				NodeRef nodeRef = new NodeRef(auditObjectPopularity.getAuditObject());
-				if (!nodeService.exists(nodeRef)) {
-					iterator.remove();
-				} else {
-					auditObjectPopularity.setObjectName((String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME));
-					auditObjectPopularity.setObjectDisplayName(getPrettyDisplayname(nodeRef));
+      return model;
+    } catch (Exception e) {
+      if (logger.isDebugEnabled()) {
+        logger.debug(e.getMessage(), e);
+      }
+      throw new WebScriptException("[ShareStats - SelectAudits] Error in executeImpl function");
+    }
+  }
 
-					SiteInfo si = siteService.getSite(nodeRef);
-					if (si != null) {
-						// Find in which site component is this node
-						Path nodePath = nodeService.getPath(nodeRef);
-						if (nodePath.size() > 4) {
-							String siteContainerQName = nodeService.getPath(nodeRef).get(4).getElementString();
-							auditObjectPopularity.setSiteComponent(QName.createQName(siteContainerQName).getLocalName());
-						}
-					}
+  public void checkForQuery(Map<String, Object> model, AuditQueryParameters params, String type) throws SQLException,
+      JSONException {
+    switch (queryType.valueOf(type)) {
+    case read:
+      model.put("dates", selectByDate(params, SELECT_BY_VIEW));
+      break;
+    case created:
+      model.put("dates", selectByDate(params, SELECT_BY_CREATED));
+      break;
+    case deleted:
+      model.put("dates", selectByDate(params, SELECT_BY_DELETED));
+      break;
+    case updated:
+      model.put("dates", selectByDate(params, SELECT_BY_UPDATED));
+      break;
+    case mostread:
+      model.put("popularity", selectByPopularity(params, SELECT_BY_MOSTREAD));
+      break;
+    case mostupdated:
+      model.put("popularity", selectByPopularity(params, SELECT_BY_MOSTUPDATED));
+      break;
+    }
+  }
 
-					treatedItems++;
-				}
-			} catch (AlfrescoRuntimeException e) {
-				iterator.remove();
-				logger.warn(e.getMessage(), e);
-			}
-		}
-		limit = auditObjectPopularityList.size() > limit ? limit : auditObjectPopularityList.size();
-		return auditObjectPopularityList.subList(0, limit);
-	}
+  public List<AuditObjectPopularity> selectByPopularity(AuditQueryParameters params, String query) {
+    List<AuditObjectPopularity> auditObjectPopularityList = new ArrayList<AuditObjectPopularity>();
+    auditObjectPopularityList = sqlSessionTemplate.selectList(query, params);
+    logger.info("Performing " + query + " ... ");
 
-	public List<List<AuditCount>> selectByDate(AuditQueryParameters params, String query) {
-		String[] dates = params.getSlicedDates().split(",");
-		List<List<AuditCount>> auditCount = new ArrayList<List<AuditCount>>();
-		for (int i = 0; i < dates.length - 1; i++) {
-			params.setDateFrom(dates[i]);
-			params.setDateTo(dates[i + 1]);
-			List<AuditCount> auditSample = new ArrayList<AuditCount>();
-			auditSample = sqlSessionTemplate.selectList(query, params);
-			auditCount.add(auditSample);
-		}
-		logger.info("Performing " + query + " ... ");
-		return auditCount;
-	}
+    Iterator<AuditObjectPopularity> iterator = auditObjectPopularityList.iterator();
+    // Verify if the returned items always exist
+    while (iterator.hasNext()) {
+      AuditObjectPopularity auditObjectPopularity = iterator.next();
+      try {
+        NodeRef nodeRef = new NodeRef(auditObjectPopularity.getAuditObject());
+        if (!nodeService.exists(nodeRef)) {
+          iterator.remove();
+        } else {
+          auditObjectPopularity.setObjectName((String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME));
+          auditObjectPopularity.setObjectDisplayName(getPrettyDisplayname(nodeRef));
 
-	public List<AuditEntry> selectEntriesToUpdate() {
-		return sqlSessionTemplate.selectList(SELECT_TO_UPDATE);
-	}
+          SiteInfo si = siteService.getSite(nodeRef);
+          if (si != null) {
+            // Find in which site component is this node
+            Path nodePath = nodeService.getPath(nodeRef);
+            if (nodePath.size() > 4) {
+              String siteContainerQName = nodeService.getPath(nodeRef).get(4).getElementString();
+              auditObjectPopularity.setSiteComponent(QName.createQName(siteContainerQName).getLocalName());
+            }
+          }
 
-	public AuditQueryParameters buildParametersFromRequest(WebScriptRequest req) {
-		try {
-			String dateFrom = req.getParameter("from");
-			String dateTo = req.getParameter("to");
+        }
+      } catch (AlfrescoRuntimeException e) {
+        iterator.remove();
+        logger.warn(e.getMessage(), e);
+      }
+    }
 
-			AuditQueryParameters params = new AuditQueryParameters();
-			params.setSiteId(req.getParameter("site"));
-			params.setSitesId(req.getParameter("sites"));
-			params.setActionName(req.getParameter("action"));
-			params.setAppName(req.getParameter("module"));
-			params.setAppNames(req.getParameter("modules"));
-			params.setDateFrom(dateFrom);
-			params.setDateTo(dateTo);
-			params.setSlicedDates(req.getParameter("dates"));
-			return params;
-		} catch (Exception e) {
-			logger.error("Error building parameters", e);
-			return null;
-		}
-	}
+    return auditObjectPopularityList;
+  }
 
-	private String getPrettyDisplayname(NodeRef nodeRef) {
-		String nodeName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+  public List<List<AuditCount>> selectByDate(AuditQueryParameters params, String query) {
+    String[] dates = params.getSlicedDates().split(",");
+    List<List<AuditCount>> auditCount = new ArrayList<List<AuditCount>>();
+    for (int i = 0; i < dates.length - 1; i++) {
+      params.setDateFrom(dates[i]);
+      params.setDateTo(dates[i + 1]);
+      List<AuditCount> auditSample = new ArrayList<AuditCount>();
+      auditSample = sqlSessionTemplate.selectList(query, params);
+      auditCount.add(auditSample);
+    }
+    logger.info("Performing " + query + " ... ");
+    return auditCount;
+  }
 
-		QName nodeType = nodeService.getType(nodeRef);
-		if (nodeType.equals(TYPE_DATALIST)) {
-			// DataList: use title
-			return (String) nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE);
-		} else if (nodeType.equals(ForumModel.TYPE_TOPIC)) {
-			// Discussion: find first child that have the same name
-			NodeRef firstTopic = nodeService.getChildByName(nodeRef, ContentModel.ASSOC_CONTAINS, nodeName);
-			if (firstTopic != null) {
-				return (String) nodeService.getProperty(firstTopic, ContentModel.PROP_TITLE);
-			}
-		} else if (nodeType.equals(TYPE_LINK)) {
-			// Link: use link title
-			return (String) nodeService.getProperty(nodeRef, PROP_LINK_TITLE);
-		} else if (nodeType.equals(TYPE_CALENDAR_EVENT)) {
-			// Event: use 'what' metadata
-			return (String) nodeService.getProperty(nodeRef, PROP_CALENDAR_EVENT_WHAT);
-		} else {
-			// Others: content, wiki, blog
-			NodeRef parentRef = nodeService.getPrimaryParent(nodeRef).getParentRef();
-			if (parentRef != null) {
-				if (nodeService.hasAspect(parentRef, SiteModel.ASPECT_SITE_CONTAINER)) {
-					String parentName = (String) nodeService.getProperty(parentRef, ContentModel.PROP_NAME);
-					if (parentName.equals("blog") || parentName.equals("wiki")) {
-						// For Blog or Wiki pages, we use the title
-						return (String) nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE);
-					}
-				}
-			}
-		}
+  public List<AuditEntry> selectEntriesToUpdate() {
+    return sqlSessionTemplate.selectList(SELECT_TO_UPDATE);
+  }
 
-		return nodeName;
-	}
+  public AuditQueryParameters buildParametersFromRequest(WebScriptRequest req) {
+    try {
+      String dateFrom = req.getParameter("from");
+      String dateTo = req.getParameter("to");
+
+      AuditQueryParameters params = new AuditQueryParameters();
+      params.setSiteId(req.getParameter("site"));
+      params.setSitesId(req.getParameter("sites"));
+      params.setActionName(req.getParameter("action"));
+      params.setAppName(req.getParameter("module"));
+      params.setAppNames(req.getParameter("modules"));
+      params.setDateFrom(dateFrom);
+      params.setDateTo(dateTo);
+      params.setSlicedDates(req.getParameter("dates"));
+      return params;
+    } catch (Exception e) {
+      logger.error("Error building parameters", e);
+      return null;
+    }
+  }
+
+  private String getPrettyDisplayname(NodeRef nodeRef) {
+    String nodeName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+
+    QName nodeType = nodeService.getType(nodeRef);
+    if (nodeType.equals(TYPE_DATALIST)) {
+      // DataList: use title
+      return (String) nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE);
+    } else if (nodeType.equals(ForumModel.TYPE_TOPIC)) {
+      // Discussion: find first child that have the same name
+      NodeRef firstTopic = nodeService.getChildByName(nodeRef, ContentModel.ASSOC_CONTAINS, nodeName);
+      if (firstTopic != null) {
+        return (String) nodeService.getProperty(firstTopic, ContentModel.PROP_TITLE);
+      }
+    } else if (nodeType.equals(TYPE_LINK)) {
+      // Link: use link title
+      return (String) nodeService.getProperty(nodeRef, PROP_LINK_TITLE);
+    } else if (nodeType.equals(TYPE_CALENDAR_EVENT)) {
+      // Event: use 'what' metadata
+      return (String) nodeService.getProperty(nodeRef, PROP_CALENDAR_EVENT_WHAT);
+    } else {
+      // Others: content, wiki, blog
+      NodeRef parentRef = nodeService.getPrimaryParent(nodeRef).getParentRef();
+      if (parentRef != null) {
+        if (nodeService.hasAspect(parentRef, SiteModel.ASPECT_SITE_CONTAINER)) {
+          String parentName = (String) nodeService.getProperty(parentRef, ContentModel.PROP_NAME);
+          if (parentName.equals("blog") || parentName.equals("wiki")) {
+            // For Blog or Wiki pages, we use the title
+            return (String) nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE);
+          }
+        }
+      }
+    }
+
+    return nodeName;
+  }
 }

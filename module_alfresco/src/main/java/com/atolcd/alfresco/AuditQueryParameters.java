@@ -31,6 +31,7 @@ public class AuditQueryParameters {
 	private long dateTo;
 	private String slicedDates;
 	private String userId;
+	private int limit;
 
 	public String getSlicedDates() {
 		return slicedDates;
@@ -173,5 +174,13 @@ public class AuditQueryParameters {
 
 	public void setObject(String object) {
 		this.object = object;
+	}
+
+	public int getLimit() {
+		return limit;
+	}
+
+	public void setLimit(int limit) {
+		this.limit = limit;
 	}
 }
