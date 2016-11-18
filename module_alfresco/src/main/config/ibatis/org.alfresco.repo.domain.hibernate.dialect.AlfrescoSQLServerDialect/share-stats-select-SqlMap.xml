@@ -28,4 +28,10 @@
   <sql id="group_by_concat">
     group by (audit_app_name + '.' + audit_action_name)
   </sql>
+  <!-- Only since SQLServer 2012  -->
+  <sql id="limit_snippet">
+    <if test="limit != 0">
+      OFFSET 0 rows fetch next #{limit} rows only
+    </if>
+  </sql>
 </mapper>
