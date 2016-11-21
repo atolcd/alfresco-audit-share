@@ -373,6 +373,7 @@
       <include refid="time_snippet" />
       group by audit_object, audit_site
       order by audit_popularity DESC
+      <include refid="alfresco.atolcd.audit.concat.limit_snippet" />
     </select>
 
     <select id="selectByMostRead" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditObjectPopularity">
@@ -385,6 +386,7 @@
       <include refid="time_snippet" />
       group by audit_object, audit_site
       order by audit_popularity DESC
+      <include refid="alfresco.atolcd.audit.concat.limit_snippet" />
     </select>
 
     <!-- Retourne les dernière personne ayant effectuée une action dans la tranche de temps donnée. On les considère connecté -->

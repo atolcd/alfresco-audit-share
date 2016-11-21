@@ -28,7 +28,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.repo.admin.SysAdminParams;
 import org.alfresco.service.cmr.site.SiteService;
+import org.alfresco.util.UrlUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -42,6 +45,7 @@ import org.springframework.util.Assert;
 
 import com.atolcd.alfresco.AuditCount;
 import com.atolcd.alfresco.AuditQueryParameters;
+import com.atolcd.alfresco.AuditObjectPopularity;
 import com.atolcd.alfresco.CsvExportEntry;
 import com.atolcd.alfresco.helper.PermissionsHelper;
 import com.csvreader.CsvWriter;
@@ -52,6 +56,12 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 
 	private SelectAuditsGet wsSelectAudits;
 	private SiteService siteService;
+	private SysAdminParams sysAdminParams;
+
+
+	public void setSysAdminParams(SysAdminParams sysAdminParams) {
+		this.sysAdminParams = sysAdminParams;
+	}
 
 	public void setWsSelectAudits(SelectAuditsGet wsSelectAudits) {
 		this.wsSelectAudits = wsSelectAudits;
@@ -107,27 +117,28 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 	/**
 	 * 
 	 * @param model
-	 *            Model for template rendering
+	 *          Model for template rendering
 	 * @param csv
-	 *            CsvWriter object used to add results into the model
+	 *          CsvWriter object used to add results into the model
 	 * @param params
-	 *            Audit query parameters
+	 *          Audit query parameters
 	 * @param type
-	 *            Type of the export (name of the csv column)
+	 *          Type of the export (name of the csv column)
 	 * @param interval
-	 *            Date interval
+	 *          Date interval
 	 * @throws SQLException
 	 * @throws JSONException
 	 * @throws IOException
 	 */
-	@SuppressWarnings("unchecked")
-	public void buildCsvFromRequest(Map<String, Object> model, CsvWriter csv, AuditQueryParameters params, String type, String interval)
-			throws SQLException, JSONException, IOException {
+	@SuppressWarnings({ "unchecked" })
+	public void buildCsvFromRequest(Map<String, Object> model, CsvWriter csv, AuditQueryParameters params, String type,
+	    String interval) throws SQLException, JSONException, IOException {
+
 		// Selection of ALL audits
 		String dateRecord = null;
 		if (model.containsKey("dates")) {
 			csv.writeRecord(new String[] { I18NUtil.getMessage("csv.date"), I18NUtil.getMessage("csv.action"),
-					I18NUtil.getMessage("csv.count") });
+			    I18NUtil.getMessage("csv.count") });
 			List<List<AuditCount>> auditCountsLists = (List<List<AuditCount>>) model.get("dates");
 
 			// XXX: for the moment, no more than 3 actions per graphic per
@@ -148,6 +159,24 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 				dateRecord = getStringDate(Long.parseLong(slicedDates[i]), interval);
 				csv.writeRecord(new String[] { dateRecord, values[i] });
 			}
+		} else if (model.containsKey("popularity")) {
+			if("mostread".equals(type)){
+				csv.writeRecord(new String []{ I18NUtil.getMessage("csv.document-name"), I18NUtil.getMessage("csv.view"), I18NUtil.getMessage("csv.target")});
+			}else{
+				csv.writeRecord(new String []{ I18NUtil.getMessage("csv.document-name"), I18NUtil.getMessage("csv.update"), I18NUtil.getMessage("csv.target")});
+			}
+			List<AuditObjectPopularity> listAudit =  (List<AuditObjectPopularity>) model.get("popularity");
+
+			String baseUrl = UrlUtil.getShareUrl(sysAdminParams)+"/page";
+
+			for(AuditObjectPopularity auditObject : listAudit){
+				String url = baseUrl;
+				if(!StringUtils.isEmpty(auditObject.getAuditSite())){
+					url += "/site/"+auditObject.getAuditSite();
+				}
+				url += "/document-details?nodeRef="+auditObject.getAuditObject();
+				csv.writeRecord(new String []{auditObject.getObjectName(), auditObject.getPopularity()+"", url});
+			}
 		}
 	}
 
@@ -162,16 +191,17 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 	/**
 	 * 
 	 * @param csv
-	 *            CsvWriter object used to write results
+	 *          CsvWriter object used to write results
 	 * @param auditCounts
-	 *            Audit results
+	 *          Audit results
 	 * @param date
-	 *            Date
+	 *          Date
 	 * @param actions
 	 * @throws IOException
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void writeAuditCount(CsvWriter csv, List<AuditCount> auditCounts, String date, Map<String, Integer> actions) throws IOException {
+	public void writeAuditCount(CsvWriter csv, List<AuditCount> auditCounts, String date, Map<String, Integer> actions)
+	    throws IOException {
 
 		for (AuditCount auditCount : auditCounts) {
 			actions.put(auditCount.getTarget(), auditCount.getCount());
@@ -188,10 +218,23 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 			csv.writeRecord(record);
 			e.setValue(new Integer(0));
 		}
-
 	}
 
-	public void writeCsvEntry(CsvWriter csv, List<CsvExportEntry> csvExportEntries, boolean dateFirst, String date) throws IOException {
+	public void writeAuditObjectPopularity(CsvWriter csv, List<AuditObjectPopularity> auditObjectPopularities, boolean dateFirst, String date)
+	    throws IOException {
+		for (AuditObjectPopularity auditObjectPopularity : auditObjectPopularities) {
+			String[] record = new String[3];
+			int recordIndex = 0;
+			record[recordIndex++] = auditObjectPopularity.getObjectName();
+			record[recordIndex++] = String.valueOf(auditObjectPopularity.getPopularity());
+			record[recordIndex++] = auditObjectPopularity.getSiteComponent();
+
+			csv.writeRecord(record);
+		}
+	}
+
+	public void writeCsvEntry(CsvWriter csv, List<CsvExportEntry> csvExportEntries, boolean dateFirst, String date)
+	    throws IOException {
 		for (CsvExportEntry csvExportEntry : csvExportEntries) {
 			String[] record;
 			int recordIndex = 0;
@@ -205,8 +248,8 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 			}
 			record[recordIndex++] = csvExportEntry.getAuditSite();
 			record[recordIndex++] = I18NUtil.getMessage("csv." + csvExportEntry.getAuditAppName());
-			record[recordIndex++] = I18NUtil.getMessage("csv." + csvExportEntry.getAuditAppName() + "."
-					+ csvExportEntry.getAuditActionName());
+			record[recordIndex++] = I18NUtil
+			    .getMessage("csv." + csvExportEntry.getAuditAppName() + "." + csvExportEntry.getAuditActionName());
 			record[recordIndex++] = String.valueOf(csvExportEntry.getCount());
 
 			if (!dateFirst && date != null) {
@@ -219,9 +262,9 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 	/**
 	 * 
 	 * @param timestamp
-	 *            Date timestamp
+	 *          Date timestamp
 	 * @param dateInterval
-	 *            Date interval
+	 *          Date interval
 	 * 
 	 * @return Date String
 	 */

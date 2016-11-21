@@ -67,6 +67,7 @@
     <property name="sqlSessionTemplate" ref="shareStatsQueriesSqlSessionClientTemplate"/>
     <property name="nodeService" ref="NodeService"/>
     <property name="siteService" ref="SiteService" />
+    <property name="limitMostReadOrUpdate" > <value>${mostreadandupdate.limit}</value> </property>
   </bean>
 
   <bean id="webscript.com.atolcd.alfresco.share-stats.update-audits.post" class="com.atolcd.alfresco.web.scripts.shareStats.UpdateAuditPost" parent="webscript">
@@ -97,6 +98,7 @@
       <ref bean="webscript.com.atolcd.alfresco.share-stats.select-audits.get" />
     </property>
     <property name="siteService" ref="SiteService" />
+    <property name="sysAdminParams" ref="sysAdminParams" />
   </bean>
 
 

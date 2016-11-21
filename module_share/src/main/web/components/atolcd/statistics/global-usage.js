@@ -107,6 +107,15 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         return;
       }
 
+      // Export menu: add menu items
+      var exportMenu = this.widgets.exportButton.getMenu();
+      if (exportMenu) {
+        exportMenu.addItems([
+          { text: this.msg("label.export.csv.most_read"), value: "mostread", disabled: false },
+          { text: this.msg("label.export.csv.most_update"), value: "mostupdated", disabled: false }
+        ]);
+      }
+
       var me = this;
 
       this.widgets.moduleCriteriaButton = new YAHOO.widget.Button(this.id + "-module-criteria", {
@@ -129,6 +138,19 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       var onModulesMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
         var sText = p_aArgs[1].cfg.getProperty("text"),
             value = p_aArgs[1].value;
+
+        // Update export menu
+        if (me.widgets.exportButton && value) {
+          var disabledCSVExportBtn = !(value == "document");
+          var exportMenuElts = me.widgets.exportButton.getMenu().getItems();
+          if (exportMenuElts) {
+            for (var i=0, ii=exportMenuElts.length ; i<ii ; i++) {
+              if (exportMenuElts[i].value == "mostread" || exportMenuElts[i].value == "mostupdated") {
+                exportMenuElts[i].cfg.setProperty("disabled", disabledCSVExportBtn);
+              }
+            }
+          }
+        }
 
         me.widgets.moduleCriteriaButton.value = value;
         me.widgets.moduleCriteriaButton.set("label", sText);
@@ -169,6 +191,22 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
     onIMGExport: function GlobalUsage_onIMGExport() {
       if (this.globalChart) {
         this.exportChartAsImage(this.globalChart);
+      }
+    },
+
+    // For export mostread chart (csv)
+    mostread: function GlobalUsage_mostread() {
+      if(this.options&&this.options.paramsmostread){
+        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + this.options.paramsmostread;
+        window.open(url);
+      }
+    },
+
+    // For export most updated chart (csv)
+    mostupdated: function GlobalUsage_mostupdated() {
+      if(this.options&&this.options.paramsmostupdated){
+        var url = Alfresco.constants.PROXY_URI + "share-stats/export-audits" + this.options.paramsmostupdated;
+        window.open(url);
       }
     },
 
@@ -347,8 +385,14 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           to = tsArray[tsArray.length - 1],
           params = null;
 
-      // Build query parameters
       params = this.buildParams(module, site, null, type, from, to, this.options.limit);
+
+      // Build query parameters
+      if(type==="mostread"){
+        this.options.paramsmostread = params;
+      }else if(type==="mostupdated"){
+        this.options.paramsmostupdated = params;
+      }
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-audits" + params;
       Alfresco.util.Ajax.jsonGet({
@@ -561,6 +605,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       if (limit) {
         params += "&limit=" + limit;
       }
+
       return params;
     },
 

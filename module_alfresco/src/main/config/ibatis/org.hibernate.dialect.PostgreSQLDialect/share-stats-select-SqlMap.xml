@@ -27,6 +27,12 @@
   </sql>
 
   <sql id="group_by_concat">
-    group by audit_app_name || '.' || audit_action_name
+    group by audit_target
+  </sql>
+
+  <sql id="limit_snippet">
+    <if test="limit != 0">
+      limit #{limit}
+    </if>
   </sql>
 </mapper>
