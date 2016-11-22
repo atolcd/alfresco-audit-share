@@ -19,6 +19,7 @@ package com.atolcd.alfresco.web.scripts.shareStats;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
@@ -43,6 +44,7 @@ import com.atolcd.alfresco.AuditEntry;
 public class InsertAuditPost extends DeclarativeWebScript implements InitializingBean {
 	private static final String INSERT_ENTRY = "alfresco.atolcd.audit.insert.insertEntry";
 	private static final String INSERT_VOLUMETRY = "alfresco.atolcd.audit.insert.insertVolumetry";
+  private static final String INSERT_VOLUMETRY_MULTI = "alfresco.atolcd.audit.insert.insertVolumetryMulti";
 
 	private static final String SITE_TO_FIND = "/service";
 	public static final String SITE_REPOSITORY = "_repository";
@@ -132,4 +134,9 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
 		sqlSessionTemplate.insert(INSERT_VOLUMETRY, atolVolumetryEntry);
 		logger.info("Volumetry entry successfully inserted.");
 	}
+
+	public void insertVolumetryMulti(List<AtolVolumetryEntry> atolVolumetryEntry) {
+    sqlSessionTemplate.insert(INSERT_VOLUMETRY_MULTI, atolVolumetryEntry);
+    logger.info("Volumetry entry successfully inserted.");
+  }
 }

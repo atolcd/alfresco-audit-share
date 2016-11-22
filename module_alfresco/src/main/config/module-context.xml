@@ -120,6 +120,12 @@
     <property name="wsInsertAudits">
       <ref bean="webscript.com.atolcd.alfresco.share-stats.insert-audit.post" />
     </property>
+    <property name="siteService">
+      <ref bean="SiteService" />
+    </property>
+    <property name="searchService">
+      <ref bean="SearchService" />
+    </property>
   </bean>
 
 
@@ -161,6 +167,32 @@
     </property>
     <property name="scriptUrl">
       <value>classpath:alfresco/module/${groupId}.${artifactId}/dbscripts/create/${db.script.dialect}/AlfrescoCreate-ShareStatsAuditTables.sql</value>
+    </property>
+  </bean>
+
+  <bean id="patch.db-ShareStats-createIndexAndSeq" class="com.atolcd.alfresco.repo.patch.SchemaUpgradeScriptPatch" parent="module.baseComponent" >
+    <property name="moduleId" value="${groupId}.${artifactId}" />
+    <property name="name" value="Création des indexes et de la séquence Oracle pour l'optimisation de la volumétrie" />
+    <property name="description" value="" />
+    <property name="executeOnceOnly" value="true" />
+    <property name="appliesFromVersion" value="1.5.2" />
+    <property name="dependsOn">
+      <ref bean="patch.db-V3.4-ShareStats-ExtraTables" />
+    </property>
+    <property name="dataSource">
+      <ref bean="dataSource"/>
+    </property>
+    <property name="localSessionFactory">
+      <ref bean="&amp;sessionFactory"></ref>
+    </property>
+    <property name="dialect">
+      <ref bean="dialect" />
+    </property>
+    <property name="globalProperties">
+      <ref bean="global-properties" />
+    </property>
+    <property name="scriptUrl">
+      <value>classpath:alfresco/module/${groupId}.${artifactId}/dbscripts/update/1.5.2/${db.script.dialect}/AlfrescoUpdate-ShareStatsAuditTables.sql</value>
     </property>
   </bean>
 </beans>

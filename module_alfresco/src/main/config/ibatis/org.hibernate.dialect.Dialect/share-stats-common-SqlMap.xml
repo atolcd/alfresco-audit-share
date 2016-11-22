@@ -446,7 +446,7 @@
 
     <select id="selectVolumetry" parameterType="AtolAuditQueryParameters" resultType="long">
       select
-        avg(site_size)
+          max(site_size)
       from
         share_stats_site_volumetry
       <!-- Reprise des snippets utilisé de share_stats_audit_entry -->
@@ -458,18 +458,34 @@
           AND <![CDATA[at_time < #{dateTo}]]>
         </if>
 
-        <if test="siteId != null">
-          AND site_id = #{siteId}
-        </if>
-        <if test="sitesId != null">
           AND site_id IN
           <foreach item="item" collection="sitesId" open="(" separator="," close=")">
             #{item}
           </foreach>
-        </if>
+
       </where>
     </select>
 
+  <select id="selectVolumetrySites" parameterType="AtolAuditQueryParameters" resultType="long">
+      select sum(taille)
+      from (select max(site_size) as taille
+      from
+        share_stats_site_volumetry
+      <!-- Reprise des snippets utilisé de share_stats_audit_entry -->
+      <where>
+        <if test="dateFrom > 0">
+          AND <![CDATA[at_time >= #{dateFrom}]]>
+        </if>
+        <if test="dateTo > 0">
+          AND <![CDATA[at_time < #{dateTo}]]>
+        </if>
+        AND site_id IN
+        <foreach item="item" collection="sitesId" open="(" separator="," close=")">
+          #{item}
+        </foreach>
+      </where>
+      group by site_id) as somme;
+    </select>
 
     <update id="updateAuditEntry" parameterType="AtolAuditEntry">
       update
@@ -479,7 +495,6 @@
       where
         id = #{id}
     </update>
-
 
     <delete id="deleteAuditByParameters" parameterType="AtolAuditQueryParameters">
       delete
