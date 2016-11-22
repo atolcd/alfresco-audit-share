@@ -273,6 +273,7 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 				varAssignments.put("TRUE", "1");
 				varAssignments.put("FALSE", "0");
 			}
+      boolean isFunction = false;
 
 			while (true) {
 				String sqlOriginal = reader.readLine();
@@ -333,9 +334,19 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 					connection.setAutoCommit(true);
 					continue;
 				}
-
+				boolean execute = false;
+				boolean optional = false;
+        // Procedure creation management
+        if (sql.startsWith("-- FUNCTION")) {
+          isFunction = true;
+          continue;
+        } else if (sql.startsWith("-- END FUNCTION")) {
+          isFunction = false;
+          execute = true;
+          optional = false;
+        }
 				// Check for comments
-				if (sql.length() == 0 || sql.startsWith("--") || sql.startsWith("//") || sql.startsWith("/*")) {
+				if ((sql.length() == 0 || sql.startsWith("--") || sql.startsWith("//") || sql.startsWith("/*")) && !sql.startsWith("-- END FUNCTION")) {
 					if (sb.length() > 0) {
 						// we have an unterminated statement
 						throw AlfrescoRuntimeException.create(ERR_STATEMENT_TERMINATOR, (line - 1), scriptUrl);
@@ -345,9 +356,7 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 					continue;
 				}
 				// have we reached the end of a statement?
-				boolean execute = false;
-				boolean optional = false;
-				if (sql.endsWith(";")) {
+				if (!isFunction && sql.endsWith(";")) {
 					sql = sql.substring(0, sql.length() - 1);
 					execute = true;
 					optional = false;
@@ -373,7 +382,8 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 					sb.append(" ");
 				}
 				// append to the statement being built up
-				sb.append(sql);
+				if(!sql.startsWith("-- END FUNCTION"))
+				  sb.append(sql);
 				// execute, if required
 				if (execute) {
 					// Now substitute and execute the statement the appropriate

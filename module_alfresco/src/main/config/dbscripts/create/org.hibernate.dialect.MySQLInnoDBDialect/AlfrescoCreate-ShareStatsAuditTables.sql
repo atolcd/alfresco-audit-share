@@ -1,4 +1,4 @@
--- Copyright (C) 2013 Atol Conseils et Développements.
+-- Copyright (C) 2013 Atol Conseils et DÃ©veloppements.
 -- http://www.atolcd.com/
 --
 -- This program is free software: you can redistribute it and/or modify
