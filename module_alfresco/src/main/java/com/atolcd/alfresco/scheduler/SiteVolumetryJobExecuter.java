@@ -14,9 +14,10 @@ public class SiteVolumetryJobExecuter {
   @SuppressWarnings("unused")
   private static final Log logger = LogFactory.getLog(SiteVolumetryJobExecuter.class);
 
-  private InsertAuditPost wsInsertAudits;
-  protected SiteService siteService;
-  protected SearchService searchService;
+  private InsertAuditPost  wsInsertAudits;
+  protected SiteService    siteService;
+  protected SearchService  searchService;
+  protected int            batchSize;
 
   public SiteService getSiteService() {
     return siteService;
@@ -38,11 +39,20 @@ public class SiteVolumetryJobExecuter {
     this.wsInsertAudits = wsInsertAudits;
   }
 
+  public int getBatchSize() {
+    return batchSize;
+  }
+
+  public void setBatchSize(int batchSize) {
+    this.batchSize = batchSize;
+  }
+
   public void execute() {
     ShareStats shareStats = new ShareStats();
     shareStats.setSearchService(searchService);
     shareStats.setWsInsertAudits(wsInsertAudits);
     shareStats.setSiteService(siteService);
+    shareStats.setBatchSize(batchSize);
     shareStats.insertVolumetryMulti(new Date().getTime());
   }
 }
