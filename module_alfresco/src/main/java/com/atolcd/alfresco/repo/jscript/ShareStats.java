@@ -52,9 +52,18 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
   private SiteService      siteService;
   private SearchService    searchService;
   private NodeService      nodeService;
+  protected int            batchSize;
+
+  public SiteService getSiteService() {
+    return siteService;
+  }
 
   public void setSiteService(SiteService siteService) {
     this.siteService = siteService;
+  }
+
+  public SearchService getSearchService() {
+    return searchService;
   }
 
   public void setSearchService(SearchService searchService) {
@@ -63,6 +72,14 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
 
   public void setNodeService(NodeService nodeService) {
     this.nodeService = nodeService;
+  }
+
+  public int getBatchSize() {
+    return batchSize;
+  }
+
+  public void setBatchSize(int batchSize) {
+    this.batchSize = batchSize;
   }
 
   public void setWsInsertAudits(InsertAuditPost wsInsertAudits) {
@@ -113,7 +130,7 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
     searchParameters.setLimitBy(LimitBy.UNLIMITED);
     searchParameters.setMaxPermissionChecks(Integer.MAX_VALUE);
     searchParameters.setMaxPermissionCheckTimeMillis(Long.MAX_VALUE);
-    searchParameters.setMaxItems(-1);
+    searchParameters.setMaxItems(batchSize);
     long totalSize = 0;
     List<AtolVolumetryEntry> listAtolVolEntry = new ArrayList<>();
     for (SiteInfo siteInfo : siteInfos) {
@@ -128,36 +145,52 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
     String query = "SELECT * FROM cmis:document D WHERE CONTAINS(D,'PATH: \"/app:company_home/st:sites/cm:" + siteInfo.getShortName()
         + "//*\"')";
     searchParameters.setQuery(query);
-    ResultSet rs = null;
+
     long totalSize = 0;
     int nbFile = 0;
-    try {
-      rs = searchService.query(searchParameters);
+    int skipCount = 0;
 
-      for (ResultSetRow rsr : rs) {
-        try {
-          // Useful to avoid nullpointer at the following line
-          @SuppressWarnings("unused")
-          Map<String, Serializable> mapValue = rsr.getValues();
-          ContentDataWithId docContent = (ContentDataWithId) rsr.getValue(ContentModel.PROP_CONTENT);
-          if (docContent != null) {
-            totalSize = totalSize + docContent.getSize();
-            nbFile++;
-          }
-        } catch (UnsupportedOperationException uoe) {
-          NodeRef nodeRef = rsr.getNodeRef();
-          ContentData docContent = (ContentData) nodeService.getProperty(nodeRef, ContentModel.PROP_CONTENT);
-          if (docContent != null) {
-            totalSize = totalSize + docContent.getSize();
-            nbFile++;
+    while (true) {
+      searchParameters.setSkipCount(skipCount);
+      ResultSet rs = null;
+      try {
+        rs = searchService.query(searchParameters);
+
+        if (rs.length() == 0) {
+          // we are at the end of our search, no more results are available
+          break;
+        }
+
+        for (ResultSetRow rsr : rs) {
+          try {
+            // Useful to avoid nullpointer at the following line
+            @SuppressWarnings("unused")
+            Map<String, Serializable> mapValue = rsr.getValues();
+            ContentDataWithId docContent = (ContentDataWithId) rsr.getValue(ContentModel.PROP_CONTENT);
+            if (docContent != null) {
+              totalSize = totalSize + docContent.getSize();
+              nbFile++;
+            }
+          } catch (UnsupportedOperationException uoe) {
+            NodeRef nodeRef = rsr.getNodeRef();
+            ContentData docContent = (ContentData) nodeService.getProperty(nodeRef, ContentModel.PROP_CONTENT);
+            if (docContent != null) {
+              totalSize = totalSize + docContent.getSize();
+              nbFile++;
+            }
           }
         }
-      }
-    } catch (Exception e) {
-      logger.error("An error occurred while calculating total site size.", e);
-    } finally {
-      if (rs != null) {
-        rs.close();
+        skipCount += rs.length();
+
+        if (logger.isDebugEnabled()) {
+          logger.debug("  -- Site Volumetry " + siteInfo.getShortName() + ": " + skipCount);
+        }
+      } catch (Exception e) {
+        logger.error("An error occurred while calculating total site size.", e);
+      } finally {
+        if (rs != null) {
+          rs.close();
+        }
       }
     }
     return new AtolVolumetryEntry(siteInfo.getShortName(), totalSize, 0, nbFile, atTime);

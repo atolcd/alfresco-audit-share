@@ -130,6 +130,9 @@
     <property name="nodeService">
       <ref bean="nodeService" />
     </property>
+    <property name="batchSize">
+      <value>${share.stats.sites.volumetry.batchSize}</value>
+    </property>
   </bean>
 
 
