@@ -75,6 +75,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       });
       this.widgets.tableCriteriaButton.getMenu().cfg.setProperty("zIndex", 4);
       this.widgets.tableCriteriaButton.value = "audit_entry";
+      this._setIdsForYUIMenuAndItems(this.widgets.tableCriteriaButton);
 
       // hide the "export" button (For the moment)
       this.widgets.exportButton.addClass("hidden");
