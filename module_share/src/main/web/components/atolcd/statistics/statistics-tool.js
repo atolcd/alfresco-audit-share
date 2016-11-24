@@ -216,6 +216,8 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
           me[value].call(me);
         }
       };
+      this._setIdsForYUIMenuAndItems(this.widgets.exportButton);
+
       this.widgets.exportButton.getMenu().subscribe("click", onExportMenuItemClick);
       Dom.addClass(this.widgets.exportButton.getMenu().element, "export-button");
 
@@ -334,6 +336,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
       this.widgets.siteButton.set("label", menuButtons[0].text);
       this.widgets.siteButton.value = menuButtons[0].value;
       this.widgets.siteButton.set("selectedMenuItem", this.widgets.siteButton.getMenu().getItem(0));
+      this._setIdsForYUIMenuAndItems(this.widgets.siteButton);
 
       this.execute();
     },
@@ -643,6 +646,44 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
 
     onIMGExport: function Tool_onIMGExport() {
       // Empty because it will be overridden
+    },
+
+    _setIdsForYUIMenuAndItems: function Tool__setIdsForYUIMenuAndItemst(btn) {
+      if (btn) {
+        var menu = btn.getMenu();
+        if (menu && menu.element) {
+          // change menu id
+          var newMenuId = btn.get("id") + "-menu"
+          menu.id = newMenuId;
+          menu.element.setAttribute("id", newMenuId);
+
+          // Menu items
+          var menuItems = menu.getItems();
+          if(menuItems && menuItems.length > 0) {
+            var currentItems = {};
+
+            for (var i=0, ii=menuItems.length ; i<ii ; i++) {
+              var item = menuItems[i];
+              if (item) {
+                // change current menu item ids
+                var newItemId = btn.get("id") + "-menu-item-" + (item.value || i);
+                item.id = newItemId;
+                item.element.setAttribute("id", newItemId);
+
+                // store current item and his index
+                currentItems[i] = item;
+              }
+            }
+
+            // insert menu items with new ids
+            for (var item in currentItems) {
+              menu.insertItem(currentItems[item], item);
+            }
+          }
+
+          menu.render();
+        }
+      }
     }
   });
 })();

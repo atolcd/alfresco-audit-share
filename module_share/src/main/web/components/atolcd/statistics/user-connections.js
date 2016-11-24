@@ -82,6 +82,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         menu: this.id + "-chart-type-criteria-select",
         lazyloadmenu: false
       });
+      this._setIdsForYUIMenuAndItems(this.widgets.chartTypeCriteriaButton);
 
       var onChartTypeMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
         var sText = p_aArgs[1].cfg.getProperty("text"),
