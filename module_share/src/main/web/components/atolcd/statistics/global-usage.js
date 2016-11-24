@@ -111,8 +111,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       var exportMenu = this.widgets.exportButton.getMenu();
       if (exportMenu) {
         exportMenu.addItems([
-          { text: this.msg("label.export.csv.most_read"), value: "mostread", disabled: false },
-          { text: this.msg("label.export.csv.most_update"), value: "mostupdated", disabled: false }
+          { text: this.msg("label.export.csv.most_read"), value: "mostread", disabled: false, id: this.widgets.exportButton.get("id") + "-menu-item-mostread" },
+          { text: this.msg("label.export.csv.most_update"), value: "mostupdated", disabled: false, id: this.widgets.exportButton.get("id") + "-menu-item-mostupdated"  }
         ]);
       }
 
@@ -125,6 +125,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       });
       this.widgets.moduleCriteriaButton.getMenu().cfg.setProperty("zIndex", 4);
       this.widgets.moduleCriteriaButton.value = "document";
+      this._setIdsForYUIMenuAndItems(this.widgets.moduleCriteriaButton);
 
       this.widgets.actionCriteriaButton = new YAHOO.widget.Button(this.id + "-action-criteria", {
         type: "split",
@@ -132,6 +133,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         lazyloadmenu: false
       });
       this.widgets.actionCriteriaButton.value = "read";
+      this._setIdsForYUIMenuAndItems(this.widgets.actionCriteriaButton);
 
       // Listeners on menu click
       // "Module" filter
