@@ -87,6 +87,7 @@
     <zip destfile="${amp.file}" update="true">
       <fileset dir="${project.dir}/" includes="*.properties" />
       <zipfileset file="${jar.file}" prefix="WEB-INF/lib" />
+      <zipfileset file="${lib.dir}/abdera-client-0.4.0-incubating.jar" prefix="WEB-INF/lib" />
     </zip>
   </target>
 

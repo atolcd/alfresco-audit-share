@@ -342,25 +342,25 @@
     <select id="selectByRead" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
       <include refid="read_snippet"/>
-      <include refid="group_by_concat"/>
+      <include refid="alfresco.atolcd.audit.concat.group_by_concat"/>
     </select>
 
     <select id="selectByUpdated" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
       <include refid="update_snippet"/>
-      <include refid="group_by_concat"/>
+      <include refid="alfresco.atolcd.audit.concat.group_by_concat"/>
     </select>
 
     <select id="selectByCreated" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
       <include refid="create_snippet"/>
-      <include refid="group_by_concat"/>
+      <include refid="alfresco.atolcd.audit.concat.group_by_concat"/>
     </select>
 
     <select id="selectByDeleted" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
       <include refid="delete_snippet"/>
-      <include refid="group_by_concat"/>
+      <include refid="alfresco.atolcd.audit.concat.group_by_concat"/>
     </select>
 
     <select id="selectByMostUpdated" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditObjectPopularity">
