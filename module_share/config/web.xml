@@ -17,36 +17,6 @@
       <param-value>classpath:web-application-config.xml</param-value>
    </context-param>
 
-  <!-- ATOL: Audit filters -->
-  <filter>
-    <description>Filtre général pour l'audit</description>
-    <filter-name>AuditFilter</filter-name>
-    <filter-class>com.atolcd.alfresco.AuditFilter</filter-class>
-  </filter> 
-  
-  <filter-mapping>
-    <filter-name>AuditFilter</filter-name>
-    <url-pattern>/page/*</url-pattern>
-  </filter-mapping>
-  
-  <filter-mapping>
-    <filter-name>AuditFilter</filter-name>
-    <url-pattern>/p/*</url-pattern>
-  </filter-mapping>
-  
-  <filter>
-    <description>Filtre pour l'audit (proxy)</description>
-    <filter-name>ProxyAuditFilter</filter-name>
-    <filter-class>com.atolcd.alfresco.ProxyAuditFilter</filter-class>
-  </filter> 
-  
-  <filter-mapping>
-    <filter-name>ProxyAuditFilter</filter-name>
-    <url-pattern>/proxy/*</url-pattern>
-  </filter-mapping>
-  
-  <!-- ATOL: Audit filters -->
-
    <filter>
       <description>Set HTTP cache Expires header 30 days forward for a mapping.</description>
       <filter-name>CacheExpiresFilter</filter-name>
@@ -206,6 +176,35 @@
       <filter-name>MTAuthentationFilter</filter-name>
       <url-pattern>/p/*</url-pattern>
    </filter-mapping>
+   
+   <!-- ATOL: Audit filters -->
+  <filter>
+    <description>Filtre général pour l'audit</description>
+    <filter-name>AuditFilter</filter-name>
+    <filter-class>com.atolcd.alfresco.AuditFilter</filter-class>
+  </filter> 
+  
+  <filter-mapping>
+    <filter-name>AuditFilter</filter-name>
+    <url-pattern>/page/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>AuditFilter</filter-name>
+    <url-pattern>/p/*</url-pattern>
+  </filter-mapping>
+  
+  <filter>
+    <description>Filtre pour l'audit (proxy)</description>
+    <filter-name>ProxyAuditFilter</filter-name>
+    <filter-class>com.atolcd.alfresco.ProxyAuditFilter</filter-class>
+  </filter> 
+  
+  <filter-mapping>
+    <filter-name>ProxyAuditFilter</filter-name>
+    <url-pattern>/proxy/*</url-pattern>
+  </filter-mapping>
+  <!-- ATOL: Audit filters -->
    
    <!-- Spring Context Loader listener - the name of the default global context is passed to the DispatcherServlet
         in the servlet definition below - this is to allow the NTLM filter etc. to find the single app context -->
