@@ -24,8 +24,8 @@
       select nextVal('share_stats_audit_entry_seq')
     </selectKey>
 
-    insert into share_stats_audit_entry (id, audit_user_id, audit_site, audit_app_name, audit_action_name, audit_object, audit_time)
-    values (#{id}, #{auditUserId}, #{auditSite}, #{auditAppName}, #{auditActionName}, #{auditObject}, #{auditTime})
+    insert into share_stats_audit_entry (id, audit_user_id, audit_site, audit_app_name, audit_action_name, audit_object, audit_time, audit_node_type)
+    values (#{id}, #{auditUserId}, #{auditSite}, #{auditAppName}, #{auditActionName}, #{auditObject}, #{auditTime}, #{auditNodeType})
   </insert>
 
   <insert id="insertVolumetry" parameterType="AtolVolumetryEntry">
