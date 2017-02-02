@@ -38,6 +38,7 @@
       <result property="auditActionName" column="audit_action_name" jdbcType="VARCHAR" javaType="java.lang.String"/>
       <result property="auditObject" column="audit_object" jdbcType="VARCHAR" javaType="java.lang.String"/>
       <result property="auditTime" column="audit_time" jdbcType="BIGINT" javaType="long"/>
+      <result property="auditNodeType" column="audit_node_type" jdbcType="VARCHAR" javaType="java.lang.String"/>
     </resultMap>
 
     <resultMap id="results_AtolCsvExportEntry" type="AtolCsvExportEntry">
@@ -63,8 +64,8 @@
     <!-- SQL Snippets   -->
     <!--                -->
     <sql id="insert_AtolAuditEntry_AutoIncrement">
-        insert into share_stats_audit_entry (audit_user_id, audit_site, audit_app_name, audit_action_name, audit_object, audit_time)
-        values (#{auditUserId},#{auditSite},#{auditAppName},#{auditActionName},#{auditObject},#{auditTime})
+        insert into share_stats_audit_entry (audit_user_id, audit_site, audit_app_name, audit_action_name, audit_object, audit_time, audit_node_type)
+        values (#{auditUserId}, #{auditSite}, #{auditAppName}, #{auditActionName}, #{auditObject}, #{auditTime}, #{auditNodeType})
     </sql>
 
     <sql id="insert_volumetry_AutoIncrement">
