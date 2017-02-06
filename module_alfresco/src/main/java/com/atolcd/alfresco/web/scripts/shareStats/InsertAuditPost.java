@@ -23,7 +23,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
+import org.alfresco.service.cmr.repository.MalformedNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.apache.commons.logging.Log;
@@ -42,101 +45,135 @@ import com.atolcd.alfresco.AtolVolumetryEntry;
 import com.atolcd.alfresco.AuditEntry;
 
 public class InsertAuditPost extends DeclarativeWebScript implements InitializingBean {
-	private static final String INSERT_ENTRY = "alfresco.atolcd.audit.insertEntry";
-	private static final String INSERT_VOLUMETRY = "alfresco.atolcd.audit.insertVolumetry";
-	private static final String INSERT_VOLUMETRY_MULTI = "alfresco.atolcd.audit.insertVolumetryMulti";
+  private static final String INSERT_ENTRY           = "alfresco.atolcd.audit.insertEntry";
+  private static final String INSERT_VOLUMETRY       = "alfresco.atolcd.audit.insertVolumetry";
+  private static final String INSERT_VOLUMETRY_MULTI = "alfresco.atolcd.audit.insertVolumetryMulti";
 
-	private static final String SITE_TO_FIND = "/service";
-	public static final String SITE_REPOSITORY = "_repository";
-	private static final String MODEL_SUCCESS = "success";
+  private static final String SITE_TO_FIND           = "/service";
+  public static final String  SITE_REPOSITORY        = "_repository";
+  private static final String MODEL_SUCCESS          = "success";
 
-	// SqlMapClientTemplate for MyBatis calls
-	private SqlSessionTemplate sqlSessionTemplate;
-	private SiteService siteService;
+  // SqlMapClientTemplate for MyBatis calls
+  private SqlSessionTemplate  sqlSessionTemplate;
+  private SiteService         siteService;
+  private NodeService         nodeService;
+  private NamespaceService    namespaceService;
 
-	private static final Log logger = LogFactory.getLog(InsertAuditPost.class);
+  private static final Log    logger                 = LogFactory.getLog(InsertAuditPost.class);
 
-	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-		this.sqlSessionTemplate = sqlSessionTemplate;
-	}
+  public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+    this.sqlSessionTemplate = sqlSessionTemplate;
+  }
 
-	public void setSiteService(SiteService siteService) {
-		this.siteService = siteService;
-	}
+  public void setSiteService(SiteService siteService) {
+    this.siteService = siteService;
+  }
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.sqlSessionTemplate);
-		Assert.notNull(this.siteService);
-	}
+  public void setNodeService(NodeService nodeService) {
+    this.nodeService = nodeService;
+  }
 
-	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		// Map that will be passed to the template
-		Map<String, Object> model = new HashMap<String, Object>();
-		model.put(MODEL_SUCCESS, false);
-		try {
-			// Check for the sqlMapClientTemplate Bean
-			if (this.sqlSessionTemplate != null) {
-				// Get the input content given into the request.
-				String jsonArg = req.getContent().getContent();
+  public void setNamespaceService(NamespaceService namespaceService) {
+    this.namespaceService = namespaceService;
+  }
 
-				if (!jsonArg.isEmpty()) {
-					// Fill an auditSample from the request content and insert
-					// it
-					AuditEntry auditSample = new AuditEntry(jsonArg);
-					getSiteFromObject(auditSample);
-					insert(auditSample);
-					model.put(MODEL_SUCCESS, true);
-				}
-			}
-		} catch (InvalidNodeRefException invalidNodeRefException) {
-			// Node no longer exists
-		} catch (Exception e) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(e.getMessage(), e);
-			}
-			throw new WebScriptException("[ShareStats-DbInsert] Error in executeImpl function");
-		}
-		return model;
-	}
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    Assert.notNull(this.sqlSessionTemplate);
+    Assert.notNull(this.nodeService);
+    Assert.notNull(this.siteService);
+    Assert.notNull(this.namespaceService);
+  }
 
-	public void insert(AuditEntry auditSample) throws SQLException, JSONException {
-		if (!auditSample.getAuditSite().isEmpty()) {
-			sqlSessionTemplate.insert(INSERT_ENTRY, auditSample);
-			logger.info("Entry successfully inserted: " + auditSample.toJSON());
-		}
-	}
+  @Override
+  protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    // Map that will be passed to the template
+    Map<String, Object> model = new HashMap<String, Object>();
+    model.put(MODEL_SUCCESS, false);
+    try {
+      // Check for the sqlMapClientTemplate Bean
+      if (this.sqlSessionTemplate != null) {
+        // Get the input content given into the request.
+        String jsonArg = req.getContent().getContent();
 
-	public void getSiteFromObject(AuditEntry auditSample) {
-		// Even if we are into the repository, we try to find the site of the
-		// document
-		if (auditSample.getAuditSite().equals(SITE_TO_FIND)) {
-			SiteInfo siteInfo = null;
-			try {
-				NodeRef nodeRef = new NodeRef(auditSample.getAuditObject());
-				siteInfo = siteService.getSite(nodeRef);
-			} catch (Exception e){
-				if (logger.isDebugEnabled()) {
-					logger.debug(e.getMessage(), e);
-				}
-			}
+        if (!jsonArg.isEmpty()) {
+          // Fill an auditSample from the request content and insert
+          // it
+          AuditEntry auditSample = new AuditEntry(jsonArg);
+          getSiteFromObject(auditSample);
+          String myAuditNodeType = auditSample.getAuditNodeType();
 
-			if (siteInfo != null) {
-				auditSample.setAuditSite(siteInfo.getShortName());
-			} else {
-				auditSample.setAuditSite(SITE_REPOSITORY);
-			}
-		}
-	}
+          // Retrieving the node type when it does not already exists
+          if (myAuditNodeType == null || myAuditNodeType.isEmpty()) {
+            getTypeFromObject(auditSample);
+          }
+          insert(auditSample);
+          model.put(MODEL_SUCCESS, true);
+        }
+      }
+    } catch (InvalidNodeRefException invalidNodeRefException) {
+      // Node no longer exists
+    } catch (Exception e) {
+      if (logger.isDebugEnabled()) {
+        logger.debug(e.getMessage(), e);
+      }
+      throw new WebScriptException("[ShareStats-DbInsert] Error in executeImpl function");
+    }
+    return model;
+  }
 
-	public void insertVolumetry(AtolVolumetryEntry atolVolumetryEntry) {
-		sqlSessionTemplate.insert(INSERT_VOLUMETRY, atolVolumetryEntry);
-		logger.info("Volumetry entry successfully inserted.");
-	}
+  public void insert(AuditEntry auditSample) throws SQLException, JSONException {
+    if (!auditSample.getAuditSite().isEmpty()) {
+      sqlSessionTemplate.insert(INSERT_ENTRY, auditSample);
+      logger.info("Entry successfully inserted: " + auditSample.toJSON());
+    }
+  }
 
-	public void insertVolumetryMulti(List<AtolVolumetryEntry> atolVolumetryEntry) {
-		sqlSessionTemplate.insert(INSERT_VOLUMETRY_MULTI, atolVolumetryEntry);
-		logger.info("Volumetry entry successfully inserted.");
-	}
+  public void getTypeFromObject(AuditEntry auditSample) {
+    try {
+      String myAuditObject = auditSample.getAuditObject();
+      if (myAuditObject != null && !myAuditObject.isEmpty()) {
+        NodeRef nodeRef = new NodeRef(myAuditObject);
+        if (this.nodeService.exists(nodeRef)) {
+          // XXX: besoin d'un runAs ?
+          String nodeType = this.nodeService.getType(nodeRef).toPrefixString(this.namespaceService);
+          auditSample.setAuditNodeType(nodeType);
+        }
+      }
+    } catch (MalformedNodeRefException e) {
+
+    }
+  }
+
+  public void getSiteFromObject(AuditEntry auditSample) {
+    // Even if we are into the repository, we try to find the site of the
+    // document
+    if (auditSample.getAuditSite().equals(SITE_TO_FIND)) {
+      SiteInfo siteInfo = null;
+      try {
+        NodeRef nodeRef = new NodeRef(auditSample.getAuditObject());
+        siteInfo = siteService.getSite(nodeRef);
+      } catch (Exception e) {
+        if (logger.isDebugEnabled()) {
+          logger.debug(e.getMessage(), e);
+        }
+      }
+
+      if (siteInfo != null) {
+        auditSample.setAuditSite(siteInfo.getShortName());
+      } else {
+        auditSample.setAuditSite(SITE_REPOSITORY);
+      }
+    }
+  }
+
+  public void insertVolumetry(AtolVolumetryEntry atolVolumetryEntry) {
+    sqlSessionTemplate.insert(INSERT_VOLUMETRY, atolVolumetryEntry);
+    logger.info("Volumetry entry successfully inserted.");
+  }
+
+  public void insertVolumetryMulti(List<AtolVolumetryEntry> atolVolumetryEntry) {
+    sqlSessionTemplate.insert(INSERT_VOLUMETRY_MULTI, atolVolumetryEntry);
+    logger.info("Volumetry entry successfully inserted.");
+  }
 }
