@@ -27,7 +27,8 @@
           auditSite: (this.options.siteId) ? this.options.siteId : AtolStatistics.constants.SITE_REPOSITORY,
           auditAppName: "document",
           auditActionName: "file-deleted",
-          auditObject: asset.nodeRef
+          auditObject: asset.nodeRef,
+          auditNodeType: asset.jsNode.type
         };
 
         if (!this.options.siteId) {
