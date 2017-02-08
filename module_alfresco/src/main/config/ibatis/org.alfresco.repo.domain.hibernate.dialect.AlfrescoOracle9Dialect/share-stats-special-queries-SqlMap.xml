@@ -42,4 +42,8 @@
       select <include refid="alfresco.atolcd.audit.selectByMostRead_snippet"/>
     </if>
   </select>
+
+  <select id="selectVolumetrySites" parameterType="AtolAuditQueryParameters" resultType="long">
+    <include refid="alfresco.atolcd.audit.selectVolumetrySites_snippet"/>
+  </select>
 </mapper>

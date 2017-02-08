@@ -49,7 +49,7 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 
 	private static final String SELECT_VOLUMETRY = "alfresco.atolcd.audit.selectVolumetry";
 
-	private static final String SELECT_VOLUMETRY_SITES = "alfresco.atolcd.audit.selectVolumetrySites";
+	private static final String SELECT_VOLUMETRY_SITES = "alfresco.atolcd.audit.special-queries.selectVolumetrySites";
 
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {

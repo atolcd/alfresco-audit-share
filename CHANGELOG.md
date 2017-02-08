@@ -8,6 +8,11 @@ SGBD supportés :
 - DB2
 
 
+## [1.5.3] - 2017-02-09
+### Fixed
+- Compatibilité Oracle
+
+
 ## [1.5.2] - 2016-11-23
 ### Added
 - Export CSV des documents les plus lus/modifiés

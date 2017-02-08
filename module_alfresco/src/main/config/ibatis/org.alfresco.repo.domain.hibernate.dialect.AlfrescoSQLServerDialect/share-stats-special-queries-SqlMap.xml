@@ -28,4 +28,8 @@
     select <if test="limit != 0"> TOP ${limit} </if>
     <include refid="alfresco.atolcd.audit.selectByMostRead_snippet" />
   </select>
+
+  <select id="selectVolumetrySites" parameterType="AtolAuditQueryParameters" resultType="long">
+    <include refid="alfresco.atolcd.audit.selectVolumetrySites_snippet"/> as somme
+  </select>
 </mapper>
