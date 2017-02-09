@@ -4,7 +4,7 @@
 
   <groupId>com.atolcd.alfresco</groupId>
   <artifactId>auditshare-42X</artifactId>
-  <version>1.4.8-SNAPSHOT</version>
+  <version>1.5.3-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>AuditShare</name>
