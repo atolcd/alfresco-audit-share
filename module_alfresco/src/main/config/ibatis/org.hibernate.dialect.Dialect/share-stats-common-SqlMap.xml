@@ -322,6 +322,28 @@
       order by audit_popularity DESC
     </sql>
 
+    <!-- Snippet "volumétrie des sites" -->
+    <sql id="selectVolumetrySites_snippet">
+      select sum(taille)
+      from (select max(site_size) as taille
+      from
+        share_stats_site_volumetry
+      <!-- Reprise des snippets utilisé de share_stats_audit_entry -->
+      <where>
+        <if test="dateFrom > 0">
+        AND <![CDATA[at_time >= #{dateFrom}]]>
+        </if>
+        <if test="dateTo > 0">
+        AND <![CDATA[at_time < #{dateTo}]]>
+        </if>
+        AND site_id IN
+        <foreach item="item" collection="sitesId" open="(" separator="," close=")">
+        #{item}
+        </foreach>
+      </where>
+      group by site_id)
+    </sql>
+
     <!--                -->
     <!-- Statements     -->
     <!--                -->
@@ -462,27 +484,6 @@
           </foreach>
 
       </where>
-    </select>
-
-  <select id="selectVolumetrySites" parameterType="AtolAuditQueryParameters" resultType="long">
-      select sum(taille)
-      from (select max(site_size) as taille
-      from
-        share_stats_site_volumetry
-      <!-- Reprise des snippets utilisé de share_stats_audit_entry -->
-      <where>
-        <if test="dateFrom > 0">
-          AND <![CDATA[at_time >= #{dateFrom}]]>
-        </if>
-        <if test="dateTo > 0">
-          AND <![CDATA[at_time < #{dateTo}]]>
-        </if>
-        AND site_id IN
-        <foreach item="item" collection="sitesId" open="(" separator="," close=")">
-          #{item}
-        </foreach>
-      </where>
-      group by site_id) as somme;
     </select>
 
     <update id="updateAuditEntry" parameterType="AtolAuditEntry">
