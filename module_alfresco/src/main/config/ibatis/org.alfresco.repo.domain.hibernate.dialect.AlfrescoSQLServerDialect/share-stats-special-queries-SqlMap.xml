@@ -18,14 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<mapper namespace="alfresco.atolcd.audit.concat">
-  <sql id="select_concat_actions">
-    select (audit_app_name + '.' + audit_action_name) as audit_target, count(*) as audit_count
-    from
-      share_stats_audit_entry
-  </sql>
+<mapper namespace="alfresco.atolcd.audit.special-queries">
+  <select id="selectByMostUpdated" parameterType="AtolAuditQueryParameters" resultMap="alfresco.atolcd.audit.results_AtolAuditObjectPopularity">
+    select <if test="limit != 0"> TOP ${limit} </if>
+    <include refid="alfresco.atolcd.audit.selectByMostUpdated_snippet" />
+  </select>
 
-  <sql id="group_by_concat">
-    group by (audit_app_name + '.' + audit_action_name)
-  </sql>
+  <select id="selectByMostRead" parameterType="AtolAuditQueryParameters" resultMap="alfresco.atolcd.audit.results_AtolAuditObjectPopularity">
+    select <if test="limit != 0"> TOP ${limit} </if>
+    <include refid="alfresco.atolcd.audit.selectByMostRead_snippet" />
+  </select>
 </mapper>

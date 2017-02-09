@@ -29,11 +29,4 @@
   <sql id="group_by_concat">
     group by audit_app_name || '.' || audit_action_name
   </sql>
-
-  <!-- not tested... -->
-  <sql id="limit_snippet">
-    <if test="limit != 0">
-      FETCH FIRST #{limit} ROWS ONLY
-    </if>
-  </sql>
 </mapper>

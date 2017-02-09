@@ -74,9 +74,9 @@
     <!-- Global select snippet -->
     <sql id="select_AuditEntriesWhereSnippet">
       <where>
-        <include refid="site_snippet"/>
-        <include refid="time_snippet"/>
-        <include refid="appName_snippet"/>
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.time_snippet"/>
+        <include refid="alfresco.atolcd.audit.appName_snippet"/>
         <if test="actionName != null">
             AND audit_action_name = #{actionName}
         </if>
@@ -92,9 +92,9 @@
     <!-- Views Snippet -->
     <sql id="select_auditViewEntriesWhereSnippet">
       <where>
-        <include refid="appName_snippet"/>
-        <include refid="site_snippet"/>
-        <include refid="time_snippet"/>
+        <include refid="alfresco.atolcd.audit.appName_snippet"/>
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.time_snippet"/>
       </where>
     </sql>
 
@@ -171,8 +171,8 @@
           </foreach>
         </if>
 
-        <include refid="time_snippet" />
-        <include refid="site_snippet"/>
+        <include refid="alfresco.atolcd.audit.time_snippet" />
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
       </where>
     </sql>
 
@@ -213,8 +213,8 @@
           </foreach>
         </if>
 
-        <include refid="time_snippet" />
-        <include refid="site_snippet"/>
+        <include refid="alfresco.atolcd.audit.time_snippet" />
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
       </where>
     </sql>
 
@@ -256,8 +256,8 @@
           </foreach>
         </if>
 
-        <include refid="time_snippet" />
-        <include refid="site_snippet"/>
+        <include refid="alfresco.atolcd.audit.time_snippet" />
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
       </where>
     </sql>
 
@@ -293,9 +293,33 @@
           </foreach>
         </if>
 
-        <include refid="time_snippet" />
-        <include refid="site_snippet"/>
+        <include refid="alfresco.atolcd.audit.time_snippet" />
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
       </where>
+    </sql>
+
+    <!-- Snippet "les plus modifiés" -->
+    <sql id="selectByMostUpdated_snippet">
+        count(*) as audit_popularity, audit_object, audit_site
+      from
+        share_stats_audit_entry
+      <include refid="alfresco.atolcd.audit.update_snippet" />
+      <include refid="alfresco.atolcd.audit.site_snippet" />
+      <include refid="alfresco.atolcd.audit.time_snippet" />
+      group by audit_object, audit_site
+      order by audit_popularity DESC
+    </sql>
+
+    <!-- Snippet "les plus lus" -->
+    <sql id="selectByMostRead_snippet">
+        count(*) as audit_popularity, audit_object, audit_site
+      from
+        share_stats_audit_entry
+      <include refid="alfresco.atolcd.audit.read_snippet" />
+      <include refid="alfresco.atolcd.audit.site_snippet" />
+      <include refid="alfresco.atolcd.audit.time_snippet" />
+      group by audit_object, audit_site
+      order by audit_popularity DESC
     </sql>
 
     <!--                -->
@@ -334,59 +358,33 @@
         audit_action_name
       from
         share_stats_audit_entry
-      <include refid="select_AuditEntriesWhereSnippet"/>
+      <include refid="alfresco.atolcd.audit.select_AuditEntriesWhereSnippet"/>
       group by audit_site, audit_app_name, audit_action_name
       order by audit_site, audit_app_name, audit_action_name
     </select>
 
     <select id="selectByRead" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
-      <include refid="read_snippet"/>
+      <include refid="alfresco.atolcd.audit.read_snippet"/>
       <include refid="group_by_concat"/>
     </select>
 
     <select id="selectByUpdated" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
-      <include refid="update_snippet"/>
+      <include refid="alfresco.atolcd.audit.update_snippet"/>
       <include refid="group_by_concat"/>
     </select>
 
     <select id="selectByCreated" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
-      <include refid="create_snippet"/>
+      <include refid="alfresco.atolcd.audit.create_snippet"/>
       <include refid="group_by_concat"/>
     </select>
 
     <select id="selectByDeleted" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
-      <include refid="delete_snippet"/>
+      <include refid="alfresco.atolcd.audit.delete_snippet"/>
       <include refid="group_by_concat"/>
-    </select>
-
-    <select id="selectByMostUpdated" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditObjectPopularity">
-      select
-        count(*) as audit_popularity, audit_object, audit_site
-      from
-        share_stats_audit_entry
-      <include refid="update_snippet"/>
-      <include refid="site_snippet"/>
-      <include refid="time_snippet" />
-      group by audit_object, audit_site
-      order by audit_popularity DESC
-      <include refid="alfresco.atolcd.audit.concat.limit_snippet" />
-    </select>
-
-    <select id="selectByMostRead" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditObjectPopularity">
-      select
-        count(*) as audit_popularity, audit_object, audit_site
-      from
-        share_stats_audit_entry
-      <include refid="read_snippet"/>
-      <include refid="site_snippet"/>
-      <include refid="time_snippet" />
-      group by audit_object, audit_site
-      order by audit_popularity DESC
-      <include refid="alfresco.atolcd.audit.concat.limit_snippet" />
     </select>
 
     <!-- Retourne les dernière personne ayant effectuée une action dans la tranche de temps donnée. On les considère connecté -->
@@ -395,8 +393,8 @@
         from
       share_stats_audit_entry
       <where>
-        <include refid="site_snippet"/>
-        <include refid="time_snippet" />
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.time_snippet" />
       </where>
     </select>
 
@@ -501,8 +499,8 @@
       from
       share_stats_audit_entry
       <where>
-        <include refid="time_snippet"/>
-        <include refid="site_snippet"/>
+        <include refid="alfresco.atolcd.audit.time_snippet"/>
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
       </where>
     </delete>
 

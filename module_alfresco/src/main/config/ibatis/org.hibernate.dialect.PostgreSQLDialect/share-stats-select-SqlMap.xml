@@ -29,10 +29,4 @@
   <sql id="group_by_concat">
     group by audit_target
   </sql>
-
-  <sql id="limit_snippet">
-    <if test="limit != 0">
-      limit #{limit}
-    </if>
-  </sql>
 </mapper>

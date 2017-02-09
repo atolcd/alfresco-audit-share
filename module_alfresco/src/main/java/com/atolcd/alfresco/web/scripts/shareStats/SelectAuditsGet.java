@@ -66,8 +66,8 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
   private static final String SELECT_BY_CREATED = "alfresco.atolcd.audit.selectByCreated";
   private static final String SELECT_BY_UPDATED = "alfresco.atolcd.audit.selectByUpdated";
   private static final String SELECT_BY_DELETED = "alfresco.atolcd.audit.selectByDeleted";
-  private static final String SELECT_BY_MOSTREAD = "alfresco.atolcd.audit.selectByMostRead";
-  private static final String SELECT_BY_MOSTUPDATED = "alfresco.atolcd.audit.selectByMostUpdated";
+  private static final String SELECT_BY_MOSTREAD = "alfresco.atolcd.audit.special-queries.selectByMostRead";
+  private static final String SELECT_BY_MOSTUPDATED = "alfresco.atolcd.audit.special-queries.selectByMostUpdated";
   private static final String SELECT_TO_UPDATE = "alfresco.atolcd.audit.selectEntriesToUpdate";
 
   static final QName TYPE_DATALIST = QName.createQName("http://www.alfresco.org/model/datalist/1.0", "dataList");

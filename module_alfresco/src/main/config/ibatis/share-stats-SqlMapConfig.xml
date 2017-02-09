@@ -33,6 +33,7 @@
   <mappers>
     <mapper resource="alfresco/module/${groupId}.${artifactId}/ibatis/#resource.dialect#/share-stats-select-SqlMap.xml"/>
     <mapper resource="alfresco/module/${groupId}.${artifactId}/ibatis/#resource.dialect#/share-stats-common-SqlMap.xml"/>
+    <mapper resource="alfresco/module/${groupId}.${artifactId}/ibatis/#resource.dialect#/share-stats-special-queries-SqlMap.xml"/>
     <mapper resource="alfresco/module/${groupId}.${artifactId}/ibatis/#resource.dialect#/share-stats-insert-SqlMap.xml"/>
   </mappers>
 
