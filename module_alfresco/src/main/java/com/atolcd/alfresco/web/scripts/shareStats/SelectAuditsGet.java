@@ -228,6 +228,8 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
       params.setDateFrom(dateFrom);
       params.setDateTo(dateTo);
       params.setSlicedDates(req.getParameter("dates"));
+      params.setNodeType(req.getParameter("nodeType"));
+      params.setNodeTypes(req.getParameter("nodeTypes"));
       return params;
     } catch (Exception e) {
       logger.error("Error building parameters", e);

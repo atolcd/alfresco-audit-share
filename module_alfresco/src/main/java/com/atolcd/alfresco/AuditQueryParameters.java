@@ -21,166 +21,202 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AuditQueryParameters {
-	private String siteId;
-	private List<String> sitesId;
-	private String appName;
-	private List<String> appNames;
-	private String actionName;
-	private String object;
-	private long dateFrom;
-	private long dateTo;
-	private String slicedDates;
-	private String userId;
-	private int limit;
+  private String       siteId;
+  private List<String> sitesId;
+  private String       appName;
+  private List<String> appNames;
+  private String       actionName;
+  private String       object;
+  private long         dateFrom;
+  private long         dateTo;
+  private String       slicedDates;
+  private String       userId;
+  private int          limit;
+  private String       nodeType;
+  private List<String> nodeTypes;
 
-	public String getSlicedDates() {
-		return slicedDates;
-	}
+  public String getSlicedDates() {
+    return slicedDates;
+  }
 
-	public void setSlicedDates(String slicedDates) {
-		this.slicedDates = slicedDates;
-	}
+  public void setSlicedDates(String slicedDates) {
+    this.slicedDates = slicedDates;
+  }
 
-	public AuditQueryParameters() {
-		siteId = null;
-		sitesId = null;
-		appName = null;
-		appNames = null;
-		actionName = null;
-		object = null;
-		dateFrom = 0;
-		dateTo = 0;
-		slicedDates = null;
-		userId = null;
-	}
+  public AuditQueryParameters() {
+    siteId = null;
+    sitesId = null;
+    appName = null;
+    appNames = null;
+    actionName = null;
+    object = null;
+    dateFrom = 0;
+    dateTo = 0;
+    slicedDates = null;
+    userId = null;
+    nodeType = null;
+    nodeTypes = null;
+  }
 
-	public AuditQueryParameters(String site, List<String> sites, String app, List<String> apps, String action, String obj, long from,
-			long to, String dates, String user) {
-		siteId = site;
-		sitesId = sites;
-		appName = app;
-		appNames = apps;
-		actionName = action;
-		object = obj;
-		dateFrom = from;
-		dateTo = to;
-		slicedDates = dates;
-		userId = user;
-	}
+  public AuditQueryParameters(String site, List<String> sites, String app, List<String> apps, String action, String obj, long from, long to,
+      String dates, String user, String node, List<String> nodes) {
+    siteId = site;
+    sitesId = sites;
+    appName = app;
+    appNames = apps;
+    actionName = action;
+    object = obj;
+    dateFrom = from;
+    dateTo = to;
+    slicedDates = dates;
+    userId = user;
+    nodeType = node;
+    nodeTypes = nodes;
+  }
 
-	public List<String> getSitesId() {
-		return sitesId;
-	}
+  public List<String> getSitesId() {
+    return sitesId;
+  }
 
-	public void setSitesId(List<String> _sitesId) {
-		if (_sitesId == null || (_sitesId != null && _sitesId.isEmpty())) {
-			this.sitesId = null;
-		} else {
-			this.sitesId = _sitesId;
-		}
-	}
+  public void setSitesId(List<String> _sitesId) {
+    if (_sitesId == null || (_sitesId != null && _sitesId.isEmpty())) {
+      this.sitesId = null;
+    } else {
+      this.sitesId = _sitesId;
+    }
+  }
 
-	public void setSitesId(String _sitesId) {
-		if (_sitesId != null) {
-			String[] sitesToken = _sitesId.split(",");
-			this.sitesId = new ArrayList<String>(sitesToken.length);
-			for (String token : sitesToken) {
-				this.sitesId.add(token);
-			}
-		}
-	}
+  public void setSitesId(String _sitesId) {
+    if (_sitesId != null) {
+      String[] sitesToken = _sitesId.split(",");
+      this.sitesId = new ArrayList<String>(sitesToken.length);
+      for (String token : sitesToken) {
+        this.sitesId.add(token);
+      }
+    }
+  }
 
-	public String getSiteId() {
-		return siteId;
-	}
+  public String getSiteId() {
+    return siteId;
+  }
 
-	public void setSiteId(String siteId) {
-		this.siteId = siteId;
-	}
+  public void setSiteId(String siteId) {
+    this.siteId = siteId;
+  }
 
-	public String getAppName() {
-		return appName;
-	}
+  public String getAppName() {
+    return appName;
+  }
 
-	public void setAppName(String _appName) {
-		this.appName = _appName;
-	}
+  public void setAppName(String _appName) {
+    this.appName = _appName;
+  }
 
-	public List<String> getAppNames() {
-		return appNames;
-	}
+  public List<String> getAppNames() {
+    return appNames;
+  }
 
-	public void setAppNames(String _appNames) {
-		if (_appNames != null) {
-			String[] appNamesToken = _appNames.split(",");
-			this.appNames = new ArrayList<String>(appNamesToken.length);
-			for (String token : appNamesToken) {
-				this.appNames.add(token);
-			}
-		}
-	}
+  public void setAppNames(String _appNames) {
+    if (_appNames != null) {
+      String[] appNamesToken = _appNames.split(",");
+      this.appNames = new ArrayList<String>(appNamesToken.length);
+      for (String token : appNamesToken) {
+        this.appNames.add(token);
+      }
+    }
+  }
 
-	public String getActionName() {
-		return actionName;
-	}
+  public String getActionName() {
+    return actionName;
+  }
 
-	public void setActionName(String actionName) {
-		this.actionName = actionName;
-	}
+  public void setActionName(String actionName) {
+    this.actionName = actionName;
+  }
 
-	public String getUserId() {
-		return userId;
-	}
+  public String getUserId() {
+    return userId;
+  }
 
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
+  public void setUserId(String userId) {
+    this.userId = userId;
+  }
 
-	public long getDateFrom() {
-		return dateFrom;
-	}
+  public long getDateFrom() {
+    return dateFrom;
+  }
 
-	public void setDateFrom(long dateFrom) {
-		this.dateFrom = dateFrom;
-	}
+  public void setDateFrom(long dateFrom) {
+    this.dateFrom = dateFrom;
+  }
 
-	public void setDateFrom(String dateFrom) {
-		if (dateFrom == null || dateFrom.equals("")) {
-			this.dateFrom = 0;
-		} else {
-			this.dateFrom = Long.parseLong(dateFrom);
-		}
-	}
+  public void setDateFrom(String dateFrom) {
+    if (dateFrom == null || dateFrom.equals("")) {
+      this.dateFrom = 0;
+    } else {
+      this.dateFrom = Long.parseLong(dateFrom);
+    }
+  }
 
-	public long getDateTo() {
-		return dateTo;
-	}
+  public long getDateTo() {
+    return dateTo;
+  }
 
-	public void setDateTo(long dateTo) {
-		this.dateTo = dateTo;
-	}
+  public void setDateTo(long dateTo) {
+    this.dateTo = dateTo;
+  }
 
-	public void setDateTo(String dateTo) {
-		if (dateTo == null || dateTo.equals("")) {
-			this.dateTo = 0;
-		} else {
-			this.dateTo = Long.parseLong(dateTo);
-		}
-	}
+  public void setDateTo(String dateTo) {
+    if (dateTo == null || dateTo.equals("")) {
+      this.dateTo = 0;
+    } else {
+      this.dateTo = Long.parseLong(dateTo);
+    }
+  }
 
-	public String getObject() {
-		return object;
-	}
+  public String getObject() {
+    return object;
+  }
 
-	public void setObject(String object) {
-		this.object = object;
-	}
+  public void setObject(String object) {
+    this.object = object;
+  }
 
-	public int getLimit() {
-		return limit;
-	}
+  public int getLimit() {
+    return limit;
+  }
 
-	public void setLimit(int limit) {
-		this.limit = limit;
-	}
+  public void setLimit(int limit) {
+    this.limit = limit;
+  }
+
+  public String getNodeType() {
+    return nodeType;
+  }
+
+  public void setNodeType(String nodeType) {
+    this.nodeType = nodeType;
+  }
+
+  public List<String> getNodeTypes() {
+    return nodeTypes;
+  }
+
+  public void setNodeTypes(List<String> _nodeTypes) {
+    if (_nodeTypes == null || (_nodeTypes != null && _nodeTypes.isEmpty())) {
+      this.nodeTypes = null;
+    } else {
+      this.nodeTypes = _nodeTypes;
+    }
+  }
+
+  public void setNodeTypes(String _nodeTypes) {
+    if (_nodeTypes != null) {
+      String[] nodeTypesToken = _nodeTypes.split(",");
+      this.nodeTypes = new ArrayList<String>(nodeTypesToken.length);
+      for (String token : nodeTypesToken) {
+        this.nodeTypes.add(token);
+      }
+    }
+  }
 }

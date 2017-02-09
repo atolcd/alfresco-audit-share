@@ -57,6 +57,7 @@
       <result property="popularity" column="audit_popularity" jdbcType="BIGINT" javaType="int"/>
       <result property="auditObject" column="audit_object" jdbcType="VARCHAR" javaType="java.lang.String"/>
       <result property="auditSite" column="audit_site" jdbcType="VARCHAR" javaType="java.lang.String"/>
+      <result property="auditNodeType" column="audit_node_type" jdbcType="VARCHAR" javaType="java.lang.String"/>
     </resultMap>
 
 
@@ -135,6 +136,18 @@
       </if>
     </sql>
 
+    <!-- Snippet pour types de noeud -->
+    <sql id="nodeType_snippet">
+      <if test="nodeType != null">
+          AND audit_node_type = #{auditNodeType}
+      </if>
+      <if test="nodeTypes != null">
+        AND  audit_node_type IN
+        <foreach item="item" collection="nodeTypes" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+      </if>
+    </sql>
 
     <!-- Snippet de consultation-->
     <sql id="read_snippet">
@@ -174,6 +187,7 @@
 
         <include refid="alfresco.atolcd.audit.time_snippet" />
         <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.nodeType_snippet"/>
       </where>
     </sql>
 
@@ -216,6 +230,7 @@
 
         <include refid="alfresco.atolcd.audit.time_snippet" />
         <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.nodeType_snippet"/>
       </where>
     </sql>
 
@@ -259,6 +274,7 @@
 
         <include refid="alfresco.atolcd.audit.time_snippet" />
         <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.nodeType_snippet"/>
       </where>
     </sql>
 
@@ -296,6 +312,7 @@
 
         <include refid="alfresco.atolcd.audit.time_snippet" />
         <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.nodeType_snippet"/>
       </where>
     </sql>
 
