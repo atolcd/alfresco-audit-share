@@ -202,4 +202,32 @@
       <value>classpath:alfresco/module/${groupId}.${artifactId}/dbscripts/update/1.5.2/${db.script.dialect}/AlfrescoUpdate-ShareStatsAuditTables.sql</value>
     </property>
   </bean>
+
+  <!-- Patch: adding a new column to the Audit table -->
+  <bean id="patch.db-ShareStats-alterAuditTable" class="com.atolcd.alfresco.repo.patch.SchemaUpgradeScriptPatch" parent="module.baseComponent" >
+    <property name="moduleId" value="${groupId}.${artifactId}" />
+    <property name="name" value="Ajout de la colonne 'audit_node_type' à la table d'Audit" />
+    <property name="description" value="" />
+    <property name="executeOnceOnly" value="true" />
+    <property name="appliesFromVersion" value="1.5.4" />
+    <property name="dependsOn">
+      <ref bean="patch.db-V3.4-ShareStats-ExtraTables" />
+    </property>
+    <property name="dataSource">
+      <ref bean="dataSource"/>
+    </property>
+    <property name="localSessionFactory">
+      <ref bean="&amp;sessionFactory"></ref>
+    </property>
+    <property name="dialect">
+      <ref bean="dialect" />
+    </property>
+    <property name="globalProperties">
+      <ref bean="global-properties" />
+    </property>
+    <property name="scriptUrl">
+      <value>classpath:alfresco/module/${groupId}.${artifactId}/dbscripts/update/${db.script.dialect}/AlfrescoUpdate-ShareStatsAlterAuditTable.sql</value>
+    </property>
+  </bean>
+
 </beans>
