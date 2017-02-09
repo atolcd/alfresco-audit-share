@@ -30,4 +30,8 @@
     <include refid="alfresco.atolcd.audit.selectByMostRead_snippet"/>
     <if test="limit != 0">fetch first ${limit} rows only</if>
   </select>
+
+  <select id="selectVolumetrySites" parameterType="AtolAuditQueryParameters" resultType="long">
+    <include refid="alfresco.atolcd.audit.selectVolumetrySites_snippet"/> as somme
+  </select>
 </mapper>
