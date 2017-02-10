@@ -34,7 +34,7 @@
   <insert id="insertVolumetryMulti" parameterType="AtolVolumetryEntry">
     insert into share_stats_site_volumetry (id, site_id, site_size, folder_count, file_count, at_time) values
       <foreach item="item" collection="list" separator=",">
-        (IDENTITY_VAL_LOCAL(), #{item.siteId}, #{item.siteSize}, #{item.folderCount}, #{item.fileCount},#{item.atTime})
+        (IDENTITY_VAL_LOCAL(), #{item.siteId}, #{item.siteSize}, #{item.folderCount}, #{item.fileCount}, #{item.atTime})
       </foreach>
   </insert>
 </mapper>
