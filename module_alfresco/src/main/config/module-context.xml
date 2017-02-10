@@ -71,6 +71,12 @@
     <property name="limitMostReadOrUpdate" > <value>${mostreadandupdate.limit}</value> </property>
   </bean>
 
+  <bean id="webscript.com.atolcd.alfresco.share-stats.select-nodetypes.get" class="com.atolcd.alfresco.web.scripts.shareStats.SelectNodeTypesGet" parent="webscript">
+    <property name="sqlSessionTemplate" ref="shareStatsQueriesSqlSessionClientTemplate"/>
+    <property name="namespaceService"> <ref bean="namespaceService" /> </property>
+    <property name="dictionaryService"> <ref bean="dictionaryService" /> </property>
+  </bean>
+
   <bean id="webscript.com.atolcd.alfresco.share-stats.update-audits.post" class="com.atolcd.alfresco.web.scripts.shareStats.UpdateAuditPost" parent="webscript">
     <property name="sqlSessionTemplate" ref="shareStatsQueriesSqlSessionClientTemplate"/>
     <property name="nodeService" ref="NodeService"/>
