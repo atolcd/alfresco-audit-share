@@ -28,6 +28,7 @@
     <typeAlias alias="AtolAuditQueryParameters" type="com.atolcd.alfresco.AuditQueryParameters"/>
     <typeAlias alias="AtolAuditObjectPopularity" type="com.atolcd.alfresco.AuditObjectPopularity"/>
     <typeAlias alias="AtolAuthorityParameters" type="com.atolcd.alfresco.AtolAuthorityParameters"/>
+    <typeAlias alias="AtolAuditNodeType" type="com.atolcd.alfresco.AuditNodeType"/>
   </typeAliases>
 
   <mappers>

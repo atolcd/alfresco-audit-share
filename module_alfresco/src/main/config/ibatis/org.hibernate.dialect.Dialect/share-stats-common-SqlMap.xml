@@ -60,6 +60,10 @@
       <result property="auditNodeType" column="audit_node_type" jdbcType="VARCHAR" javaType="java.lang.String"/>
     </resultMap>
 
+    <resultMap id="result_AtolAuditNodeType" type="AtolAuditNodeType">
+      <result property="nodeTypeValue" column="audit_node_type" jdbcType="VARCHAR" javaType="java.lang.String"/>
+    </resultMap>
+
 
     <!--                -->
     <!-- SQL Snippets   -->
@@ -366,6 +370,18 @@
     <!-- Statements     -->
     <!--                -->
 
+
+    <!-- Get the node Types by audit -->
+    <select id="selectNodeType" parameterType="AtolAuditQueryParameters" resultMap="result_AtolAuditNodeType">
+      select distinct
+        (audit_node_type)
+      from
+        share_stats_audit_entry
+      <include refid="alfresco.atolcd.audit.select_auditViewEntriesWhereSnippet"/>
+      <if test="actionName != null">
+        AND audit_action_name = #{actionName}
+      </if>
+    </select>
 
     <!-- Get the audit application by ID -->
     <select id="selectById" parameterMap="parameter_IdMap" resultMap="result_AtolAuditEntry">
