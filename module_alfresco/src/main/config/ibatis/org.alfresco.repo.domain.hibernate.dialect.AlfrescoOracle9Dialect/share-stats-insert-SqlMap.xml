@@ -41,8 +41,8 @@
     insert all
     <foreach item="item" collection="list" separator=" ">
       into share_stats_site_volumetry (id, site_id, site_size, folder_count, file_count, at_time) values
-      (get_seq_id_site_volumetry, #{item.siteId}, #{item.siteSize}, #{item.folderCount}, #{item.fileCount},#{item.atTime})
+      (get_seq_id_site_volumetry, #{item.siteId}, #{item.siteSize}, #{item.folderCount}, #{item.fileCount}, #{item.atTime})
     </foreach>
-    select * from dual;
+    select * from dual
   </insert>
 </mapper>
