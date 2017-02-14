@@ -143,7 +143,7 @@
     <!-- Snippet pour types de noeud -->
     <sql id="nodeType_snippet">
       <if test="nodeType != null">
-          AND audit_node_type = #{auditNodeType}
+          AND audit_node_type = #{nodeType}
       </if>
       <if test="nodeTypes != null">
         AND  audit_node_type IN
