@@ -180,6 +180,96 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       this.loadSites();
     },
 
+    loadNodeTypes: function GlobalUsage_loadNodeTypes() {
+      var module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value);
+
+      // Call the Webscript only when the document library is selected
+      if (module == "document") {
+        var url = Alfresco.constants.PROXY_URI + "share-stats/select-nodetypes" + this.lastRequest.params;
+        Alfresco.util.Ajax.jsonGet({
+          url: url,
+          successCallback: {
+            fn: this.createNodeTypesMenu,
+            scope: this
+          },
+          failureMessage: this.msg("label.popup.query.error"),
+          execScripts: true
+        });
+      } else {
+        if (this.widgets.nodeTypeButton) {
+          this.widgets.nodeTypeButton.set("disabled", true);
+          this.widgets.nodeTypeButton.value = "";
+          this.widgets.nodeTypeButton.set("label", this.msg("label.menu.nodetype.all"));
+        }
+      }
+    },
+
+    onNodeTypesMenuClick: function GlobalUsage_onNodeTypesMenuClick(p_sType, p_aArgs, p_oItem) {
+      var sText = p_oItem.cfg.getProperty("text");
+
+      this.widgets.nodeTypeButton.value = p_oItem.value;
+      this.widgets.nodeTypeButton.set("label", sText);
+      this.execute();
+    },
+
+    createNodeTypesMenu: function GlobalUsage_createNodeTypesMenu (response) {
+      if (response.json) {
+        var menuButtons = [];
+
+        menuButtons.push({
+            text: this.msg("label.menu.nodetype.all"),
+            value: "",
+            onclick: {
+              fn: this.onNodeTypesMenuClick,
+              scope: this
+            }
+          });
+
+        for (var i=0, ii=response.json.length ; i < ii ; i++) {
+          var current_nodetype = response.json[i];
+          menuButtons.push({
+            text: current_nodetype.label,
+            value: current_nodetype.value,
+            onclick: {
+              fn: this.onNodeTypesMenuClick,
+              scope: this
+            }
+          });
+        }
+
+      }
+
+      if (!this.widgets.nodeTypeButton) {
+        var btOpts = {
+          type: "split",
+          menu: menuButtons,
+          lazyloadmenu: false
+        };
+        this.widgets.nodeTypeButton = new YAHOO.widget.Button(this.id + "-nodetype-criteria", btOpts);
+
+        // First item selection
+        this.widgets.nodeTypeButton.set("label", this.msg("label.menu.nodetype.all"));
+        this.widgets.nodeTypeButton.value = "";
+        this.widgets.nodeTypeButton.set("selectedMenuItem", this.widgets.nodeTypeButton.getMenu().getItem(0));
+        this._setIdsForYUIMenuAndItems(this.widgets.nodeTypeButton);
+
+        this.widgets.nodeTypeButton.set("disabled", false);
+      } else {
+        var nodeTypeMenu = this.widgets.nodeTypeButton.getMenu();
+
+        // Removing and repopulating of node types menu when a query is call
+        nodeTypeMenu.clearContent();
+        nodeTypeMenu.addItems(menuButtons);
+        nodeTypeMenu.render();
+        this.widgets.nodeTypeButton.set("disabled", false);
+      }
+
+      // Disable the menu when it contains only one item
+      if (menuButtons.length <= 1) {
+        this.widgets.nodeTypeButton.set("disabled", true);
+      }
+    },
+
     onCSVExport: function GlobalUsage_onCSVExport() {
       if (this.lastRequest.params) {
         var params = this.lastRequest.params;
@@ -218,7 +308,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
           dateFilter = this.options.currentDateFilter,
           site = this.convertMenuValue(this.widgets.siteButton.value),
-          type = action;
+          type = action,
+          nodeType = (this.widgets.nodeTypeButton) ? this.convertMenuValue(this.widgets.nodeTypeButton.value) : "";
 
       // Date range table
       if (dateFilter) {
@@ -226,7 +317,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       }
 
       // Build query parameters
-      this.lastRequest.params = this.buildParams(module, site, tsString, type);
+      this.lastRequest.params = this.buildParams(module, site, tsString, type, null, null, null, nodeType);
       this.lastRequest.dateFilter = dateFilter;
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-audits" + this.lastRequest.params;
@@ -385,9 +476,10 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           tsString = tsArray.toString(),
           from = tsArray[0],
           to = tsArray[tsArray.length - 1],
+          nodeType = (this.widgets.nodeTypeButton) ? this.convertMenuValue(this.widgets.nodeTypeButton.value) : "",
           params = null;
 
-      params = this.buildParams(module, site, null, type, from, to, this.options.limit);
+      params = this.buildParams(module, site, null, type, from, to, this.options.limit, nodeType);
 
       // Build query parameters
       if(type==="mostread"){
@@ -559,10 +651,11 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
      * @param dates - selected dates
      * @param type - query type
      * @param limit - results limit
+     * @param nodetype - selected node type
 
      * @return string - url params
      */
-    buildParams: function GlobalUsage_buildParams(module, site, dates, type, from, to, limit) {
+    buildParams: function GlobalUsage_buildParams(module, site, dates, type, from, to, limit, nodetype) {
       var params = "?type=" + type;
 
       if (dates !== null && dates != "") {
@@ -607,6 +700,20 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       if (limit) {
         params += "&limit=" + limit;
       }
+      if (nodetype) {
+        if (nodetype.indexOf(',') >= 0) {
+          // Encode nodetype ids
+          var nodetypes = [],
+          nodetypesArray = nodetype.split(',');
+          for (var i=0, ii=nodetypesArray.length ; i<ii ; i++) {
+            nodetypes.push(encodeURIComponent(nodetypesArray[i]));
+          }
+
+          params += "&nodeTypes=" + nodetypes.join(',');
+        } else {
+          params += "&nodeType=" + encodeURIComponent(nodetype);
+        }
+      }
 
       return params;
     },
@@ -616,6 +723,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       this.getByPopularity("mostread");
 
       AtolStatistics.GlobalUsage.superclass.execute.call(this);
+
+      this.loadNodeTypes();
     }
   });
 })();
