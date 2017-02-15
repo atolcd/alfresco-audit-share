@@ -68,6 +68,7 @@
                 </select>
 
                 <input type="button" class="criterias-button" id="${el}-site-criteria" name="site-criteria-button" value="" />
+                <input type="button" class="criterias-button" id="${el}-nodetype-criteria" name="nodetype-criteria-button" value="" />
 
                 <@stats.renderExportButton el />
               </div>
