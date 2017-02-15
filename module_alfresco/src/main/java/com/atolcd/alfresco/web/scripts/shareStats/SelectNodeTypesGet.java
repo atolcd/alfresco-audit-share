@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
@@ -107,11 +108,13 @@ public class SelectNodeTypesGet extends DeclarativeWebScript implements Initiali
           String myNodeType = auditNodeType.getNodeTypeValue();
           if (myNodeType != null && !myNodeType.isEmpty()) {
             try {
-              QName propertyQName = QName.createQName(myNodeType, this.namespaceService);
-              String nodeTypeLabel = this.dictionaryService.getType(propertyQName).getTitle(this.dictionaryService);
-              auditNodeType.setNodeTypeLabel(nodeTypeLabel);
+              QName typeQName = QName.createQName(myNodeType, this.namespaceService);
+              if (Boolean.valueOf(dictionaryService.isSubClass(typeQName, ContentModel.TYPE_CONTENT))) {
+                String nodeTypeLabel = this.dictionaryService.getType(typeQName).getTitle(this.dictionaryService);
+                auditNodeType.setNodeTypeLabel(nodeTypeLabel);
 
-              res.add(auditNodeType);
+                res.add(auditNodeType);
+              }
             } catch (Exception e) {
               logger.warn(e.getMessage(), e);
             }
