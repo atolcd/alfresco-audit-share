@@ -20,7 +20,7 @@
   [
   <#if nodeTypes?exists && nodeTypes?has_content>
     <#-- Retrieve list of nodeTypes -->
-      <#list nodeTypes as nodeTypeItem>
+      <#list nodeTypes?sort_by("nodeTypeLabel") as nodeTypeItem>
         {
           "label": "${nodeTypeItem.nodeTypeLabel!}",
           "value": "${nodeTypeItem.nodeTypeValue!}"
