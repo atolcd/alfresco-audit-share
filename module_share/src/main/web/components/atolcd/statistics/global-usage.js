@@ -47,6 +47,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
     this.options.popularity = 25;
     this.popularityCharts = {};
     this.options.barChartColors = [];
+    this.selectedNodeTypes = [];
 
     // Declaration of the colors used by charts
     var red = "#EE1C2F",
@@ -197,76 +198,55 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         });
       } else {
         if (this.widgets.nodeTypeButton) {
-          this.widgets.nodeTypeButton.set("disabled", true);
-          this.widgets.nodeTypeButton.value = "";
-          this.widgets.nodeTypeButton.set("label", this.msg("label.menu.nodetype.all"));
+          $(this.widgets.nodeTypeButton).prop("disabled", true);
         }
       }
-    },
-
-    onNodeTypesMenuClick: function GlobalUsage_onNodeTypesMenuClick(p_sType, p_aArgs, p_oItem) {
-      var sText = p_oItem.cfg.getProperty("text");
-
-      this.widgets.nodeTypeButton.value = p_oItem.value;
-      this.widgets.nodeTypeButton.set("label", sText);
-      this.execute();
     },
 
     createNodeTypesMenu: function GlobalUsage_createNodeTypesMenu (response) {
       if (response.json) {
-        var menuButtons = [];
-
-        menuButtons.push({
-            text: this.msg("label.menu.nodetype.all"),
-            value: "",
-            onclick: {
-              fn: this.onNodeTypesMenuClick,
-              scope: this
-            }
-          });
+        var menuButtons = [],
+            me = this;
 
         for (var i=0, ii=response.json.length ; i < ii ; i++) {
           var current_nodetype = response.json[i];
           menuButtons.push({
-            text: current_nodetype.label,
-            value: current_nodetype.value,
-            onclick: {
-              fn: this.onNodeTypesMenuClick,
-              scope: this
-            }
+            id: current_nodetype.value,
+            text: current_nodetype.label
           });
         }
-
       }
 
       if (!this.widgets.nodeTypeButton) {
-        var btOpts = {
-          type: "split",
-          menu: menuButtons,
-          lazyloadmenu: false
-        };
-        this.widgets.nodeTypeButton = new YAHOO.widget.Button(this.id + "-nodetype-criteria", btOpts);
+        this.widgets.nodeTypeButton = "#" + this.id + "-nodetype-criteria-select";
 
-        // First item selection
-        this.widgets.nodeTypeButton.set("label", this.msg("label.menu.nodetype.all"));
-        this.widgets.nodeTypeButton.value = "";
-        this.widgets.nodeTypeButton.set("selectedMenuItem", this.widgets.nodeTypeButton.getMenu().getItem(0));
-        this._setIdsForYUIMenuAndItems(this.widgets.nodeTypeButton);
+        $(this.widgets.nodeTypeButton).select2({
+          data: menuButtons,
+          placeholder: this.msg("label.menu.nodetype.all"),
+          width: "200px"
+        })
+          .on("select2:selecting", function(e) {
+            me.selectedNodeTypes.push(e.params.args.data.id);
 
-        this.widgets.nodeTypeButton.set("disabled", false);
+            me.execute();
+          })
+          .on("select2:unselecting", function(e) {
+            var index = me.selectedNodeTypes.indexOf(e.params.args.data.id);
+            if (index > -1) {
+              me.selectedNodeTypes.splice(index, 1);
+            }
+
+            me.execute();
+          });
+
+        $(this.widgets.nodeTypeButton).prop("disabled", false);
       } else {
-        var nodeTypeMenu = this.widgets.nodeTypeButton.getMenu();
-
-        // Removing and repopulating of node types menu when a query is call
-        nodeTypeMenu.clearContent();
-        nodeTypeMenu.addItems(menuButtons);
-        nodeTypeMenu.render();
-        this.widgets.nodeTypeButton.set("disabled", false);
+        $(this.widgets.nodeTypeButton).prop("disabled", false);
       }
 
       // Disable the menu when it contains only one item
       if (menuButtons.length <= 1) {
-        this.widgets.nodeTypeButton.set("disabled", true);
+        $(this.widgets.nodeTypeButton).prop("disabled", true);
       }
     },
 
@@ -309,7 +289,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           dateFilter = this.options.currentDateFilter,
           site = this.convertMenuValue(this.widgets.siteButton.value),
           type = action,
-          nodeType = (this.widgets.nodeTypeButton) ? this.convertMenuValue(this.widgets.nodeTypeButton.value) : "";
+          nodeType = (this.widgets.nodeTypeButton) ? this.convertMenuValue(this.selectedNodeTypes.join(',')) : "";
 
       // Date range table
       if (dateFilter) {
@@ -476,7 +456,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           tsString = tsArray.toString(),
           from = tsArray[0],
           to = tsArray[tsArray.length - 1],
-          nodeType = (this.widgets.nodeTypeButton) ? this.convertMenuValue(this.widgets.nodeTypeButton.value) : "",
+          nodeType = (this.widgets.nodeTypeButton) ? this.convertMenuValue(this.selectedNodeTypes.join(',')) : "",
           params = null;
 
       params = this.buildParams(module, site, null, type, from, to, this.options.limit, nodeType);
