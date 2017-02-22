@@ -8,6 +8,11 @@
   <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/canvg/rgbcolor.js"></@script>
   <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/canvg/StackBlur.js"></@script>
   <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/canvg/canvg.js"></@script>
+
+  <!-- select2 loading -->
+  <@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/select2/select2.css" />
+  <@script type="text/javascript" src="${page.url.context}/res/js/lib/jquery-1.11.1/jquery-1.11.1.min.js"></@script>
+  <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/select2/select2.js"></@script>
 <![endif]-->
 
 <!-- Admin Console for Share Stats Tool -->
