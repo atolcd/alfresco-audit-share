@@ -253,11 +253,6 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
         $(this.widgets.nodeTypeButton).prop("disabled", false);
       }
-
-      // Disable the menu when it contains only one item
-      if (menuButtons.length <= 1) {
-        $(this.widgets.nodeTypeButton).prop("disabled", true);
-      }
     },
 
     onCSVExport: function GlobalUsage_onCSVExport() {
