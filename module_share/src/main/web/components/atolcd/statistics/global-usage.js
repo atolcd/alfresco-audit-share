@@ -186,7 +186,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
       // Call the Webscript only when the document library is selected
       if (module == "document") {
-        var url = Alfresco.constants.PROXY_URI + "share-stats/select-nodetypes" + this.lastRequest.params;
+        var url = Alfresco.constants.PROXY_URI + "share-stats/select-nodetypes" + this.nodeTypeRequestParams;
         Alfresco.util.Ajax.jsonGet({
           url: url,
           successCallback: {
@@ -241,6 +241,16 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
         $(this.widgets.nodeTypeButton).prop("disabled", false);
       } else {
+        // Emptying and repopulating of node types menu when a query is call
+        if (this.selectedNodeTypes == "" || this.selectedNodeTypes == null) {
+          $(this.widgets.nodeTypeButton).empty();
+        }
+        $(this.widgets.nodeTypeButton).select2({
+          data: menuButtons,
+          placeholder: this.msg("label.menu.nodetype.all"),
+          width: "200px",
+        });
+
         $(this.widgets.nodeTypeButton).prop("disabled", false);
       }
 
@@ -289,6 +299,9 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           dateFilter = this.options.currentDateFilter,
           site = this.convertMenuValue(this.widgets.siteButton.value),
           type = action,
+          tsArray = this.buildTimeStampArray(),
+          from = tsArray[0],
+          to = tsArray[tsArray.length - 1],
           nodeType = (this.widgets.nodeTypeButton) ? this.convertMenuValue(this.selectedNodeTypes.join(',')) : "";
 
       // Date range table
@@ -297,6 +310,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       }
 
       // Build query parameters
+      this.nodeTypeRequestParams = this.buildParams(module, site, null, type, from, to, null, nodeType); // Query parameters of nodetypes
       this.lastRequest.params = this.buildParams(module, site, tsString, type, null, null, null, nodeType);
       this.lastRequest.dateFilter = dateFilter;
 
