@@ -19,6 +19,7 @@
 -->
 
 <beans>
+  <import resource="classpath:alfresco/module/${groupId}.${artifactId}/context/bootstrap-context.xml" />
   <import resource="classpath:alfresco/module/${groupId}.${artifactId}/context/schedulers-context.xml" />
 
   <!-- Module configuration properties -->

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<referentiel-groups>
+  <groups>
+    <group>
+      <!--
+      Exemple de groupe
+      <id>GROUP_1</id>
+      <libelle>Libelle_GROUP_1</libelle>
+      -->
+    </group>
+  </groups>
+</referentiel-groups>
