@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+
+<beans>
+  <!-- Boostrap of the list of user connection groups -->
+  <bean id="auditshare.user.group.bootstrapSpaces" class="org.alfresco.repo.module.ImporterModuleComponent" parent="module.baseComponent">
+    <property name="moduleId" value="${groupId}.${artifactId}" />
+    <property name="name" value="auditshare.user.group.bootstrapSpaces" />
+    <property name="description" value="Creation of a folder containing the lists of user connection groups" />
+    <property name="sinceVersion" value="1.0" />
+    <property name="appliesFromVersion" value="1.0" />
+    <property name="importer" ref="spacesBootstrap" />
+    <property name="executeOnceOnly" value="true" />
+    <property name="bootstrapViews">
+      <list>
+        <props>
+          <prop key="path">/${spaces.company_home.childname}/${spaces.dictionary.childname}</prop>
+          <prop key="location">alfresco/module/${groupId}.${artifactId}/bootstrap/auditshare-user-connections-groups.xml</prop>
+        </props>
+      </list>
+    </property>
+  </bean>
+</beans>
