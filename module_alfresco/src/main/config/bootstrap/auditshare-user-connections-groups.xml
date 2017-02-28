@@ -19,7 +19,7 @@
           <view:properties>
             <sys:node-uuid>auditshare-user-connections-groups</sys:node-uuid>
             <cm:description>List of user connection groups</cm:description>
-            <cm:content>contentUrl=classpath:alfresco/module/${project.groupId}.${project.artifactId}/bootstrap/auditshare-user-connections-groups-List.xml|mimetype=text/xml|encoding=UTF-8|locale=fr_FR_</cm:content>
+            <cm:content>contentUrl=classpath:alfresco/module/${project.groupId}.${project.artifactId}/bootstrap/auditshare-user-connections-groups-list.xml|mimetype=text/xml|encoding=UTF-8|locale=fr_FR_</cm:content>
             <cm:title>List of user connection groups</cm:title>
             <cm:author>admin</cm:author>
             <cm:name>auditshare-user-connections-groups-list.xml</cm:name>
