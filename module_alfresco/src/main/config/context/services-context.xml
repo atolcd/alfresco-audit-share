@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING/DTD BEAN//EN"
+   "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+  <!-- Service pour la gestion du référentiel -->
+  <bean id="AuditShareReferentielService" class="org.springframework.aop.framework.ProxyFactoryBean">
+    <property name="proxyInterfaces">
+      <list>
+        <value>com.atolcd.auditshare.repo.service.AuditShareReferentielService</value>
+      </list>
+    </property>
+    <property name="target">
+      <ref bean="auditShareReferentielService" />
+    </property>
+  </bean>
+  <bean id="auditShareReferentielService" class="com.atolcd.auditshare.repo.service.AuditShareReferentielServiceImpl">
+    <property name="nodeService">
+      <ref bean="NodeService" />
+    </property>
+    <property name="contentService">
+      <ref bean="ContentService" />
+    </property>
+  </bean>
+
+</beans>
