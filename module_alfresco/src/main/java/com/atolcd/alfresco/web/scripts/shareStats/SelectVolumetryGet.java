@@ -68,13 +68,14 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		try {
-		  Long calculateTime = System.currentTimeMillis();
+			Long calculateTime = System.currentTimeMillis();
 			Map<String, Object> model = new HashMap<String, Object>();
 			if (PermissionsHelper.isAuthorized(req)) {
 				if (this.sqlSessionTemplate != null) {
 					AuditQueryParameters params = buildParametersFromRequest(req);
 
 					String[] dates = params.getSlicedDates().split(",");
+					boolean sendStackedValues = Boolean.parseBoolean(req.getParameter("stacked"));
 					Map<String, List<Long>> stackedValues = new HashMap<String, List<Long>>(dates.length - 1);
 					List<Long> countValues = new ArrayList<Long>(dates.length - 1);
 
@@ -85,13 +86,17 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 						siteIds = getAllSites();
 					} else if (params.getSiteId() != null) {
 						siteIds.add(params.getSiteId());
-            requete = SELECT_VOLUMETRY;
+						requete = SELECT_VOLUMETRY;
 					} else if (params.getSitesId() != null) {
 						siteIds = params.getSitesId();
 					}
 
-					// Site by site
-					params.setSitesId(siteIds);
+					if (sendStackedValues) {
+						// Site by site
+						params.setSitesId(Collections.<String> emptyList());
+					} else {
+						params.setSitesId(siteIds);
+					}
 
 					for (int i = 0; i < dates.length - 1; i++) {
 						params.setDateFrom(dates[i]);
@@ -99,26 +104,46 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 
 						List<Long> values = new ArrayList<Long>(siteIds.size());
 						Long total = (long) 0;
-						if(logger.isTraceEnabled()){
-              logger.trace(" before :" + (System.currentTimeMillis()-calculateTime));
-            }
-            Object o = sqlSessionTemplate.selectOne(requete, params);
-            if(logger.isTraceEnabled()){
-              logger.trace(" after :" + (System.currentTimeMillis()-calculateTime));
-            }
-            if (o == null) {
-              values.add(Long.valueOf(0));
-            } else {
-              values.add((Long) o);
-              total += (Long) o;
-            }
+
+						if (logger.isTraceEnabled()){
+							logger.trace(" before :" + (System.currentTimeMillis() - calculateTime));
+						}
+
+						if (sendStackedValues) {
+							for (String site : siteIds) {
+								params.setSitesId(site);
+								Object o = sqlSessionTemplate.selectOne(SELECT_VOLUMETRY, params);
+								if (o == null) {
+									values.add(Long.valueOf(0));
+								} else {
+									values.add((Long) o);
+									total += (Long) o;
+								}
+							}
+						} else {
+							Object o = sqlSessionTemplate.selectOne(requete, params);
+							if (o == null) {
+								values.add(Long.valueOf(0));
+							} else {
+								values.add((Long) o);
+								total += (Long) o;
+							}
+						}
+
+						if (logger.isTraceEnabled()){
+							logger.trace(" after :" + (System.currentTimeMillis() - calculateTime));
+						}
 
 						countValues.add(total);
-						stackedValues.put(String.valueOf(i > 9 ? i : "0" + i), values);
+						if (sendStackedValues) {
+							stackedValues.put(String.valueOf(i > 9 ? i : "0" + i), values);
+						}
 					}
 
+					if (sendStackedValues) {
+						model.put("stackedValues", stackedValues.entrySet());
+					}
 					model.put("values", countValues);
-					model.put("stackedValues", stackedValues.entrySet());
 					model.put("sites", siteIds);
 				}
 			} else {
