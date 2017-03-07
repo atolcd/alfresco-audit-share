@@ -153,6 +153,16 @@
       </if>
     </sql>
 
+    <!-- Snippet pour groupes d'utilisateurs -->
+    <sql id="group_snippet">
+      <if test="groupsMembers != null">
+        AND  audit_user_id IN
+        <foreach item="item" collection="groupsMembers" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+      </if>
+    </sql>
+
     <!-- Snippet de consultation-->
     <sql id="read_snippet">
       <where>
@@ -451,6 +461,7 @@
       <where>
         <include refid="alfresco.atolcd.audit.site_snippet"/>
         <include refid="alfresco.atolcd.audit.time_snippet" />
+        <include refid="alfresco.atolcd.audit.group_snippet" />
       </where>
     </select>
 
