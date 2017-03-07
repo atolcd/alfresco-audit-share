@@ -259,7 +259,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           break;
         };
 
-        if (Dom.get(this.id + "-bar_stack-criteria").checked) {    // Volumetry conversion by sites
+        if (!Dom.hasClass(this.id + "-bar-stack-criteria-container", "hidden") && Dom.get(this.id + "-bar_stack-criteria").checked) {    // Volumetry conversion by sites
           var labelVolumetry = (this.msg("tool.volumetry.label") +" ("+ AtolStatistics.util.formatFileSize(response.json.maxLocal).message +")"),
             value_obj = {};
 
