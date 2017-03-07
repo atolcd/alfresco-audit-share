@@ -34,7 +34,7 @@ function main() {
       }
     }
   } catch (e) {
-    logger.log("An error occurred while retrieving user groups", e);
+    logger.log("An error occurred while retrieving user groups: " + e);
   }
 }
 
