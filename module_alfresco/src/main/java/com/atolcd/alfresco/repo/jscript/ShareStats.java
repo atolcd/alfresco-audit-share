@@ -43,16 +43,21 @@ import org.springframework.util.Assert;
 
 import com.atolcd.alfresco.AtolVolumetryEntry;
 import com.atolcd.alfresco.web.scripts.shareStats.InsertAuditPost;
+import com.atolcd.auditshare.repo.service.AuditShareReferentielService;
+import com.atolcd.auditshare.repo.xml.Group;
 
 public class ShareStats extends BaseScopableProcessorExtension implements InitializingBean {
   // Logger
-  private static final Log logger = LogFactory.getLog(ShareStats.class);
+  private static final Log   logger = LogFactory.getLog(ShareStats.class);
 
-  private InsertAuditPost  wsInsertAudits;
-  private SiteService      siteService;
-  private SearchService    searchService;
-  private NodeService      nodeService;
-  protected int            batchSize;
+  private InsertAuditPost    wsInsertAudits;
+  private SiteService        siteService;
+  private SearchService      searchService;
+  private NodeService        nodeService;
+  protected int              batchSize;
+
+  // For the user groups referentiel services
+  private AuditShareReferentielService auditShareReferentielService;
 
   public SiteService getSiteService() {
     return siteService;
@@ -86,12 +91,26 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
     this.wsInsertAudits = wsInsertAudits;
   }
 
+  public AuditShareReferentielService getAuditShareReferentielService() {
+    return auditShareReferentielService;
+  }
+
+  public void setAuditShareReferentielService(AuditShareReferentielService auditShareReferentielService) {
+    this.auditShareReferentielService = auditShareReferentielService;
+  }
+
   @Override
   public void afterPropertiesSet() throws Exception {
     Assert.notNull(siteService);
     Assert.notNull(searchService);
     Assert.notNull(nodeService);
     Assert.notNull(wsInsertAudits);
+    Assert.notNull(auditShareReferentielService);
+  }
+
+  public List<Group> getReferentiel(String refGroup) {
+    // Referentiel
+    return auditShareReferentielService.parseRefentielForNodeUUID(refGroup);
   }
 
   public boolean insertVolumetry(String siteId, long siteSize, int folderCount, int fileCount, long atTime) {

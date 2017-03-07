@@ -2,8 +2,7 @@ package com.atolcd.auditshare.repo.service;
 
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -41,7 +40,7 @@ public class AuditShareReferentielServiceImpl implements AuditShareReferentielSe
     this.nodeService = nodeService;
   }
 
-  public Map<Object, String> parseRefentielForNodeUUID(String id) {
+  public List<Group> parseRefentielForNodeUUID(String id) {
     InputStream xmlStream = null;
     try {
       // Verification de l'existance du node
@@ -69,27 +68,26 @@ public class AuditShareReferentielServiceImpl implements AuditShareReferentielSe
       }
     }
 
-    return Collections.emptyMap();
+    return Collections.emptyList();
   }
 
-  public Map<Object, String> parseReferentielGroups(InputStream file) {
-    Map<Object, String> mapRefGroups = new HashMap<Object, String>();
+  public List<Group> parseReferentielGroups(InputStream file) {
+    ReferentielGroups referentiel = new ReferentielGroups();
     logger.info("Début du parsing du référentiel des groupes");
+
     try {
       JAXBContext jc = JAXBContext.newInstance("com.atolcd.auditshare");
       Unmarshaller unmarshaller = jc.createUnmarshaller();
-      ReferentielGroups referentiel = (ReferentielGroups) unmarshaller.unmarshal(file);
-      // Vide les referentiels existants
-      mapRefGroups.clear();
-      for (Group group : referentiel.getGroups()) {
-        mapRefGroups.put(group.getId(), group.getLibelle());
+      referentiel = (ReferentielGroups) unmarshaller.unmarshal(file);
+
+      if(logger.isInfoEnabled()) {
+        logger.info("Parsing du référentiel des groupes d'utilisateurs [OK]");
+        logger.info("Nombre de groupes : " + referentiel.getGroups().size());
       }
-      logger.info("Parsing du référentiel des groupes d'utilisateurs [OK]");
-      logger.info("Nombre de groupes : " + mapRefGroups.size());
     } catch (Exception e) {
       logger.error("Erreur lors du parsing du référentiel des groupes d'utilisateurs", e);
     }
 
-    return mapRefGroups;
+    return referentiel.getGroups();
   }
 }
