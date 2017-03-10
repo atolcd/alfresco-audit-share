@@ -335,9 +335,9 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           params += "&site=" + encodeURIComponent(site);
         }
       }
+      params = this.addGroupsParam(params);
       this.lastRequest.params = params;
       this.lastRequest.dateFilter = dateFilter;
-      params = this.addGroupsParam(params);
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-users" + this.lastRequest.params;
       Alfresco.util.Ajax.jsonGet({
