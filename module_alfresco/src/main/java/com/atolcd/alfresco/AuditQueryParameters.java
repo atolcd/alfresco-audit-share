@@ -18,6 +18,7 @@
 package com.atolcd.alfresco;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class AuditQueryParameters {
@@ -229,7 +230,7 @@ public class AuditQueryParameters {
 
   public void setGroupsMembers(List<String> _groupsMembers) {
     if (_groupsMembers == null || (_groupsMembers != null && _groupsMembers.isEmpty())) {
-      this.groupsMembers = null;
+      this.groupsMembers = Collections.emptyList();
     } else {
       this.groupsMembers = _groupsMembers;
     }
@@ -237,9 +238,9 @@ public class AuditQueryParameters {
 
   public void setGroupsMembers(String _groupsMembers) {
     if (_groupsMembers != null) {
-      String[] nodeTypesToken = _groupsMembers.split(",");
-      this.groupsMembers = new ArrayList<String>(nodeTypesToken.length);
-      for (String token : nodeTypesToken) {
+      String[] groupsMembersToken = _groupsMembers.split(",");
+      this.groupsMembers = new ArrayList<String>(groupsMembersToken.length);
+      for (String token : groupsMembersToken) {
         this.groupsMembers.add(token);
       }
     }
