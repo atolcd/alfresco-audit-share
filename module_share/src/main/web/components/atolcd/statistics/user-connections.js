@@ -103,6 +103,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       this.headers["users-recently-connected"] = Dom.get(this.id + "-users-recently-connected-header");
 
       this.loadSites();
+
+      this.initUserGroupsMenu();
       this.loadUserGroups();
     },
 
@@ -120,11 +122,36 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       });
     },
 
-    createUserGroupsMenu: function UserConnections_createUserGroupsMenu (response) {
-      if (response.json) {
-        var menuButtons = [],
-            me = this;
+    initUserGroupsMenu: function UserConnections_initUserGroupsMenu () {
+      var me = this;
 
+      if (!this.widgets.userGroupButtonId) {
+        this.widgets.userGroupButtonId = "#" + this.id + "-usergroup-criteria-select";
+
+        $(this.widgets.userGroupButtonId).select2({
+          data: [],
+          placeholder: this.msg("label.menu.usergroup.all"),
+          width: "200px"
+        }).on("select2:selecting", function(e) {
+          me.selectedGroups.push(e.params.args.data.id);
+          me.execute();
+        }).on("select2:unselecting", function(e) {
+          var index = me.selectedGroups.indexOf(e.params.args.data.id);
+          if (index > -1) {
+            me.selectedGroups.splice(index, 1);
+          }
+
+          me.execute();
+        });
+
+        $(this.widgets.userGroupButtonId).prop("disabled", false);
+      }
+    },
+
+    createUserGroupsMenu: function UserConnections_createUserGroupsMenu (response) {
+      var menuButtons = [];
+
+      if (response.json) {
         for (var i=0, ii=response.json.length ; i < ii ; i++) {
           var current_usergroup = response.json[i];
           menuButtons.push({
@@ -134,42 +161,17 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         }
       }
 
-      if (!this.widgets.userGroupButtonId) {
-        this.widgets.userGroupButtonId = "#" + this.id + "-usergroup-criteria-select";
-
-        $(this.widgets.userGroupButtonId).select2({
-          data: menuButtons,
-          placeholder: this.msg("label.menu.usergroup.all"),
-          width: "160px"
-        })
-          .on("select2:selecting", function(e) {
-            me.selectedGroups.push(e.params.args.data.id);
-
-            me.execute();
-          })
-          .on("select2:unselecting", function(e) {
-            var index = me.selectedGroups.indexOf(e.params.args.data.id);
-            if (index > -1) {
-              me.selectedGroups.splice(index, 1);
-            }
-
-            me.execute();
-          });
-
-        $(this.widgets.userGroupButtonId).prop("disabled", false);
-      } else {
-        // Emptying and repopulating of user groups menu when a query is call
-        if (this.selectedGroups == "" || this.selectedGroups == null) {
-          $(this.widgets.userGroupButtonId).empty();
-        }
-        $(this.widgets.userGroupButtonId).select2({
-          data: menuButtons,
-          placeholder: this.msg("label.menu.usergroup.all"),
-          width: "160px",
-        });
-
-        $(this.widgets.userGroupButtonId).prop("disabled", false);
+      // Emptying and repopulating of user groups menu when a query is call
+      if (this.selectedGroups == "" || this.selectedGroups == null) {
+        $(this.widgets.userGroupButtonId).empty();
       }
+      $(this.widgets.userGroupButtonId).select2({
+        data: menuButtons,
+        placeholder: this.msg("label.menu.usergroup.all"),
+        width: "200px",
+      });
+
+      $(this.widgets.userGroupButtonId).prop("disabled", false);
     },
 
     onCSVExport: function UserConnections_onCSVExport() {

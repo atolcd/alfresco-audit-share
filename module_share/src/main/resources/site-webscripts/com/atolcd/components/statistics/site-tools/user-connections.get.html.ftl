@@ -61,6 +61,7 @@
                 </span>
 
                 <@stats.renderExportButton el />
+
                 <select id="${el}-usergroup-criteria-select" name="usergroup-criteria-select" multiple="multiple"></select>
               </div>
             </div>

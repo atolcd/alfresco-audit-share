@@ -76,14 +76,3 @@
 .yui-module  .bd .node-details-popup label {
   font-weight: bold;
 }
-
-/* select2 multi-select menu */
-.statistic-tool .criterias .select2-container {
-  margin-top: -15px;
-  left: 98px;
-}
-
-/* YUI export button */
-.statistic-tool .criterias .yui-menu-button {
-  margin-left: -200px;
-}
