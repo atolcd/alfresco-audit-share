@@ -16,21 +16,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+const refGroup = "auditshare-user-connections-groups";
 function main() {
   try {
     var groups = sharestats.getReferentiel(refGroup);
 
     // Only if the group exists, check if it have a label and assign it the
     // default group label if it does not exist.
-    for ( var group in groups) {
-      if (people.getGroup(group.getId())) {
-        if (!group.getLibelle()) {
-          var groupDefaultName = (people.getGroup(group)).properties["cm:authorityName"];
-          group.setLibelle(groupDefaultName);
+    for (var i = 0, ii = groups.size(); i < ii; i++) {
+      var groupObj = groups.get(i),
+          group = people.getGroup(groupObj.getId());
+      if (group) {
+        if (groupObj.getLibelle() == null || (groupObj.getLibelle() != null && groupObj.getLibelle().isEmpty())) {
+          var groupDefaultName = (group.properties["cm:authorityDisplayName"]) ? group.properties["cm:authorityDisplayName"]
+              : group.properties["cm:authorityName"];
+          groupObj.setLibelle(groupDefaultName);
         }
-        model.items.push(group);
+        model.items.push(groupObj);
       } else {
-        logger.log("The group " + group.getId() + " does not exist.");
+        logger.log("The group " + groupObj.getId() + " does not exist.");
       }
     }
   } catch (e) {
@@ -39,5 +43,4 @@ function main() {
 }
 
 model.items = [];
-const refGroup = "ref-group";
 main();
