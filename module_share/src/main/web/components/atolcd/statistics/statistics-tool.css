@@ -1,1 +1,182 @@
-/* * Copyright (C) 2013 Atol Conseils et Développements. * http://www.atolcd.com/ * * This program is free software: you can redistribute it and/or modify * it under the terms of the GNU Lesser General Public License as published by * the Free Software Foundation, either version 3 of the License, or * (at your option) any later version. * * This program is distributed in the hope that it will be useful, * but WITHOUT ANY WARRANTY; without even the implied warranty of * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the * GNU Lesser General Public License for more details. * * You should have received a copy of the GNU Lesser General Public License * along with this program. If not, see <http://www.gnu.org/licenses/>. */.statistic-tool {  margin: 16px 10px 10px;}.statistic-tool .title {  font-size: 123.1%;  font-weight: bold;  padding-bottom: 0.5em;}.statistic-tool .separator {  margin-bottom: 0.5em;}.statistic-tool .loading {  background-image: url("../../images/lightbox/loading.gif");  padding-left: 18px;  background-repeat: no-repeat;}.statistic-tool .header {  float: left;  margin-top: 2px;  width: 95%;}.statistic-tool .main-chart {  float: left;  text-align: center;  width: 100%;}.statistic-tool .browsing {  float: left;  text-align: center;}.statistic-tool .criterias-button {  float: left;}.statistic-tool .criterias label {  float: left;  margin-left: 15px;  margin-top: 5px;}.statistic-tool .home {  padding-right: 20px;}.statistic-tool .filters span {  padding: 0.25em 0.5em;}.statistic-tool .filters a {  background: none repeat scroll 0 0 transparent;  border-radius: 4px;  color: #555555;  font-size: 90%;  font-weight: bold;  padding: 4px;  text-decoration: none;  text-transform: uppercase;}.statistic-tool .filters span.selected a {  background: none repeat scroll 0 0 #555555;  color: #FFFFFF;  font-weight: bold;}.statistic-tool .filters  a:hover {  background: none repeat scroll 0 0 #AAAAAA;  color: #FFFFFF;}.statistic-tool .home-img {  background: url("./img/home.png") no-repeat scroll 0 0 transparent;  cursor: pointer;  display: inline-block;  height: 16px;  padding: 0 !important;  width: 16px;}.statistic-tool .home-img:hover {  background: url("./img/home_hover.png") no-repeat scroll 0 0 transparent;}.statistic-tool .img-prev-arrow {  background: url("./img/prev.png") repeat scroll 0 0 transparent;  cursor: pointer;  float: left;  height: 24px;  margin-left: 5px;  position: relative;  z-index: 2;  width: 24px;}.statistic-tool .img-prev-arrow:hover {  background: url("./img/prev_hover.png") repeat scroll 0 0 transparent;}.statistic-tool .img-next-arrow {  background: url("./img/next.png") repeat scroll 0 0 transparent;  cursor: pointer;  float: right;  height: 24px;  margin-right: 5px;  position: relative;  z-index: 2;  width: 24px;}.statistic-tool .img-next-arrow:hover {  background: url("./img/next_hover.png") repeat scroll 0 0 transparent;}.statistic-tool .chart-container {  float: left;  min-height: 300px;  padding-bottom: 20px;}.statistic-tool .footer-atol {  float: left;  padding-top: 20px;  text-align: right;  vertical-align: middle;  width: 100%;}.statistic-tool .footer-atol a, .statistic-tool .footer-atol .footer-atol-text, .statistic-tool .footer-atol .footer-atol-img {  color: #333333;  vertical-align: middle;}/* YUI */.statistic-tool .header .yuimenu .bd ul li.yuimenuitem .yuimenuitemlabel {  padding-left: 25px;}li.yui-button-selectedmenuitem {  background: url("../../../../yui/menu/assets/menuitem_checkbox.png") left center no-repeat;}/* Export button */.export-button li.yui-button-selectedmenuitem {  background: none;}
+/*
+ * Copyright (C) 2013 Atol Conseils et Développements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.statistic-tool {
+  margin: 16px 10px 10px;
+}
+
+.statistic-tool .title {
+  font-size: 123.1%;
+  font-weight: bold;
+  padding-bottom: 0.5em;
+}
+
+.statistic-tool .separator {
+  margin-bottom: 0.5em;
+}
+
+.statistic-tool .loading {
+  background-image: url("../../images/lightbox/loading.gif");
+  padding-left: 18px;
+  background-repeat: no-repeat;
+}
+
+.statistic-tool .header {
+  float: left;
+  margin-top: 2px;
+  width: 95%;
+}
+
+.statistic-tool .main-chart {
+  float: left;
+  text-align: center;
+  width: 100%;
+}
+
+.statistic-tool .browsing {
+  float: left;
+  text-align: center;
+}
+
+.statistic-tool .criterias-button {
+  float: left;
+}
+
+.statistic-tool .criterias label {
+  float: left;
+  margin-left: 15px;
+  margin-top: 5px;
+}
+
+.statistic-tool .home {
+  padding-right: 20px;
+}
+
+.statistic-tool .filters span {
+  padding: 0.25em 0.5em;
+}
+
+.statistic-tool .filters a {
+  background: none repeat scroll 0 0 transparent;
+  border-radius: 4px;
+  color: #555555;
+  font-size: 90%;
+  font-weight: bold;
+  padding: 4px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.statistic-tool .filters span.selected a {
+  background: none repeat scroll 0 0 #555555;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.statistic-tool .filters  a:hover {
+  background: none repeat scroll 0 0 #AAAAAA;
+  color: #FFFFFF;
+}
+
+.statistic-tool .home-img {
+  background: url("./img/home.png") no-repeat scroll 0 0 transparent;
+  cursor: pointer;
+  display: inline-block;
+  height: 16px;
+  padding: 0 !important;
+  width: 16px;
+}
+
+.statistic-tool .home-img:hover {
+  background: url("./img/home_hover.png") no-repeat scroll 0 0 transparent;
+}
+
+.statistic-tool .img-prev-arrow {
+  background: url("./img/prev.png") repeat scroll 0 0 transparent;
+  cursor: pointer;
+  float: left;
+  height: 24px;
+  margin-left: 5px;
+  position: relative;
+  z-index: 2;
+  width: 24px;
+}
+
+.statistic-tool .img-prev-arrow:hover {
+  background: url("./img/prev_hover.png") repeat scroll 0 0 transparent;
+}
+
+.statistic-tool .img-next-arrow {
+  background: url("./img/next.png") repeat scroll 0 0 transparent;
+  cursor: pointer;
+  float: right;
+  height: 24px;
+  margin-right: 5px;
+  position: relative;
+  z-index: 2;
+  width: 24px;
+}
+
+.statistic-tool .img-next-arrow:hover {
+  background: url("./img/next_hover.png") repeat scroll 0 0 transparent;
+}
+
+.statistic-tool .chart-container {
+  float: left;
+  min-height: 300px;
+  padding-bottom: 20px;
+}
+
+.statistic-tool .footer-atol {
+  float: left;
+  padding-top: 20px;
+  text-align: right;
+  vertical-align: middle;
+  width: 100%;
+}
+.statistic-tool .footer-atol a, .statistic-tool .footer-atol .footer-atol-text, .statistic-tool .footer-atol .footer-atol-img {
+  color: #333333;
+  vertical-align: middle;
+}
+
+/* YUI */
+.statistic-tool .header .yuimenu .bd ul li.yuimenuitem .yuimenuitemlabel {
+  padding-left: 25px;
+}
+
+li.yui-button-selectedmenuitem {
+  background: url("../../../../yui/menu/assets/menuitem_checkbox.png") left center no-repeat;
+}
+
+/* Export button */
+.export-button li.yui-button-selectedmenuitem {
+  background: none;
+}
+
+/* Select2 */
+.statistic-tool .select2-container .select2-selection--multiple {
+  border: 1px solid #ccc !important;
+  border-radius: 0px !important;
+  min-height: 28px !important;
+  font-size: 12px !important;
+  margin-top: -12px;
+}
+
+.statistic-tool .select2-container .select2-selection--multiple .select2-selection__choice {
+  background-color: #ffffff !important;
+}
