@@ -179,6 +179,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       this.widgets.actionCriteriaButton.getMenu().subscribe("click", onActionsMenuItemClick);
 
       this.loadSites();
+
+      this.initNodeTypesMenu();
     },
 
     loadNodeTypes: function GlobalUsage_loadNodeTypes() {
@@ -203,11 +205,36 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       }
     },
 
-    createNodeTypesMenu: function GlobalUsage_createNodeTypesMenu (response) {
-      if (response.json) {
-        var menuButtons = [],
-            me = this;
+    initNodeTypesMenu: function GlobalUsage_initNodeTypesMenu (response) {
+      var me = this;
 
+      if (!this.widgets.nodeTypeButton) {
+        this.widgets.nodeTypeButton = "#" + this.id + "-nodetype-criteria-select";
+
+        $(this.widgets.nodeTypeButton).select2({
+          data: [],
+          placeholder: this.msg("label.menu.nodetype.all"),
+          width: "200px"
+        }).on("select2:selecting", function(e) {
+          me.selectedNodeTypes.push(e.params.args.data.id);
+          me.execute();
+        }).on("select2:unselecting", function(e) {
+          var index = me.selectedNodeTypes.indexOf(e.params.args.data.id);
+          if (index > -1) {
+            me.selectedNodeTypes.splice(index, 1);
+          }
+
+          me.execute();
+        });
+
+        $(this.widgets.nodeTypeButton).prop("disabled", false);
+      }
+    },
+
+    createNodeTypesMenu: function GlobalUsage_createNodeTypesMenu (response) {
+      var menuButtons = [];
+
+      if (response.json) {
         for (var i=0, ii=response.json.length ; i < ii ; i++) {
           var current_nodetype = response.json[i];
           menuButtons.push({
@@ -217,42 +244,17 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         }
       }
 
-      if (!this.widgets.nodeTypeButton) {
-        this.widgets.nodeTypeButton = "#" + this.id + "-nodetype-criteria-select";
-
-        $(this.widgets.nodeTypeButton).select2({
-          data: menuButtons,
-          placeholder: this.msg("label.menu.nodetype.all"),
-          width: "200px"
-        })
-          .on("select2:selecting", function(e) {
-            me.selectedNodeTypes.push(e.params.args.data.id);
-
-            me.execute();
-          })
-          .on("select2:unselecting", function(e) {
-            var index = me.selectedNodeTypes.indexOf(e.params.args.data.id);
-            if (index > -1) {
-              me.selectedNodeTypes.splice(index, 1);
-            }
-
-            me.execute();
-          });
-
-        $(this.widgets.nodeTypeButton).prop("disabled", false);
-      } else {
-        // Emptying and repopulating of node types menu when a query is call
-        if (this.selectedNodeTypes == "" || this.selectedNodeTypes == null) {
-          $(this.widgets.nodeTypeButton).empty();
-        }
-        $(this.widgets.nodeTypeButton).select2({
-          data: menuButtons,
-          placeholder: this.msg("label.menu.nodetype.all"),
-          width: "200px",
-        });
-
-        $(this.widgets.nodeTypeButton).prop("disabled", false);
+      // Emptying and repopulating of node types menu when a query is call
+      if (this.selectedNodeTypes == "" || this.selectedNodeTypes == null) {
+        $(this.widgets.nodeTypeButton).empty();
       }
+      $(this.widgets.nodeTypeButton).select2({
+        data: menuButtons,
+        placeholder: this.msg("label.menu.nodetype.all"),
+        width: "200px",
+      });
+
+      $(this.widgets.nodeTypeButton).prop("disabled", false);
     },
 
     onCSVExport: function GlobalUsage_onCSVExport() {

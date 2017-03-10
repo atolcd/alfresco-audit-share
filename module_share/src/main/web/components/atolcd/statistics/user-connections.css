@@ -92,8 +92,3 @@
   padding-bottom: 5px;
   padding-left: 1.5em;
 }
-
-/* select2 multi-select menu */
-.statistic-tool .criterias .select2-container {
-  margin-top: -15px;
-}
