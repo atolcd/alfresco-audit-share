@@ -45,6 +45,9 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
     AtolStatistics.UserConnections.superclass.constructor.call(this, "AtolStatistics.UserConnections", htmlId, ["button", "container", "json"]);
     Event.addListener(window, 'resize', this.onWindowResize, this, true);
 
+    // Default value
+    this.selectedGroups = [];
+
     return this;
   };
 
@@ -100,6 +103,73 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       this.headers["users-recently-connected"] = Dom.get(this.id + "-users-recently-connected-header");
 
       this.loadSites();
+      this.loadUserGroups();
+    },
+
+    loadUserGroups: function UserConnections_loadUserGroups() {
+        var url = Alfresco.constants.PROXY_URI + "share-stats/user-connections/groups";
+
+      Alfresco.util.Ajax.jsonGet({
+        url: url,
+        successCallback: {
+          fn: this.createUserGroupsMenu,
+          scope: this
+        },
+        failureMessage: this.msg("label.popup.query.error"),
+        execScripts: true
+      });
+    },
+
+    createUserGroupsMenu: function UserConnections_createUserGroupsMenu (response) {
+      if (response.json) {
+        var menuButtons = [],
+            me = this;
+
+        for (var i=0, ii=response.json.length ; i < ii ; i++) {
+          var current_usergroup = response.json[i];
+          menuButtons.push({
+            id: current_usergroup.id,
+            text: current_usergroup.libelle
+          });
+        }
+      }
+
+      if (!this.widgets.userGroupButtonId) {
+        this.widgets.userGroupButtonId = "#" + this.id + "-usergroup-criteria-select";
+
+        $(this.widgets.userGroupButtonId).select2({
+          data: menuButtons,
+          placeholder: this.msg("label.menu.usergroup.all"),
+          width: "160px"
+        })
+          .on("select2:selecting", function(e) {
+            me.selectedGroups.push(e.params.args.data.id);
+
+            me.execute();
+          })
+          .on("select2:unselecting", function(e) {
+            var index = me.selectedGroups.indexOf(e.params.args.data.id);
+            if (index > -1) {
+              me.selectedGroups.splice(index, 1);
+            }
+
+            me.execute();
+          });
+
+        $(this.widgets.userGroupButtonId).prop("disabled", false);
+      } else {
+        // Emptying and repopulating of user groups menu when a query is call
+        if (this.selectedGroups == "" || this.selectedGroups == null) {
+          $(this.widgets.userGroupButtonId).empty();
+        }
+        $(this.widgets.userGroupButtonId).select2({
+          data: menuButtons,
+          placeholder: this.msg("label.menu.usergroup.all"),
+          width: "160px",
+        });
+
+        $(this.widgets.userGroupButtonId).prop("disabled", false);
+      }
     },
 
     onCSVExport: function UserConnections_onCSVExport() {
@@ -119,6 +189,22 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       if (this.userChart) {
         this.exportChartAsImage(this.userChart);
       }
+    },
+
+    // Build query parameters of user groups
+    addGroupsParam: function UserConnections_onUserGroups(params) {
+      var userGroup = (this.widgets.userGroupButtonId) ? this.convertMenuValue(this.selectedGroups.join(',')) : "";
+      if (userGroup) {
+        // Encode userGroup ids
+        var userGroups = [],
+            userGroupsArray = userGroup.split(',');
+        for (var i=0, ii=userGroupsArray.length ; i<ii ; i++) {
+          userGroups.push(encodeURIComponent(userGroupsArray[i]));
+        }
+
+        params += "&groups=" + userGroups.join(',');
+      }
+      return params;
     },
 
     prepareRecentlyConnectedUsersRequest: function UserConnections_prepareRecentlyConnectedUsersRequest() {
@@ -145,6 +231,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         }
       }
 
+      params = this.addGroupsParam(params);
       this.executeUserRequest(params, "users-recently-connected");
     },
 
@@ -174,6 +261,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         }
       }
 
+      params = this.addGroupsParam(params);
       this.executeUserRequest(params, type);
     },
 
@@ -223,15 +311,16 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
       // Date range table
       if (dateFilter) {
-        var tsArray = this.buildTimeStampArray();
         // Labels update
+        var tsArray = this.buildTimeStampArray();
         this.updateUsersLabels(tsArray);
         tsString = tsArray.toString();
       }
 
-      // Build query parameters
       params = "?type=users-count";
       params += "&dates=" + tsString;
+
+      // Build query parameters of sites
       if (site) {
         if (site.indexOf(',') >= 0) {
           // Encode site ids
@@ -248,6 +337,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       }
       this.lastRequest.params = params;
       this.lastRequest.dateFilter = dateFilter;
+      params = this.addGroupsParam(params);
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-users" + this.lastRequest.params;
       Alfresco.util.Ajax.jsonGet({
