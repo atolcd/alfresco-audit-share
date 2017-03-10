@@ -47,12 +47,8 @@ public class AuditShareReferentielServiceImpl implements AuditShareReferentielSe
       NodeRef xmlRefNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, id);
       if (xmlRefNodeRef != null && nodeService.exists(xmlRefNodeRef)) {
         xmlStream = contentService.getReader(xmlRefNodeRef, ContentModel.PROP_CONTENT).getContentInputStream();
-        if (id.equals(REF_GROUP_ID)) {
-          // Initialisation du référentiel des groupes
-          return parseReferentielGroups(xmlStream);
-        } else {
-          logger.error("Référentiel (UUDI) non reconnu " + id);
-        }
+        // Initialisation du référentiel des groupes
+        return parseReferentielGroups(xmlStream);
       } else {
         logger.error("NodeRef non trouvé pour l'id passé en paramètre : " + id);
       }
@@ -76,7 +72,7 @@ public class AuditShareReferentielServiceImpl implements AuditShareReferentielSe
     logger.info("Début du parsing du référentiel des groupes");
 
     try {
-      JAXBContext jc = JAXBContext.newInstance("com.atolcd.auditshare");
+      JAXBContext jc = JAXBContext.newInstance(ReferentielGroups.class);
       Unmarshaller unmarshaller = jc.createUnmarshaller();
       referentiel = (ReferentielGroups) unmarshaller.unmarshal(file);
 
