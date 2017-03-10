@@ -13,6 +13,12 @@
   <@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/select2/select2.css" />
   <@script type="text/javascript" src="${page.url.context}/res/js/lib/jquery-1.11.1/jquery-1.11.1.min.js"></@script>
   <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/select2/select2.js"></@script>
+
+  <#assign shortLocale = "en" />
+  <#if locale?? && locale?contains("fr")>
+    <#assign shortLocale = locale[0..1] />
+  </#if>
+  <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/select2/i18n/${shortLocale!'en'}.js" />
 <![endif]-->
 
 <!-- Admin Console for Share Stats Tool -->
