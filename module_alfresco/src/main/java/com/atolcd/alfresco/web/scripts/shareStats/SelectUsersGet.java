@@ -159,7 +159,13 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 
     List<String> auditUsers = new ArrayList<String>();
     auditUsers = (List<String>) this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, auditQueryParameters);
-    Set<String> usersSet = this.selectSiteMembers(atolAuthorityParameters);
+
+    Set<String> usersSet;
+    if (auditQueryParameters !=null && auditQueryParameters.getGroupsMembers() != null) {
+      usersSet = new HashSet<String>(auditQueryParameters.getGroupsMembers());
+    } else {
+      usersSet = this.selectSiteMembers(atolAuthorityParameters);
+    }
     // Differentiel
     usersSet.removeAll(auditUsers);
     return usersSet;
