@@ -17,6 +17,8 @@
  */
 
 const refGroup = "auditshare-user-connections-groups";
+const groupPrefix = "GROUP_";
+
 function main() {
   try {
     var groups = sharestats.getReferentiel(refGroup);
@@ -29,7 +31,7 @@ function main() {
       if (group) {
         if (groupObj.getLibelle() == null || (groupObj.getLibelle() != null && groupObj.getLibelle().isEmpty())) {
           var groupDefaultName = (group.properties["cm:authorityDisplayName"]) ? group.properties["cm:authorityDisplayName"]
-              : group.properties["cm:authorityName"];
+              : group.properties["cm:authorityName"].substring(groupPrefix.length);
           groupObj.setLibelle(groupDefaultName);
         }
         model.items.push(groupObj);
