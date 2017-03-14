@@ -144,7 +144,9 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           me.execute();
         });
 
-        $(this.widgets.userGroupButtonId).prop("disabled", false);
+        // hide group menu
+        $(".select2.select2-container").addClass("hidden");
+        $(this.widgets.userGroupButtonId).prop("disabled", true);
       }
     },
 
@@ -161,17 +163,21 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         }
       }
 
-      // Emptying and repopulating of user groups menu when a query is call
-      if (this.selectedGroups == "" || this.selectedGroups == null) {
-        $(this.widgets.userGroupButtonId).empty();
-      }
-      $(this.widgets.userGroupButtonId).select2({
-        data: menuButtons,
-        placeholder: this.msg("label.menu.usergroup.all"),
-        width: "200px",
-      });
+      if (menuButtons.length > 0) {
+        // Emptying and repopulating of user groups menu when a query is call
+        if (this.selectedGroups == "" || this.selectedGroups == null) {
+          $(this.widgets.userGroupButtonId).empty();
+        }
+        $(this.widgets.userGroupButtonId).select2({
+          data: menuButtons,
+          placeholder: this.msg("label.menu.usergroup.all"),
+          width: "200px",
+        });
 
-      $(this.widgets.userGroupButtonId).prop("disabled", false);
+        // show group menu
+        $(".select2.select2-container").removeClass("hidden");
+        $(this.widgets.userGroupButtonId).prop("disabled", false);
+      }
     },
 
     onCSVExport: function UserConnections_onCSVExport() {
