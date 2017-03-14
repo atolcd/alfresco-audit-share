@@ -38,7 +38,7 @@ public class DeleteAuditDelete extends DeclarativeWebScript implements Initializ
 	private static final Log logger = LogFactory.getLog(DeleteAuditDelete.class);
 
 	// SqlMapClientTemplate for MyBatis calls
-	private static SqlSessionTemplate sqlSessionTemplate;
+	private SqlSessionTemplate sqlSessionTemplate;
 
 	// MyBatis query ids
 	private static final String DELETE_AUDIT_BY_PARAMETERS = "alfresco.atolcd.audit.deleteAuditByParameters";
@@ -46,7 +46,7 @@ public class DeleteAuditDelete extends DeclarativeWebScript implements Initializ
 	private static final String MODEL_SUCCESS = "success";
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-		DeleteAuditDelete.sqlSessionTemplate = sqlSessionTemplate;
+		this.sqlSessionTemplate = sqlSessionTemplate;
 	}
 
 	@Override
@@ -103,7 +103,7 @@ public class DeleteAuditDelete extends DeclarativeWebScript implements Initializ
 	 * @param site
 	 *          Site
 	 */
-	public static void deleteAuditEntries(long from, long to, String site) {
+	public void deleteAuditEntries(long from, long to, String site) {
 		AuditQueryParameters auditQueryParameters = new AuditQueryParameters();
 		auditQueryParameters.setDateFrom(from);
 		auditQueryParameters.setDateTo(to);

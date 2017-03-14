@@ -217,7 +217,6 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 	 *            the URL of the script to report. If this is null, the script
 	 *            is assumed to have been auto-generated.
 	 */
-	@SuppressWarnings("resource")
 	private void executeScriptFile(Configuration cfg, Connection connection, File scriptFile, String scriptUrl) throws Exception {
 		final Dialect dialect = Dialect.getDialect(cfg.getProperties());
 
