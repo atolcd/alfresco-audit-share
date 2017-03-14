@@ -108,6 +108,12 @@
     </property>
     <property name="siteService" ref="SiteService" />
     <property name="sysAdminParams" ref="sysAdminParams" />
+    <property name="auditShareReferentielService">
+      <ref bean="AuditShareReferentielService" />
+    </property>
+    <property name="authorityService">
+      <ref bean="AuthorityService" />
+    </property>
   </bean>
 
 
