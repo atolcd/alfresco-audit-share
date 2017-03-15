@@ -24,11 +24,11 @@
       <#if values?size !=0>
         <#assign maxCount = 0 />
         <#list values as value>
-          <#if value?c?number gt maxCount>
+          <#if value?? && value?c?number gt maxCount>
             <#assign maxCount = value?c?number />
           </#if>
 
-          ${value?c}<#if value_has_next>,</#if>
+          ${(value?c)!'null'}<#if value_has_next>,</#if>
         </#list>
       </#if>
     ],
@@ -46,11 +46,11 @@
         <#list stackedValues?sort as sv>
           [
             <#list sv.value as val>
-              <#if val?c?number gt maxLocal>
+              <#if val?? && val?c?number gt maxLocal>
                 <#assign maxLocal = val?c?number />
               </#if>
 
-              ${val?c}<#if val_has_next>,</#if>
+              ${(val?c)!'null'}<#if val_has_next>,</#if>
             </#list>
           ]
           <#if sv_has_next>,</#if>
