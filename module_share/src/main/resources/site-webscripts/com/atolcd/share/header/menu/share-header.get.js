@@ -24,7 +24,7 @@ if (user.isAdmin) {
   // user needs to be SiteManger of at least one site
   var json = remote.call("/share-stats/site/list-sites?role=SiteManager");
   if (json.status == 200) {
-    var sites = eval('(' + json + ')');
+    var sites = JSON.parse(json);
     if (sites && sites.length > 0) {
       showMenu = true;
     }

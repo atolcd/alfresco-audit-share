@@ -22,7 +22,7 @@ if (page.url.templateArgs.site != null && page.id != "search" && page.id != "adv
 
   var json = remote.call("/api/sites/" + page.url.templateArgs.site + "/memberships/" + encodeURIComponent(user.name));
   if (json.status == 200) {
-    var obj = eval('(' + json + ')');
+    var obj = JSON.parse(json);
     if (obj) {
       userIsSiteManager = (obj.role == "SiteManager");
     }
