@@ -29,11 +29,11 @@ atolcd::alfresco::modules::share_module_stable:
 
 atolcd::alfresco::modules::repo_module:
   com.atolcd.alfresco.auditshare-42X-repo:
-    source: '/root/com.atolcd.alfresco.auditshare-42X-repo-1.5.4-SNAPSHOT.amp'
+    source: '/root/com.atolcd.alfresco.auditshare-42X-repo-1.5.5-SNAPSHOT.amp'
 
 atolcd::alfresco::modules::share_module:
   com.atolcd.alfresco.auditshare-42X-share:
-    source: '/root/com.atolcd.alfresco.auditshare-42X-share-1.5.4-SNAPSHOT.amp'
+    source: '/root/com.atolcd.alfresco.auditshare-42X-share-1.5.5-SNAPSHOT.amp'
 
 alfresco::params:
   #mail
