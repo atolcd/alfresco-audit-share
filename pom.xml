@@ -14,17 +14,18 @@
     <alfresco.version>5.0.3</alfresco.version>
     <alfresco-maven.version>1.1.5</alfresco-maven.version>
     <java.version>1.7</java.version>
+    <sonar.projectName>AtolCD - AuditShare [5.0.X]</sonar.projectName>
   </properties>
 
   <distributionManagement>
     <repository>
       <id>nexus-releases</id>
-      <url>http://nexus/content/repositories/releases/</url>
+      <url>http://nexus.lan.priv.atolcd.com/content/repositories/releases/</url>
       <name>Releases</name>
     </repository>
     <snapshotRepository>
       <id>nexus-snapshots</id>
-      <url>http://nexus/content/repositories/snapshots/</url>
+      <url>http://nexus.lan.priv.atolcd.com/content/repositories/snapshots/</url>
       <name>Snapshots</name>
     </snapshotRepository>
   </distributionManagement>
