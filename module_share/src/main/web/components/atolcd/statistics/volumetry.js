@@ -267,19 +267,24 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           for (var i=0, ii=response.json.stackedValues.length ; i<ii ; i++) {
             var values = response.json.stackedValues[i];
             for (var j=0, jj=values.length ; j<jj ; j++) {
-              var siteId = response.json.sites[j];
+              var value = values[j],
+                  siteId = response.json.sites[j];
               if (!value_obj[siteId]) {
                 value_obj[siteId] = [siteId];
               }
 
-              var valueConvert = AtolStatistics.util.formatFileSize(values[j]),
-                stackedConvert = AtolStatistics.util.formatFileSize(response.json.maxLocal),
-                jsonConvertStackedValue = valueConvert.value;
+              if (value == null) {
+                value_obj[siteId].push(value);
+              } else {
+                var valueConvert = AtolStatistics.util.formatFileSize(value),
+                  stackedConvert = AtolStatistics.util.formatFileSize(response.json.maxLocal),
+                  jsonConvertStackedValue = valueConvert.value;
 
-              if (valueConvert.message != stackedConvert.message) {
-                jsonConvertStackedValue = AtolStatistics.util.roundNumber(values[j] / stackedConvert.unitValue, 2); // Convert format of a value when it's different from the max format
+                if (valueConvert.message != stackedConvert.message) {
+                  jsonConvertStackedValue = AtolStatistics.util.roundNumber(value / stackedConvert.unitValue, 2); // Convert format of a value when it's different from the max format
+                }
+                value_obj[siteId].push(jsonConvertStackedValue);
               }
-              value_obj[siteId].push(jsonConvertStackedValue);
 
               // Complete Columns of matrices and build groups array when we are on the last iteration of the first loop
               if (i == response.json.stackedValues.length - 1) {
@@ -295,7 +300,12 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
           chartArguments.axis.y.label.text = [labelVolumetry];
           for (var i=0, ii=response.json.values.length ; i<ii ; i++) {
-            jsonConvertValues[i] = AtolStatistics.util.formatFileSize(response.json.values[i]).value; // json responses converted in the right format (Bytes, Kb, Mb, Gb or Tb)
+            var value = response.json.values[i];
+            if (value == null) {
+              jsonConvertValues[i] = value;
+            } else {
+              jsonConvertValues[i] = AtolStatistics.util.formatFileSize(value).value; // json responses converted in the right format (Bytes, Kb, Mb, Gb or Tb)
+            }
           }
           chartArguments.data.columns.push([labelVolumetry].concat(jsonConvertValues));
         }

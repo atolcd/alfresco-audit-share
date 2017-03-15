@@ -103,7 +103,7 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 						params.setDateTo(dates[i + 1]);
 
 						List<Long> values = new ArrayList<Long>(siteIds.size());
-						Long total = (long) 0;
+						Long total = null;
 
 						if (logger.isTraceEnabled()){
 							logger.trace(" before :" + (System.currentTimeMillis() - calculateTime));
@@ -114,19 +114,24 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 								params.setSitesId(site);
 								Object o = sqlSessionTemplate.selectOne(SELECT_VOLUMETRY, params);
 								if (o == null) {
-									values.add(Long.valueOf(0));
+									values.add(null);
 								} else {
 									values.add((Long) o);
-									total += (Long) o;
+
+									if (total == null) {
+										total = (Long) o;
+									} else {
+										total += (Long) o;
+									}
 								}
 							}
 						} else {
 							Object o = sqlSessionTemplate.selectOne(requete, params);
 							if (o == null) {
-								values.add(Long.valueOf(0));
+								values.add(null);
 							} else {
 								values.add((Long) o);
-								total += (Long) o;
+								total = (Long) o;
 							}
 						}
 
