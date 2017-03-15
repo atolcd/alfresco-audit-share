@@ -37,14 +37,6 @@ public class AuditQueryParameters {
   private List<String> nodeTypes;
   private List<String> groupsMembers;
 
-  public String getSlicedDates() {
-    return slicedDates;
-  }
-
-  public void setSlicedDates(String slicedDates) {
-    this.slicedDates = slicedDates;
-  }
-
   public AuditQueryParameters() {
     siteId = null;
     sitesId = null;
@@ -61,38 +53,29 @@ public class AuditQueryParameters {
     groupsMembers = null;
   }
 
-  public AuditQueryParameters(String site, List<String> sites, String app, List<String> apps, String action, String obj, long from, long to,
-      String dates, String user, String node, List<String> nodes, List<String> groups) {
-    siteId = site;
-    sitesId = sites;
-    appName = app;
-    appNames = apps;
-    actionName = action;
-    object = obj;
-    dateFrom = from;
-    dateTo = to;
-    slicedDates = dates;
-    userId = user;
-    nodeType = node;
-    nodeTypes = nodes;
-    groupsMembers = groups;
+  public String getSlicedDates() {
+    return slicedDates;
+  }
+
+  public void setSlicedDates(String slicedDates) {
+    this.slicedDates = slicedDates;
   }
 
   public List<String> getSitesId() {
     return sitesId;
   }
 
-  public void setSitesId(List<String> _sitesId) {
-    if (_sitesId == null || (_sitesId != null && _sitesId.isEmpty())) {
+  public void setSitesId(List<String> sitesId) {
+    if (sitesId == null || sitesId.isEmpty()) {
       this.sitesId = null;
     } else {
-      this.sitesId = _sitesId;
+      this.sitesId = sitesId;
     }
   }
 
-  public void setSitesId(String _sitesId) {
-    if (_sitesId != null) {
-      String[] sitesToken = _sitesId.split(",");
+  public void setSitesId(String sitesId) {
+    if (sitesId != null) {
+      String[] sitesToken = sitesId.split(",");
       this.sitesId = new ArrayList<String>(sitesToken.length);
       for (String token : sitesToken) {
         this.sitesId.add(token);
@@ -112,17 +95,17 @@ public class AuditQueryParameters {
     return appName;
   }
 
-  public void setAppName(String _appName) {
-    this.appName = _appName;
+  public void setAppName(String appName) {
+    this.appName = appName;
   }
 
   public List<String> getAppNames() {
     return appNames;
   }
 
-  public void setAppNames(String _appNames) {
-    if (_appNames != null) {
-      String[] appNamesToken = _appNames.split(",");
+  public void setAppNames(String appNames) {
+    if (appNames != null) {
+      String[] appNamesToken = appNames.split(",");
       this.appNames = new ArrayList<String>(appNamesToken.length);
       for (String token : appNamesToken) {
         this.appNames.add(token);
@@ -155,7 +138,7 @@ public class AuditQueryParameters {
   }
 
   public void setDateFrom(String dateFrom) {
-    if (dateFrom == null || dateFrom.equals("")) {
+    if (dateFrom == null || "".equals(dateFrom)) {
       this.dateFrom = 0;
     } else {
       this.dateFrom = Long.parseLong(dateFrom);
@@ -171,7 +154,7 @@ public class AuditQueryParameters {
   }
 
   public void setDateTo(String dateTo) {
-    if (dateTo == null || dateTo.equals("")) {
+    if (dateTo == null || "".equals(dateTo)) {
       this.dateTo = 0;
     } else {
       this.dateTo = Long.parseLong(dateTo);
@@ -206,17 +189,17 @@ public class AuditQueryParameters {
     return nodeTypes;
   }
 
-  public void setNodeTypes(List<String> _nodeTypes) {
-    if (_nodeTypes == null || (_nodeTypes != null && _nodeTypes.isEmpty())) {
+  public void setNodeTypes(List<String> nodeTypes) {
+    if (nodeTypes == null || nodeTypes.isEmpty()) {
       this.nodeTypes = null;
     } else {
-      this.nodeTypes = _nodeTypes;
+      this.nodeTypes = nodeTypes;
     }
   }
 
-  public void setNodeTypes(String _nodeTypes) {
-    if (_nodeTypes != null) {
-      String[] nodeTypesToken = _nodeTypes.split(",");
+  public void setNodeTypes(String nodeTypes) {
+    if (nodeTypes != null) {
+      String[] nodeTypesToken = nodeTypes.split(",");
       this.nodeTypes = new ArrayList<String>(nodeTypesToken.length);
       for (String token : nodeTypesToken) {
         this.nodeTypes.add(token);
@@ -228,17 +211,17 @@ public class AuditQueryParameters {
     return groupsMembers;
   }
 
-  public void setGroupsMembers(List<String> _groupsMembers) {
-    if (_groupsMembers == null || (_groupsMembers != null && _groupsMembers.isEmpty())) {
+  public void setGroupsMembers(List<String> groupsMembers) {
+    if (groupsMembers == null || groupsMembers.isEmpty()) {
       this.groupsMembers = Collections.emptyList();
     } else {
-      this.groupsMembers = _groupsMembers;
+      this.groupsMembers = groupsMembers;
     }
   }
 
-  public void setGroupsMembers(String _groupsMembers) {
-    if (_groupsMembers != null) {
-      String[] groupsMembersToken = _groupsMembers.split(",");
+  public void setGroupsMembers(String groupsMembers) {
+    if (groupsMembers != null) {
+      String[] groupsMembersToken = groupsMembers.split(",");
       this.groupsMembers = new ArrayList<String>(groupsMembersToken.length);
       for (String token : groupsMembersToken) {
         this.groupsMembers.add(token);
