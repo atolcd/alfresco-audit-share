@@ -120,6 +120,8 @@
     <property name="authorityService" ref="AuthorityService" />
   </bean>
 
+  <!-- For the user groups referentiel services -->
+  <import resource="classpath:alfresco/module/${project.groupId}.${project.artifactId}/context/services-context.xml" />
 
   <!-- JavaScript API -->
   <bean id="shareStatsScript" parent="baseJavaScriptExtension" class="com.atolcd.alfresco.repo.jscript.ShareStats">
@@ -137,6 +139,9 @@
     </property>
     <property name="batchSize">
       <value>${share.stats.sites.volumetry.batchSize}</value>
+    </property>
+    <property name="auditShareReferentielService">
+      <ref bean="AuditShareReferentielService" />
     </property>
   </bean>
 
