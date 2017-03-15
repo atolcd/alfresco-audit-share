@@ -8,6 +8,19 @@ SGBD supportés :
 - DB2
 
 
+## [Unreleased]
+### Added
+- Filtrage des graphiques par typologie des documents dans les sites (https://redmine.atolcd.com/issues/32303)
+- Filtrage des connexions utilisateurs en fonction d'un ou plusieurs groupes (https://redmine.atolcd.com/issues/32305)
+- Affichage de la version du module dans les interfaces d'AuditShare
+
+### Changed
+- Gestion des valeurs nulles dans les graphiques de volumétrie (https://redmine.atolcd.com/issues/33321)
+
+### Fixed
+- Correction de l'affichage par site de la volumétrie (option "Afficher les résultats par site")
+
+
 ## [1.5.3] - 2017-02-09
 ### Fixed
 - Compatibilité Oracle
