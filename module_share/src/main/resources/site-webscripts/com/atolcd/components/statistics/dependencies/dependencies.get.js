@@ -22,7 +22,7 @@ function main() {
     var json = remote.call("/api/server");
     if (json.status == 200) {
       // Check if we got a positive result
-      json = eval('(' + json + ')');
+      json = JSON.parse(json);
       if (json.data) {
         model.serverVersion = parseFloat(json.data.version.split(" ")[0]);
       }

@@ -16,7 +16,7 @@ public class ReferentielGroups implements Serializable {
 
   private static final long serialVersionUID = 1205873923209186977L;
   @XmlElement(name = "group")
-  protected List<Group>     Groups;
+  private List<Group>     Groups;
 
   /**
    * Gets the value of the Groups property.

@@ -135,17 +135,16 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 			// it wasn't run and it can be run now
 			executeScriptUrl(cfg, connection, scriptUrl);
 
-		} catch (Throwable e) {
+		} catch (Exception e) {
+			logger.error(e);
 		} finally {
 			try {
 				if (connection != null) {
 					connection.close();
 				}
-			} catch (Throwable e) {
-				logger.warn("Error closing DB connection: " + e.getMessage());
+			} catch (Exception e) {
+				logger.warn("Error closing DB connection: " + e.getMessage(), e);
 			}
-			// Remove the connection reference from the threadlocal boostrap
-			// SchemaBootstrapConnectionProvider.setBootstrapConnection(null);
 		}
 		return null;
 	}
@@ -467,10 +466,11 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 			// Record the statement
 			executedStatements.append(sql).append(";\n\n");
 			if (haveResults && fetchColumnName != null) {
-				ResultSet rs = stmt.getResultSet();
-				if (rs.next()) {
-					// Get the result value
-					ret = rs.getObject(fetchColumnName);
+				try (ResultSet rs = stmt.getResultSet()){
+					if (!rs.next()) {
+						// Get the result value
+						ret = rs.getObject(fetchColumnName);
+					}
 				}
 			}
 		} catch (SQLException e) {
@@ -484,7 +484,8 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 		} finally {
 			try {
 				stmt.close();
-			} catch (Throwable e) {
+			} catch (Exception e) {
+				logger.error(e);
 			}
 		}
 		return ret;
@@ -499,18 +500,25 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 			// Table doesn't exist, yet
 			return false;
 		}
+
+		if (patchId == null) {
+			return false;
+		}
+
 		Statement stmt = connection.createStatement();
 		try {
-			ResultSet rs = stmt.executeQuery("select succeeded from " + patchTableName + " where id = '" + patchId + "'");
-			if (!rs.next()) {
-				return false;
+			String query = "select succeeded from " + patchTableName + " where id = '" + patchId + "'";
+			try (ResultSet rs = stmt.executeQuery(query)) {
+				if (!rs.next()) {
+					return false;
+				}
+				return rs.getBoolean(1);
 			}
-			boolean succeeded = rs.getBoolean(1);
-			return succeeded;
 		} finally {
 			try {
 				stmt.close();
-			} catch (Throwable e) {
+			} catch (Exception e) {
+				logger.error("Error during statement closure", e);
 			}
 		}
 	}
