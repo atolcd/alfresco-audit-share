@@ -45,204 +45,206 @@ import com.atolcd.alfresco.AuditQueryParameters;
 import com.atolcd.alfresco.helper.PermissionsHelper;
 
 public class SelectUsersGet extends DeclarativeWebScript implements InitializingBean {
-	// Logger
-	private static final Log logger = LogFactory.getLog(SelectUsersGet.class);
+  // Logger
+  private static final Log logger = LogFactory.getLog(SelectUsersGet.class);
 
-	private SqlSessionTemplate sqlSessionTemplate;
-	private NodeService nodeService;
-	private SiteService siteService;
-	private AuthorityService authorityService;
-	private Long memberQnameId = null;
-	private Long personQnameId = null;
-	private Long containerQnameId = null;
+  private SqlSessionTemplate sqlSessionTemplate;
+  private NodeService nodeService;
+  private SiteService siteService;
+  private AuthorityService authorityService;
+  private Long memberQnameId = null;
+  private Long personQnameId = null;
+  private Long containerQnameId = null;
 
-	private static final String SELECT_CONNECTED_USERS = "alfresco.atolcd.audit.selectConnectedUsers";
-	private static final String SELECT_QNAME_ID = "alfresco.atolcd.audit.selectQNameId";
-	private static final String SELECT_SITES_MEMBERS = "alfresco.atolcd.audit.selectSiteMember";
+  private static final String SELECT_CONNECTED_USERS = "alfresco.atolcd.audit.selectConnectedUsers";
+  private static final String SELECT_QNAME_ID = "alfresco.atolcd.audit.selectQNameId";
+  private static final String SELECT_SITES_MEMBERS = "alfresco.atolcd.audit.selectSiteMember";
 
-	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-		this.sqlSessionTemplate = sqlSessionTemplate;
-	}
+  public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+    this.sqlSessionTemplate = sqlSessionTemplate;
+  }
 
-	public void setNodeService(NodeService nodeService) {
-		this.nodeService = nodeService;
-	}
+  public void setNodeService(NodeService nodeService) {
+    this.nodeService = nodeService;
+  }
 
-	public void setSiteService(SiteService siteService) {
-		this.siteService = siteService;
-	}
+  public void setSiteService(SiteService siteService) {
+    this.siteService = siteService;
+  }
 
-	public void setAuthorityService(AuthorityService authorityService) {
-		this.authorityService = authorityService;
-	}
+  public void setAuthorityService(AuthorityService authorityService) {
+    this.authorityService = authorityService;
+  }
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.sqlSessionTemplate);
-		Assert.notNull(this.nodeService);
-		Assert.notNull(this.siteService);
-		Assert.notNull(this.authorityService);
-	}
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    Assert.notNull(this.sqlSessionTemplate);
+    Assert.notNull(this.nodeService);
+    Assert.notNull(this.siteService);
+    Assert.notNull(this.authorityService);
+  }
 
-	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		try {
-			Map<String, Object> model = new HashMap<String, Object>();
-			if (PermissionsHelper.isAuthorized(req)) {
-				if (this.sqlSessionTemplate != null) {
-					String type = req.getParameter("type");
-					AuditQueryParameters auditQueryParameters = buildParametersFromRequest(req);
-					AtolAuthorityParameters atolAuthorityParameters = buildAuthorityParametersFromRequest(req);
-					if ("users-connected".equals(type) || "users-recently-connected".equals(type)) {
-						model.put("users", selectConnectedUsers(auditQueryParameters, atolAuthorityParameters));
-					} else if ("users-count".equals(type)) {
-						model.put("values", selectConnectedUsersByDate(auditQueryParameters));
-					} else if ("users-never-connected".equals(type)) {
-						model.put("users", selectNeverConnectedUsers(auditQueryParameters, atolAuthorityParameters));
-					}
-					model.put("type", type);
-				}
-			} else {
-				status.setCode(Status.STATUS_UNAUTHORIZED);
-			}
+  @Override
+  protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    try {
+      Map<String, Object> model = new HashMap<String, Object>();
+      if (PermissionsHelper.isAuthorized(req)) {
+        if (this.sqlSessionTemplate != null) {
+          String type = req.getParameter("type");
+          AuditQueryParameters auditQueryParameters = buildParametersFromRequest(req);
+          AtolAuthorityParameters atolAuthorityParameters = buildAuthorityParametersFromRequest(req);
+          if ("users-connected".equals(type) || "users-recently-connected".equals(type)) {
+            model.put("users", selectConnectedUsers(auditQueryParameters, atolAuthorityParameters));
+          } else if ("users-count".equals(type)) {
+            model.put("values", selectConnectedUsersByDate(auditQueryParameters));
+          } else if ("users-never-connected".equals(type)) {
+            model.put("users", selectNeverConnectedUsers(auditQueryParameters, atolAuthorityParameters));
+          }
+          model.put("type", type);
+        }
+      } else {
+        status.setCode(Status.STATUS_UNAUTHORIZED);
+      }
 
-			return model;
-		} catch (Exception e) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(e.getMessage(), e);
-			}
-			throw new WebScriptException("[ShareStats - SelectUsers] Error in executeImpl function");
-		}
-	}
+      return model;
+    } catch (Exception e) {
+      if (logger.isDebugEnabled()) {
+        logger.debug(e.getMessage(), e);
+      }
+      throw new WebScriptException("[ShareStats - SelectUsers] Error in executeImpl function");
+    }
+  }
 
-	public List<String> selectConnectedUsers(AuditQueryParameters params, AtolAuthorityParameters atolAuthorityParameters) {
-		List<String> users = new ArrayList<String>();
-		users = this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, params);
-		Set<String> usersSet = this.selectSiteMembers(atolAuthorityParameters);
-		users.retainAll(usersSet);
-		return users;
-	}
+  public List<String> selectConnectedUsers(AuditQueryParameters params, AtolAuthorityParameters atolAuthorityParameters) {
+    List<String> users = new ArrayList<String>();
+    users = this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, params);
+    Set<String> usersSet = this.selectSiteMembers(atolAuthorityParameters);
+    users.retainAll(usersSet);
+    return users;
+  }
 
-	public int[] selectConnectedUsersByDate(AuditQueryParameters params) {
-		String[] dates = params.getSlicedDates().split(",");
-		int[] values = new int[dates.length - 1];
-		for (int i = 0; i < dates.length - 1; i++) {
-			params.setDateFrom(dates[i]);
-			params.setDateTo(dates[i + 1]);
-			List<String> users = new ArrayList<String>();
-			users = sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, params);
-			values[i] = users.size();
-		}
-		return values;
-	}
+  public int[] selectConnectedUsersByDate(AuditQueryParameters params) {
+    String[] dates = params.getSlicedDates().split(",");
+    int[] values = new int[dates.length - 1];
+    for (int i = 0; i < dates.length - 1; i++) {
+      params.setDateFrom(dates[i]);
+      params.setDateTo(dates[i + 1]);
+      List<String> users = new ArrayList<String>();
+      users = sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, params);
+      values[i] = users.size();
+    }
+    return values;
+  }
 
-	public Set<String> selectNeverConnectedUsers(AuditQueryParameters auditQueryParameters, AtolAuthorityParameters atolAuthorityParameters) {
-		List<String> auditUsers = new ArrayList<String>();
-		auditUsers = this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, auditQueryParameters);
-		Set<String> usersSet = this.selectSiteMembers(atolAuthorityParameters);
-		// Differentiel
-		usersSet.removeAll(auditUsers);
-		return usersSet;
-	}
+  public Set<String> selectNeverConnectedUsers(AuditQueryParameters auditQueryParameters, AtolAuthorityParameters atolAuthorityParameters) {
+    List<String> auditUsers = new ArrayList<String>();
+    auditUsers = this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, auditQueryParameters);
+    Set<String> usersSet = this.selectSiteMembers(atolAuthorityParameters);
+    // Differentiel
+    usersSet.removeAll(auditUsers);
+    return usersSet;
+  }
 
-	public Set<String> selectSiteMembers(AtolAuthorityParameters atolAuthorityParameters) {
-		List<String> users = new ArrayList<String>();
-		List<String> groups = new ArrayList<String>();
+  public Set<String> selectSiteMembers(AtolAuthorityParameters atolAuthorityParameters) {
+    List<String> users = new ArrayList<String>();
+    List<String> groups = new ArrayList<String>();
 
-		// All site members
-		atolAuthorityParameters.setPersonQnameId(getPersonQnameId());
-		users = this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
+    // All site members
+    atolAuthorityParameters.setPersonQnameId(getPersonQnameId());
+    users = this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
 
-		// All groups of the site
-		atolAuthorityParameters.setPersonQnameId(getContainerQnameId());
-		groups = this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
+    // All groups of the site
+    atolAuthorityParameters.setPersonQnameId(getContainerQnameId());
+    groups = this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
 
-		Set<String> usersSet = new HashSet<String>(users.size());
-		usersSet.addAll(users);
-		for (String group : groups) {
-			if (group.startsWith("GROUP_")) {
-				Set<String> s = authorityService.getContainedAuthorities(AuthorityType.USER, group, false);
-				usersSet.addAll(s);
-			}
-		}
-		return usersSet;
-	}
+    Set<String> usersSet = new HashSet<String>(users.size());
+    usersSet.addAll(users);
+    for (String group : groups) {
+      if (group.startsWith("GROUP_")) {
+        Set<String> s = authorityService.getContainedAuthorities(AuthorityType.USER, group, false);
+        usersSet.addAll(s);
+      }
+    }
+    return usersSet;
+  }
 
-	public AtolAuthorityParameters buildAuthorityParametersFromRequest(WebScriptRequest req) {
-		try {
-			AtolAuthorityParameters params = new AtolAuthorityParameters();
-			String site = req.getParameter("site");
-			String sites = req.getParameter("sites");
-			if (site != null) {
-				// One site
-				params.setSite(site);
-			} else if (sites != null) {
-				// Several sites
-				String[] sitesToken = sites.split(",");
-				for (String siteId : sitesToken) {
-					params.setSite(siteId);
-				}
-			} else {
-				// Add the user's sites, plus the container group
-				List<SiteInfo> sitesInfo = siteService.listSites("", "");
-				if (sitesInfo.size() > 0) {
-					for (SiteInfo siteInfo : sitesInfo) {
-						params.setSite(siteInfo.getShortName());
-					}
-				} else {
-					params.setGroupNames(null);
-				}
-			}
-			params.setMemberQnameId(this.getMemberQnameId());
-			return params;
-		} catch (Exception e) {
-			logger.error("Error building parameters", e);
-			return null;
-		}
-	}
+  public AtolAuthorityParameters buildAuthorityParametersFromRequest(WebScriptRequest req) {
+    try {
+      AtolAuthorityParameters params = new AtolAuthorityParameters();
+      String site = req.getParameter("site");
+      String sites = req.getParameter("sites");
+      if (site != null) {
+        // One site
+        params.setSite(site);
+      } else if (sites != null) {
+        // Several sites
+        String[] sitesToken = sites.split(",");
+        for (String siteId : sitesToken) {
+          params.setSite(siteId);
+        }
+      } else {
+        // Add the user's sites, plus the container group
+        List<SiteInfo> sitesInfo = siteService.listSites("", "");
+        if (sitesInfo.size() > 0) {
+          for (SiteInfo siteInfo : sitesInfo) {
+            params.setSite(siteInfo.getShortName());
+          }
+        } else {
+          params.setGroupNames(null);
+        }
+      }
+      params.setMemberQnameId(this.getMemberQnameId());
+      return params;
+    } catch (Exception e) {
+      logger.error("Error building parameters", e);
+      return null;
+    }
+  }
 
-	public AuditQueryParameters buildParametersFromRequest(WebScriptRequest req) {
-		try {
-			// Probleme de long / null
-			String dateFrom = req.getParameter("from");
-			String dateTo = req.getParameter("to");
+  public AuditQueryParameters buildParametersFromRequest(WebScriptRequest req) {
+    try {
+      // Probleme de long / null
+      String dateFrom = req.getParameter("from");
+      String dateTo = req.getParameter("to");
 
-			AuditQueryParameters params = new AuditQueryParameters();
-			params.setSiteId(req.getParameter("site"));
-			params.setSitesId(req.getParameter("sites"));
-			params.setActionName(req.getParameter("action"));
-			params.setAppName(req.getParameter("module"));
-			params.setDateFrom(dateFrom);
-			params.setDateTo(dateTo);
-			params.setSlicedDates(req.getParameter("dates"));
-			return params;
-		} catch (Exception e) {
-			logger.error("Error building parameters", e);
-			return null;
-		}
-	}
+      AuditQueryParameters params = new AuditQueryParameters();
+      params.setSiteId(req.getParameter("site"));
+      params.setSitesId(req.getParameter("sites"));
+      params.setActionName(req.getParameter("action"));
+      params.setAppName(req.getParameter("module"));
+      params.setDateFrom(dateFrom);
+      params.setDateTo(dateTo);
+      params.setSlicedDates(req.getParameter("dates"));
+      params.setGroupsMembers(req.getParameter("groups"));
 
-	private Long getMemberQnameId() {
-		if (this.memberQnameId == null) {
-			this.memberQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "member");
-		}
+      return params;
+    } catch (Exception e) {
+      logger.error("Error building parameters", e);
+      return null;
+    }
+  }
 
-		return this.memberQnameId;
-	}
+  private Long getMemberQnameId() {
+    if (this.memberQnameId == null) {
+      this.memberQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "member");
+    }
 
-	private Long getPersonQnameId() {
-		if (this.personQnameId == null) {
-			this.personQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "person");
-		}
+    return this.memberQnameId;
+  }
 
-		return this.personQnameId;
-	}
+  private Long getPersonQnameId() {
+    if (this.personQnameId == null) {
+      this.personQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "person");
+    }
 
-	private Long getContainerQnameId() {
-		if (this.containerQnameId == null) {
-			this.containerQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "authorityContainer");
-		}
+    return this.personQnameId;
+  }
 
-		return this.containerQnameId;
-	}
+  private Long getContainerQnameId() {
+    if (this.containerQnameId == null) {
+      this.containerQnameId = (Long) this.sqlSessionTemplate.selectOne(SELECT_QNAME_ID, "authorityContainer");
+    }
+
+    return this.containerQnameId;
+  }
 }

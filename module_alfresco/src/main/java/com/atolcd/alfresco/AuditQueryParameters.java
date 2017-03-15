@@ -34,6 +34,7 @@ public class AuditQueryParameters {
   private int          limit;
   private String       nodeType;
   private List<String> nodeTypes;
+  private List<String> groupsMembers;
 
   public String getSlicedDates() {
     return slicedDates;
@@ -56,10 +57,11 @@ public class AuditQueryParameters {
     userId = null;
     nodeType = null;
     nodeTypes = null;
+    groupsMembers = null;
   }
 
   public AuditQueryParameters(String site, List<String> sites, String app, List<String> apps, String action, String obj, long from, long to,
-      String dates, String user, String node, List<String> nodes) {
+      String dates, String user, String node, List<String> nodes, List<String> groups) {
     siteId = site;
     sitesId = sites;
     appName = app;
@@ -72,6 +74,7 @@ public class AuditQueryParameters {
     userId = user;
     nodeType = node;
     nodeTypes = nodes;
+    groupsMembers = groups;
   }
 
   public List<String> getSitesId() {
@@ -216,6 +219,28 @@ public class AuditQueryParameters {
       this.nodeTypes = new ArrayList<String>(nodeTypesToken.length);
       for (String token : nodeTypesToken) {
         this.nodeTypes.add(token);
+      }
+    }
+  }
+
+  public List<String> getGroupsMembers() {
+    return groupsMembers;
+  }
+
+  public void setGroupsMembers(List<String> _groupsMembers) {
+    if (_groupsMembers == null || (_groupsMembers != null && _groupsMembers.isEmpty())) {
+      this.groupsMembers = null;
+    } else {
+      this.groupsMembers = _groupsMembers;
+    }
+  }
+
+  public void setGroupsMembers(String _groupsMembers) {
+    if (_groupsMembers != null) {
+      String[] nodeTypesToken = _groupsMembers.split(",");
+      this.groupsMembers = new ArrayList<String>(nodeTypesToken.length);
+      for (String token : nodeTypesToken) {
+        this.groupsMembers.add(token);
       }
     }
   }
