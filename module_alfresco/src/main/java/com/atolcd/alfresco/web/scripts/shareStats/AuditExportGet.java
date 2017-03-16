@@ -48,7 +48,6 @@ import org.springframework.util.Assert;
 import com.atolcd.alfresco.AuditCount;
 import com.atolcd.alfresco.AuditObjectPopularity;
 import com.atolcd.alfresco.AuditQueryParameters;
-import com.atolcd.alfresco.CsvExportEntry;
 import com.atolcd.alfresco.helper.PermissionsHelper;
 import com.atolcd.auditshare.repo.service.AuditShareReferentielService;
 import com.atolcd.auditshare.repo.xml.Group;
@@ -57,6 +56,10 @@ import com.csvreader.CsvWriter;
 public class AuditExportGet extends AbstractWebScript implements InitializingBean {
   // Logger
   private static final Log logger = LogFactory.getLog(AuditExportGet.class);
+
+  private static final String MESSAGE_CSV_DATE = "csv.date";
+  private static final String MODEL_VALUES = "values";
+  private static final String PARAM_GROUPS = "groups";
 
   private SelectAuditsGet  wsSelectAudits;
   private SiteService      siteService;
@@ -113,9 +116,9 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 
         String interval = req.getParameter("interval");
         String type = req.getParameter("type");
-        if (type.equals("volumetry") || type.equals("users-count")) {
+        if ("volumetry".equals(type) || "users-count".equals(type)) {
           String values = req.getParameter("values");
-          model.put("values", values.split(","));
+          model.put(MODEL_VALUES, values.split(","));
         } else {
           wsSelectAudits.checkForQuery(model, params, type);
         }
@@ -153,14 +156,13 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
       WebScriptRequest req) throws SQLException, JSONException, IOException {
 
     // Selection of ALL audits
-    String dateRecord = null;
+    String dateRecord;
     if (model.containsKey("dates")) {
       csv.writeRecord(
-          new String[] { I18NUtil.getMessage("csv.date"), I18NUtil.getMessage("csv.action"), I18NUtil.getMessage("csv.count") });
+          new String[] { I18NUtil.getMessage(MESSAGE_CSV_DATE), I18NUtil.getMessage("csv.action"), I18NUtil.getMessage("csv.count") });
       List<List<AuditCount>> auditCountsLists = (List<List<AuditCount>>) model.get("dates");
 
-      // XXX: for the moment, no more than 3 actions per graphic per
-      // export
+      // XXX: for the moment, no more than 3 actions per graphic per export
       Map<String, Integer> actions = new HashMap<String, Integer>(3);
       getAllActions(actions, auditCountsLists);
 
@@ -169,11 +171,10 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
         dateRecord = getStringDate(Long.parseLong(slicedDates[i]), interval);
         writeAuditCount(csv, auditCountsLists.get(i), dateRecord, actions);
       }
-    } else if (model.containsKey("values")) {
-
+    } else if (model.containsKey(MODEL_VALUES)) {
       // Put selected groups in parentheses
-      if (type.equals("users-count") && (req.getParameter("groups") != null && !req.getParameter("groups").isEmpty())) {
-        String[] groupsToken = req.getParameter("groups").split(",");
+      if ("users-count".equals(type) && (req.getParameter(PARAM_GROUPS) != null && !req.getParameter(PARAM_GROUPS).isEmpty())) {
+        String[] groupsToken = req.getParameter(PARAM_GROUPS).split(",");
         List<String> libelles = new ArrayList<String>();
         List<Group> groups = auditShareReferentielService.parseRefentielForNodeUUID(AuditShareReferentielService.auditShareReferentielNodeUUID);
 
@@ -196,13 +197,13 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 
         String selectedGroups = StringUtils.join(libelles, ",");
 
-        csv.writeRecord(new String[] { I18NUtil.getMessage("csv.date"), I18NUtil.getMessage("csv." + type) + " (" + selectedGroups + ")" });
+        csv.writeRecord(new String[] { I18NUtil.getMessage(MESSAGE_CSV_DATE), I18NUtil.getMessage("csv." + type) + " (" + selectedGroups + ")" });
 
       } else {
-        csv.writeRecord(new String[] { I18NUtil.getMessage("csv.date"), I18NUtil.getMessage("csv." + type) });
+        csv.writeRecord(new String[] { I18NUtil.getMessage(MESSAGE_CSV_DATE), I18NUtil.getMessage("csv." + type) });
       }
       String[] slicedDates = params.getSlicedDates().split(",");
-      String[] values = (String[]) model.get("values");
+      String[] values = (String[]) model.get(MODEL_VALUES);
       for (int i = 0; i < values.length; i++) {
         dateRecord = getStringDate(Long.parseLong(slicedDates[i]), interval);
         csv.writeRecord(new String[] { dateRecord, values[i] });
@@ -225,7 +226,7 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
           url += "/site/" + auditObject.getAuditSite();
         }
         url += "/document-details?nodeRef=" + auditObject.getAuditObject();
-        csv.writeRecord(new String[] { auditObject.getObjectName(), auditObject.getPopularity() + "", url });
+        csv.writeRecord(new String[] { auditObject.getObjectName(), Integer.toString(auditObject.getPopularity()), url });
       }
     }
   }
@@ -259,47 +260,10 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
       String[] record = new String[3];
 
       record[0] = date;
-      record[1] = I18NUtil.getMessage("csv." + (String) e.getKey());
-      record[2] = ((Integer) e.getValue()).toString();
+      record[1] = I18NUtil.getMessage("csv." + e.getKey());
+      record[2] = e.getValue().toString();
       csv.writeRecord(record);
-      e.setValue(new Integer(0));
-    }
-  }
-
-  public void writeAuditObjectPopularity(CsvWriter csv, List<AuditObjectPopularity> auditObjectPopularities, boolean dateFirst, String date)
-      throws IOException {
-    for (AuditObjectPopularity auditObjectPopularity : auditObjectPopularities) {
-      String[] record = new String[3];
-      int recordIndex = 0;
-      record[recordIndex++] = auditObjectPopularity.getObjectName();
-      record[recordIndex++] = String.valueOf(auditObjectPopularity.getPopularity());
-      record[recordIndex++] = auditObjectPopularity.getSiteComponent();
-
-      csv.writeRecord(record);
-    }
-  }
-
-  public void writeCsvEntry(CsvWriter csv, List<CsvExportEntry> csvExportEntries, boolean dateFirst, String date) throws IOException {
-    for (CsvExportEntry csvExportEntry : csvExportEntries) {
-      String[] record;
-      int recordIndex = 0;
-      if (date != null) {
-        record = new String[5];
-        if (dateFirst) {
-          record[recordIndex++] = date;
-        }
-      } else {
-        record = new String[4];
-      }
-      record[recordIndex++] = csvExportEntry.getAuditSite();
-      record[recordIndex++] = I18NUtil.getMessage("csv." + csvExportEntry.getAuditAppName());
-      record[recordIndex++] = I18NUtil.getMessage("csv." + csvExportEntry.getAuditAppName() + "." + csvExportEntry.getAuditActionName());
-      record[recordIndex++] = String.valueOf(csvExportEntry.getCount());
-
-      if (!dateFirst && date != null) {
-        record[recordIndex++] = date;
-      }
-      csv.writeRecord(record);
+      e.setValue(0);
     }
   }
 
@@ -314,7 +278,7 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
     GregorianCalendar gc = new GregorianCalendar();
     gc.setTimeInMillis(timestamp);
 
-    String date = "";
+    String date;
     switch (intervalEnum.valueOf(dateInterval)) {
       case days:
         date = padZero(gc.get(Calendar.HOUR_OF_DAY)) + "h00";
@@ -322,19 +286,16 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
         date += padZero((gc.get(Calendar.HOUR_OF_DAY) + 2) % 24) + "h00";
         break;
       case weeks:
-        date = padZero(gc.get(Calendar.DAY_OF_MONTH)) + "/";
-        date += padZero(gc.get(Calendar.MONTH) + 1) + "/";
-        date += String.valueOf(gc.get(Calendar.YEAR));
-        break;
       case months:
         date = padZero(gc.get(Calendar.DAY_OF_MONTH)) + "/";
         date += padZero(gc.get(Calendar.MONTH) + 1) + "/";
         date += String.valueOf(gc.get(Calendar.YEAR));
         break;
       case years:
+      default:
         String monthNumber = String.valueOf(gc.get(Calendar.MONTH));
         date = I18NUtil.getMessage("csv.month." + monthNumber);
-        date += " " + String.valueOf(gc.get(Calendar.YEAR));
+        date += " " + gc.get(Calendar.YEAR);
         break;
     }
 

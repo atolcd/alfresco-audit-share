@@ -119,28 +119,26 @@ public class UpdateAuditPost extends DeclarativeWebScript implements Initializin
 	 * @return NodeRef
 	 */
 	public NodeRef getAuditNodeRef(NodeRef container, AuditEntry auditEntry) {
-		NodeRef nodeRef = null, child = null;
+		NodeRef nodeRef = null;
+		NodeRef child;
 		switch (AuditAppEnum.valueOf(auditEntry.getAuditAppName())) {
 		case wiki:
 			nodeRef = nodeService.getChildByName(container, ContentModel.ASSOC_CONTAINS, auditEntry.getAuditObject());
 			break;
 		case blog:
 		case discussions:
-			child = SearchHelper.getFirstFromQuery("+PARENT:\"" + container.toString() + "\" +@cm\\:title:\"" + auditEntry.getAuditObject()
-					+ "\"");
+			child = SearchHelper.getFirstFromQuery("+PARENT:\"" + container.toString() + "\" +@cm\\:title:\"" + auditEntry.getAuditObject() + "\"");
 			if (child != null) {
 				nodeRef = child;
 			}
 			break;
 		case links:
-			child = SearchHelper.getFirstFromQuery("+PARENT:\"" + container.toString() + "\" +@lnk\\:title:\""
-					+ auditEntry.getAuditObject() + "\"");
+			child = SearchHelper.getFirstFromQuery("+PARENT:\"" + container.toString() + "\" +@lnk\\:title:\"" + auditEntry.getAuditObject() + "\"");
 			if (child != null) {
 				nodeRef = child;
 			}
 			break;
 		default:
-			// TODO: Handle other cases if necessary
 			break;
 		}
 		return nodeRef;

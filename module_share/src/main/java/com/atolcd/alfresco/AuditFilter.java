@@ -134,7 +134,6 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
 
         // Get the HTTP request/response/session
         HttpServletRequest request = (HttpServletRequest) sReq;
-        // HttpServletResponse response = (HttpServletResponse) sRes;
 
         // Initialize a new request context
         RequestContext context = ThreadLocalRequestContext.getRequestContext();
@@ -147,9 +146,9 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
                 try {
                     RequestContextUtil.populateRequestContext(context, request);
                 } catch (ResourceLoaderException e) {
-                    // e.printStackTrace();
+                  logger.debug(e);
                 } catch (UserFactoryException e) {
-                    // e.printStackTrace();
+                  logger.debug(e);
                 }
             } catch (RequestContextException ex) {
                 throw new ServletException(ex);
@@ -207,7 +206,6 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         try {
             connector = FrameworkUtil.getConnector(request.getSession(true), auditSample.getString(AUDIT_USER_ID),
                     AlfrescoUserFactory.ALFRESCO_ENDPOINT_ID);
-            // if (parameters == null), we use the 'inputstream'
             // The webscript is called with the audit converted into JSON.
             ConnectorContext postContext = new ConnectorContext(null, buildDefaultHeaders());
             postContext.setMethod(HttpMethod.POST);
@@ -277,7 +275,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
         HashMap<String, String> auditData = new HashMap<String, String>();
         String[] urlTokens = requestURL.split("/");
 
-        HashMap<String, String> urlData = getUrlData(urlTokens, requestURL.indexOf("site") != -1);
+        Map<String, String> urlData = getUrlData(urlTokens, requestURL.indexOf("site") != -1);
 
         auditData.putAll(urlData);
 
@@ -285,14 +283,14 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
             // Retrieves the id of the <<objet>> viewed from its module
             String obj = request.getParameter(moduleIds.get(urlData.get(KEY_MODULE)));
             if (obj != null) {
-                if (auditData.get(KEY_MODULE).equals("calendar")) {
+                if ("calendar".equals(auditData.get(KEY_MODULE))) {
                     auditData.put(KEY_ACTION, obj);
                     auditData.put(KEY_OBJECT, "");
-                } else if (auditData.get(KEY_MODULE).equals(MOD_LINKS) && auditData.get(KEY_ACTION).equals("view")) {
+                } else if (auditData.get(KEY_MODULE).equals(MOD_LINKS) && "view".equals(auditData.get(KEY_ACTION))) {
                     String auditObject = getNodeRefRemoteCall(request, userId, auditData.get(KEY_SITE), auditData.get(KEY_MODULE), obj);
                     auditData.put(KEY_OBJECT, auditObject);
                     auditData.put(KEY_ACTION, "single-view");
-                } else if (auditData.get("module").equals("search")) {
+                } else if ("search".equals(auditData.get("module"))) {
                     if (!obj.isEmpty()) {
                         auditData.put(KEY_ACTION, "query");
                         auditData.put(KEY_OBJECT, obj);
@@ -309,6 +307,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
             }
         } catch (Exception e) {
             auditData.put(KEY_OBJECT, "");
+            logger.trace(e);
         }
 
         return filter(auditData);
@@ -321,7 +320,9 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
      * @param hasSite
      * @return HashMap
      */
-    public HashMap<String, String> getUrlData(String[] urlTokens, boolean hasSite) {
+    public Map<String, String> getUrlData(final String[] pUrlTokens, boolean hasSite) {
+        String[] urlTokens = pUrlTokens;
+
         HashMap<String, String> urlData = new HashMap<String, String>();
         urlData.put(KEY_MODULE, "");
         urlData.put(KEY_ACTION, "");
@@ -335,7 +336,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
                 token = urlTokens[i];
                 newUrlTokens[i + j] = token;
 
-                if (urlTokens[i].equals("page")) {
+                if ("page".equals(urlTokens[i])) {
                     newUrlTokens[i + 1] = "site";
                     newUrlTokens[i + 2] = REPOSITORY_SITE;
                     j = 2;
@@ -354,7 +355,7 @@ public class AuditFilter extends AuditFilterConstants implements Filter {
                 urlData.put(KEY_SITE, urlTokens[i]);
                 String[] splittedModuleAction = urlTokens[i + 1].split("-");
                 // "site-members" & "site-groups" test
-                if (splittedModuleAction[0].equals("site")) {
+                if ("site".equals(splittedModuleAction[0])) {
                     urlData.put(KEY_MODULE, MOD_MEMBERS);
                 } else {
                     urlData.put(KEY_MODULE, splittedModuleAction[0]);

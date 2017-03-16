@@ -17,7 +17,9 @@
  */
 
 // AtolStatistics namespace
-if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistics = {}; }
+if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
+  var AtolStatistics = {};
+}
 
 /**
  * DataPurge tool component.
@@ -82,7 +84,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
       // Listeners on menu click
       // "Purge tables" filter
-      var onTablesMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
+      var onTablesMenuItemClick = function (p_sType, p_aArgs) {
         var sText = p_aArgs[1].cfg.getProperty("text"),
             value = p_aArgs[1].value;
 
@@ -153,10 +155,11 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
     onPurgeButtonClick: function DataPurge_onPurgeButtonClick() {
 
-      var me = this;
+      var me = this,
+          body;
       // Ensure that a period is selected
       if (!Dom.get(this.id + "-purge_all-criteria").checked && (document.getElementById(this.id + "-period-from").value == '' || document.getElementById(this.id + "-period-to").value == '')) {
-        var body = '<div class="node-details-popup">';
+        body = '<div class="node-details-popup">';
         body += '<p><label>' + me.getMessage("label.popup.period_empty") + '</label></p>';
         body += '</div>';
 
@@ -178,7 +181,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
       // Ensure that the end date is before the start one
       if (this.convertDateToTimeStamp(document.getElementById(this.id + "-period-from").value) > this.convertDateToTimeStamp(document.getElementById(this.id + "-period-to").value)) {
-        var body = '<div class="node-details-popup">';
+        body = '<div class="node-details-popup">';
         body += '<p><label>' + me.getMessage("label.popup.date_failure") + '</label></p>';
         body += '</div>';
 
@@ -198,7 +201,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         return false;
       }
 
-      var body = '<div class="node-details-popup">';
+      body = '<div class="node-details-popup">';
       body += '<p><label>' + me.getMessage("label.popup.body") + '</label></p>';
       body += '</div>';
 
@@ -236,7 +239,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
     convertDateToTimeStamp: function DataPurge_convertDateToTimeStamp(dateString, timeString) {
       var dateTimeParts = dateString.split(' '),
           dateParts = dateTimeParts[0].split('/'),
-          d = null;
+          d;
 
       if (timeString) {
         var timeParts = timeString.split(':');
@@ -338,13 +341,14 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
      * @return string - url params
      */
     buildParams: function DataPurge_buildParams(purgeTable, from, to, site) {
-      var params = "";
+      var params = "",
+          i, ii;
 
       if (purgeTable !== null) {
         if (purgeTable === "all") {
           var purgeTableValues = [],
               items = this.widgets.tableCriteriaButton.getMenu().getItems();
-          for (var i=0, ii=items.length ; i<ii ; i++) {
+          for (i=0, ii=items.length ; i<ii ; i++) {
             var item = items[i];
             if (item.value != "") {
               purgeTableValues.push(item.value);
@@ -361,7 +365,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           // Encode site ids
           var sites = [],
               sitesArray = site.split(',');
-          for (var i=0, ii=sitesArray.length ; i<ii ; i++) {
+          for (i=0, ii=sitesArray.length ; i<ii ; i++) {
             sites.push(encodeURIComponent(sitesArray[i]));
           }
 
