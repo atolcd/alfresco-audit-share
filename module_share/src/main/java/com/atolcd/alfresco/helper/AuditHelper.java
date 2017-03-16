@@ -53,7 +53,7 @@ public class AuditHelper {
         if (json.has("appTool")) {
             String tool = json.getString("appTool");
             if ("datalists".equals(tool)) {
-                mod = AuditFilterConstants.MOD_DOCUMENT;
+                mod = AuditFilterConstants.MOD_DATA;
             } else if ("documentlibrary".equals(tool)) {
                 mod = AuditFilterConstants.MOD_DOCUMENT;
             }

@@ -17,7 +17,9 @@
  */
 
 // AtolStatistics namespace
-if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistics = {}; }
+if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
+  var AtolStatistics = {};
+}
 
 // AtolStatistics top-level util namespace.
 AtolStatistics.util = AtolStatistics.util || {};
@@ -47,8 +49,7 @@ AtolStatistics.util.fileSizes = {
 
 AtolStatistics.util.roundNumber = function (number, digits) {
   var multiple = Math.pow(10, digits);
-  var rndedNum = Math.round(number * multiple) / multiple;
-  return rndedNum;
+  return Math.round(number * multiple) / multiple;
 }
 
 AtolStatistics.util.formatFileSize = function (fileSize) {
@@ -208,7 +209,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
       });
       this.widgets.exportButton.set("disabled", true);
 
-      var onExportMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
+      var onExportMenuItemClick = function (p_sType, p_aArgs) {
         var value = p_aArgs[1].value,
             isDisabled = p_aArgs[1].cfg.getProperty("disabled");
         // Get the function related to the clicked item
@@ -240,9 +241,6 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
     },
 
     loadSites: function loadSites() {
-      // Loading icon
-      // this.widgets.siteButton.set("label", this.msg("label.sites.loading") + ' <span class="loading"></span>');
-
       if (this.options.siteId && this.options.siteId != "") {
         Alfresco.util.Ajax.jsonGet({
           url: Alfresco.constants.PROXY_URI + "api/sites/" + encodeURIComponent(this.options.siteId),
@@ -287,7 +285,6 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
     createSiteMenu: function Tool_createSiteMenu(res, hideAllSiteEntry) {
       var siteMenuButtons = [],
           allSitesMenuButton = [],
-          menuButtons = [],
           siteIds = [];
 
       for (var i=0, ii=res.json.length ; i < ii ; i++) {
@@ -319,7 +316,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
         });
       }
 
-      menuButtons = allSitesMenuButton.concat(siteMenuButtons);
+      var menuButtons = allSitesMenuButton.concat(siteMenuButtons);
       var btOpts = {
         type: "split",
         menu: menuButtons,
@@ -342,16 +339,12 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
     },
 
     buildTimeStampArray: function Tool_buildTimeStampArray() {
-      var tsArray = [],
-        from = null,
-        to = null,
-        currentDay = null,
-        next = null,
-        hasNext = null,
-        res = "";
+      var next,
+          hasNext,
+          tsArray = [];
 
-      to = new Date(this.endDatesArray[this.options.currentDateFilter].getTime());
-      from = new Date(this.endDatesArray[this.options.currentDateFilter].getTime());
+      var to = new Date(this.endDatesArray[this.options.currentDateFilter].getTime());
+      var from = new Date(this.endDatesArray[this.options.currentDateFilter].getTime());
 
       // Creating date intervals from starting month to the ending month INCLUDED
       if (this.options.currentDateFilter == "months") {
@@ -373,10 +366,8 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
         tsArray.push(next.getTime());
       }
       else if (this.options.currentDateFilter == "weeks") {
-        next = null, currentDay = to.getDay(), hasNext = false;
-
         // Beginning of the week
-        from.setDate(to.getDate() - (currentDay - 1));
+        from.setDate(to.getDate() - (to.getDay() - 1));
         next = new Date(from);
         tsArray.push(from.getTime());
 
@@ -447,7 +438,10 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
     },
 
     onChangeDateFilter: function Tool_OnChangeDateFilter(e, args) {
-      if (e) Event.stopEvent(e);
+      if (e) {
+        Event.stopEvent(e);
+      }
+
       Dom.removeClass(this.id + "-by-" + this.options.currentDateFilter, "selected");
       Dom.addClass(this.id + "-by-" + args.filter, "selected");
       this.options.currentDateFilter = args.filter;
@@ -456,7 +450,6 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
 
     onChangeDateInterval: function Tool_OnChangeDateInterval(e, args) {
       var coef = args.coef,
-          currentDate = new Date(),
           dateFilter = this.options.currentDateFilter,
           newDate = new Date(this.endDatesArray[dateFilter]);
 
@@ -476,6 +469,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
           break;
 
         case "years":
+        default:
           newDate.setFullYear(this.endDatesArray[dateFilter].getFullYear() + (1 * coef));
           break;
       }
@@ -512,7 +506,8 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
       var labels = [],
           timeType = params.currentFilter,
           slicedDates = params.additionalsParams.tsString.split(","),
-          truncateLabels = false;
+          truncateLabels = false,
+          i, ii;
 
       if (currentSizeMin && params.chartDomId) {
         var chartElt = document.getElementById(params.chartDomId);
@@ -523,7 +518,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
 
       switch (timeType) {
         case "years":
-          for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+          for (i = 0, ii = slicedDates.length - 1; i < ii; i++) {
             labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.fullMonth); // default: mmmm
             if (truncateLabels) {
               labels[i] = labels[i].substring(0,3);
@@ -532,7 +527,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
           break;
 
         case "months":
-          for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+          for (i = 0, ii = slicedDates.length - 1; i < ii; i++) {
             labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.shortDay); // default: dd/mm
             if (truncateLabels) {
               labels[i] = labels[i].substring(0,2);
@@ -541,7 +536,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
           break;
 
         case "weeks":
-          for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+          for (i = 0, ii = slicedDates.length - 1; i < ii; i++) {
             labels[i] = Alfresco.thirdparty.dateFormat(new Date(parseInt(slicedDates[i], 10)), AtolStatistics.dateFormatMasks.mediumDay); // default: dddd dd/mm
             if (truncateLabels) {
               labels[i] = labels[i].substring(0,3);
@@ -550,7 +545,8 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
           break;
 
         case "days":
-          for (var i = 0, ii = slicedDates.length - 1; i < ii; i++) {
+        default:
+          for (i = 0, ii = slicedDates.length - 1; i < ii; i++) {
             var timestamp = parseInt(slicedDates[i], 10),
                 h1 = Alfresco.thirdparty.dateFormat(new Date(timestamp), AtolStatistics.dateFormatMasks.shortHour), // default: HH'h'
                 h2 = Alfresco.thirdparty.dateFormat(new Date(timestamp + (2 * 60 * 60 * 1000)), AtolStatistics.dateFormatMasks.shortHour); // + 2 hours
@@ -564,7 +560,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
 
     // For build date title of user-connection and volumetry charts
     buildDateTitle: function Tool_buildDateTitle(params) {
-      var title = "",
+      var title,
           timeType = params.currentFilter,
           slicedDates = params.additionalsParams.tsString.split(","),
           from = new Date(parseInt(slicedDates[0], 10));
@@ -584,6 +580,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
           break;
 
         case "days":
+        default:
           title = this.getMessage(timeType, "graph.title.date.", Alfresco.thirdparty.dateFormat(from, AtolStatistics.dateFormatMasks.shortDate));
           break;
       }
@@ -592,7 +589,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
     },
 
     buildTitle: function Tool_buildTitle(params) {
-      var title = "",
+      var title,
           site = params.additionalsParams.site,
           siteTitle = params.additionalsParams.siteTitle || '';
 
@@ -676,8 +673,10 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
             }
 
             // insert menu items with new ids
-            for (var item in currentItems) {
-              menu.insertItem(currentItems[item], item);
+            for (var currItem in currentItems) {
+              if (currentItems.hasOwnProperty(currItem)) {
+                menu.insertItem(currentItems[currItem], currItem);
+              }
             }
           }
 

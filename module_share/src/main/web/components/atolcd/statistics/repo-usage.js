@@ -17,7 +17,9 @@
  */
 
 // AtolStatistics namespace
-if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistics = {}; }
+if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
+  var AtolStatistics = {};
+}
 
 /**
  * RepoUsage tool component.
@@ -26,12 +28,6 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
  * @class AtolStatistics.RepoUsage
  */
 (function () {
-  /**
-   * YUI Library aliases
-   */
-  var Dom = YAHOO.util.Dom,
-      Event = YAHOO.util.Event;
-
   /**
    * RepoUsage constructor.
    *

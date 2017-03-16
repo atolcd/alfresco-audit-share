@@ -17,7 +17,9 @@
  */
 
 // AtolStatistics namespace
-if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistics = {}; }
+if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
+  var AtolStatistics = {};
+}
 
 /**
  * Volumetry tool component.
@@ -70,7 +72,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       });
       this._setIdsForYUIMenuAndItems(this.widgets.chartTypeCriteriaButton);
 
-      var onChartTypeMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
+      var onChartTypeMenuItemClick = function (p_sType, p_aArgs) {
         var sText = p_aArgs[1].cfg.getProperty("text"),
             value = p_aArgs[1].value;
 
@@ -108,15 +110,14 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       // Retrieve variables from UI
       var dateFilter = this.options.currentDateFilter,
           site = this.convertMenuValue(this.widgets.siteButton.value),
-          tsString = "",
-          params = "";
+          tsString = "";
 
       // Date range table
       if (dateFilter) {
         tsString = this.buildTimeStampArray().toString();
       }
 
-      params = "?dates=" + tsString;
+      var params = "?dates=" + tsString;
       if (site) {
         if (site.indexOf(',') >= 0) {
           // Encode site ids
@@ -133,7 +134,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       }
 
       // Stacked values ?
-      if (!this.options.siteId && !Dom.hasClass(this.id + "-bar-stack-criteria-container", "hidden") && (Dom.get(this.id + "-bar_stack-criteria").checked == true)) {
+      if (!this.options.siteId && !Dom.hasClass(this.id + "-bar-stack-criteria-container", "hidden") && (Dom.get(this.id + "-bar_stack-criteria").checked)) {
         params += "&stacked=true";
       }
 
@@ -144,7 +145,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-volumetry" + this.lastRequest.params;
 
       // Display bars or lines depending on the option selected. (Lines by default)
-      chartType = (this.widgets.chartTypeCriteriaButton.value == "bar") ? "bar" : "line";
+      var chartType = (this.widgets.chartTypeCriteriaButton.value == "bar") ? "bar" : "line";
 
       Alfresco.util.Ajax.jsonGet({
         url: url,
@@ -247,32 +248,36 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
               }
             }
           }
-        }
+        },
+        labelVolumetry,
+        value,
+        i, ii;
 
         switch (displayParameters.additionalsParams.chartType) {
           case "bar":
             chartArguments.data.type = 'bar';
           break;
-          default :
           case "line":
+          default:
             chartArguments.point.show = true;
           break;
-        };
+        }
 
-        if (!Dom.hasClass(this.id + "-bar-stack-criteria-container", "hidden") && Dom.get(this.id + "-bar_stack-criteria").checked) {    // Volumetry conversion by sites
-          var labelVolumetry = (this.msg("tool.volumetry.label") +" ("+ AtolStatistics.util.formatFileSize(response.json.maxLocal).message +")"),
-            value_obj = {};
+        if (!Dom.hasClass(this.id + "-bar-stack-criteria-container", "hidden") && Dom.get(this.id + "-bar_stack-criteria").checked) {
+          // Volumetry conversion by sites
+          var value_obj = {};
+          labelVolumetry = (this.msg("tool.volumetry.label") +" ("+ AtolStatistics.util.formatFileSize(response.json.maxLocal).message +")");
 
           chartArguments.axis.y.label.text = [labelVolumetry];
-          for (var i=0, ii=response.json.stackedValues.length ; i<ii ; i++) {
+          for (i=0, ii=response.json.stackedValues.length ; i<ii ; i++) {
             var values = response.json.stackedValues[i];
             for (var j=0, jj=values.length ; j<jj ; j++) {
-              var value = values[j],
-                  siteId = response.json.sites[j];
+              var siteId = response.json.sites[j];
               if (!value_obj[siteId]) {
                 value_obj[siteId] = [siteId];
               }
 
+              value = values[j];
               if (value == null) {
                 value_obj[siteId].push(value);
               } else {
@@ -294,13 +299,14 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           }
           chartArguments.data.groups = [response.json.sites];
 
-        } else {    //Conversion of total volumetries
-          var jsonConvertValues = [],
-            labelVolumetry = (this.msg("tool.volumetry.label") +" ("+ AtolStatistics.util.formatFileSize(response.json.maxCount).message +")");
+        } else {
+          // Conversion of total volumetries
+          var jsonConvertValues = [];
+          labelVolumetry = (this.msg("tool.volumetry.label") +" ("+ AtolStatistics.util.formatFileSize(response.json.maxCount).message +")");
 
           chartArguments.axis.y.label.text = [labelVolumetry];
-          for (var i=0, ii=response.json.values.length ; i<ii ; i++) {
-            var value = response.json.values[i];
+          for (i=0, ii=response.json.values.length ; i<ii ; i++) {
+            value = response.json.values[i];
             if (value == null) {
               jsonConvertValues[i] = value;
             } else {
