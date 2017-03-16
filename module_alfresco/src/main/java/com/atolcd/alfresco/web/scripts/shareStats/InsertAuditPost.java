@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.MalformedNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -105,14 +106,16 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
 
           // Retrieving the node type when it does not already exists
           if (myAuditNodeType == null || myAuditNodeType.isEmpty()) {
-            getTypeFromObject(auditSample);
+            auditSample.setAuditNodeType(getTypeFromObject(auditSample));
           }
           insert(auditSample);
           model.put(MODEL_SUCCESS, true);
         }
       }
     } catch (InvalidNodeRefException invalidNodeRefException) {
-      // Node no longer exists
+      if (logger.isWarnEnabled()) {
+        logger.warn(invalidNodeRefException);
+      }
     } catch (Exception e) {
       if (logger.isDebugEnabled()) {
         logger.debug(e.getMessage(), e);
@@ -129,20 +132,23 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
     }
   }
 
-  public void getTypeFromObject(AuditEntry auditSample) {
+  public String getTypeFromObject(AuditEntry auditSample) {
     try {
       String myAuditObject = auditSample.getAuditObject();
       if (myAuditObject != null && !myAuditObject.isEmpty()) {
         NodeRef nodeRef = new NodeRef(myAuditObject);
         if (this.nodeService.exists(nodeRef)) {
-          // XXX: besoin d'un runAs ?
-          String nodeType = this.nodeService.getType(nodeRef).toPrefixString(this.namespaceService);
-          auditSample.setAuditNodeType(nodeType);
+          return this.nodeService.getType(nodeRef).toPrefixString(this.namespaceService);
         }
       }
     } catch (MalformedNodeRefException e) {
-
+      if (logger.isTraceEnabled()) {
+        logger.trace(e);
+      }
     }
+
+    // Default value: cm:content
+    return ContentModel.TYPE_CONTENT.toPrefixString(this.namespaceService);
   }
 
   public void getSiteFromObject(AuditEntry auditSample) {

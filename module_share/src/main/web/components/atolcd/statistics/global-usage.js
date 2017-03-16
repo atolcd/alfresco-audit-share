@@ -17,7 +17,9 @@
  */
 
 // AtolStatistics namespace
-if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistics = {}; }
+if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
+  var AtolStatistics = {};
+}
 
 /**
  * GlobalUsage tool component.
@@ -51,10 +53,10 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
     // Declaration of the colors used by charts
     var red = "#EE1C2F",
-      blue = "#19ABEA",lightBlue = "#1B9EFC",darkBlue = "#1B5AF9",
+      blue = "#19ABEA", darkBlue = "#1B5AF9",
       green = "#7CBC28", darkGreen = "#0A9200",
-      orange = "#FF9900", lightOrange = "#FFC600", darkOrange = "#FF692B",
-      gray = "#C1C1C1", mediumGray = "#DFDFDF";
+      orange = "#FF9900", lightOrange = "#FFC600",
+      darkOrange = "#FF692B";
 
     // Blog
     this.options.barChartColors["blog.postview"] = blue;
@@ -138,7 +140,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
       // Listeners on menu click
       // "Module" filter
-      var onModulesMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
+      var onModulesMenuItemClick = function (p_sType, p_aArgs) {
         var sText = p_aArgs[1].cfg.getProperty("text"),
             value = p_aArgs[1].value;
 
@@ -168,7 +170,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       }
 
       // "Action" filter
-      var onActionsMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
+      var onActionsMenuItemClick = function (p_sType, p_aArgs) {
         var sText = p_aArgs[1].cfg.getProperty("text"),
             value = p_aArgs[1].value;
 
@@ -205,7 +207,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       }
     },
 
-    initNodeTypesMenu: function GlobalUsage_initNodeTypesMenu (response) {
+    initNodeTypesMenu: function GlobalUsage_initNodeTypesMenu () {
       var me = this;
 
       if (!this.widgets.nodeTypeButton) {
@@ -299,7 +301,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           tsArray = this.buildTimeStampArray(),
           from = tsArray[0],
           to = tsArray[tsArray.length - 1],
-          nodeType = (this.widgets.nodeTypeButton) ? this.convertMenuValue(this.selectedNodeTypes.join(',')) : "";
+          nodeType = (this.widgets.nodeTypeButton) ? this.convertMenuValue(this.selectedNodeTypes.join(',')) : "",
+          tsString;
 
       // Date range table
       if (dateFilter) {
@@ -341,12 +344,14 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         this.globalChart.categories(this.buildBarChartXLabels(resizeParameters, this.options.chartLabelSizeMin));
       }
 
-      // Remove the last width attribute of the svg tag. /!\ Because the width resizing is not native on FireFox /!\
+      // Remove the last width attribute of the svg tag. Because the width resizing is not native on FireFox
       if (this.popularityCharts) {
         for (var chartId in this.popularityCharts) {
-          var theChart = this.popularityCharts[chartId];
-          if (theChart.element && theChart.element.firstChild) {
-            theChart.element.firstChild.removeAttribute("width");
+          if (this.popularityCharts.hasOwnProperty(chartId)) {
+            var theChart = this.popularityCharts[chartId];
+            if (theChart.element && theChart.element.firstChild) {
+              theChart.element.firstChild.removeAttribute("width");
+            }
           }
         }
       }
@@ -401,48 +406,43 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
                   tick: { format: d3.format(",d") }
                 }
               }
-          };
+          },
+          i, ii, j, jj;
 
         // Recovery datas for graph displaying
         var jsonResults = [];
 
-        for (var i = 0 ; i < response.json.items.length ; i++) {
+        for (i = 0, ii = response.json.items.length ; i < ii ; i++) {
           var jsonItem = response.json.items[i];
           if (jsonItem.totalResults > 0) {
-            for (var j = 0, jj = jsonItem.totalResults; j < jj; j++) {
-              var labelParam = jsonItem.items[j].target,
-                max = 0;
+            for (j = 0, jj = jsonItem.totalResults; j < jj; j++) {
+              var labelParam = jsonItem.items[j].target;
 
               if (!jsonResults[labelParam]) {
                 jsonResults[labelParam] = [];
                 jsonResults[labelParam][i] = jsonItem.items[j].count;
-
-                if (jsonResults[labelParam][i] > max) {
-                  max = jsonResults[labelParam][i];
-                }
               } else {
                 jsonResults[labelParam][i] = jsonItem.items[j].count;
-                if (jsonResults[labelParam][i] > max) {
-                  max = jsonResults[labelParam][i];
-                }
               }
             }
           }
         }
 
-        for (resultId in jsonResults) {
-          var value_obj = [this.getMessage(resultId, "graph.label.")];
-          for (var j = 0; j < response.json.items.length; j++) {
-            if (!jsonResults[resultId][j]) {
-              jsonResults[resultId][j] = 0;
+        for (var resultId in jsonResults) {
+          if (jsonResults.hasOwnProperty(resultId)) {
+            var value_obj = [this.getMessage(resultId, "graph.label.")];
+            for (j = 0, jj = response.json.items.length; j < jj; j++) {
+              if (!jsonResults[resultId][j]) {
+                jsonResults[resultId][j] = 0;
+              }
             }
-          }
 
-          for (var i = 0, ii = jsonResults[resultId].length; i < ii; i++) {
-            value_obj.push(jsonResults[resultId][i]);
+            for (i = 0, ii = jsonResults[resultId].length; i < ii; i++) {
+              value_obj.push(jsonResults[resultId][i]);
+            }
+            chartArguments.data.colors[value_obj[0]] = this.options.barChartColors[resultId];
+            chartArguments.data.columns.push(value_obj);
           }
-          chartArguments.data.colors[value_obj[0]] = this.options.barChartColors[resultId];
-          chartArguments.data.columns.push(value_obj);
         }
 
           // Recovery of the connection values and reactivation of the export button
@@ -462,20 +462,19 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
     getByPopularity: function GlobalUsage_getByPopularity(type) {
       var site = this.convertMenuValue(this.widgets.siteButton.value),
           module = this.convertMenuValue(this.widgets.moduleCriteriaButton.value),
-          dateFilter = this.options.currentDateFilter,
           tsArray = this.buildTimeStampArray(),
           tsString = tsArray.toString(),
           from = tsArray[0],
           to = tsArray[tsArray.length - 1],
           nodeType = (this.widgets.nodeTypeButton) ? this.convertMenuValue(this.selectedNodeTypes.join(',')) : "",
-          params = null;
+          params;
 
       params = this.buildParams(module, site, null, type, from, to, this.options.limit, nodeType);
 
       // Build query parameters
-      if(type==="mostread"){
+      if ("mostread" === type) {
         this.options.paramsmostread = params;
-      }else if(type==="mostupdated"){
+      } else if ("mostupdated" === type) {
         this.options.paramsmostupdated = params;
       }
 
@@ -500,7 +499,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
     getTemplateUrl: function GlobalUsage_getTemplateUrl() {
       var baseUrl = window.location.protocol + "//" + window.location.host + Alfresco.constants.URL_PAGECONTEXT + "site/{site}/";
 
-      return templates = {
+      return {
         "documentLibrary" : baseUrl + "document-details?nodeRef={nodeRef}",
         "wiki": baseUrl + "wiki-page?title={id}&listViewLinkBack=true",
         "blog": baseUrl + "blog-postview?postId={id}&listViewLinkBack=true",
@@ -531,7 +530,6 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
             onclick: function(barParams) {
               var item = response.json.items[barParams.x];
 
-              // TODO: make something cleaner?
               var body = '<div class="node-details-popup">';
               body += '<p><label>' + me.getMessage("label.popup.filename") + '</label>' + item.name + '</p>';
               body += (item.siteTitle) ? '<p><label>' + me.getMessage("label.popup.type") + '</label>' + me.getMessage("site.component." + item.siteComponent) + '</p>' : '';
@@ -610,9 +608,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         // Generation of the charts
         chartsPopularityArguments.bindto = '#' + this.id + '-' + response.config.additionalsParams.type;
 
-        var value_obj = {};
         for (var i=0, ii=response.json.items.length ; i<ii ; i++) {
-          value_obj = response.json.items[i];
+          var value_obj = response.json.items[i];
           chartsPopularityArguments.data.json.push(value_obj);
           if (chartsPopularityArguments.data.json[i].displayName.length > this.options.popularity) {
             chartsPopularityArguments.data.json[i].displayName = chartsPopularityArguments.data.json[i].displayName.substr(0, this.options.popularity) + " ...";
@@ -647,7 +644,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
      * @return string - url params
      */
     buildParams: function GlobalUsage_buildParams(module, site, dates, type, from, to, limit, nodetype) {
-      var params = "?type=" + type;
+      var params = "?type=" + type,
+          i, ii;
 
       if (dates !== null && dates != "") {
         params += "&dates=" + dates;
@@ -656,7 +654,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
         if (module === "all") {
           var moduleValues = [],
               items = this.widgets.moduleCriteriaButton.getMenu().getItems();
-          for (var i=0, ii=items.length ; i<ii ; i++) {
+          for (i=0, ii=items.length ; i<ii ; i++) {
             var item = items[i];
             if (item.value != "") {
               moduleValues.push(item.value);
@@ -673,7 +671,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           // Encode site ids
           var sites = [],
               sitesArray = site.split(',');
-          for (var i=0, ii=sitesArray.length ; i<ii ; i++) {
+          for (i=0, ii=sitesArray.length ; i<ii ; i++) {
             sites.push(encodeURIComponent(sitesArray[i]));
           }
 
@@ -696,7 +694,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           // Encode nodetype ids
           var nodetypes = [],
           nodetypesArray = nodetype.split(',');
-          for (var i=0, ii=nodetypesArray.length ; i<ii ; i++) {
+          for (i=0, ii=nodetypesArray.length ; i<ii ; i++) {
             nodetypes.push(encodeURIComponent(nodetypesArray[i]));
           }
 

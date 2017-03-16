@@ -197,6 +197,10 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
               totalSize = totalSize + docContent.getSize();
               nbFile++;
             }
+
+            if (logger.isDebugEnabled()) {
+              logger.debug(uoe);
+            }
           }
         }
         skipCount += rs.length();

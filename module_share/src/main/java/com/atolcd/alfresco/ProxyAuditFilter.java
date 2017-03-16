@@ -127,7 +127,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
     public void doFilter(ServletRequest sReq, ServletResponse sRes, FilterChain chain) throws IOException, ServletException {
         // Get the HTTP request/response/session
         HttpServletRequest request = (HttpServletRequest) sReq;
-        // HttpServletResponse response = (HttpServletResponse) sRes;
+
         RequestWrapper requestWrapper = new RequestWrapper(request);
         // Initialize a new request context
         RequestContext context = ThreadLocalRequestContext.getRequestContext();
@@ -142,9 +142,9 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                 try {
                     RequestContextUtil.populateRequestContext(context, request);
                 } catch (ResourceLoaderException e) {
-                    // e.printStackTrace();
+                  logger.debug(e);
                 } catch (UserFactoryException e) {
-                    // e.printStackTrace();
+                  logger.debug(e);
                 }
             } catch (RequestContextException ex) {
                 throw new ServletException(ex);
@@ -173,7 +173,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                 // For documents only (only in sites!)
                 if (requestURI.endsWith("/doclib/activity") && request.getMethod().equals(POST)) {
                     String type = request.getContentType().split(";")[0];
-                    if (type.equals("application/json")) {
+                    if ("application/json".equals(type)) {
                         // Get JSON Object
                         JSONObject activityFeed = new JSONObject(requestWrapper.getStringContent());
 
@@ -199,7 +199,6 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                                     auditSample.put(AUDIT_SITE, activityFeed.getString("site"));
                                     auditSample.put(AUDIT_ACTION_NAME, "file-" + activityType.split("-")[1]);
                                     auditSample.put(AUDIT_APP_NAME, MOD_DOCUMENT);
-                                    // auditSample.put(AUDIT_OBJECT, "");
 
                                     for (int i = 0; i < fileCount; i++) {
                                         remoteCall(request, auditSample);
@@ -238,7 +237,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                     // Nothing to do - Insert request is done in JavaScript
                 } else if (requestURI.endsWith("/comments") || requestURI.endsWith("/replies")) {
                     // Comments & replies
-                    String[] urlTokens = request.getHeader("referer").toString().split("/");
+                    String[] urlTokens = request.getHeader("referer").split("/");
                     HashMap<String, String> auditData = this.getUrlData(urlTokens);
 
                     auditSample.put(AUDIT_SITE, auditData.get(KEY_SITE));
@@ -252,7 +251,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                     String[] urlTokens = requestURI.split("/");
                     String wikiPageId = urlTokens[urlTokens.length - 1];
                     String siteId = urlTokens[urlTokens.length - 2];
-                    if (method.equals(Method.PUT.toString().toString())) {
+                    if (method.equals(Method.PUT.toString())) {
                         JSONObject params = new JSONObject(requestWrapper.getStringContent());
                         auditSample.put(AUDIT_SITE, siteId);
                         auditSample.put(AUDIT_APP_NAME, MOD_WIKI);
@@ -499,12 +498,9 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
      * @return nodeRef
      */
     public String getNodeRefFromUrl(String url, int offset) {
-        String nodeRef = "";
         String[] urlTokens = url.split("/");
-        nodeRef = urlTokens[urlTokens.length - offset - 3] + "://" + urlTokens[urlTokens.length - offset - 2] + "/"
+        return urlTokens[urlTokens.length - offset - 3] + "://" + urlTokens[urlTokens.length - offset - 2] + "/"
                 + urlTokens[urlTokens.length - offset - 1];
-
-        return nodeRef;
     }
 
     /**
@@ -522,7 +518,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
         for (int i = 0; i < urlTokens.length; i++) {
             if (urlTokens[i].equals(KEY_SITE) && !siteFlag) {
                 siteFlag = true;
-            } else if (siteFlag && (urlData.get(KEY_SITE).equals(""))) {
+            } else if (siteFlag && ("".equals(urlData.get(KEY_SITE)))) {
                 urlData.put(KEY_SITE, urlTokens[i]);
                 String[] splittedModuleAction = urlTokens[i + 1].split("-");
                 urlData.put(KEY_MODULE, splittedModuleAction[0]);

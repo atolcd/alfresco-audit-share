@@ -22,7 +22,7 @@ public class CsvExportEntry {
 	String auditSite = "";
 	String auditAppName = "";
 	String auditActionName = "";
-	int count = 0;;
+	int count = 0;
 
 	public long getId() {
 		return id;

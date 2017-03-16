@@ -17,7 +17,9 @@
  */
 
 // AtolStatistics namespace
-if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistics = {}; }
+if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
+  var AtolStatistics = {};
+}
 
 /**
  * UserConnections tool component.
@@ -87,7 +89,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       });
       this._setIdsForYUIMenuAndItems(this.widgets.chartTypeCriteriaButton);
 
-      var onChartTypeMenuItemClick = function (p_sType, p_aArgs, p_oItem) {
+      var onChartTypeMenuItemClick = function (p_sType, p_aArgs) {
         var sText = p_aArgs[1].cfg.getProperty("text"),
             value = p_aArgs[1].value;
 
@@ -219,7 +221,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       // Retrieve variables from UI
       var site = this.convertMenuValue(this.widgets.siteButton.value),
           currentDate = new Date(),
-          params = "";
+          params;
 
       params = "?type=users-recently-connected";
       params += "&to=" + currentDate.getTime();
@@ -245,12 +247,11 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
 
     prepareUserRequest: function UserConnections_prepareUserRequest(type) {
       // Retrieve variables from UI
-      var dateFilter = this.options.currentDateFilter,
-          site = this.convertMenuValue(this.widgets.siteButton.value),
-          params = "";
+      var site = this.convertMenuValue(this.widgets.siteButton.value),
+          params;
 
       // Date range table
-      tsArray = this.buildTimeStampArray();
+      var tsArray = this.buildTimeStampArray();
       params = "?type=" + type;
       params += "&from=" + tsArray[0];
       params += "&to=" + tsArray[tsArray.length - 1];
@@ -315,7 +316,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
       var dateFilter = this.options.currentDateFilter,
         site = this.convertMenuValue(this.widgets.siteButton.value),
         tsString = "",
-        params = "";
+        params;
 
       // Date range table
       if (dateFilter) {
@@ -429,14 +430,14 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
           };
 
           switch (displayParameters.additionalsParams.chartType) {
-            default :
-            case "bar":
-              chartArguments.data.type = 'bar';
-            break;
             case "line":
               chartArguments.point.show = true;
             break;
-          };
+            case "bar":
+            default :
+              chartArguments.data.type = 'bar';
+            break;
+          }
 
           // Recovery of the connection values and reactivation of the export button
           this.lastRequest.values = response.json.values;
@@ -457,51 +458,51 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) { var AtolStatistic
      * @return string - url params
      */
     buildParams: function UserConnections_buildParams() {
-      // TODO:
       return "";
     },
 
     updateUsersLabels: function UserConnections_updateUsersLabels(tsArray) {
-      var connectedLabel = "",
-        neverConnectedLabel = "";
+      var connectedLabel,
+          neverConnectedLabel;
 
       switch (this.options.currentDateFilter) {
-      case "days":
-        var date = new Date(tsArray[0]),
-            today = new Date();
+        case "days":
+          var date = new Date(tsArray[0]),
+              today = new Date();
 
-        if (date.getMonth() == today.getMonth() && date.getDate() == today.getDate() && date.getFullYear() == today.getFullYear()) {
-          connectedLabel = this.msg("label.users.connected.today");
-          neverConnectedLabel = this.msg("label.users.never-connected.today");
-        } else {
-          var day = dateFormat(date, AtolStatistics.dateFormatMasks.mediumDay); // dddd
-                                                                                // dd/mm
-          connectedLabel = this.msg("label.users.connected." + this.options.currentDateFilter, day);
-          neverConnectedLabel = this.msg("label.users.never-connected." + this.options.currentDateFilter, day);
-        }
-        break;
+          if (date.getMonth() == today.getMonth() && date.getDate() == today.getDate() && date.getFullYear() == today.getFullYear()) {
+            connectedLabel = this.msg("label.users.connected.today");
+            neverConnectedLabel = this.msg("label.users.never-connected.today");
+          } else {
+            var day = dateFormat(date, AtolStatistics.dateFormatMasks.mediumDay); // dddd
+                                                                                  // dd/mm
+            connectedLabel = this.msg("label.users.connected." + this.options.currentDateFilter, day);
+            neverConnectedLabel = this.msg("label.users.never-connected." + this.options.currentDateFilter, day);
+          }
+          break;
 
-      case "weeks":
-        var from = dateFormat(new Date(tsArray[0]), AtolStatistics.dateFormatMasks.shortDate), // dd/mm/yyyy
-            to   = dateFormat(new Date(tsArray[tsArray.length - 2]), AtolStatistics.dateFormatMasks.shortDate); // dd/mm/yyyy
+        case "weeks":
+          var from = dateFormat(new Date(tsArray[0]), AtolStatistics.dateFormatMasks.shortDate), // dd/mm/yyyy
+              to   = dateFormat(new Date(tsArray[tsArray.length - 2]), AtolStatistics.dateFormatMasks.shortDate); // dd/mm/yyyy
 
-        connectedLabel = this.msg("label.users.connected." + this.options.currentDateFilter, from, to);
-        neverConnectedLabel = this.msg("label.users.never-connected." + this.options.currentDateFilter, from, to);
-        break;
+          connectedLabel = this.msg("label.users.connected." + this.options.currentDateFilter, from, to);
+          neverConnectedLabel = this.msg("label.users.never-connected." + this.options.currentDateFilter, from, to);
+          break;
 
-      case "months":
-        var month = dateFormat(new Date(tsArray[0]), AtolStatistics.dateFormatMasks.monthYear); // mmmm
-                                                                                                // yyyy
-        connectedLabel = this.msg("label.users.connected." + this.options.currentDateFilter, month);
-        neverConnectedLabel = this.msg("label.users.never-connected." + this.options.currentDateFilter, month);
-        break;
+        case "months":
+          var month = dateFormat(new Date(tsArray[0]), AtolStatistics.dateFormatMasks.monthYear); // mmmm
+                                                                                                  // yyyy
+          connectedLabel = this.msg("label.users.connected." + this.options.currentDateFilter, month);
+          neverConnectedLabel = this.msg("label.users.never-connected." + this.options.currentDateFilter, month);
+          break;
 
-      case "years":
-        var date = new Date(tsArray[0]);
-        connectedLabel = this.msg("label.users.connected." + this.options.currentDateFilter, date.getFullYear());
-        neverConnectedLabel = this.msg("label.users.never-connected." + this.options.currentDateFilter, date.getFullYear());
-        break;
-      };
+        case "years":
+        default:
+          date = new Date(tsArray[0]);
+          connectedLabel = this.msg("label.users.connected." + this.options.currentDateFilter, date.getFullYear());
+          neverConnectedLabel = this.msg("label.users.never-connected." + this.options.currentDateFilter, date.getFullYear());
+          break;
+      }
 
       if (connectedLabel) {
         this.headers["users-connected"].innerHTML = connectedLabel;

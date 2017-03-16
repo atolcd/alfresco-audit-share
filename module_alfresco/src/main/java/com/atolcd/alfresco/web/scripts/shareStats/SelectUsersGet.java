@@ -61,6 +61,8 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
   private static final String SELECT_QNAME_ID = "alfresco.atolcd.audit.selectQNameId";
   private static final String SELECT_SITES_MEMBERS = "alfresco.atolcd.audit.selectSiteMember";
 
+  private static final String PARAM_GROUPS = "groups";
+
   public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
     this.sqlSessionTemplate = sqlSessionTemplate;
   }
@@ -123,8 +125,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
       return Collections.emptyList();
     }
 
-    List<String> users = new ArrayList<String>();
-    users = (List<String>) this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, params);
+    List<String> users = (List<String>) this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, params);
     Set<String> usersSet = this.selectSiteMembers(atolAuthorityParameters);
     users.retainAll(usersSet);
     return users;
@@ -136,15 +137,14 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
     int[] values = new int[dates.length - 1];
 
     // When the groups members list is empty, return an empty list without executing the query.
-    if (params !=null && params.getGroupsMembers() != null && params.getGroupsMembers().isEmpty()) {
+    if (params.getGroupsMembers() != null && params.getGroupsMembers().isEmpty()) {
       return values;
     }
 
     for (int i = 0; i < dates.length - 1; i++) {
       params.setDateFrom(dates[i]);
       params.setDateTo(dates[i + 1]);
-      List<String> users = new ArrayList<String>();
-      users = (List<String>) sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, params);
+      List<String> users = (List<String>) sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, params);
       values[i] = users.size();
     }
     return values;
@@ -153,15 +153,14 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
   @SuppressWarnings("unchecked")
   public Set<String> selectNeverConnectedUsers(AuditQueryParameters auditQueryParameters, AtolAuthorityParameters atolAuthorityParameters) {
     // When the groups members list is empty, return an empty HashSet without executing the query.
-    if (auditQueryParameters !=null && auditQueryParameters.getGroupsMembers() != null && auditQueryParameters.getGroupsMembers().isEmpty()) {
+    if (auditQueryParameters != null && auditQueryParameters.getGroupsMembers() != null && auditQueryParameters.getGroupsMembers().isEmpty()) {
       return Collections.emptySet();
     }
 
-    List<String> auditUsers = new ArrayList<String>();
-    auditUsers = (List<String>) this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, auditQueryParameters);
+    List<String> auditUsers = (List<String>) this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, auditQueryParameters);
 
     Set<String> usersSet;
-    if (auditQueryParameters !=null && auditQueryParameters.getGroupsMembers() != null) {
+    if (auditQueryParameters != null && auditQueryParameters.getGroupsMembers() != null) {
       usersSet = new HashSet<String>(auditQueryParameters.getGroupsMembers());
     } else {
       usersSet = this.selectSiteMembers(atolAuthorityParameters);
@@ -173,16 +172,13 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 
   @SuppressWarnings("unchecked")
   public Set<String> selectSiteMembers(AtolAuthorityParameters atolAuthorityParameters) {
-    List<String> users = new ArrayList<String>();
-    List<String> groups = new ArrayList<String>();
-
     // All site members
     atolAuthorityParameters.setPersonQnameId(getPersonQnameId());
-    users = (List<String>) this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
+    List<String> users = (List<String>) this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
 
     // All groups of the site
     atolAuthorityParameters.setPersonQnameId(getContainerQnameId());
-    groups = (List<String>) this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
+    List<String> groups = (List<String>) this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
 
     Set<String> usersSet = new HashSet<String>(users.size());
     usersSet.addAll(users);
@@ -208,7 +204,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
       }
     }
 
-    if (groupsMembers == null || (groupsMembers != null && groupsMembers.isEmpty())) {
+    if (groupsMembers.isEmpty()) {
       return Collections.emptyList();
     } else {
       return new ArrayList<String>(groupsMembers);
@@ -232,7 +228,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
       } else {
         // Add the user's sites, plus the container group
         List<SiteInfo> sitesInfo = siteService.listSites("", "");
-        if (sitesInfo.size() > 0) {
+        if (!sitesInfo.isEmpty()) {
           for (SiteInfo siteInfo : sitesInfo) {
             params.setSite(siteInfo.getShortName());
           }
@@ -263,8 +259,8 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
       params.setDateTo(dateTo);
       params.setSlicedDates(req.getParameter("dates"));
 
-      if (req.getParameter("groups") != null && !req.getParameter("groups").isEmpty()) {
-        params.setGroupsMembers(this.getGroupsMembers(req.getParameter("groups")));
+      if (req.getParameter(PARAM_GROUPS) != null && !req.getParameter(PARAM_GROUPS).isEmpty()) {
+        params.setGroupsMembers(this.getGroupsMembers(req.getParameter(PARAM_GROUPS)));
       }
 
       return params;

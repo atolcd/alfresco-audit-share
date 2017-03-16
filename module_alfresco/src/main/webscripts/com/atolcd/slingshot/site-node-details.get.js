@@ -71,12 +71,6 @@ function main() {
     result.nodeRef = link.nodeRef.toString();
     result.displayName = link.properties["lnk:title"] || [];
   }
-  else if (componentId == "dataLists") {
-    // TODO:
-  }
-  else if (componentId == "calendar") {
-    // TODO:
-  }
 
   return result;
 }

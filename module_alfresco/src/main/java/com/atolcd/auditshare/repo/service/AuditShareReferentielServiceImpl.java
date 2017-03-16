@@ -45,7 +45,7 @@ public class AuditShareReferentielServiceImpl implements AuditShareReferentielSe
     try {
       // Verification de l'existance du node
       NodeRef xmlRefNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, id);
-      if (xmlRefNodeRef != null && nodeService.exists(xmlRefNodeRef)) {
+      if (nodeService.exists(xmlRefNodeRef)) {
         xmlStream = contentService.getReader(xmlRefNodeRef, ContentModel.PROP_CONTENT).getContentInputStream();
         // Initialisation du référentiel des groupes
         return parseReferentielGroups(xmlStream);

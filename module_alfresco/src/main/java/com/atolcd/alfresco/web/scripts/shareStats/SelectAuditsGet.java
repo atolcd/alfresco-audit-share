@@ -76,6 +76,9 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
   static final QName TYPE_LINK = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "link");
   static final QName PROP_LINK_TITLE = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "title");
 
+  static final String MODEL_DATES_VARIABLE = "dates";
+  static final String MODEL_POPULARITY_VARIABLE = "popularity";
+
   public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
     this.sqlSessionTemplate = sqlSessionTemplate;
   }
@@ -139,30 +142,30 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
       JSONException {
     switch (queryType.valueOf(type)) {
     case read:
-      model.put("dates", selectByDate(params, SELECT_BY_VIEW));
+      model.put(MODEL_DATES_VARIABLE, selectByDate(params, SELECT_BY_VIEW));
       break;
     case created:
-      model.put("dates", selectByDate(params, SELECT_BY_CREATED));
+      model.put(MODEL_DATES_VARIABLE, selectByDate(params, SELECT_BY_CREATED));
       break;
     case deleted:
-      model.put("dates", selectByDate(params, SELECT_BY_DELETED));
+      model.put(MODEL_DATES_VARIABLE, selectByDate(params, SELECT_BY_DELETED));
       break;
     case updated:
-      model.put("dates", selectByDate(params, SELECT_BY_UPDATED));
+      model.put(MODEL_DATES_VARIABLE, selectByDate(params, SELECT_BY_UPDATED));
       break;
     case mostread:
-      model.put("popularity", selectByPopularity(params, SELECT_BY_MOSTREAD));
+      model.put(MODEL_POPULARITY_VARIABLE, selectByPopularity(params, SELECT_BY_MOSTREAD));
       break;
     case mostupdated:
-      model.put("popularity", selectByPopularity(params, SELECT_BY_MOSTUPDATED));
+    default:
+      model.put(MODEL_POPULARITY_VARIABLE, selectByPopularity(params, SELECT_BY_MOSTUPDATED));
       break;
     }
   }
 
   @SuppressWarnings("unchecked")
   public List<AuditObjectPopularity> selectByPopularity(AuditQueryParameters params, String query) {
-    List<AuditObjectPopularity> auditObjectPopularityList = new ArrayList<AuditObjectPopularity>();
-    auditObjectPopularityList = (List<AuditObjectPopularity>) sqlSessionTemplate.selectList(query, params);
+    List<AuditObjectPopularity> auditObjectPopularityList = (List<AuditObjectPopularity>) sqlSessionTemplate.selectList(query, params);
     logger.info("Performing " + query + " ... ");
 
     Iterator<AuditObjectPopularity> iterator = auditObjectPopularityList.iterator();
@@ -204,8 +207,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
     for (int i = 0; i < dates.length - 1; i++) {
       params.setDateFrom(dates[i]);
       params.setDateTo(dates[i + 1]);
-      List<AuditCount> auditSample = new ArrayList<AuditCount>();
-      auditSample = (List<AuditCount>) sqlSessionTemplate.selectList(query, params);
+      List<AuditCount> auditSample = (List<AuditCount>) sqlSessionTemplate.selectList(query, params);
       auditCount.add(auditSample);
     }
     logger.info("Performing " + query + " ... ");
@@ -265,7 +267,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
       if (parentRef != null) {
         if (nodeService.hasAspect(parentRef, SiteModel.ASPECT_SITE_CONTAINER)) {
           String parentName = (String) nodeService.getProperty(parentRef, ContentModel.PROP_NAME);
-          if (parentName.equals("blog") || parentName.equals("wiki")) {
+          if ("blog".equals(parentName) || "wiki".equals(parentName)) {
             // For Blog or Wiki pages, we use the title
             return (String) nodeService.getProperty(nodeRef, ContentModel.PROP_TITLE);
           }
