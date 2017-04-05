@@ -187,7 +187,7 @@
           AND (
             audit_action_name = 'file-added'
           or
-            audit_action_name = 'create'
+            audit_action_name = 'file-created'
           )
         </if>
         <if test="appName == 'wiki'">
@@ -206,7 +206,7 @@
 
           AND audit_action_name IN
           <foreach item="item" collection="appNames" open="(" separator="," close=")">
-            <if test="item == 'document'">'file-added', 'create'</if>
+            <if test="item == 'document'">'file-added', 'file-created'</if>
             <if test="item == 'wiki'">'create-post'</if>
             <if test="item == 'blog'">'blog-create'</if>
             <if test="item == 'discussions'">'discussions-create'</if>
