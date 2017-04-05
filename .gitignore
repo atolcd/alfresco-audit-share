@@ -1,2 +1,9 @@
 build
 dist
+.gitignore
+module_alfresco/.classpath
+module_alfresco/.project
+module_alfresco/.settings
+module_share/.classpath
+module_share/.project
+module_share/.settings
