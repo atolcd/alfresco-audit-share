@@ -118,7 +118,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	@SuppressWarnings("unchecked")
 	public List<String> selectConnectedUsers(AuditQueryParameters params, AtolAuthorityParameters atolAuthorityParameters) {
 		List<String> users = new ArrayList<String>();
-		users = (List<String>) this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, params);
+		users = this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, params);
 		Set<String> usersSet = this.selectSiteMembers(atolAuthorityParameters);
 		users.retainAll(usersSet);
 		return users;
@@ -132,7 +132,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 			params.setDateFrom(dates[i]);
 			params.setDateTo(dates[i + 1]);
 			List<String> users = new ArrayList<String>();
-			users = (List<String>) sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, params);
+			users = sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, params);
 			values[i] = users.size();
 		}
 		return values;
@@ -141,7 +141,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 	@SuppressWarnings("unchecked")
 	public Set<String> selectNeverConnectedUsers(AuditQueryParameters auditQueryParameters, AtolAuthorityParameters atolAuthorityParameters) {
 		List<String> auditUsers = new ArrayList<String>();
-		auditUsers = (List<String>) this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, auditQueryParameters);
+		auditUsers = this.sqlSessionTemplate.selectList(SELECT_CONNECTED_USERS, auditQueryParameters);
 		Set<String> usersSet = this.selectSiteMembers(atolAuthorityParameters);
 		// Differentiel
 		usersSet.removeAll(auditUsers);
@@ -155,11 +155,11 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 
 		// All site members
 		atolAuthorityParameters.setPersonQnameId(getPersonQnameId());
-		users = (List<String>) this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
+		users = this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
 
 		// All groups of the site
 		atolAuthorityParameters.setPersonQnameId(getContainerQnameId());
-		groups = (List<String>) this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
+		groups = this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
 
 		Set<String> usersSet = new HashSet<String>(users.size());
 		usersSet.addAll(users);
