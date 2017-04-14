@@ -187,7 +187,7 @@
           AND (
             audit_action_name = 'file-added'
           or
-            audit_action_name = 'create'
+            audit_action_name = 'file-created'
           )
         </if>
         <if test="appName == 'wiki'">
@@ -206,7 +206,7 @@
 
           AND audit_action_name IN
           <foreach item="item" collection="appNames" open="(" separator="," close=")">
-            <if test="item == 'document'">'file-added', 'create'</if>
+            <if test="item == 'document'">'file-added', 'file-created'</if>
             <if test="item == 'wiki'">'create-post'</if>
             <if test="item == 'blog'">'blog-create'</if>
             <if test="item == 'discussions'">'discussions-create'</if>
@@ -342,25 +342,25 @@
     <select id="selectByRead" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
       <include refid="read_snippet"/>
-      <include refid="group_by_concat"/>
+      <include refid="alfresco.atolcd.audit.concat.group_by_concat"/>
     </select>
 
     <select id="selectByUpdated" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
       <include refid="update_snippet"/>
-      <include refid="group_by_concat"/>
+      <include refid="alfresco.atolcd.audit.concat.group_by_concat"/>
     </select>
 
     <select id="selectByCreated" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
       <include refid="create_snippet"/>
-      <include refid="group_by_concat"/>
+      <include refid="alfresco.atolcd.audit.concat.group_by_concat"/>
     </select>
 
     <select id="selectByDeleted" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
       <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
       <include refid="delete_snippet"/>
-      <include refid="group_by_concat"/>
+      <include refid="alfresco.atolcd.audit.concat.group_by_concat"/>
     </select>
 
     <select id="selectByMostUpdated" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditObjectPopularity">

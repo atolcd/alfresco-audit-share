@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.atolcd</groupId>
+	<artifactId>auditshare-module-alfresco</artifactId>
+	<version>1.5</version>
+	<name>auditshare-module-alfresco Repository AMP project</name>
+	<packaging>amp</packaging>
+	<description>Manages the lifecycle of the auditshare-module-alfresco Repository AMP (Alfresco Module Package)</description>
+
+	<parent>
+		<groupId>org.alfresco.maven</groupId>
+		<artifactId>alfresco-sdk-parent</artifactId>
+		<version>2.2.0</version>
+	</parent>
+
+	<properties>
+		<alfresco.version>5.1.1</alfresco.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.alfresco.maven</groupId>
+				<artifactId>alfresco-sdk-aggregator</artifactId>
+				<version>2.2.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+            <version>4.12</version>
+        </dependency>
+		<dependency>
+			<groupId>org.alfresco</groupId>
+			<artifactId>alfresco-repository</artifactId>
+			<version>5.1.e</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.alfresco</groupId>
+		    <artifactId>alfresco-core</artifactId>
+		    <version>5.1.1</version>
+		    <scope>provided</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.alfresco</groupId>
+		    <artifactId>alfresco-remote-api</artifactId>
+		    <version>5.1.e</version>
+		    <scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.javacsv</groupId>
+			<artifactId>javacsv</artifactId>
+			<version>2.0</version>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+		<!-- Brings in the extra Enterprise specific repository classes, if the 
+			'enterprise' profile has been activated, needs to be activated manually. -->
+		<profile>
+			<id>enterprise</id>
+			<dependencies>
+				<dependency>
+					<groupId>${alfresco.groupId}</groupId>
+					<artifactId>alfresco-enterprise-repository</artifactId>
+					<version>${alfresco.version}</version>
+					<scope>provided</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+
+		<!-- If the 'amp-to-war' profile is enabled then make sure to bring in 
+			the alfresco-rad module, which has the H2 scripts and other RAD features. 
+			TODO: TO INVESTIGATE: This dependency is already defined in the parent SDK 
+			pom in the 'amp-to-war' profile but this does not work, it is not include... 
+			<profile> <id>amp-to-war</id> <dependencies> <dependency> <groupId>org.alfresco.maven</groupId> 
+			<artifactId>alfresco-rad</artifactId> <version>${maven.alfresco.version}</version> 
+			</dependency> </dependencies> </profile> -->
+	</profiles>
+
+	<build>
+		<sourceDirectory>src/java</sourceDirectory>
+		<plugins>
+			<plugin>
+				<groupId>org.alfresco.maven.plugin</groupId>
+				<artifactId>maven-amp-plugin</artifactId>
+				<version>3.0.4</version>
+				<extensions>true</extensions>
+				<configuration>
+					<mAmpName>${project.artifactId}-${project.version}</mAmpName>
+					<archive>
+						<addMavenDescriptor>false</addMavenDescriptor>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/webscripts</directory>
+				<filtering>true</filtering>
+				<targetPath>alfresco/extension/templates/webscripts/</targetPath>
+			</resource>
+			<resource>
+				<directory>config</directory>
+				<filtering>true</filtering>
+				<targetPath>alfresco/module/${project.artifactId}/</targetPath>
+			</resource>
+		</resources>
+	</build>
+
+</project>
