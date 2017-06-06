@@ -7,11 +7,11 @@ Vagrant.configure("2") do |config|
   # please see the online documentation at vagrantup.com.
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "ubuntu-1404-64-puppet3"
+  config.vm.box = "ubuntu-1604-64-puppet3"
 
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
-  config.vm.box_url = "http://software/vagrant/ubuntu-1404-64-puppet3.box"
+  config.vm.box_url = "http://software/vagrant/ubuntu-1604-64-puppet3.box"
 
   config.vm.host_name = "atolcd-alfresco-auditshare.hosting.priv.atolcd.com"
 
@@ -30,6 +30,7 @@ Vagrant.configure("2") do |config|
   #config.vm.network :public_network
   config.vm.network :forwarded_port, guest:   8080, host: 8080
   config.vm.network :forwarded_port, guest:   8000, host: 8000
+  config.vm.network :forwarded_port, guest:   80, host: 80
 
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is

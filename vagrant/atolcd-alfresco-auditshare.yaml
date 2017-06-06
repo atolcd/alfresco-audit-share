@@ -1,43 +1,43 @@
 ---
 classes:
-  - atolcd::alfresco::mysql
+  - atolcd::alfresco::postgresql
   - alfresco::solr
   - atolcd::tomcat::javaopts
 
-alfresco::version:    '5.1.1'
-alfresco::autocsrf:   false
+alfresco::version:    '5.2.0'
+
+postgresql::globals::version: '9.5'
 
 tomcat::version:      '7'
+tomcat::proxyName:            'localhost'
+tomcat::proxyPort:            '8080'
+tomcat::scheme:               'http'
 
-java::package: 'openjdk-7-jdk'
-java::java_alternative: 'java-1.7.0-openjdk-amd64'
-java::java_alternative_path: '/usr/lib/jvm/java-1.7.0-openjdk-amd64/bin/java'
+java::package: 'openjdk-8-jdk'
 
-atolcd::alfresco::modules::repo_module_stable:
+atolcd::alfresco::modules::repo:
+  org.alfresco.alfresco-share-services:
+    version: '5.2.0'
   com.atolcd.alfresco.repository:
-    version: '5.1.1'
-    project: 'atolcd-alfresco'
-  javascript-console-repo:
-    version: '1.0'
-  alfresco-share-services:
-    version: '5.1.1'
+    version: '5.2.0'
+  org.alfresco.aos-module.alfresco-aos-module:
+    version: '1.1.5'
+  com.atolcd.alfresco.auditshare-52X-repo:
+    version: '1.5.5-SNAPSHOT'
 
-atolcd::alfresco::modules::share_module_stable:
+atolcd::alfresco::modules::share:
   com.atolcd.alfresco.share:
-    version: '5.1.1'
-    project: 'atolcd-alfresco'
-  javascript-console-share:
-    version: '1.0'
-
-atolcd::alfresco::modules::repo_module:
-  com.atolcd.alfresco.auditshare-51X-repo:
-    source: '/root/com.atolcd.alfresco.auditshare-51X-repo-1.5.5-SNAPSHOT.amp'
-
-atolcd::alfresco::modules::share_module:
-  com.atolcd.alfresco.auditshare-51X-share:
-    source: '/root/com.atolcd.alfresco.auditshare-51X-share-1.5.5-SNAPSHOT.amp'
+    version: '5.2.0'
+  com.atolcd.alfresco.auditshare-52X-share:
+    version: '1.5.5-SNAPSHOT'
 
 alfresco::params:
+  'alfresco.host':                                          'localhost'
+  'alfresco.port':                                          8080
+  'alfresco.protocol':                                      'http'
+  'share.host':                                             'localhost'
+  'share.port':                                             8080
+  'share.protocol':                                         'http'
   #mail
   'mail.from.default':           'alfresco@atolcd.com'
   'index.subsystem.name':        'solr4'
