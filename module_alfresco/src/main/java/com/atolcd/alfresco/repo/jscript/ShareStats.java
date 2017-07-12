@@ -28,6 +28,7 @@ import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
+import org.alfresco.util.ISO9075;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -147,8 +148,8 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
   }
 
   private AtolVolumetryEntry getTotalSizeSite(SearchParameters searchParameters, SiteInfo siteInfo, long atTime) {
-    String query = "SELECT * FROM cmis:document D WHERE CONTAINS(D,'PATH: \"/app:company_home/st:sites/cm:" + siteInfo.getShortName()
-        + "//*\"')";
+    String query = "SELECT * FROM cmis:document D WHERE CONTAINS(D,'PATH: \"/app:company_home/st:sites/cm:"
+        + ISO9075.encode(siteInfo.getShortName()) + "//*\"')";
     searchParameters.setQuery(query);
 
     long totalSize = 0;
