@@ -236,9 +236,9 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                 } else if (requestURI.equals(URI_UPLOAD)) {
                     // XXX: issue with big files
                     // Nothing to do - Insert request is done in JavaScript
-                } else if (requestURI.endsWith("/comments") || requestURI.endsWith("/replies")) {
+                } else if (referer != null && (requestURI.endsWith("/comments") || requestURI.endsWith("/replies"))) {
                     // Comments & replies
-                    String[] urlTokens = request.getHeader("referer").split("/");
+                    String[] urlTokens = referer.split("/");
                     HashMap<String, String> auditData = this.getUrlData(urlTokens);
 
                     auditSample.put(AUDIT_SITE, auditData.get(KEY_SITE));
