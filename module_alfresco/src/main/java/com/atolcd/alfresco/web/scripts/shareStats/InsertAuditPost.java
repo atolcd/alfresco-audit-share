@@ -46,9 +46,9 @@ import com.atolcd.alfresco.AtolVolumetryEntry;
 import com.atolcd.alfresco.AuditEntry;
 
 public class InsertAuditPost extends DeclarativeWebScript implements InitializingBean {
-  private static final String INSERT_ENTRY           = "alfresco.atolcd.audit.insertEntry";
-  private static final String INSERT_VOLUMETRY       = "alfresco.atolcd.audit.insertVolumetry";
-  private static final String INSERT_VOLUMETRY_MULTI = "alfresco.atolcd.audit.insertVolumetryMulti";
+  public static final String INSERT_ENTRY            = "alfresco.atolcd.audit.insertEntry";
+  public static final String INSERT_VOLUMETRY        = "alfresco.atolcd.audit.insertVolumetry";
+  public static final String INSERT_VOLUMETRY_MULTI  = "alfresco.atolcd.audit.insertVolumetryMulti";
 
   private static final String SITE_TO_FIND           = "/service";
   public static final String  SITE_REPOSITORY        = "_repository";

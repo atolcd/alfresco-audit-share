@@ -18,6 +18,7 @@
 package com.atolcd.alfresco.repo.jscript;
 
 import java.io.Serializable;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,26 +38,31 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.util.ISO9075;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 import com.atolcd.alfresco.AtolVolumetryEntry;
+import com.atolcd.alfresco.AuditEntry;
 import com.atolcd.alfresco.web.scripts.shareStats.InsertAuditPost;
 import com.atolcd.auditshare.repo.service.AuditShareReferentielService;
 import com.atolcd.auditshare.repo.xml.Group;
 
 public class ShareStats extends BaseScopableProcessorExtension implements InitializingBean {
   // Logger
-  private static final Log   logger = LogFactory.getLog(ShareStats.class);
+  private static final Log             logger = LogFactory.getLog(ShareStats.class);
 
-  private InsertAuditPost    wsInsertAudits;
-  private SiteService        siteService;
-  private SearchService      searchService;
-  private NodeService        nodeService;
-  protected int              batchSize;
-
+  private InsertAuditPost              wsInsertAudits;
+  private SiteService                  siteService;
+  private SearchService                searchService;
+  private NodeService                  nodeService;
+  private int                          batchSize;
+  // SqlMapClientTemplate for MyBatis calls
+  private SqlSessionTemplate           sqlSessionTemplate;
   // For the user groups referentiel services
   private AuditShareReferentielService auditShareReferentielService;
 
@@ -100,6 +106,10 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
     this.auditShareReferentielService = auditShareReferentielService;
   }
 
+  public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+    this.sqlSessionTemplate = sqlSessionTemplate;
+  }
+
   @Override
   public void afterPropertiesSet() throws Exception {
     Assert.notNull(siteService);
@@ -107,11 +117,32 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
     Assert.notNull(nodeService);
     Assert.notNull(wsInsertAudits);
     Assert.notNull(auditShareReferentielService);
+    Assert.notNull(sqlSessionTemplate);
   }
 
   public List<Group> getReferentiel(String refGroup) {
     // Referentiel
     return auditShareReferentielService.parseRefentielForNodeUUID(refGroup);
+  }
+
+  public void insertAuditEntry(long id, String auditUserId, String auditSite, String auditAppName, String auditActionName,
+      String auditObject, long auditTime, String auditNodeType) throws SQLException, JSONException {
+    AuditEntry auditSample = new AuditEntry();
+    auditSample.setId(id);
+    auditSample.setAuditUserId(auditUserId);
+    auditSample.setAuditAppName(auditAppName);
+    auditSample.setAuditActionName(auditActionName);
+    auditSample.setAuditObject(auditObject);
+    auditSample.setAuditTime(auditTime);
+
+    auditSample.setAuditSite(StringUtils.isNotBlank(auditSite) ? auditSite : InsertAuditPost.SITE_REPOSITORY);
+
+    if (StringUtils.isNotBlank(auditNodeType)) {
+      auditSample.setAuditNodeType(auditNodeType);
+    }
+
+    sqlSessionTemplate.insert(InsertAuditPost.INSERT_ENTRY, auditSample);
+    logger.info("Entry successfully inserted: " + auditSample.toJSON());
   }
 
   public boolean insertVolumetry(String siteId, long siteSize, int folderCount, int fileCount, long atTime) {

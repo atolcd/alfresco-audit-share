@@ -153,6 +153,9 @@
     <property name="auditShareReferentielService">
       <ref bean="AuditShareReferentielService" />
     </property>
+    <property name="sqlSessionTemplate">
+      <ref bean="shareStatsQueriesSqlSessionClientTemplate" />
+    </property>
   </bean>
 
 
