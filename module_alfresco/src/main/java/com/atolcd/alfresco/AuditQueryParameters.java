@@ -21,17 +21,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class AuditQueryParameters {
   private String       siteId;
   private List<String> sitesId;
   private String       appName;
   private List<String> appNames;
   private String       actionName;
+  private List<String> actionNames;
   private String       object;
   private long         dateFrom;
   private long         dateTo;
   private String       slicedDates;
   private String       userId;
+  private List<String> userIds;
   private int          limit;
   private String       nodeType;
   private List<String> nodeTypes;
@@ -43,11 +48,13 @@ public class AuditQueryParameters {
     appName = null;
     appNames = null;
     actionName = null;
+    actionNames = null;
     object = null;
     dateFrom = 0;
     dateTo = 0;
     slicedDates = null;
     userId = null;
+    userIds = null;
     nodeType = null;
     nodeTypes = null;
     groupsMembers = null;
@@ -121,12 +128,40 @@ public class AuditQueryParameters {
     this.actionName = actionName;
   }
 
+  public List<String> getActionNames() {
+    return actionNames;
+  }
+
+  public void setActionNames(String actionNames) {
+    if (actionNames != null) {
+      String[] actionNamesToken = actionNames.split(",");
+      this.actionNames = new ArrayList<String>(actionNamesToken.length);
+      for (String token : actionNamesToken) {
+        this.actionNames.add(token);
+      }
+    }
+  }
+
   public String getUserId() {
     return userId;
   }
 
   public void setUserId(String userId) {
     this.userId = userId;
+  }
+
+  public List<String> getUserIds() {
+    return userIds;
+  }
+
+  public void setUserIds(String userIds) {
+    if (userIds != null) {
+      String[] userIdsToken = userIds.split(",");
+      this.userIds = new ArrayList<String>(userIdsToken.length);
+      for (String token : userIdsToken) {
+        this.userIds.add(token);
+      }
+    }
   }
 
   public long getDateFrom() {
@@ -227,5 +262,27 @@ public class AuditQueryParameters {
         this.groupsMembers.add(token);
       }
     }
+  }
+
+  public String toJSON() throws JSONException {
+    JSONObject jsonResult = new JSONObject();
+    jsonResult.put("siteId", siteId);
+    jsonResult.put("sitesId", sitesId);
+    jsonResult.put("appName", appName);
+    jsonResult.put("appNames", appNames);
+    jsonResult.put("actionName", actionName);
+    jsonResult.put("actionNames", actionNames);
+    jsonResult.put("object", object);
+    jsonResult.put("userId", userId);
+    jsonResult.put("userIds", userIds);
+    jsonResult.put("dateFrom", Long.toString(dateFrom));
+    jsonResult.put("dateTo", Long.toString(dateTo));
+    jsonResult.put("slicedDates", slicedDates);
+    jsonResult.put("limit", Integer.toString(limit));
+    jsonResult.put("nodeType", nodeType);
+    jsonResult.put("nodeTypes", nodeTypes);
+    jsonResult.put("groupsMembers", groupsMembers);
+
+    return jsonResult.toString();
   }
 }

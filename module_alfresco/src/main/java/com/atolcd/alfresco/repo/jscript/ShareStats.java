@@ -47,8 +47,11 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 import com.atolcd.alfresco.AtolVolumetryEntry;
+import com.atolcd.alfresco.AuditCount;
 import com.atolcd.alfresco.AuditEntry;
+import com.atolcd.alfresco.AuditQueryParameters;
 import com.atolcd.alfresco.web.scripts.shareStats.InsertAuditPost;
+import com.atolcd.alfresco.web.scripts.shareStats.SelectAuditsGet;
 import com.atolcd.auditshare.repo.service.AuditShareReferentielService;
 import com.atolcd.auditshare.repo.xml.Group;
 
@@ -143,6 +146,52 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
 
     sqlSessionTemplate.insert(InsertAuditPost.INSERT_ENTRY, auditSample);
     logger.info("Entry successfully inserted: " + auditSample.toJSON());
+  }
+
+  public List<AuditCount> selectByRead(String auditAppNames, String auditActionNames, String auditUserIds, String auditSites,
+      String auditObject, Long dateFrom, Long dateTo, String auditNodeTypes) throws SQLException, JSONException {
+    return this.selectAuditCount(SelectAuditsGet.SELECT_BY_VIEW, auditAppNames, auditActionNames, auditUserIds, auditSites, auditObject,
+        dateFrom, dateTo, auditNodeTypes);
+  }
+
+  public List<AuditCount> selectByCreated(String auditAppNames, String auditActionNames, String auditUserIds, String auditSites,
+      String auditObject, Long dateFrom, Long dateTo, String auditNodeTypes) throws SQLException, JSONException {
+    return this.selectAuditCount(SelectAuditsGet.SELECT_BY_CREATED, auditAppNames, auditActionNames, auditUserIds, auditSites, auditObject,
+        dateFrom, dateTo, auditNodeTypes);
+  }
+
+  public List<AuditCount> selectByUpdated(String auditAppNames, String auditActionNames, String auditUserIds, String auditSites,
+      String auditObject, Long dateFrom, Long dateTo, String auditNodeTypes) throws SQLException, JSONException {
+    return this.selectAuditCount(SelectAuditsGet.SELECT_BY_UPDATED, auditAppNames, auditActionNames, auditUserIds, auditSites, auditObject,
+        dateFrom, dateTo, auditNodeTypes);
+  }
+
+  public List<AuditCount> selectByDeleted(String auditAppNames, String auditActionNames, String auditUserIds, String auditSites,
+      String auditObject, Long dateFrom, Long dateTo, String auditNodeTypes) throws SQLException, JSONException {
+    return this.selectAuditCount(SelectAuditsGet.SELECT_BY_DELETED, auditAppNames, auditActionNames, auditUserIds, auditSites, auditObject,
+        dateFrom, dateTo, auditNodeTypes);
+  }
+
+  private List<AuditCount> selectAuditCount(String queryType, String auditAppNames, String auditActionNames, String auditUserIds,
+      String auditSites, String auditObject, Long dateFrom, Long dateTo, String auditNodeTypes) throws SQLException, JSONException {
+    AuditQueryParameters params = new AuditQueryParameters();
+
+    params.setAppNames(auditAppNames);
+    params.setActionNames(auditActionNames);
+    params.setUserIds(auditUserIds);
+    params.setSitesId(auditSites);
+    params.setObject(auditObject);
+    if (dateFrom != null) {
+      params.setDateFrom(dateFrom);
+    }
+    if (dateTo != null) {
+      params.setDateTo(dateTo);
+    }
+    params.setNodeTypes(auditNodeTypes);
+
+    logger.info("AuditQueryParameters: " + params.toJSON());
+
+    return (List<AuditCount>) sqlSessionTemplate.selectList(queryType, params);
   }
 
   public boolean insertVolumetry(String siteId, long siteSize, int folderCount, int fileCount, long atTime) {

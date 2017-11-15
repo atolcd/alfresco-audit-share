@@ -83,15 +83,9 @@
         <include refid="alfresco.atolcd.audit.site_snippet"/>
         <include refid="alfresco.atolcd.audit.time_snippet"/>
         <include refid="alfresco.atolcd.audit.appName_snippet"/>
-        <if test="actionName != null">
-            AND audit_action_name = #{actionName}
-        </if>
-        <if test="object != null">
-           AND audit_object = #{object}
-        </if>
-        <if test="userId != null">
-           AND audit_user_id = #{userId}
-        </if>
+        <include refid="alfresco.atolcd.audit.actionName_snippet"/>
+        <include refid="alfresco.atolcd.audit.auditObject_snippet"/>
+        <include refid="alfresco.atolcd.audit.auditUserId_snippet"/>
       </where>
     </sql>
 
@@ -122,6 +116,39 @@
       <if test="appNames != null">
         AND audit_app_name IN
         <foreach item="item" collection="appNames" open="(" separator="," close=")">
+          #{item}
+        </foreach>
+      </if>
+    </sql>
+
+    <!-- Snippet pour actionName -->
+    <sql id="actionName_snippet">
+      <if test="actionName != null">
+        AND audit_action_name = #{actionName}
+      </if>
+      <if test="actionNames != null">
+        AND audit_action_name IN
+        <foreach item="item" collection="actionNames" open="(" separator="," close=")">
+          #{item}
+        </foreach>
+      </if>
+    </sql>
+
+    <!-- Snippet pour auditObject -->
+    <sql id="auditObject_snippet">
+      <if test="object != null">
+        AND audit_object = #{object}
+      </if>
+    </sql>
+
+    <!-- Snippet pour auditUserId -->
+    <sql id="auditUserId_snippet">
+      <if test="userId != null">
+        AND audit_user_id = #{userId}
+      </if>
+      <if test="userIds != null">
+        AND audit_user_id IN
+        <foreach item="item" collection="userIds" open="(" separator="," close=")">
           #{item}
         </foreach>
       </if>
@@ -201,6 +228,9 @@
 
         <include refid="alfresco.atolcd.audit.time_snippet" />
         <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.actionName_snippet"/>
+        <include refid="alfresco.atolcd.audit.auditObject_snippet"/>
+        <include refid="alfresco.atolcd.audit.auditUserId_snippet"/>
         <include refid="alfresco.atolcd.audit.nodeType_snippet"/>
       </where>
     </sql>
@@ -348,8 +378,6 @@
       from
         share_stats_audit_entry
       <include refid="alfresco.atolcd.audit.read_snippet" />
-      <include refid="alfresco.atolcd.audit.site_snippet" />
-      <include refid="alfresco.atolcd.audit.time_snippet" />
       group by audit_object, audit_site
       order by audit_popularity DESC
     </sql>
@@ -388,9 +416,7 @@
       from
         share_stats_audit_entry
       <include refid="alfresco.atolcd.audit.select_auditViewEntriesWhereSnippet"/>
-      <if test="actionName != null">
-        AND audit_action_name = #{actionName}
-      </if>
+      <include refid="alfresco.atolcd.audit.actionName_snippet"/>
     </select>
 
     <!-- Get the audit application by ID -->
