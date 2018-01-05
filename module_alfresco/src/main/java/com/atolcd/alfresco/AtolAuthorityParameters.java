@@ -20,6 +20,9 @@ package com.atolcd.alfresco;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class AtolAuthorityParameters {
 	private long memberQnameId = 0;
 	private long personQnameId = 0;
@@ -58,5 +61,12 @@ public class AtolAuthorityParameters {
 		groupNames.add("GROUP_site_" + siteName + "_SiteCollaborator");
 		groupNames.add("GROUP_site_" + siteName + "_SiteContributor");
 		groupNames.add("GROUP_site_" + siteName + "_SiteConsumer");
+	}
+
+	public String toJSON() throws JSONException {
+		JSONObject jsonResult = new JSONObject();
+		jsonResult.put("groupNames", groupNames);
+
+		return jsonResult.toString();
 	}
 }

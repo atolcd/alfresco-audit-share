@@ -114,6 +114,10 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
         Map<String, Object> model = new HashMap<String, Object>();
         AuditQueryParameters params = wsSelectAudits.buildParametersFromRequest(req);
 
+        if (logger.isInfoEnabled()) {
+          logger.info(params.toJSON());
+        }
+
         String interval = req.getParameter("interval");
         String type = req.getParameter("type");
         if ("volumetry".equals(type) || "users-count".equals(type)) {
