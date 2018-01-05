@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,6 +73,10 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 				if (this.sqlSessionTemplate != null) {
 					AuditQueryParameters params = buildParametersFromRequest(req);
 
+					if (logger.isInfoEnabled()) {
+					  logger.info(params.toJSON());
+					}
+
 					String[] dates = params.getSlicedDates().split(",");
 					boolean sendStackedValues = Boolean.parseBoolean(req.getParameter("stacked"));
 					Map<String, List<Long>> stackedValues = new HashMap<String, List<Long>>(dates.length - 1);
@@ -82,13 +85,13 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 					List<String> siteIds = new ArrayList<String>();
 					String requete = SELECT_VOLUMETRY_SITES;
 
-					if (params.getSiteId() == null && params.getSitesId() == null) {
-						siteIds = getAllSites();
-					} else if (params.getSiteId() != null) {
+					if (params.getSiteId() != null) {
 						siteIds.add(params.getSiteId());
 						requete = SELECT_VOLUMETRY;
 					} else if (params.getSitesId() != null) {
 						siteIds = params.getSitesId();
+					} else {
+						siteIds = PermissionsHelper.getUserSiteList();
 					}
 
 					if (sendStackedValues) {
@@ -171,7 +174,14 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 
 			AuditQueryParameters params = new AuditQueryParameters();
 			params.setSiteId(req.getParameter("site"));
-			params.setSitesId(req.getParameter("sites"));
+
+			String sites = req.getParameter("sites");
+			if ("*".equals(sites)) {
+				params.setSitesId(PermissionsHelper.getUserSites());
+			} else {
+				params.setSitesId(sites);
+			}
+
 			params.setActionName(req.getParameter("action"));
 			params.setAppName(req.getParameter("module"));
 			params.setDateFrom(dateFrom);
@@ -182,19 +192,5 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 			logger.error("Error building parameters", e);
 			return null;
 		}
-	}
-
-	private List<String> getAllSites() {
-		List<SiteInfo> sites = siteService.listSites("", "");
-		if (sites != null && !sites.isEmpty()) {
-			List<String> res = new ArrayList<String>(sites.size());
-			for (SiteInfo siteInfo : sites) {
-				res.add(siteInfo.getShortName());
-			}
-
-			return res;
-		}
-
-		return Collections.emptyList();
 	}
 }

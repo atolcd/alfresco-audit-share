@@ -227,15 +227,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
       params += "&to=" + currentDate.getTime();
       params += "&from=" + currentDate.setMinutes(currentDate.getMinutes() - this.recentlyConnectedDelay);
       if (site) {
-        if (site.indexOf(',') >= 0) {
-          // Encode site ids
-          var sites = [],
-              sitesArray = site.split(',');
-          for (var i=0, ii=sitesArray.length ; i<ii ; i++) {
-            sites.push(encodeURIComponent(sitesArray[i]));
-          }
-
-          params += "&sites=" + sites.join(',');
+        if (site === '*') {
+          params += "&sites=*";
         } else {
           params += "&site=" + encodeURIComponent(site);
         }
@@ -256,15 +249,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
       params += "&from=" + tsArray[0];
       params += "&to=" + tsArray[tsArray.length - 1];
       if (site) {
-        if (site.indexOf(',') >= 0) {
-          // Encode site ids
-          var sites = [],
-              sitesArray = site.split(',');
-          for (var i=0, ii=sitesArray.length ; i<ii ; i++) {
-            sites.push(encodeURIComponent(sitesArray[i]));
-          }
-
-          params += "&sites=" + sites.join(',');
+        if (site === '*') {
+          params += "&sites=*";
         } else {
           params += "&site=" + encodeURIComponent(site);
         }
@@ -292,11 +278,11 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
 
           html = "<ul>" + html + "</ul>";
           el.innerHTML = html;
+
+          this.headers[type].innerHTML += " (" + users.length + ")";
         } else {
           el.innerHTML = this.msg("label.no-results." + type);
         }
-
-        this.headers[type].innerHTML += " (" + users.length + ")";
       };
 
       var url = Alfresco.constants.PROXY_URI + "share-stats/select-users" + params;
@@ -331,15 +317,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
 
       // Build query parameters of sites
       if (site) {
-        if (site.indexOf(',') >= 0) {
-          // Encode site ids
-          var sites = [],
-              sitesArray = site.split(',');
-          for (var i=0, ii=sitesArray.length ; i<ii ; i++) {
-            sites.push(encodeURIComponent(sitesArray[i]));
-          }
-
-          params += "&sites=" + sites.join(',');
+        if (site === "*") {
+          params += "&sites=*";
         } else {
           params += "&site=" + encodeURIComponent(site);
         }
