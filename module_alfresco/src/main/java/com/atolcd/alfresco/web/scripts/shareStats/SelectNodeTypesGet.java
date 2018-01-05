@@ -81,6 +81,11 @@ public class SelectNodeTypesGet extends DeclarativeWebScript implements Initiali
         if (this.sqlSessionTemplate != null) {
           // Get the input content given into the request.
           AuditQueryParameters params = buildParametersFromRequest(req);
+
+          if (logger.isInfoEnabled()) {
+            logger.info(params.toJSON());
+          }
+
           model.put("nodeTypes", selectNodeType(params, SELECT_NODE_TYPE_BY_AUDIT));
         }
       } else {
@@ -96,7 +101,6 @@ public class SelectNodeTypesGet extends DeclarativeWebScript implements Initiali
     }
   }
 
-  @SuppressWarnings("unchecked")
   public List<AuditNodeType> selectNodeType(AuditQueryParameters params, String query) {
     List<AuditNodeType> auditNodeTypeList = (List<AuditNodeType>) sqlSessionTemplate.selectList(query, params);
     logger.info("Performing " + query + " ... ");
@@ -124,7 +128,7 @@ public class SelectNodeTypesGet extends DeclarativeWebScript implements Initiali
       return res;
     }
 
-    return Collections.EMPTY_LIST;
+    return Collections.emptyList();
   }
 
   public AuditQueryParameters buildParametersFromRequest(WebScriptRequest req) {
@@ -134,7 +138,14 @@ public class SelectNodeTypesGet extends DeclarativeWebScript implements Initiali
 
       AuditQueryParameters params = new AuditQueryParameters();
       params.setSiteId(req.getParameter("site"));
-      params.setSitesId(req.getParameter("sites"));
+
+      String sites = req.getParameter("sites");
+      if ("*".equals(sites)) {
+        params.setSitesId(PermissionsHelper.getUserSites());
+      } else {
+        params.setSitesId(sites);
+      }
+
       params.setActionName(req.getParameter("action"));
       params.setAppName(req.getParameter("module"));
       params.setAppNames(req.getParameter("modules"));

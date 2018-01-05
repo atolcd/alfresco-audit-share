@@ -108,6 +108,11 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
           if (myAuditNodeType == null || myAuditNodeType.isEmpty()) {
             auditSample.setAuditNodeType(getTypeFromObject(auditSample));
           }
+
+          if (logger.isInfoEnabled()) {
+            logger.info(auditSample.toJSON());
+          }
+
           insert(auditSample);
           model.put(MODEL_SUCCESS, true);
         }

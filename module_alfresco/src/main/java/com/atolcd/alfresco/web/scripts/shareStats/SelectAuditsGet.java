@@ -123,6 +123,11 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
           }
 
           params.setLimit(limitMostReadOrUpdate);
+
+          if (logger.isInfoEnabled()) {
+            logger.info(params.toJSON());
+          }
+
           checkForQuery(model, params, type);
         }
       } else {
@@ -226,7 +231,14 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 
       AuditQueryParameters params = new AuditQueryParameters();
       params.setSiteId(req.getParameter("site"));
-      params.setSitesId(req.getParameter("sites"));
+
+      String sites = req.getParameter("sites");
+      if ("*".equals(sites)) {
+        params.setSitesId(PermissionsHelper.getUserSites());
+      } else {
+        params.setSitesId(sites);
+      }
+
       params.setActionName(req.getParameter("action"));
       params.setAppName(req.getParameter("module"));
       params.setAppNames(req.getParameter("modules"));

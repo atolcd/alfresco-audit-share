@@ -307,7 +307,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
       if (!hideAllSiteEntry) {
         allSitesMenuButton.push({
           text: this.msg("label.menu.site.all"),
-          value: siteIds.join(','),
+          value: '*',
 
           onclick: {
             fn: this.onSiteMenuClick,
@@ -593,7 +593,7 @@ AtolStatistics.util.formatFileSize = function (fileSize) {
           site = params.additionalsParams.site,
           siteTitle = params.additionalsParams.siteTitle || '';
 
-      if (site && site.indexOf(',') == -1) {
+      if (site && site != "*") {
         var opt = '"' + ((siteTitle != "") ? siteTitle : site) + '"';
         title = this.getMessage("site", "graph.title.", opt);
       } else {

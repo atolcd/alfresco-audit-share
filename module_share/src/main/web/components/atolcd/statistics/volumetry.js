@@ -119,15 +119,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
 
       var params = "?dates=" + tsString;
       if (site) {
-        if (site.indexOf(',') >= 0) {
-          // Encode site ids
-          var sites = [],
-              sitesArray = site.split(',');
-          for (var i=0, ii=sitesArray.length ; i<ii ; i++) {
-            sites.push(encodeURIComponent(sitesArray[i]));
-          }
-
-          params += "&sites=" + sites.join(',');
+        if (site === '*') {
+          params += "&sites=*";
         } else {
           params += "&site=" + encodeURIComponent(site);
         }
@@ -168,7 +161,7 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
       var sText = p_oItem.cfg.getProperty("text"),
           value = p_oItem.value;
 
-      if (value == "" || value.indexOf(',') >= 0) { // All sites
+      if (value == "" || value === '*') { // All sites
         Dom.removeClass(this.id + "-bar-stack-criteria-container", "hidden");
       } else {
         Dom.addClass(this.id + "-bar-stack-criteria-container", "hidden");

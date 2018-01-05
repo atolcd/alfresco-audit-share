@@ -28,7 +28,6 @@ import java.util.Set;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.AuthorityType;
-import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -96,6 +95,12 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
           String type = req.getParameter("type");
           AuditQueryParameters auditQueryParameters = buildParametersFromRequest(req);
           AtolAuthorityParameters atolAuthorityParameters = buildAuthorityParametersFromRequest(req);
+
+          if (logger.isInfoEnabled()) {
+            logger.info(auditQueryParameters.toJSON());
+            logger.info(atolAuthorityParameters.toJSON());
+          }
+
           if ("users-connected".equals(type) || "users-recently-connected".equals(type)) {
             model.put("users", selectConnectedUsers(auditQueryParameters, atolAuthorityParameters));
           } else if ("users-count".equals(type)) {
@@ -219,7 +224,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
       if (site != null) {
         // One site
         params.setSite(site);
-      } else if (sites != null) {
+      } else if (!"*".equals(sites)) {
         // Several sites
         String[] sitesToken = sites.split(",");
         for (String siteId : sitesToken) {
@@ -227,10 +232,10 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
         }
       } else {
         // Add the user's sites, plus the container group
-        List<SiteInfo> sitesInfo = siteService.listSites("", "");
-        if (!sitesInfo.isEmpty()) {
-          for (SiteInfo siteInfo : sitesInfo) {
-            params.setSite(siteInfo.getShortName());
+        List<String> siteShortNames = PermissionsHelper.getUserSiteList();
+        if (!siteShortNames.isEmpty()) {
+          for (String siteShortName : siteShortNames) {
+            params.setSite(siteShortName);
           }
         } else {
           params.setGroupNames(null);
@@ -252,7 +257,14 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 
       AuditQueryParameters params = new AuditQueryParameters();
       params.setSiteId(req.getParameter("site"));
-      params.setSitesId(req.getParameter("sites"));
+
+      String sites = req.getParameter("sites");
+      if ("*".equals(sites)) {
+        params.setSitesId(PermissionsHelper.getUserSites());
+      } else {
+        params.setSitesId(sites);
+      }
+
       params.setActionName(req.getParameter("action"));
       params.setAppName(req.getParameter("module"));
       params.setDateFrom(dateFrom);
