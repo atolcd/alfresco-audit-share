@@ -361,15 +361,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
         }
       }
       if (site !== null) {
-        if (site.indexOf(',') >= 0) {
-          // Encode site ids
-          var sites = [],
-              sitesArray = site.split(',');
-          for (i=0, ii=sitesArray.length ; i<ii ; i++) {
-            sites.push(encodeURIComponent(sitesArray[i]));
-          }
-
-          params += "&sites=" + sites.join(',');
+        if (site === '*') {
+          params += "&sites=*";
         } else {
           params += "&site=" + encodeURIComponent(site);
         }

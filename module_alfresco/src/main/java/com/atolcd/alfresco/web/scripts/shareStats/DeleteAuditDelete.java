@@ -32,6 +32,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.util.Assert;
 
 import com.atolcd.alfresco.AuditQueryParameters;
+import com.atolcd.alfresco.helper.PermissionsHelper;
 
 public class DeleteAuditDelete extends DeclarativeWebScript implements InitializingBean {
 	// Logger
@@ -63,6 +64,10 @@ public class DeleteAuditDelete extends DeclarativeWebScript implements Initializ
 			if (this.sqlSessionTemplate != null) {
 				String purgeTable = req.getParameter("purgeTable");
 				AuditQueryParameters auditQueryParameters = buildParametersFromRequest(req);
+
+				if (logger.isInfoEnabled()) {
+					logger.info(auditQueryParameters.toJSON());
+				}
 
 				if (auditQueryParameters != null) {
 					if ("audit_entry".equals(purgeTable)) {
@@ -134,7 +139,14 @@ public class DeleteAuditDelete extends DeclarativeWebScript implements Initializ
 
 			AuditQueryParameters params = new AuditQueryParameters();
 			params.setSiteId(req.getParameter("site"));
-			params.setSitesId(req.getParameter("sites"));
+
+			String sites = req.getParameter("sites");
+			if ("*".equals(sites)) {
+				params.setSitesId(PermissionsHelper.getUserSites());
+			} else {
+				params.setSitesId(sites);
+			}
+
 			params.setDateFrom(dateFrom);
 			params.setDateTo(dateTo);
 			return params;

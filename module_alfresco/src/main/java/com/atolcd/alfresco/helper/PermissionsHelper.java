@@ -17,9 +17,17 @@
  */
 package com.atolcd.alfresco.helper;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.site.SiteModel;
 import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -48,7 +56,7 @@ public class PermissionsHelper implements InitializingBean {
   }
 
   public static boolean isAuthorized(WebScriptRequest req) {
-    String currentUser = AuthenticationUtil.getRunAsUser();
+    String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
 
     // Alfresco administrators can access everything
     if (authorityService.isAdminAuthority(currentUser)) {
@@ -70,10 +78,12 @@ public class PermissionsHelper implements InitializingBean {
 
     String sites = req.getParameter("sites");
     if (sites != null) {
-      String[] sitesToken = sites.split(",");
-      for (String token : sitesToken) {
-        if (!isSiteManager(token, currentUser)) {
-          return false;
+      if (!"*".equals(sites)) {
+        String[] sitesToken = sites.split(",");
+        for (String token : sitesToken) {
+          if (!isSiteManager(token, currentUser)) {
+            return false;
+          }
         }
       }
 
@@ -83,10 +93,35 @@ public class PermissionsHelper implements InitializingBean {
     return isAllowed;
   }
 
+  public static String getUserSites() {
+    return StringUtils.join(getUserSiteList(), ",");
+  }
+
+  public static List<String> getUserSiteList() {
+    String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+
+    // Alfresco administrators can access everything
+    boolean isAdmin = authorityService.isAdminAuthority(currentUser);
+
+    List<SiteInfo> sites = siteService.listSites("", "");
+    if (CollectionUtils.isNotEmpty(sites)) {
+      List<String> siteShortNames = new ArrayList<>(sites.size());
+      for (SiteInfo siteInfo : sites) {
+        if (isAdmin || isSiteManager(siteInfo.getShortName(), currentUser)) {
+          siteShortNames.add(siteInfo.getShortName());
+        }
+      }
+
+      return siteShortNames;
+    }
+
+    return Collections.emptyList();
+  }
+
   private static boolean isSiteManager(String siteShortName, String userName) {
     try {
       String userRole = siteService.getMembersRole(siteShortName, userName);
-      if (userRole != null && "SiteManager".equals(userRole)) {
+      if (SiteModel.SITE_MANAGER.equals(userRole)) {
         return true;
       }
     } catch (Exception e) {
