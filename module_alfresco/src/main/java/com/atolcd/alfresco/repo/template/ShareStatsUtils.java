@@ -19,62 +19,74 @@ package com.atolcd.alfresco.repo.template;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.template.BaseTemplateProcessorExtension;
+import org.alfresco.service.cmr.repository.MalformedNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 public class ShareStatsUtils extends BaseTemplateProcessorExtension implements InitializingBean {
-	private NodeService nodeService;
-	private PersonService personService;
-	private SiteService siteService;
+  private static final Log logger = LogFactory.getLog(ShareStatsUtils.class);
 
-	public void setNodeService(NodeService nodeService) {
-		this.nodeService = nodeService;
-	}
+  private NodeService      nodeService;
+  private PersonService    personService;
+  private SiteService      siteService;
 
-	public void setPersonService(PersonService personService) {
-		this.personService = personService;
-	}
+  public void setNodeService(NodeService nodeService) {
+    this.nodeService = nodeService;
+  }
 
-	public void setSiteService(SiteService siteService) {
-		this.siteService = siteService;
-	}
+  public void setPersonService(PersonService personService) {
+    this.personService = personService;
+  }
 
-	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(nodeService, "There must be a NodeService");
-		Assert.notNull(personService, "There must be a PersonService");
-		Assert.notNull(siteService, "There must be a SiteService");
-	}
+  public void setSiteService(SiteService siteService) {
+    this.siteService = siteService;
+  }
 
-	public String getPersonFullName(String username) {
-		if (this.personService.personExists(username)) {
-			NodeRef person = this.personService.getPerson(username);
+  public void afterPropertiesSet() throws Exception {
+    Assert.notNull(nodeService, "There must be a NodeService");
+    Assert.notNull(personService, "There must be a PersonService");
+    Assert.notNull(siteService, "There must be a SiteService");
+  }
 
-			String firstName = (String) this.nodeService.getProperty(person, ContentModel.PROP_FIRSTNAME);
-			String lastName = (String) this.nodeService.getProperty(person, ContentModel.PROP_LASTNAME);
+  public String getPersonFullName(String username) {
+    if (this.personService.personExists(username)) {
+      NodeRef person = this.personService.getPerson(username);
 
-			return (firstName != null ? firstName : "") + " " + (lastName != null ? lastName.toUpperCase() : "");
-		}
-		return "";
-	}
+      String firstName = (String) this.nodeService.getProperty(person, ContentModel.PROP_FIRSTNAME);
+      String lastName = (String) this.nodeService.getProperty(person, ContentModel.PROP_LASTNAME);
 
-	public String getSiteTitle(String shortName) {
-		SiteInfo si = this.siteService.getSite(shortName);
-		if (si != null) {
-			return si.getTitle();
-		}
-		return "";
-	}
+      return (firstName != null ? firstName : "") + " " + (lastName != null ? lastName.toUpperCase() : "");
+    }
+    return "";
+  }
 
-	public String getDocumentSite(String documentRef) {
-		SiteInfo si = this.siteService.getSite(new NodeRef(documentRef));
-		if (si != null) {
-			return si.getShortName();
-		}
-		return null;
-	}
+  public String getSiteTitle(String shortName) {
+    SiteInfo si = this.siteService.getSite(shortName);
+    if (si != null) {
+      return si.getTitle();
+    }
+    return "";
+  }
+
+  public String getDocumentSite(String documentRef) {
+    try {
+      NodeRef nodeRef = new NodeRef(documentRef);
+      if (this.nodeService.exists(nodeRef)) {
+        SiteInfo si = this.siteService.getSite(nodeRef);
+        if (si != null) {
+          return si.getShortName();
+        }
+      }
+    } catch (MalformedNodeRefException mne) {
+      logger.warn(mne);
+    }
+    return null;
+  }
 }
