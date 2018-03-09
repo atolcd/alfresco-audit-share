@@ -4,14 +4,14 @@
 
   <groupId>com.atolcd.alfresco</groupId>
   <artifactId>auditshare-42X</artifactId>
-  <version>1.5.5-SNAPSHOT</version>
+  <version>1.5.6-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>AuditShare</name>
   <description>Alfresco and Share modules - AuditShare</description>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <alfresco.version>4.2.6</alfresco.version>
+    <alfresco.version>4.2.8</alfresco.version>
     <alfresco-maven.version>1.1.5</alfresco-maven.version>
     <java.version>1.7</java.version>
     <sonar.projectName>AtolCD - AuditShare [4.2.X]</sonar.projectName>

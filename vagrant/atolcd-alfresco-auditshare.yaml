@@ -3,37 +3,25 @@ classes:
   - atolcd::alfresco::postgresql
   - alfresco::solr
 
-alfresco::version:    '4.2.4'
+alfresco::version:    '4.2.8'
 
 tomcat::version:      '7'
 
-atolcd::alfresco::modules::repo_module_stable:
+
+atolcd::alfresco::modules::repo:
   com.atolcd.alfresco.repository:
-    version: '4.2.4'
-    project: 'atolcd-alfresco'
+    version: '4.2.8'
   com.atolcd.alfresco.localsolr:
-    version: '4.2.4'
-    project: 'atolcd-alfresco'
-  javascript-console-repo:
-    version: '0.6.0'
-  com.atolcd.alfresco.support-tools-42X:
-    version: '1.8'
-    project: 'support-tools-42X'
-
-atolcd::alfresco::modules::share_module_stable:
-  com.atolcd.alfresco.share:
-    version: '4.2.4'
-    project: 'atolcd-alfresco'
-  javascript-console-share:
-    version: '0.6.0'
-
-atolcd::alfresco::modules::repo_module:
+    version: '4.2.8'
   com.atolcd.alfresco.auditshare-42X-repo:
-    source: '/root/com.atolcd.alfresco.auditshare-42X-repo-1.5.5-SNAPSHOT.amp'
+    version: '1.5.6-SNAPSHOT'
 
-atolcd::alfresco::modules::share_module:
+atolcd::alfresco::modules::share:
+  com.atolcd.alfresco.share:
+    version: '4.2.8'
   com.atolcd.alfresco.auditshare-42X-share:
-    source: '/root/com.atolcd.alfresco.auditshare-42X-share-1.5.5-SNAPSHOT.amp'
+    version: '1.5.6-SNAPSHOT'
+
 
 alfresco::params:
   #mail
