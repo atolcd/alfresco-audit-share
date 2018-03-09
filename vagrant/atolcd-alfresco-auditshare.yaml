@@ -4,7 +4,7 @@ classes:
   - alfresco::solr
   - atolcd::tomcat::javaopts
 
-alfresco::version:    '5.1.1'
+alfresco::version:    '5.1.4.1'
 alfresco::autocsrf:   false
 
 tomcat::version:      '7'
@@ -13,29 +13,21 @@ java::package: 'openjdk-7-jdk'
 java::java_alternative: 'java-1.7.0-openjdk-amd64'
 java::java_alternative_path: '/usr/lib/jvm/java-1.7.0-openjdk-amd64/bin/java'
 
-atolcd::alfresco::modules::repo_module_stable:
+
+atolcd::alfresco::modules::repo:
+  org.alfresco.alfresco-share-services:
+    version: '5.1.4.1'
   com.atolcd.alfresco.repository:
-    version: '5.1.1'
-    project: 'atolcd-alfresco'
-  javascript-console-repo:
-    version: '1.0'
-  alfresco-share-services:
-    version: '5.1.1'
-
-atolcd::alfresco::modules::share_module_stable:
-  com.atolcd.alfresco.share:
-    version: '5.1.1'
-    project: 'atolcd-alfresco'
-  javascript-console-share:
-    version: '1.0'
-
-atolcd::alfresco::modules::repo_module:
+    version: '5.1.4.1'
   com.atolcd.alfresco.auditshare-51X-repo:
-    source: '/root/com.atolcd.alfresco.auditshare-51X-repo-1.5.5-SNAPSHOT.amp'
+    version: '1.5.6-SNAPSHOT'
 
-atolcd::alfresco::modules::share_module:
+atolcd::alfresco::modules::share:
+  com.atolcd.alfresco.share:
+    version: '5.1.4.1'
   com.atolcd.alfresco.auditshare-51X-share:
-    source: '/root/com.atolcd.alfresco.auditshare-51X-share-1.5.5-SNAPSHOT.amp'
+    version: '1.5.6-SNAPSHOT'
+
 
 alfresco::params:
   #mail
