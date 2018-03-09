@@ -11,14 +11,29 @@ SGBD supportés :
 ## [Unreleased]
 
 
+## [1.5.5] - 2018-03-09
+### Added
+- Enrichissement API Javascript
+
+### Changed
+- Modification de l'expression CRON du calcul de volumétrie (toutes les 4 heures)
+- Compatibilité Alfresco 5.2.x
+
+### Fixed
+- Correction "Erreur 414" (Request-URI Too Large) lorsqu'il y a beaucoup de sites créés
+- Correction bug sur le calcul de la volumétrie
+- Correction NPE si le referer est null (https://github.com/atolcd/alfresco-audit-share/issues/4)
+- Corrections vulnérabilités/bugs mineurs
+
+
 ## [1.5.4] - 2017-03-15
 ### Added
-- Filtrage des graphiques par typologie des documents dans les sites (https://redmine.atolcd.com/issues/32303)
-- Filtrage des connexions utilisateurs en fonction d'un ou plusieurs groupes (https://redmine.atolcd.com/issues/32305)
+- Filtrage des graphiques par typologie des documents dans les sites
+- Filtrage des connexions utilisateurs en fonction d'un ou plusieurs groupes
 - Affichage de la version du module dans les interfaces d'AuditShare
 
 ### Changed
-- Gestion des valeurs nulles dans les graphiques de volumétrie (https://redmine.atolcd.com/issues/33321)
+- Gestion des valeurs nulles dans les graphiques de volumétrie
 
 ### Fixed
 - Correction de l'affichage par site de la volumétrie (option "Afficher les résultats par site")
