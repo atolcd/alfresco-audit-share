@@ -103,6 +103,12 @@
       <version>${alfresco.version}</version>
       <classifier>classes</classifier>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.alfresco</groupId>
+          <artifactId>alfresco-web-framework-commons</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 </project>
