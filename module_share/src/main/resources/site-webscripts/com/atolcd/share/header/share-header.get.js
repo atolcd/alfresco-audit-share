@@ -17,18 +17,7 @@
  */
 
 if (page.url.templateArgs.site != null && page.id != "search" && page.id != "advsearch") {
-  // We are in the context of a site, so call the repository to see if the user is site manager or not
-  var userIsSiteManager = false;
-
-  var json = remote.call("/api/sites/" + page.url.templateArgs.site + "/memberships/" + encodeURIComponent(user.name));
-  if (json.status == 200) {
-    var obj = eval('(' + json + ')');
-    if (obj) {
-      userIsSiteManager = (obj.role == "SiteManager");
-    }
-  }
-
-  if (userIsSiteManager) {
+  if (auditshare.isMemberOfGroups("SiteManager")) {
     // AuditShare site page
     var statisticsPage = {
       id: "HEADER_SITE_STATISTICS",

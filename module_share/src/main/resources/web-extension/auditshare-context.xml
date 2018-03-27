@@ -38,4 +38,9 @@
     </property>
   </bean>
 
+  <!-- JavaScript API -->
+  <bean id="share-statistics.scriptExtension" class="com.atolcd.auditshare.repo.jscript.AuditShareScriptExtension" parent="baseScriptExtension">
+    <property name="extensionName" value="auditshare" />
+    <property name="slingshotEvaluatorUtil" ref="slingshot.evaluator.utility" />
+  </bean>
 </beans>
