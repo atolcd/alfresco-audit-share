@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/atolcd/alfresco-audit-share.svg?branch=5.1.X)](https://travis-ci.org/atolcd/alfresco-audit-share)
+
 "AuditShare" for Alfresco
 ================================
 
