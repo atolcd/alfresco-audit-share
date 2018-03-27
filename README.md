@@ -3,7 +3,7 @@
 "AuditShare" for Alfresco
 ================================
 
-**Audit Share** is an extension totally integrated into the Share UI accessible by **administrators** and **sites managers**.   
+**AuditShare** is an extension totally integrated into the Share UI accessible by **administrators** and **sites managers**.   
 This app displays sites and repository usage info: number of created/read/updated/deleted documents displayed by day/week/month/year.  
 In sites, others informations are "audited" concerning wiki, blog and discussions components but also users connected and sites volumetry.  
 
@@ -49,7 +49,7 @@ Overrides
 Using the module
 ---------------------
 
-**/!\ Only actions performed from Share UI are "audited" /!\**  
+**/!\ Only actions performed from Share UI are "audited" /!\\**  
 Be aware that this module does **NOT** use alfresco audit mechanisms.
 
 #### Configuration
@@ -78,7 +78,7 @@ Screeshots
 Contributors
 -------------------
 
-Created by: Alexandre NICOLAS and [Bertrand FOREST](https://github.com/bforest)
+Created by: [Alexandre NICOLAS](https://github.com/alexandre-nicolas) and [Bertrand FOREST](https://github.com/bforest)
 
 Contributors:
 - Anicet PRAO
