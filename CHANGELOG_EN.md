@@ -9,6 +9,8 @@ Supported DBMS:
 
 
 ## [Unreleased]
+### Changed
+- Optimization: caching group membership
 
 
 ## [1.5.5] - 2018-03-09

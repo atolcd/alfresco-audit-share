@@ -9,6 +9,8 @@ SGBD supportés :
 
 
 ## [Unreleased]
+### Changed
+- Optimisation : utilisation de caches pour la vérification d'appartenance aux groupes
 
 
 ## [1.5.5] - 2018-03-09
