@@ -117,30 +117,13 @@ function checkPermissions() {
   // Check permissions
   if (page.url.templateArgs.site) {
     // We are in the context of a site, so call the repository to see if the user is site manager or not
-    var json = remote.call("/api/sites/" + page.url.templateArgs.site + "/memberships/" + encodeURIComponent(user.name));
-    if (json.status == 200) {
-      var obj = JSON.parse(json);
-      if (obj) {
-        return (obj.role == "SiteManager");
-      }
-    }
+    return auditshare.isMemberOfGroups("SiteManager");
   } else if (user.isAdmin) {
     // User is an administrator
     return true;
   } else {
-    // Check if current user is site manager of a site
-    // http://localhost:8080/alfresco/s/api/people/admin/sites?roles=user
-    var json = remote.call("/api/people/" + encodeURIComponent(user.name) + "/sites?roles=user");
-    if (json.status == 200) {
-      var sites = JSON.parse(json);
-      if (sites && sites.length > 0) {
-        for (var i=0, ii=sites.length ; i<ii ; i++) {
-          if (sites[i].siteRole == "SiteManager") {
-            return true;
-          }
-        }
-      }
-    }
+    // Check if current user is site manager of at least one site
+    return auditshare.isSiteMangerOfAtLeastOneSite();
   }
   return false;
 }
