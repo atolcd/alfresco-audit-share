@@ -34,7 +34,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.abdera.protocol.client.util.MethodHelper.Method;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,51 +64,51 @@ import com.atolcd.alfresco.helper.AuditHelper;
 @SuppressWarnings("deprecation")
 public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
     // Logger
-    private static final Log logger = LogFactory.getLog(ProxyAuditFilter.class);
+    private static final Log    logger                = LogFactory.getLog(ProxyAuditFilter.class);
 
-    private ServletContext servletContext;
+    private ServletContext      servletContext;
 
     // XXX: externalize configuration?
-    public static final String SHARE_WEBAPP_NAME = "share";
-    public static final String ALFRESCO_ENDPOINT_ID = "alfresco";
-    public static final String SHORT_PROXY_URL = "/" + SHARE_WEBAPP_NAME + "/page/proxy/" + ALFRESCO_ENDPOINT_ID + "/";
+    public static final String  SHARE_WEBAPP_NAME     = "share";
+    public static final String  ALFRESCO_ENDPOINT_ID  = "alfresco";
+    public static final String  SHORT_PROXY_URL       = "/" + SHARE_WEBAPP_NAME + "/page/proxy/" + ALFRESCO_ENDPOINT_ID + "/";
 
-    public static final String KEY_SITE = "site";
-    public static final String KEY_MODULE = "module";
-    public static final String KEY_ACTION = "action";
+    public static final String  KEY_SITE              = "site";
+    public static final String  KEY_MODULE            = "module";
+    public static final String  KEY_ACTION            = "action";
 
     // Fake site id (for repository)
-    public static final String TEMP_SITE = "/service";
+    public static final String  TEMP_SITE             = "/service";
 
     // URIs parsed
-    private static final String URI_BLOG = SHORT_PROXY_URL + "api/blog/";
-    private static final String URI_LINKS = SHORT_PROXY_URL + "api/links/";
-    private static final String URI_DOWNLOAD = SHORT_PROXY_URL + "api/node/content/";
-    private static final String URI_DOWNLOAD_2 = SHORT_PROXY_URL + "slingshot/node/content/";
-    private static final String URI_CALENDAR = "/calendar/create";
+    private static final String URI_BLOG              = SHORT_PROXY_URL + "api/blog/";
+    private static final String URI_LINKS             = SHORT_PROXY_URL + "api/links/";
+    private static final String URI_DOWNLOAD          = SHORT_PROXY_URL + "api/node/content/";
+    private static final String URI_DOWNLOAD_2        = SHORT_PROXY_URL + "slingshot/node/content/";
+    private static final String URI_CALENDAR          = "/calendar/create";
 
     // Check the method of the request
-    private static final String URI_DISCUSSIONS = SHORT_PROXY_URL + "api/forum/";
-    private static final String URI_WIKI = SHORT_PROXY_URL + "slingshot/wiki/page/";
+    private static final String URI_DISCUSSIONS       = SHORT_PROXY_URL + "api/forum/";
+    private static final String URI_WIKI              = SHORT_PROXY_URL + "slingshot/wiki/page/";
 
-    private static final String URI_DATALIST = SHORT_PROXY_URL + "slingshot/datalists/item/";
-    private static final String URI_DATALIST_DELETE = SHORT_PROXY_URL + "slingshot/datalists/action/item";
+    private static final String URI_DATALIST          = SHORT_PROXY_URL + "slingshot/datalists/item/";
+    private static final String URI_DATALIST_DELETE   = SHORT_PROXY_URL + "slingshot/datalists/action/item";
 
     // Updated from form
-    private static final String URI_NODE_UPDATE = SHORT_PROXY_URL + "api/node/";
-    private static final String FORMPROCESSOR = "/formprocessor";
+    private static final String URI_NODE_UPDATE       = SHORT_PROXY_URL + "api/node/";
+    private static final String FORMPROCESSOR         = "/formprocessor";
 
     // Repository and sites
-    private static final String URI_ACTION = SHORT_PROXY_URL + "slingshot/doclib/action/files";
-    private static final String URI_UPLOAD = SHORT_PROXY_URL + "api/upload";
+    private static final String URI_ACTION            = SHORT_PROXY_URL + "slingshot/doclib/action/files";
+    private static final String URI_UPLOAD            = SHORT_PROXY_URL + "api/upload";
 
     // Social features
     private static final String URI_SOCIAL_PUBLISHING = SHORT_PROXY_URL + "api/publishing/queue";
 
-    private static final String GET = Method.GET.toString();
-    private static final String POST = Method.POST.toString();
-    private static final String PUT = Method.PUT.toString();
-    private static final String DELETE = Method.DELETE.toString();
+    private static final String GET                   = HttpMethod.GET.toString();
+    private static final String POST                  = HttpMethod.POST.toString();
+    private static final String PUT                   = HttpMethod.PUT.toString();
+    private static final String DELETE                = HttpMethod.DELETE.toString();
 
     @Override
     public void destroy() {
@@ -252,7 +251,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
                     String[] urlTokens = requestURI.split("/");
                     String wikiPageId = urlTokens[urlTokens.length - 1];
                     String siteId = urlTokens[urlTokens.length - 2];
-                    if (method.equals(Method.PUT.toString())) {
+                    if (method.equals(PUT)) {
                         JSONObject params = new JSONObject(requestWrapper.getStringContent());
                         auditSample.put(AUDIT_SITE, siteId);
                         auditSample.put(AUDIT_APP_NAME, MOD_WIKI);
