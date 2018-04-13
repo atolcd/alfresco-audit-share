@@ -9,6 +9,8 @@ SGBD supportés :
 
 
 ## [Unreleased]
+### Changed
+- Utilisation de "web fragments" (le fichier web.xml n'est plus écrasé par le module) (https://github.com/atolcd/alfresco-audit-share/issues/14)
 
 
 ## [1.5.6] - 2018-03-29

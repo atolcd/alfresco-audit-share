@@ -9,6 +9,8 @@ Supported DBMS:
 
 
 ## [Unreleased]
+### Changed
+- Use of "web fragments" (web.xml is no more overridden by the module) (https://github.com/atolcd/alfresco-audit-share/issues/14)
 
 
 ## [1.5.6] - 2018-03-29
