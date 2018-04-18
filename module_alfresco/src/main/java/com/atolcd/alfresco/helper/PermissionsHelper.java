@@ -72,8 +72,9 @@ public class PermissionsHelper implements InitializingBean {
         return false;
       }
 
-      // Current user must be "SiteManager" of the site
-      isAllowed = isSiteManager(site, currentUser);
+      // Current user must be "SiteMember" of the site
+     // isAllowed = isSiteManager(site, currentUser); Changed by Sandeep Reddy
+      isAllowed = userIsMember(site, currentUser);
     }
 
     String sites = req.getParameter("sites");
@@ -81,7 +82,7 @@ public class PermissionsHelper implements InitializingBean {
       if (!"*".equals(sites)) {
         String[] sitesToken = sites.split(",");
         for (String token : sitesToken) {
-          if (!isSiteManager(token, currentUser)) {
+          if (!userIsMember(token, currentUser)) {
             return false;
           }
         }
@@ -107,7 +108,7 @@ public class PermissionsHelper implements InitializingBean {
     if (CollectionUtils.isNotEmpty(sites)) {
       List<String> siteShortNames = new ArrayList<>(sites.size());
       for (SiteInfo siteInfo : sites) {
-        if (isAdmin || isSiteManager(siteInfo.getShortName(), currentUser)) {
+        if (isAdmin || userIsMember(siteInfo.getShortName(), currentUser)) {
           siteShortNames.add(siteInfo.getShortName());
         }
       }
@@ -118,10 +119,10 @@ public class PermissionsHelper implements InitializingBean {
     return Collections.emptyList();
   }
 
-  private static boolean isSiteManager(String siteShortName, String userName) {
+  private static boolean userIsMember(String siteShortName, String userName) {
     try {
       String userRole = siteService.getMembersRole(siteShortName, userName);
-      if (SiteModel.SITE_MANAGER.equals(userRole)) {
+      if (SiteModel.SITE_MEMBER.equals(userRole)) {
         return true;
       }
     } catch (Exception e) {
