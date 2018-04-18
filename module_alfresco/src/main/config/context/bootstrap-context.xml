@@ -24,8 +24,8 @@
     <property name="moduleId" value="${groupId}.${artifactId}" />
     <property name="name" value="auditshare.user.group.bootstrapSpaces" />
     <property name="description" value="Creation of a folder containing the lists of user connection groups" />
-    <property name="sinceVersion" value="1.0" />
-    <property name="appliesFromVersion" value="1.0" />
+    <property name="sinceVersion" value="1.5.4" />
+    <property name="appliesFromVersion" value="1.5.4" />
     <property name="importer" ref="spacesBootstrap" />
     <property name="executeOnceOnly" value="true" />
     <property name="bootstrapViews">
