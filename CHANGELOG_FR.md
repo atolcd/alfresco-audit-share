@@ -9,6 +9,9 @@ SGBD supportés :
 
 
 ## [Unreleased]
+### Fixed
+- Correction de l'affichage du graphique de volumétrie en mode "courbe"
+- Correction du retour JSON du webscript "select-audits"
 
 
 ## [1.5.7] - 2018-04-13

@@ -235,6 +235,9 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
               }
             },
             y: {
+              // force min value to have similar display between line chart and barchart
+              min: 0,
+              padding: {bottom: 0},
               tick: { format: d3.format("") },
               label: {
                 position: 'outer-middle'
