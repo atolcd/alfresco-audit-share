@@ -41,10 +41,10 @@
 </#macro>
 
 <#escape x as jsonUtils.encodeJSONString(x)>
+  {
   <#if popularity?exists>
     <#-- By popularity -->
     <#if popularity?size !=0>
-    {
       "items" :
       [
         <#list popularity as auditItem>
@@ -59,12 +59,10 @@
           }<#if auditItem_has_next>,</#if>
         </#list>
       ]
-    }
     </#if>
   <#elseif dates?exists>
     <#-- By dates -->
     <#if dates?size !=0>
-    {
       "totalResults": ${dates?size?c},
       "items":
       [
@@ -74,7 +72,7 @@
         }<#if date_has_next>,</#if>
         </#list>
       ]
-    }
     </#if>
   </#if>
+  }
 </#escape>
