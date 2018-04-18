@@ -9,6 +9,9 @@ Supported DBMS:
 
 
 ## [Unreleased]
+### Fixed
+- Bug fix: fixed volumetry line chart display issue
+- Bug fix: fixed invalid JSON response ("select-audits" webscript)
 
 
 ## [1.5.7] - 2018-04-13
