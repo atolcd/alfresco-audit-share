@@ -41,10 +41,19 @@ AtolStatistics.dateFormatMasks = {
 };
 
 AtolStatistics.util.fileSizes = {
+  'BYTES_B' : 1,
   'BYTES_KB': 1024,
   'BYTES_MB': 1048576,
   'BYTES_GB': 1073741824,
   'BYTES_TB': 1099511627776
+};
+
+AtolStatistics.util.fileSizeMessages = {
+  'BYTES_B' : Alfresco.util.message("size.bytes"),
+  'BYTES_KB': Alfresco.util.message("size.kilobytes"),
+  'BYTES_MB': Alfresco.util.message("size.megabytes"),
+  'BYTES_GB': Alfresco.util.message("size.gigabytes"),
+  'BYTES_TB': Alfresco.util.message("size.terabytes")
 };
 
 AtolStatistics.util.roundNumber = function (number, digits) {
@@ -52,44 +61,52 @@ AtolStatistics.util.roundNumber = function (number, digits) {
   return Math.round(number * multiple) / multiple;
 }
 
-AtolStatistics.util.formatFileSize = function (fileSize) {
+AtolStatistics.util.formatFileSize = function (fileSize, unit) {
   if (typeof fileSize == "string") {
     fileSize = parseInt(fileSize, 10);
   }
 
+  if (unit) {
+    return  {
+      unit: unit,
+      value: AtolStatistics.util.roundNumber(fileSize / AtolStatistics.util.fileSizes[unit], 2),
+      message: AtolStatistics.util.fileSizeMessages[unit]
+    };
+  }
+
   if (fileSize < AtolStatistics.util.fileSizes.BYTES_KB) {
     return  {
-      unitValue: 1,
+      unit: "BYTES_B",
       value: fileSize,
-      message: Alfresco.util.message("size.bytes")
+      message: AtolStatistics.util.fileSizeMessages["BYTES_B"]
     };
   }
   else if (fileSize < AtolStatistics.util.fileSizes.BYTES_MB) {
     return  {
-      unitValue: AtolStatistics.util.fileSizes.BYTES_KB,
+      unit: "BYTES_KB",
       value: AtolStatistics.util.roundNumber(fileSize / AtolStatistics.util.fileSizes.BYTES_KB, 2),
-      message: Alfresco.util.message("size.kilobytes")
+      message: AtolStatistics.util.fileSizeMessages["BYTES_KB"]
     };
   }
   else if (fileSize < AtolStatistics.util.fileSizes.BYTES_GB) {
     return  {
-      unitValue: AtolStatistics.util.fileSizes.BYTES_MB,
+      unit: "BYTES_MB",
       value: AtolStatistics.util.roundNumber(fileSize / AtolStatistics.util.fileSizes.BYTES_MB, 2),
-      message: Alfresco.util.message("size.megabytes")
+      message: AtolStatistics.util.fileSizeMessages["BYTES_MB"]
     };
   }
   else if (fileSize < AtolStatistics.util.fileSizes.BYTES_TB) {
     return  {
-      unitValue: AtolStatistics.util.fileSizes.BYTES_GB,
+      unit: "BYTES_GB",
       value: AtolStatistics.util.roundNumber(fileSize / AtolStatistics.util.fileSizes.BYTES_GB, 2),
-      message: Alfresco.util.message("size.gigabytes")
+      message: AtolStatistics.util.fileSizeMessages["BYTES_GB"]
     };
   }
 
   return  {
-    unitValue: AtolStatistics.util.fileSizes.BYTES_TB,
+    unit: "BYTES_TB",
     value: AtolStatistics.util.roundNumber(fileSize / AtolStatistics.util.fileSizes.BYTES_TB, 2),
-    message: Alfresco.util.message("size.terabytes")
+    message: AtolStatistics.util.fileSizeMessages["BYTES_TB"]
   };
 };
 
