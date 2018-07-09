@@ -261,8 +261,9 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
 
         if (!Dom.hasClass(this.id + "-bar-stack-criteria-container", "hidden") && Dom.get(this.id + "-bar_stack-criteria").checked) {
           // Volumetry conversion by sites
-          var value_obj = {};
-          labelVolumetry = (this.msg("tool.volumetry.label") +" ("+ AtolStatistics.util.formatFileSize(response.json.maxLocal).message +")");
+          var value_obj = {},
+              maxLocalValue = AtolStatistics.util.formatFileSize(response.json.maxLocal);
+          labelVolumetry = (this.msg("tool.volumetry.label") + " (" + maxLocalValue.message + ")");
 
           chartArguments.axis.y.label.text = [labelVolumetry];
           for (i=0, ii=response.json.stackedValues.length ; i<ii ; i++) {
@@ -277,14 +278,8 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
               if (value == null) {
                 value_obj[siteId].push(value);
               } else {
-                var valueConvert = AtolStatistics.util.formatFileSize(value),
-                  stackedConvert = AtolStatistics.util.formatFileSize(response.json.maxLocal),
-                  jsonConvertStackedValue = valueConvert.value;
-
-                if (valueConvert.message != stackedConvert.message) {
-                  jsonConvertStackedValue = AtolStatistics.util.roundNumber(value / stackedConvert.unitValue, 2); // Convert format of a value when it's different from the max format
-                }
-                value_obj[siteId].push(jsonConvertStackedValue);
+                // convert format of a value when it's different from the max format
+                value_obj[siteId].push(AtolStatistics.util.formatFileSize(value, maxLocalValue.unit).value);
               }
 
               // Complete Columns of matrices and build groups array when we are on the last iteration of the first loop
@@ -297,8 +292,9 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
 
         } else {
           // Conversion of total volumetries
-          var jsonConvertValues = [];
-          labelVolumetry = (this.msg("tool.volumetry.label") +" ("+ AtolStatistics.util.formatFileSize(response.json.maxCount).message +")");
+          var jsonConvertValues = [],
+              maxValue = AtolStatistics.util.formatFileSize(response.json.maxCount);
+          labelVolumetry = (this.msg("tool.volumetry.label") + " (" + maxValue.message + ")");
 
           chartArguments.axis.y.label.text = [labelVolumetry];
           for (i=0, ii=response.json.values.length ; i<ii ; i++) {
@@ -306,7 +302,9 @@ if (typeof AtolStatistics == "undefined" || !AtolStatistics) {
             if (value == null) {
               jsonConvertValues[i] = value;
             } else {
-              jsonConvertValues[i] = AtolStatistics.util.formatFileSize(value).value; // json responses converted in the right format (Bytes, Kb, Mb, Gb or Tb)
+              // convert format of a value when it's different from the max format
+              // json response converted in the right format (Bytes, Kb, Mb, Gb or Tb)
+              jsonConvertValues[i] = AtolStatistics.util.formatFileSize(value, maxValue.unit).value;
             }
           }
           chartArguments.data.columns.push([labelVolumetry].concat(jsonConvertValues));
