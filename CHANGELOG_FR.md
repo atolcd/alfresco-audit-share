@@ -9,6 +9,9 @@ SGBD supportés :
 
 
 ## [Unreleased]
+
+
+## [1.5.8] - 2018-08-07
 ### Fixed
 - Correction de l'affichage des graphiques de volumétrie avec des données qui ont un format différent (Ko / Mo / Go / To)
 - Correction de l'affichage du graphique de volumétrie en mode "courbe"
