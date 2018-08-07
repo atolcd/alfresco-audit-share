@@ -9,6 +9,9 @@ Supported DBMS:
 
 
 ## [Unreleased]
+
+
+## [1.5.8] - 2018-08-07
 ### Fixed
 - Bug fix: fix volumetry chart: incorrect units handling (KB / MB / GB / TB)
 - Bug fix: fix volumetry line chart display issue
