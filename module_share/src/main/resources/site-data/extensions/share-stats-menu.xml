@@ -28,6 +28,13 @@
           <targetPackageRoot>org.alfresco.share.header</targetPackageRoot>
           <sourcePackageRoot>com.atolcd.share.header.menu</sourcePackageRoot>
         </customization>
+        <customization>
+          <targetPackageRoot>org.alfresco.share.pages</targetPackageRoot>
+          <sourcePackageRoot>com.atolcd.share.header.menu</sourcePackageRoot>
+          <alwaysApply>
+            <webscript>share-header</webscript>
+          </alwaysApply>
+        </customization>
 
         <!-- For resources (CSS, JS, ...) -->
         <customization>
