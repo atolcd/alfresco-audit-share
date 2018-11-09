@@ -44,9 +44,8 @@
   {
   <#if popularity?exists>
     <#-- By popularity -->
-    <#if popularity?size !=0>
-      "items" :
-      [
+    "items" : [
+      <#if popularity?size !=0>
         <#list popularity as auditItem>
           {
             "popularity": ${auditItem.popularity?c},
@@ -58,8 +57,8 @@
             "displayName": "${auditItem.objectDisplayName}"
           }<#if auditItem_has_next>,</#if>
         </#list>
-      ]
-    </#if>
+      </#if>
+    ]
   <#elseif dates?exists>
     <#-- By dates -->
     <#if dates?size !=0>
