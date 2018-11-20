@@ -46,6 +46,12 @@
               <value>auditshare-module-share, com.atolcd.alfresco.auditshare-share</value>
             </property>
           </moduleProperties>
+          <filemappingProperties>
+            <property>
+              <name>/WEB-INF</name>
+              <value>/WEB-INF</value>
+            </property>
+          </filemappingProperties>
           <rootDirectory>${project.basedir}/src/main/webapp</rootDirectory>
         </configuration>
       </plugin>

@@ -18,11 +18,6 @@ Supported DBMS:
 - Bug fix: fixed invalid JSON response ("select-audits" webscript)
 
 
-## [1.5.7] - 2018-04-13
-### Changed
-- Use of "web fragments" (web.xml is no more overridden by the module) (https://github.com/atolcd/alfresco-audit-share/issues/14)
-
-
 ## [1.5.6] - 2018-03-29
 ### Changed
 - Optimization: caching group membership

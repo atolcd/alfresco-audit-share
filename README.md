@@ -4,7 +4,7 @@
 "AuditShare" for Alfresco
 ================================
 
-**AuditShare** is an extension totally integrated into the Share UI accessible by **administrators** and **site managers**.   
+**AuditShare** is an extension totally integrated into the Share UI accessible by **administrators** and **sites managers**.   
 This app displays sites and repository usage info: number of created/read/updated/deleted documents displayed by day/week/month/year.  
 In sites, others informations are "audited" concerning wiki, blog and discussions components but also users connected and sites volumetry.  
 
@@ -41,6 +41,11 @@ This extension is a standard Alfresco Module, so experienced users can skip thes
 3. Delete the `$TOMCAT_HOME/webapps/alfresco/` and `$TOMCAT_HOME/webapps/share/` folders.  
 **Caution:** please ensure you do not have unsaved custom files in the webapp folders before deleting.
 4. Start Alfresco
+
+
+Overrides
+---------------------
+**Caution:** Share **web.xml** file is overridden by the module (to declare new filters).
 
 
 Using the module

@@ -71,7 +71,7 @@ public class ProxyAuditFilter extends AuditFilterConstants implements Filter {
     // XXX: externalize configuration?
     public static final String  SHARE_WEBAPP_NAME     = "share";
     public static final String  ALFRESCO_ENDPOINT_ID  = "alfresco";
-    public static final String  SHORT_PROXY_URL       = "/" + SHARE_WEBAPP_NAME + "/page/proxy/" + ALFRESCO_ENDPOINT_ID + "/";
+    public static final String  SHORT_PROXY_URL       = "/" + SHARE_WEBAPP_NAME + "/proxy/" + ALFRESCO_ENDPOINT_ID + "/";
 
     public static final String  KEY_SITE              = "site";
     public static final String  KEY_MODULE            = "module";
