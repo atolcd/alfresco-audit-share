@@ -10,7 +10,8 @@ Supported DBMS:
 
 ## [Unreleased]
 ### Fixed
-- Bug fix: fixed volumetry line chart display issue
+- Bug fix: fix volumetry chart: incorrect units handling (KB / MB / GB / TB)
+- Bug fix: fix volumetry line chart display issue
 - Bug fix: fixed invalid JSON response ("select-audits" webscript)
 
 
