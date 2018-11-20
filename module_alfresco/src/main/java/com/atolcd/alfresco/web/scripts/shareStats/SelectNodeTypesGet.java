@@ -115,7 +115,7 @@ public class SelectNodeTypesGet extends DeclarativeWebScript implements Initiali
               QName typeQName = QName.createQName(myNodeType, this.namespaceService);
               if (Boolean.valueOf(dictionaryService.isSubClass(typeQName, ContentModel.TYPE_CONTENT))) {
                 String nodeTypeLabel = this.dictionaryService.getType(typeQName).getTitle(this.dictionaryService);
-                auditNodeType.setNodeTypeLabel(nodeTypeLabel);
+                auditNodeType.setNodeTypeLabel(nodeTypeLabel != null ? nodeTypeLabel : myNodeType);
 
                 res.add(auditNodeType);
               }
