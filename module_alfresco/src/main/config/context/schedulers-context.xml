@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING/DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 <!--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
@@ -18,49 +19,51 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<beans>
-  <bean id="com.atolcd.alfresco.scheduler.SiteVolumetryJobExecuter"
-      class="com.atolcd.alfresco.scheduler.SiteVolumetryJobExecuter">
-      <property name="wsInsertAudits">
+  <bean id="com.atolcd.alfresco.scheduler.SiteVolumetryJobExecuter" class="com.atolcd.alfresco.scheduler.SiteVolumetryJobExecuter">
+    <property name="wsInsertAudits">
       <ref bean="webscript.com.atolcd.alfresco.share-stats.insert-audit.post" />
-      </property>
-      <property name="siteService">
-        <ref bean="SiteService" />
-      </property>
-      <property name="searchService">
-        <ref bean="SearchService" />
-      </property>
-      <property name="batchSize">
-        <value>${share.stats.sites.volumetry.batchSize}</value>
-      </property>
+    </property>
+    <property name="siteService">
+      <ref bean="SiteService" />
+    </property>
+    <property name="searchService">
+      <ref bean="SearchService" />
+    </property>
+    <property name="batchSize">
+      <value>${share.stats.sites.volumetry.batchSize}</value>
+    </property>
   </bean>
 
   <!-- CRON : sites volumetry -->
-  <bean id="scheduledSitesVolumetryJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+  <bean id="scheduledSitesVolumetryJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
     <property name="jobClass">
       <value>com.atolcd.alfresco.scheduler.SiteVolumetryJob</value>
     </property>
     <property name="jobDataAsMap">
       <map>
-         <entry key="jobExecuter">
-              <ref bean="com.atolcd.alfresco.scheduler.SiteVolumetryJobExecuter" />
-          </entry>
-          <entry key="jobLockService">
-              <ref bean="jobLockService" />
-          </entry>
+        <entry key="jobExecuter">
+          <ref bean="com.atolcd.alfresco.scheduler.SiteVolumetryJobExecuter" />
+        </entry>
+        <entry key="jobLockService">
+          <ref bean="jobLockService" />
+        </entry>
       </map>
     </property>
   </bean>
 
-  <bean id="scheduledSitesVolumetryTrigger" class="org.alfresco.util.CronTriggerBean">
-    <property name="jobDetail">
-      <ref bean="scheduledSitesVolumetryJobDetail" />
-    </property>
-    <property name="scheduler">
-      <ref bean="schedulerFactory" />
-    </property>
-    <property name="cronExpression">
-      <value>${share.stats.sites.volumetry.trigger}</value>
+  <bean id="scheduledSitesVolumetrySchedulerAccessor" class="org.alfresco.schedule.AlfrescoSchedulerAccessorBean">
+    <property name="scheduler" ref="schedulerFactory" />
+    <property name="triggers">
+      <list>
+        <bean id="scheduledSitesVolumetryTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+          <property name="jobDetail">
+            <ref bean="scheduledSitesVolumetryJobDetail" />
+          </property>
+          <property name="cronExpression">
+            <value>${share.stats.sites.volumetry.trigger}</value>
+          </property>
+        </bean>
+      </list>
     </property>
   </bean>
 </beans>

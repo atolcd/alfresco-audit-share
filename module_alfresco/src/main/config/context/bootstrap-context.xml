@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 <!--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
@@ -18,7 +19,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<beans>
   <!-- Boostrap of the list of user connection groups -->
   <bean id="auditshare.user.group.bootstrapSpaces" class="org.alfresco.repo.module.ImporterModuleComponent" parent="module.baseComponent">
     <property name="moduleId" value="${groupId}.${artifactId}" />

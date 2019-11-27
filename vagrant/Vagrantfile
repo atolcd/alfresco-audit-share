@@ -1,19 +1,59 @@
+require 'base64'
+require 'vagrant/util/downloader'
+
+#
+# Extend vagrant's Downloader class to ask for basic auth credentials
+module Vagrant
+ module Util
+   class Downloader
+     @@token = ""
+
+     def basicauth_downloader(options, subprocess_options, &data_proc)
+       if @@token.empty?
+         print "Username: "
+         username = STDIN.gets.chomp
+         print "Password: "
+         password = STDIN.noecho(&:gets).chomp
+         @@token = Base64.encode64("#{username}:#{password}")
+       end
+
+       options = [ "-H", "Authorization: Basic #{@@token}" ] + options
+       orig_execute_curl(options, subprocess_options, &data_proc)
+     end
+
+     def execute_curl_with_basicauth(options, subprocess_options, &data_proc)
+       orig_execute_curl(options, subprocess_options, &data_proc)
+     rescue Errors::DownloaderError => e
+       @ui.clear_line if @ui
+       if e.message =~ /401 Unauthorized/
+         basicauth_downloader(options, subprocess_options, &data_proc) || (raise e)
+       else
+         raise e
+       end
+     end
+
+     alias orig_execute_curl execute_curl
+     alias execute_curl execute_curl_with_basicauth
+   end
+ end
+end
+
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-
+PUPPET_PATH = ENV['PUPPET3_PATH']
 Vagrant.configure("2") do |config|
   # All Vagrant configuration is done here. The most common configuration
   # options are documented and commented below. For a complete reference,
   # please see the online documentation at vagrantup.com.
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "ubuntu-1604-64-puppet3"
+  config.vm.box = "ubuntu-1804-puppet5"
 
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
-  config.vm.box_url = "http://software/vagrant/ubuntu-1604-64-puppet3.box"
+  config.vm.box_url = [ "http://nexus3.priv.atolcd.com/repository/atolcd-vagrant/ubuntu-1804-puppet5.box", "https://vagrant-registry.priv.atolcd.com/ubuntu-1804-puppet5.box" ]
 
-  config.vm.host_name = "atolcd-alfresco-auditshare.hosting.priv.atolcd.com"
+  config.vm.host_name = "atolcd-alfresco-auditshare.lan.priv.atolcd.com"
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
@@ -30,18 +70,18 @@ Vagrant.configure("2") do |config|
   #config.vm.network :public_network
   config.vm.network :forwarded_port, guest:   8080, host: 8080
   config.vm.network :forwarded_port, guest:   8000, host: 8000
-  config.vm.network :forwarded_port, guest:   80, host: 80
+  config.vm.network :forwarded_port, guest:   8983, host: 8983
 
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  config.vm.synced_folder "~/.vagrant.d/cache/apt", "/var/cache/apt/archives", create: true
 
   #Création de la variable d'environnement PUPPET3_PATH qui pointe sur Puppet3
-  config.vm.synced_folder ENV['PUPPET3_PATH'] + "/hieradata", "/var/lib/puppet/environments/vagrant/hieradata", create: true
+  config.vm.synced_folder PUPPET_PATH + "/hieradata", "/var/lib/puppet/environments/vagrant/hieradata", create: true
+  config.vm.synced_folder ".", "/tmp/vagrant-puppet/hieradata/vagrant", create: true
   config.vm.synced_folder "../", "/project", create: true
-  config.vm.synced_folder ".", "/var/lib/puppet/environments/vagrant/hieradata/vagrant", create: true
+  config.vm.synced_folder "~/.vagrant.d/cache/apt", "/var/cache/apt/archives", create: true
 
 
   # Provider-specific configuration so you can fine-tune various
@@ -52,6 +92,7 @@ Vagrant.configure("2") do |config|
     # Don't boot with headless mode
     # vb.gui = true
     vb.memory = 4096
+    vb.name = "auditshare"
 
     # Use VBoxManage to customize the VM. For example to change cpus:
     vb.customize ["modifyvm", :id, "--cpus", "2"]
@@ -60,10 +101,13 @@ Vagrant.configure("2") do |config|
   # View the documentation for the provider you're using for more
   # information on available options.
   config.vm.provision "shell",
-    inline: 'lvresize -r -L 30G $(mount| grep "on / " | cut -d " " -f 1)'
+    inline: 'lvresize -r -L 10G $(mount| grep "on / " | cut -d " " -f 1)'
 
   config.vm.provision "shell",
     inline: "cp /project/*/target/*.amp /root/"
+
+  config.vm.provision "shell",
+    inline: '/opt/puppetlabs/puppet/bin/gem install toml-rb'
 
   # Enable provisioning with Puppet stand alone.  Puppet manifests
   # are contained in a directory path relative to this Vagrantfile.
@@ -71,17 +115,12 @@ Vagrant.configure("2") do |config|
   # the file ubuntu-1204-64.pp in the manifests_path directory.
   #
   config.vm.provision :puppet do |puppet|
-    puppet.hiera_config_path = ENV['PUPPET3_PATH'] + "/local_modules/atolcd/files/puppet/master/hiera.yaml"
-    puppet.working_directory = "/etc/puppet/"
-    puppet.environment_path  = ENV['PUPPET3_PATH']
+    puppet.hiera_config_path = PUPPET_PATH + "/hiera.yaml"
+    puppet.environment_path  = PUPPET_PATH
     puppet.environment       = "vagrant"
     puppet.facter            = {
       "application" => "alfresco"
     }
   end
-
-  config.vm.provision "shell",
-    inline: "clean-alfresco-modules ; install-alfresco-modules > /root/install_modules.log"
-
 end
 

@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.atolcd.alfresco</groupId>
-    <artifactId>auditshare-52X</artifactId>
+    <artifactId>auditshare-61X</artifactId>
     <version>1.6.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>auditshare-52X-share</artifactId>
+  <artifactId>auditshare-61X-share</artifactId>
   <packaging>amp</packaging>
   <name>AuditShare - Share</name>
   <description>AuditShare Share project</description>
@@ -18,7 +18,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.0</version>
+        <version>${maven-compiler.version}</version>
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
@@ -43,7 +43,7 @@
             <!-- Module aliases -->
             <property>
               <name>module.aliases</name>
-              <value>auditshare-module-share, com.atolcd.alfresco.auditshare-share, com.atolcd.alfresco.auditshare-42X-share, com.atolcd.alfresco.auditshare-50X-share, com.atolcd.alfresco.auditshare-51X-share</value>
+              <value>auditshare-module-share, com.atolcd.alfresco.auditshare-share, com.atolcd.alfresco.auditshare-42X-share, com.atolcd.alfresco.auditshare-50X-share, com.atolcd.alfresco.auditshare-51X-share, com.atolcd.alfresco.auditshare-52X-share</value>
             </property>
           </moduleProperties>
           <rootDirectory>${project.basedir}/src/main/webapp</rootDirectory>
@@ -52,7 +52,7 @@
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>yuicompressor-maven-plugin</artifactId>
-        <version>1.3.2</version>
+        <version>${yuicompressor.version}</version>
         <executions>
           <execution>
             <id>compressyui</id>
@@ -94,7 +94,7 @@
     <dependency>
       <groupId>org.alfresco</groupId>
       <artifactId>share</artifactId>
-      <version>${alfresco.version}</version>
+      <version>${alfresco.share.version}</version>
       <classifier>classes</classifier>
       <scope>provided</scope>
     </dependency>

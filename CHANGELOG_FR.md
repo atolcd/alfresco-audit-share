@@ -9,6 +9,8 @@ SGBD supportés :
 
 
 ## [Unreleased]
+### Changed
+- Compatibilité Alfresco 6.1.X
 
 
 ## [1.5.9] - 2018-11-20

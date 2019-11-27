@@ -1,32 +1,36 @@
 ---
 classes:
   - atolcd::alfresco::postgresql
-  - alfresco::solr
+  - alfresco::solr6
   - atolcd::tomcat::javaopts
 
-alfresco::version:    '5.2.2'
+alfresco::version:    '6.1.0'
 
-postgresql::globals::version: '9.5'
+postgresql::globals::version: '10'
+alfresco::postgresql::pgjdbcver: '42.2.5.jre8'
 
-tomcat::version:      '7'
-tomcat::proxyName:            'localhost'
-tomcat::proxyPort:            '8080'
-tomcat::scheme:               'http'
 
-java::package: 'openjdk-8-jdk'
+tomcat::version:              '8'
+tomcat::xms:                  '3G'
+tomcat::xmx:                  '6G'
+tomcat::newsize:              '2G'
+
+java::package: 'openjdk-11-jdk'
+java::java_alternative: 'java-1.11.0-openjdk-amd64'
+java::java_alternative_path: '/usr/lib/jvm/java-1.11.0-openjdk-amd64/bin/java'
 
 atolcd::alfresco::modules::repo:
   org.alfresco.alfresco-share-services:
-    version: '5.2.2'
+    version: '6.1.0'
   com.atolcd.alfresco.repository:
-    version: '5.2.2'
-  com.atolcd.alfresco.auditshare-52X-repo:
+    version: '6.1.0'
+  com.atolcd.alfresco.auditshare-61X-repo:
     version: '1.6.0-SNAPSHOT'
 
 atolcd::alfresco::modules::share:
   com.atolcd.alfresco.share:
-    version: '5.2.2'
-  com.atolcd.alfresco.auditshare-52X-share:
+    version: '6.1.0'
+  com.atolcd.alfresco.auditshare-61X-share:
     version: '1.6.0-SNAPSHOT'
 
 alfresco::params:
@@ -38,7 +42,12 @@ alfresco::params:
   'share.protocol':                                         'http'
   #mail
   'mail.from.default':                                      'alfresco@atolcd.com'
-  'index.subsystem.name':                                   'solr4'
+  # Solr
+  'index.subsystem.name':                                   'solr6'
+  'solr.host':                                              'localhost'
+  'solr.port':                                              '8983'
+  'solr.port.ssl':                                          '8443'
+  'solr.secureComms':                                       'none'
 
 atolcd::tomcat::javaopts:
  debug:

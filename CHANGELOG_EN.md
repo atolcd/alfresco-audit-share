@@ -9,6 +9,8 @@ Supported DBMS:
 
 
 ## [Unreleased]
+### Changed
+- Alfresco 6.1.X compatibility
 
 
 ## [1.5.9] - 2018-11-20

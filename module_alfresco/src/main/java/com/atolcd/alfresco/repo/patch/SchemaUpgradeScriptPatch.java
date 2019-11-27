@@ -34,6 +34,12 @@ import javax.sql.DataSource;
 
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.repo.content.filestore.FileContentWriter;
+
+import org.alfresco.repo.domain.dialect.Dialect;
+
+import org.alfresco.repo.domain.dialect.MySQLInnoDBDialect;
+
+import org.alfresco.repo.domain.dialect.PostgreSQLDialect;
 import org.alfresco.repo.module.AbstractModuleComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ContentWriter;
@@ -41,14 +47,10 @@ import org.alfresco.util.LogUtil;
 import org.alfresco.util.TempFileProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.MySQLInnoDBDialect;
-import org.hibernate.dialect.PostgreSQLDialect;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 
 public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements AuthenticationUtil.RunAsWork<Object> {
 	private static Log logger = LogFactory.getLog(SchemaUpgradeScriptPatch.class);
@@ -75,7 +77,7 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 	public static final int DEFAULT_MAX_STRING_LENGTH = 1024;
 
 	private DataSource dataSource;
-	private LocalSessionFactoryBean localSessionFactory;
+
 	private Dialect dialect;
 	private Properties globalProperties;
 
@@ -87,10 +89,6 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
-	}
-
-	public void setLocalSessionFactory(LocalSessionFactoryBean localSessionFactory) {
-		this.localSessionFactory = localSessionFactory;
 	}
 
 	public void setDialect(Dialect dialect) {
@@ -122,8 +120,6 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 			connection = dataSource.getConnection();
 			connection.setAutoCommit(true);
 
-			Configuration cfg = localSessionFactory.getConfiguration();
-
 			// check if the script was successfully executed
 			boolean wasSuccessfullyApplied = didPatchSucceed(connection, id);
 			if (wasSuccessfullyApplied) {
@@ -133,7 +129,7 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 				return null;
 			}
 			// it wasn't run and it can be run now
-			executeScriptUrl(cfg, connection, scriptUrl);
+			executeScriptUrl(connection, scriptUrl);
 
 		} catch (Exception e) {
 			logger.error(e);
@@ -149,8 +145,8 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 		return null;
 	}
 
-	private void executeScriptUrl(Configuration cfg, Connection connection, String scriptUrl) throws Exception {
-		Dialect dialect = Dialect.getDialect(cfg.getProperties());
+	private void executeScriptUrl(Connection connection, String scriptUrl) throws Exception {
+		Dialect dialect = this.dialect;
 		String dialectStr = dialect.getClass().getSimpleName();
 		InputStream scriptInputStream = getScriptInputStream(dialect.getClass(), scriptUrl);
 		// check that it exists
@@ -172,14 +168,14 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 		// now execute it
 		String dialectScriptUrl = scriptUrl.replaceAll(PLACEHOLDER_SCRIPT_DIALECT, dialect.getClass().getName());
 		// Replace the script placeholders
-		executeScriptFile(cfg, connection, tempFile, dialectScriptUrl);
+		executeScriptFile(connection, tempFile, dialectScriptUrl);
 	}
 
 	/**
 	 * Replaces the dialect placeholder in the script URL and attempts to find a
 	 * file for it. If not found, the dialect hierarchy will be walked until a
-	 * compatible script is found. This makes it possible to have scripts that
-	 * are generic to all dialects.
+	 * compatible script is found. This makes it possible to have scripts that are
+	 * generic to all dialects.
 	 * 
 	 * @return Returns an input stream onto the script, otherwise null
 	 */
@@ -206,28 +202,23 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 	}
 
 	/**
-	 * @param cfg
-	 *            the Hibernate configuration
-	 * @param connection
-	 *            the DB connection to use
-	 * @param scriptFile
-	 *            the file containing the statements
-	 * @param scriptUrl
-	 *            the URL of the script to report. If this is null, the script
-	 *            is assumed to have been auto-generated.
+	 * @param cfg        the Hibernate configuration
+	 * @param connection the DB connection to use
+	 * @param scriptFile the file containing the statements
+	 * @param scriptUrl  the URL of the script to report. If this is null, the
+	 *                   script is assumed to have been auto-generated.
 	 */
-	private void executeScriptFile(Configuration cfg, Connection connection, File scriptFile, String scriptUrl) throws Exception {
-		final Dialect dialect = Dialect.getDialect(cfg.getProperties());
+	private void executeScriptFile(Connection connection, File scriptFile, String scriptUrl) throws Exception {
+		final Dialect dialect = this.dialect;
 
 		StringBuilder executedStatements = executedStatementsThreadLocal.get();
 		if (executedStatements == null) {
 			// Dump the normalized, pre-upgrade Alfresco schema. We keep the
 			// file for later reporting.
 			/*
-			 * xmlPreSchemaOutputFile = dumpSchema(this.dialect,
-			 * TempFileProvider .createTempFile( "AlfrescoSchema-" +
-			 * this.dialect.getClass().getSimpleName() + "-",
-			 * "-Startup.xml").getPath(),
+			 * xmlPreSchemaOutputFile = dumpSchema(this.dialect, TempFileProvider
+			 * .createTempFile( "AlfrescoSchema-" + this.dialect.getClass().getSimpleName()
+			 * + "-", "-Startup.xml").getPath(),
 			 * "Failed to dump normalized, pre-upgrade schema to file.");
 			 */
 
@@ -271,7 +262,7 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 				varAssignments.put("TRUE", "1");
 				varAssignments.put("FALSE", "0");
 			}
-      boolean isFunction = false;
+			boolean isFunction = false;
 
 			while (true) {
 				String sqlOriginal = reader.readLine();
@@ -288,12 +279,14 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 				if (sql.startsWith("--ASSIGN:")) {
 					if (sb.length() > 0) {
 						// This can only be set before a new SQL statement
-						throw AlfrescoRuntimeException.create(ERR_STATEMENT_VAR_ASSIGNMENT_BEFORE_SQL, (line - 1), scriptUrl);
+						throw AlfrescoRuntimeException.create(ERR_STATEMENT_VAR_ASSIGNMENT_BEFORE_SQL, (line - 1),
+								scriptUrl);
 					}
 					String assignStr = sql.substring(9, sql.length());
 					String[] assigns = assignStr.split("=");
 					if (assigns.length != 2 || assigns[0].length() == 0 || assigns[1].length() == 0) {
-						throw AlfrescoRuntimeException.create(ERR_STATEMENT_VAR_ASSIGNMENT_FORMAT, (line - 1), scriptUrl);
+						throw AlfrescoRuntimeException.create(ERR_STATEMENT_VAR_ASSIGNMENT_FORMAT, (line - 1),
+								scriptUrl);
 					}
 					fetchVarName = assigns[0];
 					fetchColumnName = assigns[1];
@@ -334,17 +327,18 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 				}
 				boolean execute = false;
 				boolean optional = false;
-        // Procedure creation management
-        if (sql.startsWith("-- FUNCTION")) {
-          isFunction = true;
-          continue;
-        } else if (sql.startsWith("-- END FUNCTION")) {
-          isFunction = false;
-          execute = true;
-          optional = false;
-        }
+				// Procedure creation management
+				if (sql.startsWith("-- FUNCTION")) {
+					isFunction = true;
+					continue;
+				} else if (sql.startsWith("-- END FUNCTION")) {
+					isFunction = false;
+					execute = true;
+					optional = false;
+				}
 				// Check for comments
-				if ((sql.length() == 0 || sql.startsWith("--") || sql.startsWith("//") || sql.startsWith("/*")) && !sql.startsWith("-- END FUNCTION")) {
+				if ((sql.length() == 0 || sql.startsWith("--") || sql.startsWith("//") || sql.startsWith("/*"))
+						&& !sql.startsWith("-- END FUNCTION")) {
 					if (sb.length() > 0) {
 						// we have an unterminated statement
 						throw AlfrescoRuntimeException.create(ERR_STATEMENT_TERMINATOR, (line - 1), scriptUrl);
@@ -380,8 +374,8 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 					sb.append(" ");
 				}
 				// append to the statement being built up
-				if(!sql.startsWith("-- END FUNCTION"))
-				  sb.append(sql);
+				if (!sql.startsWith("-- END FUNCTION"))
+					sb.append(sql);
 				// execute, if required
 				if (execute) {
 					// Now substitute and execute the statement the appropriate
@@ -417,7 +411,8 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 							sql = sql.replaceAll("(?i)TYPE=InnoDB", "ENGINE=InnoDB");
 						}
 
-						Object fetchedVal = executeStatement(connection, sql, fetchColumnName, optional, line, scriptFile);
+						Object fetchedVal = executeStatement(connection, sql, fetchColumnName, optional, line,
+								scriptFile);
 						if (fetchVarName != null && fetchColumnName != null) {
 							varAssignments.put(fetchVarName, fetchedVal);
 						}
@@ -443,14 +438,13 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 	}
 
 	/**
-	 * Execute the given SQL statement, absorbing exceptions that we expect
-	 * during schema creation or upgrade.
+	 * Execute the given SQL statement, absorbing exceptions that we expect during
+	 * schema creation or upgrade.
 	 * 
-	 * @param fetchColumnName
-	 *            the name of the column value to return
+	 * @param fetchColumnName the name of the column value to return
 	 */
-	private Object executeStatement(Connection connection, String sql, String fetchColumnName, boolean optional, int line, File file)
-			throws Exception {
+	private Object executeStatement(Connection connection, String sql, String fetchColumnName, boolean optional,
+			int line, File file) throws Exception {
 		StringBuilder executedStatements = executedStatementsThreadLocal.get();
 		if (executedStatements == null) {
 			throw new IllegalArgumentException("The executedStatementsThreadLocal must be populated");
@@ -466,7 +460,7 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 			// Record the statement
 			executedStatements.append(sql).append(";\n\n");
 			if (haveResults && fetchColumnName != null) {
-				try (ResultSet rs = stmt.getResultSet()){
+				try (ResultSet rs = stmt.getResultSet()) {
 					if (!rs.next()) {
 						// Get the result value
 						ret = rs.getObject(fetchColumnName);
@@ -524,8 +518,8 @@ public class SchemaUpgradeScriptPatch extends AbstractModuleComponent implements
 	}
 
 	/**
-	 * @return Returns the name of the applied patch table, or <tt>null</tt> if
-	 *         the table doesn't exist
+	 * @return Returns the name of the applied patch table, or <tt>null</tt> if the
+	 *         table doesn't exist
 	 */
 	private String getAppliedPatchTableName(Connection connection) throws Exception {
 		Statement stmt = connection.createStatement();
