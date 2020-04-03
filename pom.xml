@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.atolcd.alfresco</groupId>
-  <artifactId>auditshare-61X</artifactId>
+  <artifactId>auditshare-62X</artifactId>
   <version>1.6.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
@@ -11,17 +11,17 @@
   <description>Alfresco and Share modules - AuditShare</description>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- Example for Enterprise version -->
-    <!--<alfresco.version>5.2.3</alfresco.version>-->
-    <alfresco.platform.version>7.33.12</alfresco.platform.version>
-        <!-- Example for share community version -->
-    <!--<alfresco.platform.version>7.43</alfresco.platform.version>-->
-    <alfresco.share.version>6.1.0</alfresco.share.version>
+    <!-- Example for acs community version -->
+    <!--<alfresco.platform.version>6.2.0-ga</alfresco.platform.version>-->
+    <alfresco.platform.version>6.2.0</alfresco.platform.version>
+    <!-- Example for share community version -->
+    <!--<alfresco.share.version>6.2.0-ga</alfresco.platform.version>-->
+    <alfresco.share.version>6.2.0</alfresco.share.version>
     <yuicompressor.version>1.5.1</yuicompressor.version>
     <alfresco-maven.version>1.1.9</alfresco-maven.version>
     <maven-compiler.version>3.8.1</maven-compiler.version>
     <java.version>11</java.version>
-    <sonar.projectName>AtolCD - AuditShare [6.1.X]</sonar.projectName>
+    <sonar.projectName>AtolCD - AuditShare [6.2.X]</sonar.projectName>
   </properties>
 
   <!-- For internal use only (atolcd) -->
@@ -68,6 +68,28 @@
     </repository>
     -->
   </repositories>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- This will import the dependencyManagement for all artifacts in the selected Alfresco platform. NOTE: You still need to define dependencies in 
+        your POM, but you can omit version as it's enforced by this dependencyManagement. NOTE: It defaults to the latest version this SDK pom has been tested 
+        with, but alfresco version can/should be overridden in your project's pom -->
+      <dependency>
+        <groupId>org.alfresco</groupId>
+        <artifactId>acs-packaging</artifactId>
+        <version>${alfresco.platform.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.alfresco</groupId>
+        <artifactId>alfresco-share-packaging</artifactId>
+        <version>${alfresco.share.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <modules>
     <module>module_alfresco</module>

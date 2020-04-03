@@ -4,56 +4,50 @@ require 'vagrant/util/downloader'
 #
 # Extend vagrant's Downloader class to ask for basic auth credentials
 module Vagrant
- module Util
-   class Downloader
-     @@token = ""
+  module Util
+    class Downloader
+      @@token = ""
 
-     def basicauth_downloader(options, subprocess_options, &data_proc)
-       if @@token.empty?
-         print "Username: "
-         username = STDIN.gets.chomp
-         print "Password: "
-         password = STDIN.noecho(&:gets).chomp
-         @@token = Base64.encode64("#{username}:#{password}")
-       end
+      def basicauth_downloader(options, subprocess_options, &data_proc)
+        if @@token.empty?
+          print "Username: "
+          username = STDIN.gets.chomp
+          print "Password: "
+          password = STDIN.noecho(&:gets).chomp
+          @@token = Base64.encode64("#{username}:#{password}")
+        end
 
-       options = [ "-H", "Authorization: Basic #{@@token}" ] + options
-       orig_execute_curl(options, subprocess_options, &data_proc)
-     end
+        options = [ "-H", "Authorization: Basic #{@@token}" ] + options
+        orig_execute_curl(options, subprocess_options, &data_proc)
+      end
 
-     def execute_curl_with_basicauth(options, subprocess_options, &data_proc)
-       orig_execute_curl(options, subprocess_options, &data_proc)
-     rescue Errors::DownloaderError => e
-       @ui.clear_line if @ui
-       if e.message =~ /401 Unauthorized/
-         basicauth_downloader(options, subprocess_options, &data_proc) || (raise e)
-       else
-         raise e
-       end
-     end
+      def execute_curl_with_basicauth(options, subprocess_options, &data_proc)
+        orig_execute_curl(options, subprocess_options, &data_proc)
+      rescue Errors::DownloaderError => e
+        @ui.clear_line if @ui
+        if e.message =~ /401 Unauthorized/
+          basicauth_downloader(options, subprocess_options, &data_proc) || (raise e)
+        else
+          raise e
+        end
+      end
 
-     alias orig_execute_curl execute_curl
-     alias execute_curl execute_curl_with_basicauth
-   end
- end
+      alias orig_execute_curl execute_curl
+      alias execute_curl execute_curl_with_basicauth
+    end
+  end
 end
 
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+
 PUPPET_PATH = ENV['PUPPET3_PATH']
+
 Vagrant.configure("2") do |config|
-  # All Vagrant configuration is done here. The most common configuration
-  # options are documented and commented below. For a complete reference,
-  # please see the online documentation at vagrantup.com.
+ config.vm.box = "ubuntu-1804-64-puppet5"
+ config.vm.box_url = [ "http://nexus3.priv.atolcd.com/repository/atolcd-vagrant/ubuntu-1804-puppet5.box", "https://nexus3-ovh.priv.atolcd.com/repository/atolcd-vagrant/ubuntu-1804-puppet5.box" ]
 
-  # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "ubuntu-1804-puppet5"
-
-  # The url from where the 'config.vm.box' box will be fetched if it
-  # doesn't already exist on the user's system.
-  config.vm.box_url = [ "http://nexus3.priv.atolcd.com/repository/atolcd-vagrant/ubuntu-1804-puppet5.box", "https://vagrant-registry.priv.atolcd.com/ubuntu-1804-puppet5.box" ]
-
-  config.vm.host_name = "atolcd-alfresco-auditshare.lan.priv.atolcd.com"
+  config.vm.host_name = "atolcd-alfresco-auditshare.demo.hosting.priv.atolcd.com"
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,

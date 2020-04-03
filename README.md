@@ -9,7 +9,7 @@ This app displays sites and repository usage info: number of created/read/update
 In sites, others informations are "audited" concerning wiki, blog and discussions components but also users connected and sites volumetry.  
 
 Works with:
- - Alfresco Enterprise 4.2.x, 5.0.x, 5.1.x, 5.2.x and 6.1.x (should works on Community versions but not tested)
+ - Alfresco Enterprise 4.2.x, 5.0.x, 5.1.x, 5.2.x, 6.1.X and 6.2.x (should works on Community versions but not tested)
 
 
 Building the module
@@ -56,7 +56,7 @@ You can deploy/undeploy AuditShare menus directly from : `http://server:port/sha
 
 #### CRON volumetry
 
-Default CRON expression (every 4 hours): `share.stats.sites.volumetry.trigger=0 0 0/4 * * ?`
+Default CRON expression (every day at 06:05:04): `share.stats.sites.volumetry.trigger=4 5 6 * * ?`
 
 This expression can be overridden from alfresco-global.properties file (http://wiki.alfresco.com/wiki/Scheduled_Actions#Cron_Explained).  
 Example (at 1:00 PM and 9:00 PM every day): `share.stats.sites.volumetry.trigger=0 0 13,21 * * ?`  

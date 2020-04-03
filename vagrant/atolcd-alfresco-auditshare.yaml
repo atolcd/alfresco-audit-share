@@ -4,16 +4,14 @@ classes:
   - alfresco::solr6
   - atolcd::tomcat::javaopts
 
-alfresco::version:    '6.1.0'
+alfresco::version:    '6.2.0'
+alfresco::solr6::assVersion: '1.4.1'
+alfresco::solr6::forceJava8: false
 
-postgresql::globals::version: '10'
-alfresco::postgresql::pgjdbcver: '42.2.5.jre8'
+postgresql::globals::version: '11'
+alfresco::postgresql::pgjdbcver: '42.2.10'
 
-
-tomcat::version:              '8'
-tomcat::xms:                  '3G'
-tomcat::xmx:                  '6G'
-tomcat::newsize:              '2G'
+tomcat::version: '8'
 
 java::package: 'openjdk-11-jdk'
 java::java_alternative: 'java-1.11.0-openjdk-amd64'
@@ -21,16 +19,16 @@ java::java_alternative_path: '/usr/lib/jvm/java-1.11.0-openjdk-amd64/bin/java'
 
 atolcd::alfresco::modules::repo:
   org.alfresco.alfresco-share-services:
-    version: '6.1.0'
+    version: '6.2.0'
   com.atolcd.alfresco.repository:
-    version: '6.1.0'
-  com.atolcd.alfresco.auditshare-61X-repo:
+    version: '6.2.0'
+  com.atolcd.alfresco.auditshare-62X-repo:
     version: '1.6.0-SNAPSHOT'
 
 atolcd::alfresco::modules::share:
   com.atolcd.alfresco.share:
-    version: '6.1.0'
-  com.atolcd.alfresco.auditshare-61X-share:
+    version: '6.2.0'
+  com.atolcd.alfresco.auditshare-62X-share:
     version: '1.6.0-SNAPSHOT'
 
 alfresco::params:
@@ -48,6 +46,20 @@ alfresco::params:
   'solr.port':                                              '8983'
   'solr.port.ssl':                                          '8443'
   'solr.secureComms':                                       'none'
+  # ActiveMq
+  'messaging.broker.url':                                   'failover:(tcp://localhost:61616)?timeout=3000'
+  'messaging.broker.host':                                  localhost
+  'messaging.broker.port':                                  61616
+  'messaging.broker.ssl':                                   false
+  'messaging.username':                                     admin
+  'messaging.password':                                     admin
+  'messaging.broker.username':                              admin
+  'messaging.broker.password':                              admin
+  # PDF Renderer
+  'alfresco-pdf-renderer.root':                             '/usr/local/alfresco/alfresco-pdf-renderer'
+  'alfresco-pdf-renderer.exe':                              '${alfresco-pdf-renderer.root}/alfresco-pdf-renderer'
+  # Disbled Transfromer Engine
+  'local.transform.service.enabled':                        false
 
 atolcd::tomcat::javaopts:
  debug:
