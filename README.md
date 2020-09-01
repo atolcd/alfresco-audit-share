@@ -80,7 +80,9 @@ Created by: [Alexandre NICOLAS](https://github.com/alexandre-nicolas) and [Bertr
 
 Contributors:
 - [Anicet PRAO](https://github.com/anicet-prao)
-- Benjamin BRUDO
+- [Antoine HEITZMANN](https://github.com/aheitzmann-atolcd)
+- [Benjamin BRUDO] (https://github.com/BenBrudo)
+- [Julien BERTHOUX] (https://github.com/jberthoux)
 - [Stéphane PROUVEZ](https://github.com/sprouvez)
 - [Laurent MEUNIER](https://github.com/lmeunier)
 - [Zylknet](https://www.zylk.net)
