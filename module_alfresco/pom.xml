@@ -61,6 +61,17 @@
         <directory>src/main/config</directory>
         <targetPath>alfresco/module/${project.groupId}.${project.artifactId}</targetPath>
         <filtering>true</filtering>
+        <excludes>
+          <exclude>**/*.sql</exclude>
+        </excludes>
+      </resource>
+      <resource>
+        <directory>src/main/config/dbscripts</directory>
+        <targetPath>alfresco/module/${project.groupId}.${project.artifactId}/dbscripts</targetPath>
+        <filtering>false</filtering>
+        <includes>
+          <include>**/*.sql</include>
+        </includes>
       </resource>
     </resources>
   </build>

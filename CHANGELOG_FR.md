@@ -9,6 +9,8 @@ SGBD supportés :
 
 
 ## [Unreleased]
+### Fixed
+- Correction problème de compilation
 
 
 ## [1.6.0] - 2020-06-03
