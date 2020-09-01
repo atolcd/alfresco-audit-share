@@ -9,6 +9,9 @@ SGBD supportés :
 
 
 ## [Unreleased]
+
+
+## [1.6.0] - 2020-06-03
 ### Changed
 - Compatibilité Alfresco 6.1.X
 - Modification de l'expression CRON du calcul de volumétrie (tous les jours à 06:05:04)

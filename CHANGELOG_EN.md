@@ -9,6 +9,9 @@ Supported DBMS:
 
 
 ## [Unreleased]
+
+
+## [1.6.0] - 2020-06-03
 ### Changed
 - Alfresco 6.1.X compatibility
 - Volumetry: set CRON every day at 06:05:04
