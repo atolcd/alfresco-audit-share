@@ -9,9 +9,10 @@ Supported DBMS:
 
 
 ## [Unreleased]
+
+## [1.6.1] - 2020-12-08
 ### Fixed
 - Fix compilation issue
-
 
 ## [1.6.0] - 2020-06-03
 ### Changed
