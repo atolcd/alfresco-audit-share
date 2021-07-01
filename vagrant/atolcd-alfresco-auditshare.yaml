@@ -23,13 +23,13 @@ atolcd::alfresco::modules::repo:
   com.atolcd.alfresco.repository:
     version: '6.2.0'
   com.atolcd.alfresco.auditshare-62X-repo:
-    version: '1.6.2-SNAPSHOT'
+    version: '2.0.0-SNAPSHOT'
 
 atolcd::alfresco::modules::share:
   com.atolcd.alfresco.share:
     version: '6.2.0'
   com.atolcd.alfresco.auditshare-62X-share:
-    version: '1.6.2-SNAPSHOT'
+    version: '2.0.0-SNAPSHOT'
 
 alfresco::params:
   'alfresco.host':                                          'localhost'
