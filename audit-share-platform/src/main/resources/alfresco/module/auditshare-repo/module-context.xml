@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+<!--
+ * Copyright (C) 2018 Atol Conseils et Développements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+  <import resource="classpath:alfresco/module/auditshare-repo/context/bootstrap-context.xml" />
+  <import resource="classpath:alfresco/module/auditshare-repo/context/schedulers-context.xml" />
+
+  <!-- Module configuration properties -->
+  <bean name="shareStatsConfigProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="ignoreUnresolvablePlaceholders">
+      <value>true</value>
+    </property>
+    <property name="locations">
+      <list>
+        <value>classpath:alfresco/module/auditshare-repo/share-stats-config.properties</value>
+      </list>
+    </property>
+  </bean>
+
+
+  <!-- MyBatis config for Alfresco (using common datasource) -->
+  <bean id="shareStatsAlfrescoSqlSessionClient" class="org.alfresco.ibatis.HierarchicalSqlSessionFactoryBean">
+    <property name="resourceLoader" ref="dialectResourceLoader"/>
+    <property name="dataSource" ref="dataSource"/>
+    <property name="configLocation">
+        <value>classpath:alfresco/module/auditshare-repo/ibatis/share-stats-SqlMapConfig.xml</value>
+    </property>
+  </bean>
+
+  <bean id="alfrescoShareStatsResourceBundles" class="org.alfresco.i18n.ResourceBundleBootstrapComponent">
+    <property name="resourceBundles">
+      <list>
+        <value>alfresco/module/auditshare-repo/messages/share-stats</value>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="shareStatsQueriesSqlSessionClientTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+    <constructor-arg index="0" ref="shareStatsAlfrescoSqlSessionClient"/>
+  </bean>
+
+
+  <!-- Webscripts - Audit Queries -->
+  <bean id="webscript.com.atolcd.alfresco.share-stats.insert-audit.post" class="com.atolcd.alfresco.web.scripts.shareStats.InsertAuditPost" parent="webscript">
+    <property name="sqlSessionTemplate" ref="shareStatsQueriesSqlSessionClientTemplate"/>
+    <property name="nodeService" ref="NodeService"/>
+    <property name="siteService" ref="SiteService" />
+    <property name="namespaceService"> <ref bean="namespaceService" /> </property>
+  </bean>
+
+  <bean id="webscript.com.atolcd.alfresco.share-stats.select-audits.get" class="com.atolcd.alfresco.web.scripts.shareStats.SelectAuditsGet" parent="webscript">
+    <property name="sqlSessionTemplate" ref="shareStatsQueriesSqlSessionClientTemplate"/>
+    <property name="nodeService" ref="NodeService"/>
+    <property name="siteService" ref="SiteService" />
+    <property name="limitMostReadOrUpdate" > <value>${mostreadandupdate.limit}</value> </property>
+  </bean>
+
+  <bean id="webscript.com.atolcd.alfresco.share-stats.select-nodetypes.get" class="com.atolcd.alfresco.web.scripts.shareStats.SelectNodeTypesGet" parent="webscript">
+    <property name="sqlSessionTemplate" ref="shareStatsQueriesSqlSessionClientTemplate"/>
+    <property name="namespaceService"> <ref bean="namespaceService" /> </property>
+    <property name="dictionaryService"> <ref bean="dictionaryService" /> </property>
+  </bean>
+
+  <bean id="webscript.com.atolcd.alfresco.share-stats.update-audits.post" class="com.atolcd.alfresco.web.scripts.shareStats.UpdateAuditPost" parent="webscript">
+    <property name="sqlSessionTemplate" ref="shareStatsQueriesSqlSessionClientTemplate"/>
+    <property name="nodeService" ref="NodeService"/>
+    <property name="siteService" ref="SiteService"/>
+    <property name="wsSelectAudits" ref="webscript.com.atolcd.alfresco.share-stats.select-audits.get"/>
+  </bean>
+
+  <bean id="webscript.com.atolcd.alfresco.share-stats.delete-audits.delete" class="com.atolcd.alfresco.web.scripts.shareStats.DeleteAuditDelete" parent="webscript">
+    <property name="sqlSessionTemplate" ref="shareStatsQueriesSqlSessionClientTemplate"/>
+  </bean>
+
+  <bean id="webscript.com.atolcd.alfresco.share-stats.select-users.get" class="com.atolcd.alfresco.web.scripts.shareStats.SelectUsersGet" parent="webscript">
+    <property name="sqlSessionTemplate" ref="shareStatsQueriesSqlSessionClientTemplate"/>
+    <property name="nodeService" ref="NodeService"/>
+    <property name="siteService" ref="SiteService" />
+    <property name="authorityService" ref="AuthorityService" />
+  </bean>
+
+  <bean id="webscript.com.atolcd.alfresco.share-stats.select-volumetry.get" class="com.atolcd.alfresco.web.scripts.shareStats.SelectVolumetryGet" parent="webscript">
+    <property name="sqlSessionTemplate" ref="shareStatsQueriesSqlSessionClientTemplate"/>
+    <property name="siteService" ref="SiteService" />
+  </bean>
+
+  <bean id="webscript.com.atolcd.alfresco.share-stats.export-audits.get" class="com.atolcd.alfresco.web.scripts.shareStats.AuditExportGet" parent="webscript">
+    <property name="wsSelectAudits">
+      <ref bean="webscript.com.atolcd.alfresco.share-stats.select-audits.get" />
+    </property>
+    <property name="siteService" ref="SiteService" />
+    <property name="sysAdminParams" ref="sysAdminParams" />
+    <property name="auditShareReferentielService">
+      <ref bean="AuditShareReferentielService" />
+    </property>
+    <property name="authorityService">
+      <ref bean="AuthorityService" />
+    </property>
+  </bean>
+
+
+  <!-- Java Helpers -->
+  <bean id="shareStatsSearchHelper" class="com.atolcd.alfresco.helper.SearchHelper">
+    <property name="searchService" ref="SearchService" />
+  </bean>
+
+  <bean id="shareStatsPermissionsHelper" class="com.atolcd.alfresco.helper.PermissionsHelper">
+    <property name="siteService" ref="SiteService" />
+    <property name="authorityService" ref="AuthorityService" />
+  </bean>
+
+  <!-- For the user groups referentiel services -->
+  <import resource="classpath:alfresco/module/auditshare-repo/context/services-context.xml" />
+
+  <!-- JavaScript API -->
+  <bean id="shareStatsScript" parent="baseJavaScriptExtension" class="com.atolcd.alfresco.repo.jscript.ShareStats">
+    <property name="extensionName">
+      <value>sharestats</value>
+    </property>
+    <property name="wsInsertAudits">
+      <ref bean="webscript.com.atolcd.alfresco.share-stats.insert-audit.post" />
+    </property>
+    <property name="siteService">
+      <ref bean="SiteService" />
+    </property>
+    <property name="searchService">
+      <ref bean="SearchService" />
+    </property>
+    <property name="batchSize">
+      <value>${share.stats.sites.volumetry.batchSize}</value>
+    </property>
+    <property name="auditShareReferentielService">
+      <ref bean="AuditShareReferentielService" />
+    </property>
+    <property name="sqlSessionTemplate">
+      <ref bean="shareStatsQueriesSqlSessionClientTemplate" />
+    </property>
+  </bean>
+
+
+  <!-- Template API -->
+  <bean id="shareStats.intranet.Template" parent="baseTemplateImplementation" class="com.atolcd.alfresco.repo.template.ShareStatsUtils">
+    <property name="extensionName">
+      <value>shareStatsutils</value>
+    </property>
+    <property name="nodeService">
+      <ref bean="NodeService" />
+    </property>
+    <property name="personService">
+      <ref bean="personService" />
+    </property>
+    <property name="siteService">
+      <ref bean="SiteService" />
+    </property>
+  </bean>
+
+
+  <!-- Patch: database tables creation -->
+  <bean id="patch.db-V3.4-ShareStats-ExtraTables" class="com.atolcd.alfresco.repo.patch.SchemaUpgradeScriptPatch" parent="module.baseComponent" >
+    <property name="moduleId" value="${project.artifactId}" />
+    <property name="name" value="Création des tables d'audit concernant les statistiques des sites Share" />
+    <property name="description" value="" />
+    <property name="executeOnceOnly" value="true" />
+
+    <property name="dataSource">
+      <ref bean="dataSource"/>
+    </property>
+    <property name="dialect">
+      <ref bean="dialect" />
+    </property>
+    <property name="globalProperties">
+      <ref bean="global-properties" />
+    </property>
+    <property name="scriptUrl">
+      <value>classpath:alfresco/module/auditshare-repo/dbscripts/create/${db.script.dialect}/AlfrescoCreate-ShareStatsAuditTables.sql</value>
+    </property>
+  </bean>
+
+  <bean id="patch.db-ShareStats-createIndexAndSeq" class="com.atolcd.alfresco.repo.patch.SchemaUpgradeScriptPatch" parent="module.baseComponent" >
+    <property name="moduleId" value="${project.artifactId}" />
+    <property name="name" value="Création des indexes et de la séquence Oracle pour l'optimisation de la volumétrie" />
+    <property name="description" value="" />
+    <property name="executeOnceOnly" value="true" />
+    <property name="appliesFromVersion" value="1.5.2" />
+    <property name="dependsOn">
+      <ref bean="patch.db-V3.4-ShareStats-ExtraTables" />
+    </property>
+    <property name="dataSource">
+      <ref bean="dataSource"/>
+    </property>
+    <property name="dialect">
+      <ref bean="dialect" />
+    </property>
+    <property name="globalProperties">
+      <ref bean="global-properties" />
+    </property>
+    <property name="scriptUrl">
+      <value>classpath:alfresco/module/auditshare-repo/dbscripts/update/1.5.2/${db.script.dialect}/AlfrescoUpdate-ShareStatsAuditTables.sql</value>
+    </property>
+  </bean>
+
+  <!-- Patch: adding a new column to the Audit table -->
+  <bean id="patch.db-ShareStats-alterAuditTable" class="com.atolcd.alfresco.repo.patch.SchemaUpgradeScriptPatch" parent="module.baseComponent" >
+    <property name="moduleId" value="${project.artifactId}" />
+    <property name="name" value="Ajout de la colonne 'audit_node_type' à la table d'Audit" />
+    <property name="description" value="" />
+    <property name="executeOnceOnly" value="true" />
+    <property name="appliesFromVersion" value="1.5.4" />
+    <property name="dependsOn">
+      <ref bean="patch.db-V3.4-ShareStats-ExtraTables" />
+    </property>
+    <property name="dataSource">
+      <ref bean="dataSource"/>
+    </property>
+    <property name="dialect">
+      <ref bean="dialect" />
+    </property>
+    <property name="globalProperties">
+      <ref bean="global-properties" />
+    </property>
+    <property name="scriptUrl">
+      <value>classpath:alfresco/module/auditshare-repo/dbscripts/update/${db.script.dialect}/AlfrescoUpdate-ShareStatsAlterAuditTable.sql</value>
+    </property>
+  </bean>
+
+</beans>

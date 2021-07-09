@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>auditshare-62X</artifactId>
+    <groupId>com.atolcd.alfresco</groupId>
+    <version>2.0.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>com.atolcd.alfresco</groupId>
+  <artifactId>audit-share-ass-docker</artifactId>
+
+  <name>audit-share-ass-docker</name>
+
+  <properties>
+    <docker.ass.image>alfresco/alfresco-search-services</docker.ass.image>
+    <alfresco.ass.version>2.0.1</alfresco.ass.version>
+  </properties>
+
+  <dependencies>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Filter the Dockerfile and the other files added to the container to be able to replace maven properties -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-and-filter-docker-resources</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/docker</directory>
+                  <filtering>true</filtering>
+                  <excludes>
+                    <exclude>**/*.jar</exclude>
+                    <exclude>**/*.so</exclude>
+                    <exclude>**/*.gz</exclude>
+                  </excludes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-and-filter-docker-resources-non-filtered</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/docker</directory>
+                  <filtering>false</filtering>
+                  <includes>
+                    <include>**/*.jar</include>
+                    <include>**/*.so</include>
+                    <include>**/*.gz</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

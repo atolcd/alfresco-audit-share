@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+ * Copyright (C) 2018 Atol Conseils et Développements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<mapper namespace="alfresco.atolcd.audit">
+    <!--                -->
+    <!-- Parameter Maps -->
+    <!--                -->
+    <parameterMap id="parameter_IdMap" type="map">
+        <parameter property="id" jdbcType="BIGINT" javaType="long"/>
+    </parameterMap>
+
+
+    <!--                -->
+    <!-- Result Maps    -->
+    <!--                -->
+    <resultMap id="result_AtolAuditEntry" type="AtolAuditEntry">
+      <result property="id" column="id" jdbcType="BIGINT" javaType="long"/>
+      <result property="auditUserId" column="audit_user_id" jdbcType="VARCHAR" javaType="java.lang.String"/>
+      <result property="auditSite" column="audit_site" jdbcType="VARCHAR" javaType="java.lang.String"/>
+      <result property="auditAppName" column="audit_app_name" jdbcType="VARCHAR" javaType="java.lang.String"/>
+      <result property="auditActionName" column="audit_action_name" jdbcType="VARCHAR" javaType="java.lang.String"/>
+      <result property="auditObject" column="audit_object" jdbcType="VARCHAR" javaType="java.lang.String"/>
+      <result property="auditTime" column="audit_time" jdbcType="BIGINT" javaType="long"/>
+      <result property="auditNodeType" column="audit_node_type" jdbcType="VARCHAR" javaType="java.lang.String"/>
+    </resultMap>
+
+    <resultMap id="results_AtolCsvExportEntry" type="AtolCsvExportEntry">
+      <result property="auditSite" column="audit_site" jdbcType="VARCHAR" javaType="java.lang.String"/>
+      <result property="auditAppName" column="audit_app_name" jdbcType="VARCHAR" javaType="java.lang.String"/>
+      <result property="auditActionName" column="audit_action_name" jdbcType="VARCHAR" javaType="java.lang.String"/>
+      <result property="count" column="audit_count" jdbcType="BIGINT" javaType="int"/>
+    </resultMap>
+
+    <resultMap id="results_AtolAuditCount" type="AtolAuditCount">
+      <result property="count" column="audit_count" jdbcType="BIGINT" javaType="int"/>
+      <result property="target" column="audit_target" jdbcType="VARCHAR" javaType="java.lang.String"/>
+    </resultMap>
+
+    <resultMap id="results_AtolAuditObjectPopularity" type="AtolAuditObjectPopularity">
+      <result property="popularity" column="audit_popularity" jdbcType="BIGINT" javaType="int"/>
+      <result property="auditObject" column="audit_object" jdbcType="VARCHAR" javaType="java.lang.String"/>
+      <result property="auditSite" column="audit_site" jdbcType="VARCHAR" javaType="java.lang.String"/>
+      <result property="auditNodeType" column="audit_node_type" jdbcType="VARCHAR" javaType="java.lang.String"/>
+    </resultMap>
+
+    <resultMap id="result_AtolAuditNodeType" type="AtolAuditNodeType">
+      <result property="nodeTypeValue" column="audit_node_type" jdbcType="VARCHAR" javaType="java.lang.String"/>
+    </resultMap>
+
+
+    <!--                -->
+    <!-- SQL Snippets   -->
+    <!--                -->
+    <sql id="insert_AtolAuditEntry_AutoIncrement">
+        insert into share_stats_audit_entry (audit_user_id, audit_site, audit_app_name, audit_action_name, audit_object, audit_time, audit_node_type)
+        values (#{auditUserId}, #{auditSite}, #{auditAppName}, #{auditActionName}, #{auditObject}, #{auditTime}, #{auditNodeType})
+    </sql>
+
+    <sql id="insert_volumetry_AutoIncrement">
+        insert into share_stats_site_volumetry (site_id, site_size, folder_count, file_count, at_time)
+        values (#{siteId},#{siteSize},#{folderCount},#{fileCount},#{atTime})
+    </sql>
+    <!-- Global select snippet -->
+    <sql id="select_AuditEntriesWhereSnippet">
+      <where>
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.time_snippet"/>
+        <include refid="alfresco.atolcd.audit.appName_snippet"/>
+        <include refid="alfresco.atolcd.audit.actionName_snippet"/>
+        <include refid="alfresco.atolcd.audit.auditObject_snippet"/>
+        <include refid="alfresco.atolcd.audit.auditUserId_snippet"/>
+      </where>
+    </sql>
+
+    <!-- Views Snippet -->
+    <sql id="select_auditViewEntriesWhereSnippet">
+      <where>
+        <include refid="alfresco.atolcd.audit.appName_snippet"/>
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.time_snippet"/>
+      </where>
+    </sql>
+
+    <!-- Snippet de dates-->
+    <sql id="time_snippet">
+      <if test="dateFrom > 0">
+        <![CDATA[ AND audit_time >= #{dateFrom}]]>
+      </if>
+      <if test="dateTo > 0">
+        <![CDATA[ AND audit_time < #{dateTo}]]>
+      </if>
+    </sql>
+
+    <!-- Snippet pour appName -->
+    <sql id="appName_snippet">
+      <if test="appName != null">
+          AND audit_app_name = #{appName}
+      </if>
+      <if test="appNames != null">
+        AND audit_app_name IN
+        <foreach item="item" collection="appNames" open="(" separator="," close=")">
+          #{item}
+        </foreach>
+      </if>
+    </sql>
+
+    <!-- Snippet pour actionName -->
+    <sql id="actionName_snippet">
+      <if test="actionName != null">
+        AND audit_action_name = #{actionName}
+      </if>
+      <if test="actionNames != null">
+        AND audit_action_name IN
+        <foreach item="item" collection="actionNames" open="(" separator="," close=")">
+          #{item}
+        </foreach>
+      </if>
+    </sql>
+
+    <!-- Snippet pour auditObject -->
+    <sql id="auditObject_snippet">
+      <if test="object != null">
+        AND audit_object = #{object}
+      </if>
+    </sql>
+
+    <!-- Snippet pour auditUserId -->
+    <sql id="auditUserId_snippet">
+      <if test="userId != null">
+        AND audit_user_id = #{userId}
+      </if>
+      <if test="userIds != null">
+        AND audit_user_id IN
+        <foreach item="item" collection="userIds" open="(" separator="," close=")">
+          #{item}
+        </foreach>
+      </if>
+    </sql>
+
+    <!-- Snippet pour sites -->
+    <sql id="site_snippet">
+      <if test="siteId != null">
+          AND audit_site = #{siteId}
+      </if>
+      <if test="sitesId != null">
+        AND  audit_site IN
+        <foreach item="item" collection="sitesId" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+      </if>
+    </sql>
+
+    <!-- Snippet pour types de noeud -->
+    <sql id="nodeType_snippet">
+      <if test="nodeType != null">
+          AND audit_node_type = #{nodeType}
+      </if>
+      <if test="nodeTypes != null">
+        AND  audit_node_type IN
+        <foreach item="item" collection="nodeTypes" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+      </if>
+    </sql>
+
+    <!-- Snippet pour groupes d'utilisateurs -->
+    <sql id="group_snippet">
+      <if test="groupsMembers != null">
+        AND  audit_user_id IN
+        <foreach item="item" collection="groupsMembers" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+      </if>
+    </sql>
+
+    <!-- Snippet de consultation-->
+    <sql id="read_snippet">
+      <where>
+        <if test="appName != null">
+          AND audit_app_name = #{appName}
+        </if>
+        <if test="appName == 'document'">
+          AND (
+            audit_action_name = 'details'
+          or
+            audit_action_name = 'download'
+          )
+        </if>
+        <if test="appName == 'wiki'">
+            AND audit_action_name = 'page'
+        </if>
+        <if test="appName == 'blog'">
+            AND audit_action_name = 'postview'
+        </if>
+        <if test="appName == 'discussions'">
+            AND audit_action_name = 'topicview'
+        </if>
+
+        <if test="appNames != null">
+          AND audit_app_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">#{item}</foreach>
+
+          AND audit_action_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">
+            <if test="item == 'document'">'details', 'download'</if>
+            <if test="item == 'wiki'">'page'</if>
+            <if test="item == 'blog'">'postview'</if>
+            <if test="item == 'discussions'">'topicview'</if>
+          </foreach>
+        </if>
+
+        <include refid="alfresco.atolcd.audit.time_snippet" />
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.actionName_snippet"/>
+        <include refid="alfresco.atolcd.audit.auditObject_snippet"/>
+        <include refid="alfresco.atolcd.audit.auditUserId_snippet"/>
+        <include refid="alfresco.atolcd.audit.nodeType_snippet"/>
+      </where>
+    </sql>
+
+
+    <!-- Snippet de création -->
+    <sql id="create_snippet">
+      <where>
+        <if test="appName != null">
+          AND audit_app_name = #{appName}
+        </if>
+        <if test="appName == 'document'">
+          AND (
+            audit_action_name = 'file-added'
+          or
+            audit_action_name = 'create'
+          )
+        </if>
+        <if test="appName == 'wiki'">
+            AND audit_action_name = 'create-post'
+        </if>
+        <if test="appName == 'blog'">
+            AND audit_action_name = 'blog-create'
+        </if>
+        <if test="appName =='discussions'">
+            AND audit_action_name = 'discussions-create'
+        </if>
+
+        <if test="appNames != null">
+          AND audit_app_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">#{item}</foreach>
+
+          AND audit_action_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">
+            <if test="item == 'document'">'file-added', 'create'</if>
+            <if test="item == 'wiki'">'create-post'</if>
+            <if test="item == 'blog'">'blog-create'</if>
+            <if test="item == 'discussions'">'discussions-create'</if>
+          </foreach>
+        </if>
+
+        <include refid="alfresco.atolcd.audit.time_snippet" />
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.nodeType_snippet"/>
+      </where>
+    </sql>
+
+    <!-- Snippet de mise à jour -->
+    <sql id="update_snippet">
+      <where>
+        <if test="appName != null">
+          AND audit_app_name = #{appName}
+        </if>
+        <if test="appName == 'document'">
+          AND (
+            audit_action_name = 'update'
+          or
+            audit_action_name = 'file-updated'
+          or
+            audit_action_name = 'inline-edit'
+          )
+        </if>
+        <if test="appName == 'wiki'">
+          AND audit_action_name = 'update-post'
+        </if>
+        <if test="appName == 'blog'">
+          AND audit_action_name = 'blog-update'
+        </if>
+        <if test="appName =='discussions'">
+          AND audit_action_name = 'discussions-update'
+        </if>
+
+        <if test="appNames != null">
+          AND audit_app_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">#{item}</foreach>
+
+          AND audit_action_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">
+            <if test="item == 'document'">'update', 'file-updated', 'inline-edit'</if>
+            <if test="item == 'wiki'">'update-post'</if>
+            <if test="item == 'blog'">'blog-update'</if>
+            <if test="item == 'discussions'">'discussions-update'</if>
+          </foreach>
+        </if>
+
+        <include refid="alfresco.atolcd.audit.time_snippet" />
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.nodeType_snippet"/>
+      </where>
+    </sql>
+
+    <!-- Snippet de suppression -->
+    <sql id="delete_snippet">
+      <where>
+        <if test="appName != null">
+          AND audit_app_name = #{appName}
+        </if>
+        <if test="appName == 'document'">
+          AND audit_action_name = 'file-deleted'
+        </if>
+        <if test="appName == 'wiki'">
+          AND audit_action_name = 'delete-post'
+        </if>
+        <if test="appName == 'blog'">
+          AND audit_action_name = 'blog-delete'
+        </if>
+        <if test="appName == 'discussions'">
+          AND audit_action_name = 'discussions-deleted'
+        </if>
+
+        <if test="appNames != null">
+          AND audit_app_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">#{item}</foreach>
+
+          AND audit_action_name IN
+          <foreach item="item" collection="appNames" open="(" separator="," close=")">
+            <if test="item == 'document'">'file-deleted'</if>
+            <if test="item == 'wiki'">'delete-post'</if>
+            <if test="item == 'blog'">'blog-delete'</if>
+            <if test="item == 'discussions'">'discussions-deleted'</if>
+          </foreach>
+        </if>
+
+        <include refid="alfresco.atolcd.audit.time_snippet" />
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.nodeType_snippet"/>
+      </where>
+    </sql>
+
+    <!-- Snippet "les plus modifiés" -->
+    <sql id="selectByMostUpdated_snippet">
+        count(*) as audit_popularity, audit_object, audit_site
+      from
+        share_stats_audit_entry
+      <include refid="alfresco.atolcd.audit.update_snippet" />
+      <include refid="alfresco.atolcd.audit.site_snippet" />
+      <include refid="alfresco.atolcd.audit.time_snippet" />
+      group by audit_object, audit_site
+      order by audit_popularity DESC
+    </sql>
+
+    <!-- Snippet "les plus lus" -->
+    <sql id="selectByMostRead_snippet">
+        count(*) as audit_popularity, audit_object, audit_site
+      from
+        share_stats_audit_entry
+      <include refid="alfresco.atolcd.audit.read_snippet" />
+      group by audit_object, audit_site
+      order by audit_popularity DESC
+    </sql>
+
+    <!-- Snippet "volumétrie des sites" -->
+    <sql id="selectVolumetrySites_snippet">
+      select sum(taille)
+      from (select max(site_size) as taille
+      from
+        share_stats_site_volumetry
+      <!-- Reprise des snippets utilisé de share_stats_audit_entry -->
+      <where>
+        <if test="dateFrom > 0">
+        AND <![CDATA[at_time >= #{dateFrom}]]>
+        </if>
+        <if test="dateTo > 0">
+        AND <![CDATA[at_time < #{dateTo}]]>
+        </if>
+        AND site_id IN
+        <foreach item="item" collection="sitesId" open="(" separator="," close=")">
+        #{item}
+        </foreach>
+      </where>
+      group by site_id)
+    </sql>
+
+    <!--                -->
+    <!-- Statements     -->
+    <!--                -->
+
+
+    <!-- Get the node Types by audit -->
+    <select id="selectNodeType" parameterType="AtolAuditQueryParameters" resultMap="result_AtolAuditNodeType">
+      select distinct
+        (audit_node_type)
+      from
+        share_stats_audit_entry
+      <include refid="alfresco.atolcd.audit.select_auditViewEntriesWhereSnippet"/>
+      <include refid="alfresco.atolcd.audit.actionName_snippet"/>
+    </select>
+
+    <!-- Get the audit application by ID -->
+    <select id="selectById" parameterMap="parameter_IdMap" resultMap="result_AtolAuditEntry">
+        select
+            *
+        from
+            share_stats_audit_entry
+        where
+            id = ?
+    </select>
+
+    <select id="selectEntriesToUpdate" resultMap="result_AtolAuditEntry">
+      select
+        *
+      from
+        share_stats_audit_entry
+      where
+          audit_object NOT LIKE '%workspace://%'
+        AND
+          audit_object != ''
+        AND
+          audit_app_name NOT IN ('dashboard','members')
+    </select>
+    <!-- Get all audit records -->
+    <select id="selectAll" resultMap="results_AtolCsvExportEntry">
+      select
+        audit_site,
+        count(*) as audit_count,
+        audit_app_name,
+        audit_action_name
+      from
+        share_stats_audit_entry
+      <include refid="alfresco.atolcd.audit.select_AuditEntriesWhereSnippet"/>
+      group by audit_site, audit_app_name, audit_action_name
+      order by audit_site, audit_app_name, audit_action_name
+    </select>
+
+    <select id="selectByRead" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+      <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
+      <include refid="alfresco.atolcd.audit.read_snippet"/>
+      <include refid="alfresco.atolcd.audit.concat.group_by_concat"/>
+    </select>
+
+    <select id="selectByUpdated" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+      <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
+      <include refid="alfresco.atolcd.audit.update_snippet"/>
+      <include refid="alfresco.atolcd.audit.concat.group_by_concat"/>
+    </select>
+
+    <select id="selectByCreated" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+      <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
+      <include refid="alfresco.atolcd.audit.create_snippet"/>
+      <include refid="alfresco.atolcd.audit.concat.group_by_concat"/>
+    </select>
+
+    <select id="selectByDeleted" parameterType="AtolAuditQueryParameters" resultMap="results_AtolAuditCount">
+      <include refid="alfresco.atolcd.audit.concat.select_concat_actions"/>
+      <include refid="alfresco.atolcd.audit.delete_snippet"/>
+      <include refid="alfresco.atolcd.audit.concat.group_by_concat"/>
+    </select>
+
+    <!-- Retourne les dernière personne ayant effectuée une action dans la tranche de temps donnée. On les considère connecté -->
+    <select id="selectConnectedUsers" parameterType="AtolAuditQueryParameters" resultType="java.lang.String">
+      select distinct(audit_user_id)
+        from
+      share_stats_audit_entry
+      <where>
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
+        <include refid="alfresco.atolcd.audit.time_snippet" />
+        <include refid="alfresco.atolcd.audit.group_snippet" />
+      </where>
+    </select>
+
+    <!-- Récupère l'id du qname - member -->
+    <select id="selectQNameId" parameterType="java.lang.String" resultType="long">
+      select
+        alf_qname.id
+      from
+        alf_qname
+        join alf_namespace alf_ns on (alf_qname.ns_id = alf_ns.id)
+      where
+        alf_ns.uri = 'http://www.alfresco.org/model/content/1.0'
+      and
+        local_name = #{string}
+    </select>
+
+
+    <select id="selectSiteMember" parameterType="AtolAuthorityParameters" resultType="java.lang.String">
+      select
+        distinct(assoc.qname_localname) as qname_localname
+      from
+        alf_child_assoc assoc
+        join alf_node parentNode on (parentNode.id = assoc.parent_node_id)
+        join alf_node childNode on (childNode.id = assoc.child_node_id)
+      where
+        assoc.type_qname_id = #{memberQnameId}
+      and
+        childNode.type_qname_id = #{personQnameId}
+      and
+        assoc.parent_node_id IN (
+          select
+            childNode.id
+          from
+            alf_child_assoc assoc
+            join alf_node childNode on (childNode.id = assoc.child_node_id)
+          where
+            assoc.type_qname_id = #{memberQnameId}
+
+          <if test="groupNames != null">
+            AND assoc.qname_localname IN
+            <foreach item="item" collection="groupNames" open="(" separator="," close=")">
+              #{item}
+          </foreach>
+          </if>
+        )
+    </select>
+
+    <select id="selectVolumetry" parameterType="AtolAuditQueryParameters" resultType="long">
+      select
+          max(site_size)
+      from
+        share_stats_site_volumetry
+      <!-- Reprise des snippets utilisé de share_stats_audit_entry -->
+      <where>
+        <if test="dateFrom > 0">
+          AND <![CDATA[at_time >= #{dateFrom}]]>
+        </if>
+        <if test="dateTo > 0">
+          AND <![CDATA[at_time < #{dateTo}]]>
+        </if>
+
+          AND site_id IN
+          <foreach item="item" collection="sitesId" open="(" separator="," close=")">
+            #{item}
+          </foreach>
+
+      </where>
+    </select>
+
+    <update id="updateAuditEntry" parameterType="AtolAuditEntry">
+      update
+        share_stats_audit_entry
+      set
+        audit_object = #{auditObject}
+      where
+        id = #{id}
+    </update>
+
+    <delete id="deleteAuditByParameters" parameterType="AtolAuditQueryParameters">
+      delete
+      from
+      share_stats_audit_entry
+      <where>
+        <include refid="alfresco.atolcd.audit.time_snippet"/>
+        <include refid="alfresco.atolcd.audit.site_snippet"/>
+      </where>
+    </delete>
+
+    <delete id="deleteVolumetryByParameters" parameterType="AtolAuditQueryParameters">
+      delete
+      from
+      share_stats_site_volumetry
+      <where>
+        <if test="dateFrom > 0">
+          AND <![CDATA[at_time >= #{dateFrom}]]>
+        </if>
+        <if test="dateTo > 0">
+          AND <![CDATA[at_time < #{dateTo}]]>
+        </if>
+
+        <if test="siteId != null">
+          AND site_id = #{siteId}
+        </if>
+        <if test="sitesId != null">
+          AND site_id IN
+          <foreach item="item" collection="sitesId" open="(" separator="," close=")">
+            #{item}
+          </foreach>
+        </if>
+      </where>
+    </delete>
+
+</mapper>

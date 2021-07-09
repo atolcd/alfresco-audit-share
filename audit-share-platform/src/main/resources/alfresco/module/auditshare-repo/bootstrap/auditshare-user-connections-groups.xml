@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view:view xmlns:view="http://www.alfresco.org/view/repository/1.0">
+  <cm:folder xmlns="" xmlns:cm="http://www.alfresco.org/model/content/1.0" xmlns:view="http://www.alfresco.org/view/repository/1.0"
+    xmlns:sys="http://www.alfresco.org/model/system/1.0" view:childName="cm:AuditShare">
+    <view:aspects>
+      <cm:titled></cm:titled>
+    </view:aspects>
+    <view:acl></view:acl>
+    <view:properties>
+      <cm:name>AuditShare</cm:name>
+      <cm:title>AuditShare</cm:title>
+      <sys:node-uuid>auditshare-folder</sys:node-uuid>
+      <cm:description></cm:description>
+    </view:properties>
+    <view:associations>
+      <cm:contains>
+        <cm:content view:childName="auditshare-user-connections-groups-list.xml">
+          <view:acl view:inherit="true"></view:acl>
+          <view:properties>
+            <sys:node-uuid>auditshare-user-connections-groups</sys:node-uuid>
+            <cm:description>List of user connection groups</cm:description>
+            <cm:content>contentUrl=classpath:alfresco/module/auditshare-repo/bootstrap/auditshare-user-connections-groups-list.xml|mimetype=text/xml|encoding=UTF-8|locale=fr_FR_</cm:content>
+            <cm:title>List of user connection groups</cm:title>
+            <cm:author>admin</cm:author>
+            <cm:name>auditshare-user-connections-groups-list.xml</cm:name>
+          </view:properties>
+        </cm:content>
+      </cm:contains>
+    </view:associations>
+  </cm:folder>
+</view:view>

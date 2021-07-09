@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+ * Copyright (C) 2018 Atol Conseils et Développements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<mapper namespace="alfresco.atolcd.audit.insert">
+  <insert id="insertEntry" parameterType="AtolAuditEntry" useGeneratedKeys="true" keyProperty="id">
+    <include refid="alfresco.atolcd.audit.insert_AtolAuditEntry_AutoIncrement"/>
+  </insert>
+  <insert id="insertVolumetry" parameterType="AtolVolumetryEntry" useGeneratedKeys="true" keyProperty="id">
+    <include refid="alfresco.atolcd.audit.insert_volumetry_AutoIncrement"/>
+  </insert>
+  <insert id="insertVolumetryMulti" parameterType="AtolVolumetryEntry" useGeneratedKeys="true">
+    insert into share_stats_site_volumetry (site_id, site_size, folder_count, file_count, at_time) values
+    <foreach item="item" collection="list" separator=",">
+      (#{item.siteId}, #{item.siteSize}, #{item.folderCount}, #{item.fileCount}, #{item.atTime})
+    </foreach>
+  </insert>
+</mapper>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Copyright (C) 2018 Atol Conseils et Développements.
+ * http://www.atolcd.com/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<alfresco-config>
+   <config evaluator="string-compare" condition="UriTemplate" replace="true">
+      <!-- list of URI based page Id templates used by Share -->
+      <!-- when pages are requested from the framework, matches are attempted
+           against each uri-template, and the token values returned if matched -->
+      <uri-templates>
+         <!-- Atol: Statistics - Site page -->
+         <!--  Need to be loaded BEFORE the 'sitepage' uri template -->
+         <uri-template id="sitestatisticstoolpage">/site/{site}/statistics/{pageid}/{toolid}</uri-template>
+         <uri-template id="sitestatisticspage">/site/{site}/statistics/{pageid}</uri-template>
+
+
+         <!--                                         -->
+         <!-- Share default uri-templates : @override -->
+         <!--                                         -->
+         <!--  This is intended for use with remotely created pages -->
+         <uri-template id="remote-site-page">/site/{site}/{pageid}/p/{pagename}</uri-template>
+         <uri-template id="remote-page">/{pageid}/p/{pagename}</uri-template>
+
+         <!-- This needs to go BEFORE "sitepage" -->
+         <uri-template id="share-site-page">/site/{site}/{pageid}/ws/{webscript}</uri-template>
+
+         <uri-template id="sitedashboardpage">/site/{site}/dashboard</uri-template>
+         <uri-template id="contextpage">/context/{pagecontext}/{pageid}</uri-template>
+         <uri-template id="sitepage">/site/{site}/{pageid}</uri-template>
+         <uri-template id="userdashboardpage">/user/{userid}/dashboard</uri-template>
+         <uri-template id="userpage">/user/{userid}/{pageid}</uri-template>
+         <uri-template id="userprofilepage">/user/{userid}/profile</uri-template>
+         <uri-template id="userdefaultpage">/user/{pageid}</uri-template>
+         <uri-template id="consoletoolpage">/console/{pageid}/{toolid}</uri-template>
+         <uri-template id="consolepage">/console/{pageid}</uri-template>
+         <uri-template id="share-page">/{pageid}/ws/{webscript}</uri-template>
+         <!--                                         -->
+
+
+         <!-- Atol: Statistics - Standalone page -->
+         <uri-template id="statisticstoolpage">/statistics/{pageid}/{toolid}</uri-template>
+         <uri-template id="statisticspage">/statistics/{pageid}</uri-template>
+      </uri-templates>
+   </config>
+</alfresco-config>
