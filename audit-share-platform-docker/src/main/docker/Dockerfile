@@ -4,7 +4,6 @@ ARG TOMCAT_DIR=/usr/local/tomcat
 
 USER root
 
-RUN localedef -c -i fr_FR -f UTF-8 fr_FR.UTF-8
 # set system-wide locale settings
 ENV LANG fr_FR.UTF-8
 ENV LANGUAGE fr_FR
