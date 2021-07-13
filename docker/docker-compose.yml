@@ -19,6 +19,7 @@ services:
       context: ../../../audit-share-platform-docker/target
       network: host
     environment:
+      JAVA_TOOL_OPTIONS: "${keystore.settings}"
       CATALINA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:8888"
     ports:
       - "${acs.port}:8080"
@@ -28,7 +29,7 @@ services:
     depends_on:
       - audit-share-postgres
   audit-share-postgres:
-    image: postgres:11
+    image: postgres:13.1
     environment:
       POSTGRES_DB: alfresco
       POSTGRES_USER: alfresco
@@ -39,7 +40,7 @@ services:
     volumes:
       - audit-share-db-volume:/var/lib/postgresql/data
   audit-share-ass:
-    image: alfresco/alfresco-search-services:2.0.1
+    image: alfresco/alfresco-search-services:2.0.1.1
     build:
       dockerfile: ./Dockerfile
       context: ../../../audit-share-ass-docker/target
@@ -56,23 +57,42 @@ services:
       - audit-share-ass-volume:/opt/alfresco-search-services/contentstore
       - audit-share-ass-volume:/opt/alfresco-search-services/data
   libreoffice:
-    image: alfresco/alfresco-libreoffice:2.3.8
+    image: alfresco/alfresco-libreoffice:2.5.1
     environment:
       JAVA_OPTS: " -Xms256m -Xmx512m"
     ports:
       - 8092:8090
   alfresco-pdf-renderer:
-    image: alfresco/alfresco-pdf-renderer:2.3.8
+    image: alfresco/alfresco-pdf-renderer:2.5.1
     environment:
       JAVA_OPTS: " -Xms256m -Xmx512m"
     ports:
       - 8090:8090
   imagemagick:
-    image: alfresco/alfresco-imagemagick:2.3.8
+    image: alfresco/alfresco-imagemagick:2.5.1
     environment:
       JAVA_OPTS: " -Xms256m -Xmx512m"
     ports:
       - 8091:8090
+  tika:
+    image: alfresco/alfresco-tika:2.5.1
+    environment:
+      JAVA_OPTS: ' -Xms256m -Xmx512m'
+    ports:
+      - 8093:8090
+  transform-misc:
+    image: alfresco/alfresco-transform-misc:2.5.1
+    environment:
+      JAVA_OPTS: ' -Xms256m -Xmx512m'
+    ports:
+      - 8094:8090
+  activemq:
+    image: alfresco/alfresco-activemq:5.16.1
+    ports:
+      - 8161:8161 # Web Console
+      - 5672:5672 # AMQP
+      - 61616:61616 # OpenWire
+      - 61613:61613 # STOMP
 volumes:
   audit-share-acs-volume:
     external: true

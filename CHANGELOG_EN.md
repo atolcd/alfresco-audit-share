@@ -10,6 +10,11 @@ Supported DBMS:
 
 ## [Unreleased]
 
+## [2.0.0] - 2021-09-15
+### Changed
+- SDK 4.2 migration and Alfresco 7.0.0 compatibility
+- SDK 4.1 migration
+
 ## [1.6.1] - 2020-12-08
 ### Fixed
 - Fix compilation issue

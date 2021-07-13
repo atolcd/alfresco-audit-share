@@ -1,12 +1,10 @@
 FROM ${docker.share.image}:${alfresco.share.version}
 
-RUN localedef -c -i fr_FR -f UTF-8 fr_FR.UTF-8
+ARG TOMCAT_DIR=/usr/local/tomcat
 # set system-wide locale settings
 ENV LANG fr_FR.UTF-8
 ENV LANGUAGE fr_FR
 ENV LC_ALL fr_FR.UTF-8
-
-ARG TOMCAT_DIR=/usr/local/tomcat
 
 # Copy Dockerfile to avoid an error if no JARs exist
 COPY Dockerfile extensions/*.jar $TOMCAT_DIR/webapps/share/WEB-INF/lib/

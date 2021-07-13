@@ -9,7 +9,7 @@
 
   <parent>
     <groupId>com.atolcd.alfresco</groupId>
-    <artifactId>auditshare-62X</artifactId>
+    <artifactId>auditshare-70X</artifactId>
     <version>2.0.0-SNAPSHOT</version>
   </parent>
 
@@ -19,12 +19,12 @@
   <dependencies>
     <dependency>
       <groupId>com.atolcd.alfresco</groupId>
-      <artifactId>auditshare-62X-repo</artifactId>
+      <artifactId>auditshare-70X-repo</artifactId>
       <version>2.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>de.fmaul</groupId>
-      <artifactId>javascript-console-repo</artifactId>
+      <artifactId>javascript-console-7X-repo</artifactId>
       <version>${javascript.console.version}</version>
       <type>amp</type>
     </dependency>

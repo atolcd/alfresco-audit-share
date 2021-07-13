@@ -3,7 +3,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.atolcd.alfresco</groupId>
-  <artifactId>auditshare-62X</artifactId>
+  <artifactId>auditshare-70X</artifactId>
   <version>2.0.0-SNAPSHOT</version>
   <name>AuditShare</name>
   <description>Alfresco and Share modules - AuditShare</description>
@@ -15,19 +15,21 @@
 
   <properties>
     <!-- Alfresco Maven Plugin version to use -->
-    <alfresco.sdk.version>4.1.0</alfresco.sdk.version>
+    <alfresco.sdk.version>4.2.0</alfresco.sdk.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Properties used in dependency declarations, you don't need to change these -->
     <alfresco.groupId>org.alfresco</alfresco.groupId>
     <alfresco.bomDependencyArtifactId>acs-packaging</alfresco.bomDependencyArtifactId>
-    <alfresco.platform.version>6.2.2</alfresco.platform.version>
-    <alfresco.share.version>6.2.2</alfresco.share.version>
+    <alfresco.platform.version>7.0.0</alfresco.platform.version>
+    <alfresco.share.version>7.0.0</alfresco.share.version>
 
     <!-- Docker images -->
-    <docker.acs.image>alfresco/alfresco-content-repository</docker.acs.image>
-    <docker.share.image>alfresco/alfresco-share</docker.share.image>
+    <docker.acs.image>quay.io/alfresco/alfresco-content-repository</docker.acs.image>
+    <docker.share.image>quay.io/alfresco/alfresco-share</docker.share.image>
+
+    <activemq.version>5.16.1</activemq.version>
 
     <!-- Environment configuration properties -->
     <share.port>8180</share.port>
@@ -43,8 +45,18 @@
     <java.version>11</java.version>
 
     <!-- Modules AMP -->
-    <javascript.console.version>1.0.0-SNAPSHOT</javascript.console.version>
+    <javascript.console.version>0.7-SNAPSHOT</javascript.console.version>
 
+    <keystore.settings>
+      -Dencryption.keystore.type=JCEKS
+      -Dencryption.cipherAlgorithm=AES/CBC/PKCS5Padding
+      -Dencryption.keyAlgorithm=AES
+      -Dencryption.keystore.location=/usr/local/tomcat/shared/classes/alfresco/extension/keystore/keystore
+      -Dmetadata-keystore.password=mp6yc0UD9e
+      -Dmetadata-keystore.aliases=metadata
+      -Dmetadata-keystore.metadata.password=oKIWzVdEdA
+      -Dmetadata-keystore.metadata.algorithm=AES
+    </keystore.settings>
   </properties>
 
   <!-- Libs used in Unit and Integration tests -->
@@ -80,6 +92,13 @@
       <groupId>org.alfresco.maven</groupId>
       <artifactId>alfresco-rad</artifactId>
       <version>${alfresco.sdk.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+     <dependency>
+      <groupId>org.apache.activemq</groupId>
+      <artifactId>activemq-all</artifactId>
+      <version>${activemq.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -431,6 +450,19 @@
       <url>https://artifacts.alfresco.com/nexus/content/groups/private</url>
     </repository>
     -->
+    
+    <!-- For internal use only (atolcd) -->
+    <repository>
+      <id>maven-snapshot-registry</id>
+      <name>Atol CD Snapshots</name>
+      <url>https://maven-snapshot-registry.priv.atolcd.com</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+    </repository>
   </repositories>
 
   <modules>
