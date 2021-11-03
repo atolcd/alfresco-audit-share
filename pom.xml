@@ -407,7 +407,7 @@
     </profile>
   </profiles>
 
-    <!-- For internal use only (atolcd) -->
+  <!-- For internal use only (atolcd) -->
   <distributionManagement>
     <repository>
       <id>maven-registry</id>
@@ -425,6 +425,19 @@
     Alfresco Maven Repositories
   -->
   <repositories>
+    <!-- For internal use only (atolcd) -->
+    <repository>
+      <id>maven-snapshot-registry</id>
+      <name>Atol CD Snapshots</name>
+      <url>https://maven-snapshot-registry.priv.atolcd.com</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+    </repository>
+
     <repository>
       <id>alfresco-public</id>
       <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>

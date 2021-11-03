@@ -41,6 +41,16 @@ This extension is a standard Alfresco Module, so experienced users can skip thes
 **Caution:** please ensure you do not have unsaved custom files in the webapp folders before deleting.
 4. Start Alfresco
 
+Inside the project, you will find the `run.bat` and `run.sh` scripts. These are convenience scripts to quickly compile / test / run the project.
+In the terminal window, use:
+
+- `./run.sh build_start` for Mac OS X or Linux.
+- `run.bat build_start` for Windows.
+
+If this is the first time you are doing this, it will take a while for Maven to download all the required dependencies and for Docker to download all the required images.
+
+For more information about how to work with SDK project, see the [online documentation](https://docs.alfresco.com/content-services/latest/develop/sdk/#workingwithprojects).
+
 
 Using the module
 ---------------------

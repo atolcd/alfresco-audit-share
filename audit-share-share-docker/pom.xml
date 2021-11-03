@@ -22,12 +22,15 @@
       <artifactId>auditshare-70X-share</artifactId>
       <version>2.0.0-SNAPSHOT</version>
     </dependency>
+    <!-- Uncomment this dependency if you already have the AMP in your M2_HOME folder
+         or see the documentation for 3rd party amps installation: https://docs.alfresco.com/content-services/latest/develop/sdk/#installing3rdpartyamps
     <dependency>
       <groupId>de.fmaul</groupId>
       <artifactId>javascript-console-share</artifactId>
       <version>${javascript.console.version}</version>
       <type>amp</type>
     </dependency>
+    -->
   </dependencies>
 
   <build>
