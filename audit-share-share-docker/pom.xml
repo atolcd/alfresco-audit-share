@@ -10,7 +10,7 @@
   <parent>
     <groupId>com.atolcd.alfresco</groupId>
     <artifactId>auditshare-71X</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.1.0-SNAPSHOT</version>
   </parent>
 
   <properties>
@@ -20,7 +20,7 @@
     <dependency>
       <groupId>com.atolcd.alfresco</groupId>
       <artifactId>auditshare-71X-share</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
+      <version>2.1.0-SNAPSHOT</version>
     </dependency>
     <!-- Uncomment this dependency if you already have the AMP in your M2_HOME folder
          or see the documentation for 3rd party amps installation: https://docs.alfresco.com/content-services/latest/develop/sdk/#installing3rdpartyamps
