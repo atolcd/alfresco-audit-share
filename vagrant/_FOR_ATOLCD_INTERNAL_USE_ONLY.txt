@@ -1,1 +1,0 @@
-This Vagrant/YAML configuration can only be used by ATOLCD.

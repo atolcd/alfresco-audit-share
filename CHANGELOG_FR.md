@@ -10,6 +10,13 @@ SGBD supportés :
 
 ## [Unreleased]
 
+## [2.1.0] - 2022-02-01
+### Changed
+- Suppression box vagrant inutilisée
+
+### Fixed
+- Correction des dépendances pour les pom docker
+
 ## [2.0.0] - 2021-09-15
 ### Changed
 - Migration SDK 4.2 et compatibilité Alfresco 7.0.0

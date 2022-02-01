@@ -10,6 +10,13 @@ Supported DBMS:
 
 ## [Unreleased]
 
+## [2.1.0] - 2022-02-01
+### Changed
+- Remove unused vagrant box
+
+### Fixed
+- Fix dependencies for docker poms
+
 ## [2.0.0] - 2021-09-15
 ### Changed
 - SDK 4.2 migration and Alfresco 7.0.0 compatibility
