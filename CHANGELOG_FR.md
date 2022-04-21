@@ -9,6 +9,8 @@ SGBD supportés :
 
 
 ## [Unreleased]
+### Fixed
+- Correction des dialects Oracle et SQLServer
 
 
 ## [2.1.0] - 2022-02-01
