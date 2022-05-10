@@ -9,9 +9,10 @@ Supported DBMS:
 
 
 ## [Unreleased]
+
+## [2.1.1] - 2022-05-10
 ### Fixed
 - Fix Oracle and SQLServer dialects
-
 
 ## [2.1.0] - 2022-02-01
 ### Changed

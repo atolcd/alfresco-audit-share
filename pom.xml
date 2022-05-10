@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.atolcd.alfresco</groupId>
   <artifactId>auditshare-71X</artifactId>
-  <version>2.1.1-SNAPSHOT</version>
+  <version>2.1.2-SNAPSHOT</version>
   <name>AuditShare</name>
   <description>Alfresco and Share modules - AuditShare</description>
   <packaging>pom</packaging>
