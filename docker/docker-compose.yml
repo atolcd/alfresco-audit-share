@@ -12,6 +12,7 @@ services:
     ports:
       - "${share.port}:8080"
       - "${share.debug.port}:8888"
+
   audit-share-acs:
     image: alfresco-content-services-audit-share:development
     build:
@@ -20,6 +21,11 @@ services:
       network: host
     environment:
       JAVA_TOOL_OPTIONS: "${keystore.settings}"
+      OVERRIDE_JAVA_OPTS: ""
+      JAVA_OPTS: "
+        -Dsolr.alfresco.port.ssl=8983
+        $$OVERRIDE_JAVA_OPTS
+      "
       CATALINA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:8888"
     ports:
       - "${acs.port}:8080"
@@ -28,8 +34,9 @@ services:
       - audit-share-acs-volume:/usr/local/tomcat/alf_data
     depends_on:
       - audit-share-postgres
+
   audit-share-postgres:
-    image: postgres:13.1
+    image: postgres:13.3
     environment:
       POSTGRES_DB: alfresco
       POSTGRES_USER: alfresco
@@ -39,60 +46,79 @@ services:
       - "${postgres.port}:5432"
     volumes:
       - audit-share-db-volume:/var/lib/postgresql/data
+
   audit-share-ass:
-    image: alfresco/alfresco-search-services:2.0.1.1
-    build:
-      dockerfile: ./Dockerfile
-      context: ../../../audit-share-ass-docker/target
+    image: ${docker.ass.image}:${alfresco.ass.version}
     environment:
       SOLR_ALFRESCO_HOST: audit-share-acs
-      SOLR_ALFRESCO_PORT: 8080
+      SOLR_ALFRESCO_PORT: 8983
       SOLR_SOLR_HOST: audit-share-ass
       SOLR_SOLR_PORT: 8983
       SOLR_CREATE_ALFRESCO_DEFAULTS: alfresco,archive
-      ALFRESCO_SECURE_COMMS: none
+      ALFRESCO_SECURE_COMMS: https
     ports:
       - "8983:8983"
     volumes:
       - audit-share-ass-volume:/opt/alfresco-search-services/contentstore
       - audit-share-ass-volume:/opt/alfresco-search-services/data
-  libreoffice:
-    image: alfresco/alfresco-libreoffice:2.5.1
+
+  transform-core-aio:
+    image: alfresco/alfresco-transform-core-aio:2.6.0
     environment:
-      JAVA_OPTS: " -Xms256m -Xmx512m"
+      JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
+      ACTIVEMQ_URL: "nio://activemq:61616"
+      ACTIVEMQ_USER: "admin"
+      ACTIVEMQ_PASSWORD: "admin"
+      FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
     ports:
-      - 8092:8090
-  alfresco-pdf-renderer:
-    image: alfresco/alfresco-pdf-renderer:2.5.1
+      - "8090:8090"
+    links:
+      - activemq
+
+  transform-router:
+    image: docker-alfresco-mirror.priv.atolcd.com/alfresco/alfresco-transform-router:1.5.3
     environment:
-      JAVA_OPTS: " -Xms256m -Xmx512m"
+      JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
+      ACTIVEMQ_URL: "nio://activemq:61616"
+      CORE_AIO_URL : "http://transform-core-aio:8090"
+      FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
     ports:
-      - 8090:8090
-  imagemagick:
-    image: alfresco/alfresco-imagemagick:2.5.1
+      - 8095:8095
+    links:
+      - activemq
+
+  shared-file-store:
+    image: docker-alfresco-mirror.priv.atolcd.com/alfresco/alfresco-shared-file-store:1.5.3
     environment:
-      JAVA_OPTS: " -Xms256m -Xmx512m"
+      JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
+      scheduler.content.age.millis: 86400000
+      scheduler.cleanup.interval: 86400000
     ports:
-      - 8091:8090
-  tika:
-    image: alfresco/alfresco-tika:2.5.1
-    environment:
-      JAVA_OPTS: ' -Xms256m -Xmx512m'
-    ports:
-      - 8093:8090
-  transform-misc:
-    image: alfresco/alfresco-transform-misc:2.5.1
-    environment:
-      JAVA_OPTS: ' -Xms256m -Xmx512m'
-    ports:
-      - 8094:8090
+      - 8099:8099
+    volumes:
+      - sfs-data:/tmp/Alfresco/sfs
+
+#  transform-dte-engine:
+#    image: docker-alfresco-mirror.priv.atolcd.com/alfresco/transform-dte-engine:1.2.0
+#    environment:
+#      JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80 -DdteServerUrl=http://alfresco-dte.dvt.cloud.priv.atolcd.com:8080/transformation-backend"
+#      ACTIVEMQ_URL: "nio://activemq:61616"
+#      ACTIVEMQ_USER: "admin"
+#      ACTIVEMQ_PASSWORD: "admin"
+#      FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
+#    ports:
+#      - 8091:8090
+#    links:
+#      - activemq
+
   activemq:
-    image: alfresco/alfresco-activemq:5.16.1
+    image: ${docker.activemq.image}:${activemq.version}
     ports:
       - 8161:8161 # Web Console
       - 5672:5672 # AMQP
       - 61616:61616 # OpenWire
       - 61613:61613 # STOMP
+
 volumes:
   audit-share-acs-volume:
     external: true
@@ -100,3 +126,7 @@ volumes:
     external: true
   audit-share-ass-volume:
     external: true
+  sfs-data:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs

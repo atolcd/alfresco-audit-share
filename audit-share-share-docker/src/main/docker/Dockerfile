@@ -1,6 +1,9 @@
 FROM ${docker.share.image}:${alfresco.share.docker.version}
 
 ARG TOMCAT_DIR=/usr/local/tomcat
+
+RUN yum -y install glibc-common glibc-locale-source glibc-langpack-en glibc-langpack-fr
+RUN localedef -c -i fr_FR -f UTF-8 fr_FR.UTF-8
 # set system-wide locale settings
 ENV LANG fr_FR.UTF-8
 ENV LANGUAGE fr_FR

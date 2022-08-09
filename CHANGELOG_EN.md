@@ -9,6 +9,9 @@ Supported DBMS:
 
 
 ## [Unreleased]
+### Changed
+- SDK 4.4 migration and Alfresco 7.2.0 compatibility
+- Remove unused context.xml files
 
 ## [2.1.1] - 2022-05-10
 ### Fixed

@@ -25,7 +25,7 @@ start_acs() {
 
 start_ass() {
     docker volume create audit-share-ass-volume
-    docker-compose -f $COMPOSE_FILE_PATH up --build -d audit-share-ass
+    docker-compose -f "$COMPOSE_FILE_PATH" up --build -d audit-share-ass
 }
 
 down() {
@@ -41,8 +41,8 @@ purge() {
 }
 
 purge_ass() {
-    docker-compose -f $COMPOSE_FILE_PATH kill audit-share-ass
-    yes | docker-compose -f $COMPOSE_FILE_PATH rm -f audit-share-ass
+    docker-compose -f "$COMPOSE_FILE_PATH" kill audit-share-ass
+    yes | docker-compose -f "$COMPOSE_FILE_PATH" rm -f audit-share-ass
     docker volume rm -f audit-share-ass-volume
 }
 
@@ -67,15 +67,15 @@ tail() {
 }
 
 tail_acs() {
-    docker-compose -f $COMPOSE_FILE_PATH logs -f audit-share-acs
+    docker-compose -f "$COMPOSE_FILE_PATH" logs -f audit-share-acs
 }
 
 tail_share() {
-    docker-compose -f $COMPOSE_FILE_PATH logs -f audit-share-share
+    docker-compose -f "$COMPOSE_FILE_PATH" logs -f audit-share-share
 }
 
 tail_ass() {
-    docker-compose -f $COMPOSE_FILE_PATH logs -f audit-share-ass
+    docker-compose -f "$COMPOSE_FILE_PATH" logs -f audit-share-ass
 }
 
 tail_all() {
@@ -94,25 +94,10 @@ ssh_ass() {
     docker exec -it docker_audit-share-ass_1 /bin/bash
 }
 
-prepare_test() {
-    $MVN_EXEC verify -DskipTests=true -pl audit-share-platform,audit-share-platform-docker
-}
-
-test() {
-    $MVN_EXEC verify -pl audit-share-platform
-}
-
 case "$1" in
   build_start)
     down
     build
-    start
-    tail
-    ;;
-  build_start_it_supported)
-    down
-    build
-    prepare_test
     start
     tail
     ;;
@@ -122,6 +107,18 @@ case "$1" in
     ;;
   stop)
     down
+    ;;
+  restart)
+    down
+    start
+    tail
+    ;;
+  reset)
+    down
+    purge
+    build
+    start
+    tail
     ;;
   purge)
     down
@@ -164,5 +161,5 @@ case "$1" in
     tail_ass
     ;;
   *)
-    echo "Usage: $0 {build_start|build_start_it_supported|start|stop|purge|tail|reload_share|reload_acs|ssh_ass|reindex_ass}"
+    echo "Usage: $0 {build_start|start|stop|restart|reset|purge|tail|tail_acs|tail_share|tail_ass|reload_share|reload_acs|ssh_acs|ssh_ass|ssh_share|reindex_ass}"
 esac

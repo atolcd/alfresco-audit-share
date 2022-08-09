@@ -9,7 +9,7 @@
 
   <parent>
     <groupId>com.atolcd.alfresco</groupId>
-    <artifactId>auditshare-71X</artifactId>
+    <artifactId>auditshare-72X</artifactId>
     <version>2.1.2-SNAPSHOT</version>
   </parent>
 
@@ -19,8 +19,14 @@
   <dependencies>
     <dependency>
       <groupId>com.atolcd.alfresco</groupId>
-      <artifactId>auditshare-71X-share</artifactId>
+      <artifactId>auditshare-72X-share</artifactId>
       <version>2.1.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>de.fmaul</groupId>
+      <artifactId>javascript-console-7X-share</artifactId>
+      <version>0.7-SNAPSHOT</version>
+      <type>amp</type>
     </dependency>
     <!-- Uncomment this dependency if you already have the AMP in your M2_HOME folder
          or see the documentation for 3rd party amps installation: https://docs.alfresco.com/content-services/latest/develop/sdk/#installing3rdpartyamps

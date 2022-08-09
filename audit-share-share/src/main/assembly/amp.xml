@@ -1,19 +1,6 @@
-<assembly
-    xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
-  <!--
-      Note that the Module dependency specified in the configuration section for the Alfresco Maven Plugin
-      needs to be set to amp if any 3rd party libs should be applied by MMT:
-      `
-      <shareModules>
-          <moduleDependency>
-              <groupId>${project.groupId}</groupId>
-              <artifactId>some-share</artifactId>
-              <version>${project.version}</version>
-              <type>amp</type>
-          </moduleDependency>
-      -->
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
+  <!-- Note that the Module dependency specified in the configuration section for the Alfresco Maven Plugin needs to be set to amp if any 3rd party libs should be applied by MMT: ` <shareModules> <moduleDependency> <groupId>${project.groupId}</groupId> <artifactId>some-share</artifactId> <version>${project.version}</version> <type>amp</type> </moduleDependency> -->
 
   <id>build-amp-file</id>
 
@@ -46,16 +33,14 @@
     <fileSet>
       <directory>src/main/assembly/web</directory>
       <outputDirectory>web</outputDirectory>
-      <filtered>true</filtered>    <!-- Will filter files and substitute POM props such as for example ${project.name} -->
+      <filtered>true</filtered>      <!-- Will filter files and substitute POM props such as for example ${project.name} -->
       <excludes>
         <exclude>README.md</exclude>
       </excludes>
     </fileSet>
   </fileSets>
 
-  <!-- Include the project artifact (JAR) in the /lib directory in the AMP, and any 3rd party libraries (JARs)
-          used by the customization.
-      -->
+  <!-- Include the project artifact (JAR) in the /lib directory in the AMP, and any 3rd party libraries (JARs) used by the customization. -->
   <dependencySets>
     <dependencySet>
       <outputDirectory>lib</outputDirectory>

@@ -3,7 +3,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.atolcd.alfresco</groupId>
-  <artifactId>auditshare-71X</artifactId>
+  <artifactId>auditshare-72X</artifactId>
   <version>2.1.2-SNAPSHOT</version>
   <name>AuditShare</name>
   <description>Alfresco and Share modules - AuditShare</description>
@@ -15,22 +15,29 @@
 
   <properties>
     <!-- Alfresco Maven Plugin version to use -->
-    <alfresco.sdk.version>4.3.0</alfresco.sdk.version>
+    <alfresco.sdk.version>4.4.0</alfresco.sdk.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Properties used in dependency declarations, you don't need to change these -->
     <alfresco.groupId>org.alfresco</alfresco.groupId>
     <alfresco.bomDependencyArtifactId>acs-packaging</alfresco.bomDependencyArtifactId>
-    <alfresco.platform.version>7.1.0.1</alfresco.platform.version>
-    <alfresco.share.version>11.77</alfresco.share.version>
-    <alfresco.share.docker.version>7.1.0.1</alfresco.share.docker.version>
+    <alfresco.platform.version>7.2.0.3</alfresco.platform.version>
+    <alfresco.platform.docker.user>alfresco</alfresco.platform.docker.user>
+    <alfresco.share.version>14.96</alfresco.share.version>
+    <alfresco.share.docker.version>7.2.0.3</alfresco.share.docker.version>
 
     <!-- Docker images -->
-    <docker.acs.image>quay.io/alfresco/alfresco-content-repository</docker.acs.image>
-    <docker.share.image>quay.io/alfresco/alfresco-share</docker.share.image>
+    <docker.acs.image>client-docker-registry.atolcd.com/alfresco/base-images/alfresco-content-repository-atolcd</docker.acs.image>
+    <docker.share.image>client-docker-registry.atolcd.com/alfresco/base-images/alfresco-share-atolcd</docker.share.image>
+    <docker.ass.image>client-docker-registry.atolcd.com/alfresco/base-images/alfresco-search-services-atolcd</docker.ass.image>
+    <docker.activemq.image>client-docker-registry.atolcd.com/alfresco/base-images/alfresco-activemq-atolcd</docker.activemq.image>
 
-    <activemq.version>5.16.3</activemq.version>
+    <!-- Alfresco search service -->
+    <alfresco.ass.version>2.0.3.6</alfresco.ass.version>
+
+    <!-- ActiveMQ -->
+    <activemq.version>5.17.1</activemq.version>
 
     <!-- Environment configuration properties -->
     <share.port>8180</share.port>
@@ -45,18 +52,7 @@
     <!-- Pour le build jenkins -->
     <java.version>11</java.version>
 
-    <!-- Modules AMP -->
-    <javascript.console.version>1.0.0-SNAPSHOT</javascript.console.version>
-
-    <keystore.settings>
-      -Dencryption.keystore.type=JCEKS
-      -Dencryption.cipherAlgorithm=AES/CBC/PKCS5Padding
-      -Dencryption.keyAlgorithm=AES
-      -Dencryption.keystore.location=/usr/local/tomcat/shared/classes/alfresco/extension/keystore/keystore
-      -Dmetadata-keystore.password=mp6yc0UD9e
-      -Dmetadata-keystore.aliases=metadata
-      -Dmetadata-keystore.metadata.password=oKIWzVdEdA
-      -Dmetadata-keystore.metadata.algorithm=AES
+    <keystore.settings> -Dencryption.keystore.type=JCEKS -Dencryption.cipherAlgorithm=DESede/CBC/PKCS5Padding -Dencryption.keyAlgorithm=DESede -Dencryption.keystore.location=/usr/local/tomcat/shared/classes/alfresco/extension/keystore/keystore -Dmetadata-keystore.password=mp6yc0UD9e -Dmetadata-keystore.aliases=metadata -Dmetadata-keystore.metadata.password=oKIWzVdEdA -Dmetadata-keystore.metadata.algorithm=DESede -Dssl.keystore.password=4s@Xssx!tLSYqsdW -Dssl.truststore.password=4s@Xssx!tLSYqsdW
     </keystore.settings>
   </properties>
 
@@ -88,15 +84,7 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Bring in Alfresco RAD so we get access to AlfrescoTestRunner classes -->
     <dependency>
-      <groupId>org.alfresco.maven</groupId>
-      <artifactId>alfresco-rad</artifactId>
-      <version>${alfresco.sdk.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-     <dependency>
       <groupId>org.apache.activemq</groupId>
       <artifactId>activemq-all</artifactId>
       <version>${activemq.version}</version>
@@ -157,37 +145,37 @@
                     the layout of your AMP. The end result is that Maven will produce both a JAR file and an AMP with your
                     module.
                 -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.6</version>
-                    <executions>
-                        <execution>
-                            <id>build-amp-file</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>single</goal>
-                            </goals>
-                            <configuration>
-                                <appendAssemblyId>false</appendAssemblyId>
-                                <descriptor>src/main/assembly/amp.xml</descriptor>
-                            </configuration>
-                        </execution>
-                    </executions>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.alfresco.maven.plugin</groupId>
-                            <artifactId>alfresco-maven-plugin</artifactId>
-                            <version>${alfresco.sdk.version}</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.6</version>
+          <executions>
+            <execution>
+              <id>build-amp-file</id>
+              <phase>package</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+              <configuration>
+                <appendAssemblyId>false</appendAssemblyId>
+                <descriptor>src/main/assembly/amp.xml</descriptor>
+              </configuration>
+            </execution>
+          </executions>
+          <dependencies>
+            <dependency>
+              <groupId>org.alfresco.maven.plugin</groupId>
+              <artifactId>alfresco-maven-plugin</artifactId>
+              <version>${alfresco.sdk.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
 
         <!-- Filter resources in any sub-project with this config -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>3.2.0</version>
           <configuration>
             <encoding>UTF-8</encoding>
             <propertiesEncoding>UTF-8</propertiesEncoding>
@@ -216,6 +204,7 @@
               <nonFilteredFileExtension>ico</nonFilteredFileExtension>
               <nonFilteredFileExtension>psd</nonFilteredFileExtension>
               <nonFilteredFileExtension>js</nonFilteredFileExtension>
+              <nonFilteredFileExtension>sql</nonFilteredFileExtension>
             </nonFilteredFileExtensions>
           </configuration>
         </plugin>
@@ -231,20 +220,6 @@
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>3.0.0-M1</version>
           <executions>
-            <execution>
-              <id>integration-test</id>
-              <phase>integration-test</phase>
-              <goals>
-                <goal>integration-test</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>verify-test</id>
-              <phase>verify</phase>
-              <goals>
-                <goal>verify</goal>
-              </goals>
-            </execution>
           </executions>
           <dependencies>
             <dependency>
@@ -350,6 +325,7 @@
             </goals>
             <configuration>
               <excludes>
+                <exclude>**/module/**</exclude>
                 <exclude>**/webscripts/**</exclude>
                 <exclude>**/site-webscripts/**</exclude>
                 <exclude>**/*.lib.js</exclude>
@@ -428,6 +404,17 @@
   <repositories>
     <!-- For internal use only (atolcd) -->
     <repository>
+      <id>maven-registry</id>
+      <name>Atol CD Releases</name>
+      <url>https://maven-registry.priv.atolcd.com</url>
+      <releases>
+        <updatePolicy>always</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
       <id>maven-snapshot-registry</id>
       <name>Atol CD Snapshots</name>
       <url>https://maven-snapshot-registry.priv.atolcd.com</url>
@@ -442,6 +429,13 @@
     <repository>
       <id>alfresco-public</id>
       <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+    </repository>
+    <repository>
+      <id>alfresco-enterprise</id>
+      <url>https://artifacts.alfresco.com/nexus/content/groups/private</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
 
     <!--
@@ -458,12 +452,6 @@
     <!-- Alfresco Enterprise Edition Artifacts, put username/pwd for server in settings.xml -->
     <!-- http://docs.alfresco.com/5.0/tasks/alfresco-sdk-tutorials-configure-maven-enterprise.html -->
     <!-- Uncomment this repository if you want to build AuditShare for Enterprise version -->
-    <!--
-    <repository>
-      <id>alfresco-private-repository</id>
-      <url>https://artifacts.alfresco.com/nexus/content/groups/private</url>
-    </repository>
-    -->
   </repositories>
 
   <modules>
@@ -471,6 +459,5 @@
     <module>audit-share-share</module>
     <module>audit-share-platform-docker</module>
     <module>audit-share-share-docker</module>
-    <module>audit-share-ass-docker</module>
   </modules>
 </project>
