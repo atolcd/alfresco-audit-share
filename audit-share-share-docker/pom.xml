@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>audit-share-share-docker</artifactId>
   <name>Alfresco Share Docker Module</name>
@@ -9,7 +9,7 @@
 
   <parent>
     <groupId>com.atolcd.alfresco</groupId>
-    <artifactId>auditshare-72X</artifactId>
+    <artifactId>auditshare-73X</artifactId>
     <version>2.1.2-SNAPSHOT</version>
   </parent>
 
@@ -19,7 +19,7 @@
   <dependencies>
     <dependency>
       <groupId>com.atolcd.alfresco</groupId>
-      <artifactId>auditshare-72X-share</artifactId>
+      <artifactId>auditshare-73X-share</artifactId>
       <version>2.1.2-SNAPSHOT</version>
     </dependency>
     <dependency>

@@ -63,7 +63,7 @@ services:
       - audit-share-ass-volume:/opt/alfresco-search-services/data
 
   transform-core-aio:
-    image: alfresco/alfresco-transform-core-aio:2.6.0
+    image: alfresco/alfresco-transform-core-aio:3.0.0
     environment:
       JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
       ACTIVEMQ_URL: "nio://activemq:61616"

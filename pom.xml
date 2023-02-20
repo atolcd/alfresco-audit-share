@@ -3,7 +3,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.atolcd.alfresco</groupId>
-  <artifactId>auditshare-72X</artifactId>
+  <artifactId>auditshare-73X</artifactId>
   <version>2.1.2-SNAPSHOT</version>
   <name>AuditShare</name>
   <description>Alfresco and Share modules - AuditShare</description>
@@ -15,17 +15,17 @@
 
   <properties>
     <!-- Alfresco Maven Plugin version to use -->
-    <alfresco.sdk.version>4.4.0</alfresco.sdk.version>
+    <alfresco.sdk.version>4.5.0</alfresco.sdk.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Properties used in dependency declarations, you don't need to change these -->
     <alfresco.groupId>org.alfresco</alfresco.groupId>
     <alfresco.bomDependencyArtifactId>acs-packaging</alfresco.bomDependencyArtifactId>
-    <alfresco.platform.version>7.2.0.3</alfresco.platform.version>
+    <alfresco.platform.version>7.3.1</alfresco.platform.version>
     <alfresco.platform.docker.user>alfresco</alfresco.platform.docker.user>
-    <alfresco.share.version>14.96</alfresco.share.version>
-    <alfresco.share.docker.version>7.2.0.3</alfresco.share.docker.version>
+    <alfresco.share.version>17.137</alfresco.share.version>
+    <alfresco.share.docker.version>7.3.1</alfresco.share.docker.version>
 
     <!-- Docker images -->
     <docker.acs.image>client-docker-registry.atolcd.com/alfresco/base-images/alfresco-content-repository-atolcd</docker.acs.image>
@@ -34,7 +34,7 @@
     <docker.activemq.image>client-docker-registry.atolcd.com/alfresco/base-images/alfresco-activemq-atolcd</docker.activemq.image>
 
     <!-- Alfresco search service -->
-    <alfresco.ass.version>2.0.3.6</alfresco.ass.version>
+    <alfresco.ass.version>2.0.6</alfresco.ass.version>
 
     <!-- ActiveMQ -->
     <activemq.version>5.17.1</activemq.version>
@@ -50,7 +50,8 @@
     <test.acs.endpoint.path/>
 
     <!-- Pour le build jenkins -->
-    <java.version>11</java.version>
+    <java.version>17</java.version>
+
 
     <keystore.settings> -Dencryption.keystore.type=JCEKS -Dencryption.cipherAlgorithm=DESede/CBC/PKCS5Padding -Dencryption.keyAlgorithm=DESede -Dencryption.keystore.location=/usr/local/tomcat/shared/classes/alfresco/extension/keystore/keystore -Dmetadata-keystore.password=mp6yc0UD9e -Dmetadata-keystore.aliases=metadata -Dmetadata-keystore.metadata.password=oKIWzVdEdA -Dmetadata-keystore.metadata.algorithm=DESede -Dssl.keystore.password=4s@Xssx!tLSYqsdW -Dssl.truststore.password=4s@Xssx!tLSYqsdW
     </keystore.settings>
@@ -377,6 +378,24 @@
             <version>3.8.0</version>
             <configuration>
               <release>11</release>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>java17</id>
+      <activation>
+        <jdk>[17.0,)</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.8.0</version>
+            <configuration>
+              <release>17</release>
             </configuration>
           </plugin>
         </plugins>

@@ -9,6 +9,7 @@ SGBD supportés :
 
 
 ## [Unreleased]
+- Migration SDK 4.5 et compatibilité Alfresco 7.3.1
 
 ## [2.1.2] - 2023-02-22
 ### Changed
