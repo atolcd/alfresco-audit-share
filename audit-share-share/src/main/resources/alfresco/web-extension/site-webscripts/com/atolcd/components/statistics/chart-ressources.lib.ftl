@@ -11,7 +11,7 @@
 
   <!-- select2 loading -->
   <@link rel="stylesheet" type="text/css" href="${page.url.context}/res/components/atolcd/statistics/select2/select2.css" />
-  <@script type="text/javascript" src="${page.url.context}/res/js/lib/jquery-1.11.1/jquery-1.11.1.min.js"></@script>
+  <@script type="text/javascript" src="${page.url.context}/res/js/lib/jquery-1.12.4/jquery-1.12.4.min.js"></@script>
   <@script type="text/javascript" src="${page.url.context}/res/components/atolcd/statistics/select2/select2.js"></@script>
 
   <#assign shortLocale = "en" />

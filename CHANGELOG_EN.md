@@ -9,9 +9,14 @@ Supported DBMS:
 
 
 ## [Unreleased]
+
+## [2.1.2] - 2023-02-22
 ### Changed
 - SDK 4.4 migration and Alfresco 7.2.0 compatibility
 - Remove unused context.xml files
+
+### Fixed
+- jQuery dependency version
 
 ## [2.1.1] - 2022-05-10
 ### Fixed

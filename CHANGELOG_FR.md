@@ -9,9 +9,14 @@ SGBD supportés :
 
 
 ## [Unreleased]
+
+## [2.1.2] - 2023-02-22
 ### Changed
 - Migration SDK 4.4 et compatibilité Alfresco 7.2.0
 - Suppression des fichiers context.xml inutiles
+
+### Fixed
+- Correction dépendance à la version de jQuery
 
 ## [2.1.1] - 2022-05-10
 ### Fixed
