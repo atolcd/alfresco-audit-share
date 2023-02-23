@@ -51,11 +51,14 @@ services:
     image: ${docker.ass.image}:${alfresco.ass.version}
     environment:
       SOLR_ALFRESCO_HOST: audit-share-acs
-      SOLR_ALFRESCO_PORT: 8983
+      SOLR_ALFRESCO_PORT: 8080
       SOLR_SOLR_HOST: audit-share-ass
       SOLR_SOLR_PORT: 8983
       SOLR_CREATE_ALFRESCO_DEFAULTS: alfresco,archive
-      ALFRESCO_SECURE_COMMS: https
+      ALFRESCO_SECURE_COMMS: "secret"
+      # SHARED SECRET VALUE
+      JAVA_TOOL_OPTIONS: "
+        -Dalfresco.secureComms.secret=secret"
     ports:
       - "8983:8983"
     volumes:
@@ -75,8 +78,9 @@ services:
     links:
       - activemq
 
+  # Block to comment in Community version
   transform-router:
-    image: docker-alfresco-mirror.priv.atolcd.com/alfresco/alfresco-transform-router:1.5.3
+    image: quay.io/alfresco/alfresco-transform-router:2.0.0
     environment:
       JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
       ACTIVEMQ_URL: "nio://activemq:61616"
@@ -88,7 +92,8 @@ services:
       - activemq
 
   shared-file-store:
-    image: docker-alfresco-mirror.priv.atolcd.com/alfresco/alfresco-shared-file-store:1.5.3
+    image: quay.io/alfresco/alfresco-shared-file-store:2.0.0
+    # Community : alfresco/alfresco-shared-file-store:0.16.1
     environment:
       JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
       scheduler.content.age.millis: 86400000
@@ -99,7 +104,7 @@ services:
       - sfs-data:/tmp/Alfresco/sfs
 
 #  transform-dte-engine:
-#    image: docker-alfresco-mirror.priv.atolcd.com/alfresco/transform-dte-engine:1.2.0
+#    image: alfresco/transform-dte-engine:1.2.0
 #    environment:
 #      JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80 -DdteServerUrl=http://alfresco-dte.dvt.cloud.priv.atolcd.com:8080/transformation-backend"
 #      ACTIVEMQ_URL: "nio://activemq:61616"

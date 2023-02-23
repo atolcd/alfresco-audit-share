@@ -9,7 +9,7 @@ This app displays sites and repository usage info: number of created/read/update
 In sites, others informations are "audited" concerning wiki, blog and discussions components but also users connected and sites volumetry.  
 
 Works with:
- - Alfresco Enterprise 4.2.x, 5.0.x, 5.1.x, 5.2.x, 6.1.X, 6.2.x, 7.0.x, 7.1.X (should works on Community versions but not tested)
+ - Alfresco Enterprise 4.2.x, 5.0.x, 5.1.x, 5.2.x, 6.1.X, 6.2.x, 7.0.x, 7.1.X, 7.2.X, 7.3.X (should works on Community versions but not tested)
 
 
 Building the module
@@ -19,7 +19,7 @@ Check out the project if you have not already done so
         git clone https://github.com/atolcd/alfresco-audit-share.git
 
 Maven build scripts are provided to build AMP files containing the custom files.  
-**Before building, ensure you have correctly configured repositories in the parent pom.xml file (alfresco-public for Community, alfresco-private-repository for Enterprise).**  
+**Before building, ensure you have correctly configured repositories in the parent pom.xml and docker-compose.yml files (alfresco-public for Community, alfresco-private-repository for Enterprise).**  
 
 To build AMP files, run the following command from the base project directory:
 
@@ -98,6 +98,7 @@ Contributors:
 - [Laurent MEUNIER](https://github.com/lmeunier)
 - [Zylknet](https://www.zylk.net)
 - [Etienne PERRIER](https://github.com/etienneperrier)
+- [Fabien CHENE](https://github.com/CheneFabien)
 
 
 
