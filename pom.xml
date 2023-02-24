@@ -27,17 +27,25 @@
     <alfresco.share.version>14.96</alfresco.share.version>
     <alfresco.share.docker.version>7.2.0.3</alfresco.share.docker.version>
 
-    <!-- Docker images -->
-    <docker.acs.image>client-docker-registry.atolcd.com/alfresco/base-images/alfresco-content-repository-atolcd</docker.acs.image>
-    <docker.share.image>client-docker-registry.atolcd.com/alfresco/base-images/alfresco-share-atolcd</docker.share.image>
-    <docker.ass.image>client-docker-registry.atolcd.com/alfresco/base-images/alfresco-search-services-atolcd</docker.ass.image>
-    <docker.activemq.image>client-docker-registry.atolcd.com/alfresco/base-images/alfresco-activemq-atolcd</docker.activemq.image>
+    <!-- Docker Enterprise images -->
+    <docker.acs.image>quay.io/alfresco/alfresco-content-repository</docker.acs.image>
+    <docker.share.image>quay.io/alfresco/alfresco-share</docker.share.image>
+
+    <!-- Docker Community images -->
+    <!-- 
+      <docker.acs.image>alfresco/alfresco-content-repository-community</docker.acs.image>
+      <docker.share.image>alfresco/alfresco-share</docker.share.image>
+    -->
+
+    <docker.ass.image>alfresco/alfresco-search-services</docker.ass.image>
+    <docker.activemq.image>alfresco/alfresco-activemq</docker.activemq.image>
 
     <!-- Alfresco search service -->
     <alfresco.ass.version>2.0.3.6</alfresco.ass.version>
 
     <!-- ActiveMQ -->
-    <activemq.version>5.17.1</activemq.version>
+    <activemq.version>5.17.1-jre11-rockylinux8</activemq.version>
+    <apache.activemq.version>5.17.1</apache.activemq.version>
 
     <!-- Environment configuration properties -->
     <share.port>8180</share.port>
@@ -87,7 +95,7 @@
     <dependency>
       <groupId>org.apache.activemq</groupId>
       <artifactId>activemq-all</artifactId>
-      <version>${activemq.version}</version>
+      <version>${apache.activemq.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -75,8 +75,9 @@ services:
     links:
       - activemq
 
+  # Only available for Enterprise version
   transform-router:
-    image: docker-alfresco-mirror.priv.atolcd.com/alfresco/alfresco-transform-router:1.5.3
+    image: quay.io/alfresco/alfresco-transform-router:1.5.3
     environment:
       JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
       ACTIVEMQ_URL: "nio://activemq:61616"
@@ -88,7 +89,8 @@ services:
       - activemq
 
   shared-file-store:
-    image: docker-alfresco-mirror.priv.atolcd.com/alfresco/alfresco-shared-file-store:1.5.3
+    image: quay.io/alfresco/alfresco-shared-file-store:1.5.3
+    # Community : alfresco/alfresco-shared-file-store:0.16.1
     environment:
       JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
       scheduler.content.age.millis: 86400000
@@ -99,9 +101,9 @@ services:
       - sfs-data:/tmp/Alfresco/sfs
 
 #  transform-dte-engine:
-#    image: docker-alfresco-mirror.priv.atolcd.com/alfresco/transform-dte-engine:1.2.0
+#    image: alfresco/transform-dte-engine:1.2.0
 #    environment:
-#      JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80 -DdteServerUrl=http://alfresco-dte.dvt.cloud.priv.atolcd.com:8080/transformation-backend"
+#      JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80 -DdteServerUrl=http://alfresco-dte-hostname:8080/transformation-backend"
 #      ACTIVEMQ_URL: "nio://activemq:61616"
 #      ACTIVEMQ_USER: "admin"
 #      ACTIVEMQ_PASSWORD: "admin"
