@@ -9,7 +9,7 @@
 
   <parent>
     <groupId>com.atolcd.alfresco</groupId>
-    <artifactId>auditshare-73X</artifactId>
+    <artifactId>auditshare-74X</artifactId>
     <version>2.1.3-SNAPSHOT</version>
   </parent>
 
@@ -19,13 +19,14 @@
   <dependencies>
     <dependency>
       <groupId>com.atolcd.alfresco</groupId>
-      <artifactId>auditshare-73X-repo</artifactId>
+      <artifactId>auditshare-74X-repo</artifactId>
       <version>2.1.3-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>de.fmaul</groupId>
-      <artifactId>javascript-console-7X-repo</artifactId>
-      <version>0.7-SNAPSHOT</version>
+      <groupId>org.orderofthebee.support-tools</groupId>
+      <artifactId>support-tools-repo</artifactId>
+      <version>${support-tools.version}</version>
+      <classifier>amp</classifier>
       <type>amp</type>
     </dependency>
     <!-- Uncomment this dependency if you already have the AMP in your M2_HOME folder
@@ -93,6 +94,7 @@
                     <exclude>**/*.jar</exclude>
                     <exclude>**/*.so</exclude>
                     <exclude>**/*.gz</exclude>
+                    <exclude>**/*.amp</exclude>
                   </excludes>
                 </resource>
               </resources>
@@ -114,6 +116,7 @@
                     <include>**/*.jar</include>
                     <include>**/*.so</include>
                     <include>**/*.gz</include>
+                    <include>**/*.amp</include>
                   </includes>
                 </resource>
               </resources>

@@ -36,7 +36,7 @@ services:
       - audit-share-postgres
 
   audit-share-postgres:
-    image: postgres:13.3
+    image: postgres:14.4
     environment:
       POSTGRES_DB: alfresco
       POSTGRES_USER: alfresco
@@ -66,7 +66,7 @@ services:
       - audit-share-ass-volume:/opt/alfresco-search-services/data
 
   transform-core-aio:
-    image: alfresco/alfresco-transform-core-aio:3.0.0
+    image: alfresco/alfresco-transform-core-aio:4.0.0
     environment:
       JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
       ACTIVEMQ_URL: "nio://activemq:61616"
@@ -80,7 +80,7 @@ services:
 
   # Block to comment in Community version
   transform-router:
-    image: quay.io/alfresco/alfresco-transform-router:2.0.0
+    image: quay.io/alfresco/alfresco-transform-router:3.0.0
     environment:
       JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
       ACTIVEMQ_URL: "nio://activemq:61616"
@@ -92,7 +92,7 @@ services:
       - activemq
 
   shared-file-store:
-    image: quay.io/alfresco/alfresco-shared-file-store:2.0.0
+    image: quay.io/alfresco/alfresco-shared-file-store:3.0.0
     # Community : alfresco/alfresco-shared-file-store:0.16.1
     environment:
       JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
@@ -104,7 +104,7 @@ services:
       - sfs-data:/tmp/Alfresco/sfs
 
 #  transform-dte-engine:
-#    image: alfresco/transform-dte-engine:1.2.0
+#    image: alfresco/transform-dte-engine:2.4.0
 #    environment:
 #      JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80 -DdteServerUrl=http://alfresco-dte.dvt.cloud.priv.atolcd.com:8080/transformation-backend"
 #      ACTIVEMQ_URL: "nio://activemq:61616"

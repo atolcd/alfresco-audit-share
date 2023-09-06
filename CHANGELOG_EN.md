@@ -9,6 +9,7 @@ Supported DBMS:
 
 
 ## [Unreleased]
+- SDK 4.6 migration and Alfresco 7.4.1 compatibility
 
 ## [2.1.3] - 2023-04-14
 ### Changed
