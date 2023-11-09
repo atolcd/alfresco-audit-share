@@ -29,14 +29,15 @@ import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.atolcd.auditshare.repo.xml.Group;
 import com.atolcd.auditshare.repo.xml.ReferentielGroups;
 
 public class AuditShareReferentielServiceImpl implements AuditShareReferentielService {
 
-  public static final Logger logger = Logger.getLogger(AuditShareReferentielServiceImpl.class.getName());
+  public static final Logger logger = LoggerFactory.getLogger(AuditShareReferentielServiceImpl.class.getName());
 
   private NodeService        nodeService;
   private ContentService     contentService;
@@ -67,7 +68,7 @@ public class AuditShareReferentielServiceImpl implements AuditShareReferentielSe
         // Initialisation du référentiel des groupes
         return parseReferentielGroups(xmlStream);
       } else {
-        logger.error("NodeRef non trouvé pour l'id passé en paramètre : " + id);
+        logger.error("NodeRef non trouvé pour l'id passé en paramètre : {}", id);
       }
     } catch (Exception e) {
       logger.error("Impossible de parser le référentiel ", e);
@@ -95,7 +96,7 @@ public class AuditShareReferentielServiceImpl implements AuditShareReferentielSe
 
       if(logger.isInfoEnabled()) {
         logger.info("Parsing du référentiel des groupes d'utilisateurs [OK]");
-        logger.info("Nombre de groupes : " + referentiel.getGroups().size());
+        logger.info("Nombre de groupes : {}", referentiel.getGroups().size());
       }
     } catch (Exception e) {
       logger.error("Erreur lors du parsing du référentiel des groupes d'utilisateurs", e);
