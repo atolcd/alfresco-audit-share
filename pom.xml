@@ -59,10 +59,7 @@
     <java.version>17</java.version>
 
     <!-- AMP modules -->
-    <support-tools.version>1.2.0.0</support-tools.version>
-
-    <!-- JAR dependencies -->
-    <log4j.version>2.20.0</log4j.version>
+    <support-tools.version>1.2.1.0</support-tools.version>
 
     <keystore.settings>
       -Dencryption.keystore.type=JCEKS
