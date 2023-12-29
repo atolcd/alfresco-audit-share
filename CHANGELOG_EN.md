@@ -12,6 +12,7 @@ Supported DBMS:
 - SDK 4.6 migration and Alfresco 7.4.1 compatibility
 - Upgrade to log4j2 - ACS 7.4 compatibility
 - Updates modules "ootbee-support-tools" - ACS 7.4 compatibility
+- Remove AtolCD internal repositories
 
 ## [2.1.3] - 2023-04-14
 ### Changed

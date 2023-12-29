@@ -12,6 +12,7 @@ SGBD supportés :
 - Migration SDK 4.6 et compatibilité Alfresco 7.4.1
 - Passage à log4j2 - compatibilité ACS 7.4
 - Mise à jour des modules "ootbee-support-tools" - compatibilité ACS 7.4
+- Suppression des repo internes AtolCD
 
 ## [2.1.3] - 2023-04-14
 ### Changed

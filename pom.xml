@@ -85,7 +85,6 @@
       <artifactId>alfresco-remote-api</artifactId>
       <scope>provided</scope>
     </dependency>
-
     <dependency>
       <groupId>org.apache.activemq</groupId>
       <artifactId>activemq-all</artifactId>
@@ -93,15 +92,9 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <dependencyManagement>
     <dependencies>
-      <!-- This will import the dependencyManagement for all artifacts in the selected Alfresco platform.
-                 NOTE: You still need to define dependencies in your POM, but you can omit version as
-                       it's enforced by this dependencyManagement.
-                 NOTE: It defaults to the latest version this SDK pom has been tested with,
-                       but alfresco version can/should be overridden in your project's pom
-            -->
+      <!-- This will import the dependencyManagement for all artifacts in the selected Alfresco platform. NOTE: You still need to define dependencies in your POM, but you can omit version as it's enforced by this dependencyManagement. NOTE: It defaults to the latest version this SDK pom has been tested with, but alfresco version can/should be overridden in your project's pom -->
       <dependency>
         <groupId>${alfresco.groupId}</groupId>
         <artifactId>${alfresco.bomDependencyArtifactId}</artifactId>
@@ -109,8 +102,7 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <!-- Redefine the following Share dependencies as they have different version numbers than platform.
-                 They are defined in alfresco-platform-distribution... -->
+      <!-- Redefine the following Share dependencies as they have different version numbers than platform. They are defined in alfresco-platform-distribution... -->
       <dependency>
         <groupId>${alfresco.groupId}</groupId>
         <artifactId>share</artifactId>
@@ -132,7 +124,6 @@
         <classifier>classes</classifier>
         <scope>provided</scope>
       </dependency>
-
     </dependencies>
   </dependencyManagement>
 
@@ -404,52 +395,11 @@
     </profile>
   </profiles>
 
-  <!-- For internal use only (atolcd) -->
-  <distributionManagement>
-    <repository>
-      <id>maven-registry</id>
-      <url>https://maven-registry.priv.atolcd.com</url>
-      <name>Releases</name>
-    </repository>
-    <snapshotRepository>
-      <id>maven-snapshot-registry</id>
-      <url>https://maven-snapshot-registry.priv.atolcd.com</url>
-      <name>Snapshot</name>
-    </snapshotRepository>
-  </distributionManagement>
 
   <!--
     Alfresco Maven Repositories
   -->
   <repositories>
-    <!-- For internal use only (atolcd) -->
-    <repository>
-      <id>maven-registry</id>
-      <name>Atol CD Releases</name>
-      <url>https://maven-registry.priv.atolcd.com</url>
-      <releases>
-        <updatePolicy>always</updatePolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>maven-snapshot-registry</id>
-      <name>Atol CD Snapshots</name>
-      <url>https://maven-snapshot-registry.priv.atolcd.com</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>alfresco-public</id>
-      <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
-    </repository>
     <repository>
       <id>alfresco-enterprise</id>
       <url>https://artifacts.alfresco.com/nexus/content/groups/private</url>
@@ -457,7 +407,10 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
-
+    <repository>
+      <id>alfresco-public</id>
+      <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+    </repository>
     <!--
     <repository>
       <id>alfresco-public-snapshots</id>
