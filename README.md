@@ -99,6 +99,7 @@ Contributors:
 - [Zylknet](https://www.zylk.net)
 - [Etienne PERRIER](https://github.com/etienneperrier)
 - [Fabien CHENE](https://github.com/CheneFabien)
+- [Justin Poinsot](https://github.com/jupatolcd)
 
 
 

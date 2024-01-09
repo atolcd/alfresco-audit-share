@@ -8,7 +8,8 @@ Supported DBMS:
 - DB2
 
 
-## [Unreleased]
+## [2.2.0] - 2024-01-09
+### Changed
 - SDK 4.6 migration and Alfresco 7.4.1 compatibility
 - Upgrade to log4j2 - ACS 7.4 compatibility
 - Updates modules "ootbee-support-tools" - ACS 7.4 compatibility
