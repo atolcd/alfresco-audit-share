@@ -7,9 +7,9 @@ SGBD supportés :
 - SQL Server
 - DB2
 
-
 ## [2.2.0] - 2024-01-09
 ### Changed
+- Migration SDK 4.7 et compatibilité Alfresco 23.1
 - Migration SDK 4.6 et compatibilité Alfresco 7.4.1
 - Passage à log4j2 - compatibilité ACS 7.4
 - Mise à jour des modules "ootbee-support-tools" - compatibilité ACS 7.4

@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import org.alfresco.web.extensibility.SlingshotEvaluatorUtil;
 import org.alfresco.web.site.SlingshotUserFactory;

@@ -36,7 +36,7 @@ services:
       - audit-share-postgres
 
   audit-share-postgres:
-    image: postgres:14.4
+    image: postgres:15.4
     environment:
       POSTGRES_DB: alfresco
       POSTGRES_USER: alfresco
@@ -66,7 +66,7 @@ services:
       - audit-share-ass-volume:/opt/alfresco-search-services/data
 
   transform-core-aio:
-    image: alfresco/alfresco-transform-core-aio:4.0.0
+    image: alfresco/alfresco-transform-core-aio:5.0.1
     environment:
       JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
       ACTIVEMQ_URL: "nio://activemq:61616"
@@ -79,29 +79,29 @@ services:
       - activemq
 
   # Block to comment in Community version
-  transform-router:
-    image: quay.io/alfresco/alfresco-transform-router:3.0.0
-    environment:
-      JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
-      ACTIVEMQ_URL: "nio://activemq:61616"
-      CORE_AIO_URL : "http://transform-core-aio:8090"
-      FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
-    ports:
-      - 8095:8095
-    links:
-      - activemq
+  # transform-router:
+  #   image: quay.io/alfresco/alfresco-transform-router:3.0.0
+  #   environment:
+  #     JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
+  #     ACTIVEMQ_URL: "nio://activemq:61616"
+  #     CORE_AIO_URL : "http://transform-core-aio:8090"
+  #     FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
+  #   ports:
+  #     - 8095:8095
+  #   links:
+  #     - activemq
 
-  shared-file-store:
-    image: quay.io/alfresco/alfresco-shared-file-store:3.0.0
-    # Community : alfresco/alfresco-shared-file-store:0.16.1
-    environment:
-      JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
-      scheduler.content.age.millis: 86400000
-      scheduler.cleanup.interval: 86400000
-    ports:
-      - 8099:8099
-    volumes:
-      - sfs-data:/tmp/Alfresco/sfs
+  # shared-file-store:
+  #   image: quay.io/alfresco/alfresco-shared-file-store:3.0.0
+  #   # Community : alfresco/alfresco-shared-file-store:0.16.1
+  #   environment:
+  #     JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
+  #     scheduler.content.age.millis: 86400000
+  #     scheduler.cleanup.interval: 86400000
+  #   ports:
+  #     - 8099:8099
+  #   volumes:
+  #     - sfs-data:/tmp/Alfresco/sfs
 
 #  transform-dte-engine:
 #    image: alfresco/transform-dte-engine:2.4.0
@@ -131,7 +131,7 @@ volumes:
     external: true
   audit-share-ass-volume:
     external: true
-  sfs-data:
-    driver_opts:
-      type: tmpfs
-      device: tmpfs
+  # sfs-data:
+  #   driver_opts:
+  #     type: tmpfs
+  #     device: tmpfs

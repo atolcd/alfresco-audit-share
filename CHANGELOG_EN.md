@@ -7,9 +7,9 @@ Supported DBMS:
 - SQL Server
 - DB2
 
-
 ## [2.2.0] - 2024-01-09
 ### Changed
+- SDK 4.7 and Alfresco 23.1 Compatibility
 - SDK 4.6 migration and Alfresco 7.4.1 compatibility
 - Upgrade to log4j2 - ACS 7.4 compatibility
 - Updates modules "ootbee-support-tools" - ACS 7.4 compatibility

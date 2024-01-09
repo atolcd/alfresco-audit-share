@@ -22,9 +22,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -72,6 +73,19 @@ public class RequestWrapper extends HttpServletRequestWrapper {
                         }
                         return 0;
                     }
+                }
+                @Override
+                public boolean isFinished() {
+                  return false;
+                }
+
+                @Override
+                public boolean isReady() {
+                  return false;
+                }
+
+                @Override
+                public void setReadListener(ReadListener readListener) {
                 }
             };
         } else

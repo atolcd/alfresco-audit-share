@@ -3,7 +3,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.atolcd.alfresco</groupId>
-  <artifactId>auditshare-74X</artifactId>
+  <artifactId>auditshare-23X</artifactId>
   <version>2.2.0-SNAPSHOT</version>
   <name>AuditShare</name>
   <description>Alfresco and Share modules - AuditShare</description>
@@ -15,17 +15,17 @@
 
   <properties>
     <!-- Alfresco Maven Plugin version to use -->
-    <alfresco.sdk.version>4.5.0</alfresco.sdk.version>
+    <alfresco.sdk.version>4.7.0</alfresco.sdk.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Properties used in dependency declarations, you don't need to change these -->
     <alfresco.groupId>org.alfresco</alfresco.groupId>
     <alfresco.bomDependencyArtifactId>acs-packaging</alfresco.bomDependencyArtifactId>
-    <alfresco.platform.version>7.4.1</alfresco.platform.version>
+    <alfresco.platform.version>23.1.1</alfresco.platform.version>
     <alfresco.platform.docker.user>alfresco</alfresco.platform.docker.user>
-    <alfresco.share.version>21.16</alfresco.share.version>
-    <alfresco.share.docker.version>7.4.1</alfresco.share.docker.version>
+    <alfresco.share.version>23.1.0.269</alfresco.share.version>
+    <alfresco.share.docker.version>23.1.0</alfresco.share.docker.version>
 
     <!-- Docker Enterprise images -->
     <docker.acs.image>quay.io/alfresco/alfresco-content-repository</docker.acs.image>
@@ -42,8 +42,8 @@
     <alfresco.ass.version>2.0.8</alfresco.ass.version>
 
     <!-- ActiveMQ -->
-    <activemq.version>5.17.1-jre11-rockylinux8</activemq.version>
-    <apache.activemq.version>5.17.1</apache.activemq.version>
+    <activemq.version>5.18.3-jre17-rockylinux8</activemq.version>
+    <apache.activemq.version>5.18.3</apache.activemq.version>
 
     <!-- Environment configuration properties -->
     <share.port>8180</share.port>
