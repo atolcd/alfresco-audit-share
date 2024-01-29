@@ -9,6 +9,8 @@ SGBD supportés :
 
 
 ## [Unreleased]
+### Fixed
+- Erreur lors du parsing du nom de la page principale d'un wiki
 
 ## [2.1.3] - 2023-04-14
 ### Changed

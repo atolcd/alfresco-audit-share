@@ -51,7 +51,7 @@ function main() {
     }
 
     result.nodeRef = page.nodeRef.toString();
-    result.displayName = page.properties["cm:title"] || page.name.replace(/_/g, " ");
+    result.displayName = page.properties["cm:title"] || page.properties["cm:name"].replace(/_/g, " ");
   }
   else if (componentId == "discussions") {
     var discussion = container.childByNamePath(objectId);

@@ -9,6 +9,8 @@ Supported DBMS:
 
 
 ## [Unreleased]
+### Fixed
+- Parsing error of the wiki main page name
 
 ## [2.1.3] - 2023-04-14
 ### Changed
