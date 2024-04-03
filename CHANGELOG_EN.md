@@ -8,6 +8,10 @@ Supported DBMS:
 - DB2
 
 
+## [Unreleased]
+### Added
+- Brazilian translations
+
 ## [2.2.0] - 2025-04-10
 ### Refactor
 - Refactoring branch tags

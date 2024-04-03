@@ -8,6 +8,10 @@ SGBD supportés :
 - DB2
 
 
+## [Unreleased]
+### Added
+- Traduction brésiliennes
+
 ## [2.2.0] - 2025-04-10
 ### Refactor
 - Refactorisation des tags de branche
