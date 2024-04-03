@@ -100,7 +100,7 @@ Contributors:
 - [Etienne PERRIER](https://github.com/etienneperrier)
 - [Fabien CHENE](https://github.com/CheneFabien)
 - [Justin Poinsot](https://github.com/jupatolcd)
-
+- [Édnei Cristian](https://github.com/edneiCristian)
 
 
 LICENSE
