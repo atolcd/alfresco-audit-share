@@ -7,6 +7,10 @@ SGBD supportés :
 - SQL Server
 - DB2
 
+## [Unreleased]
+### Added
+- Traduction brésiliennes
+
 ## [2.2.0] - 2024-01-09
 ### Changed
 - Migration SDK 4.7 et compatibilité Alfresco 23.1
