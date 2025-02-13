@@ -52,7 +52,7 @@ public class DeleteAuditDelete extends DeclarativeWebScript implements Initializ
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(sqlSessionTemplate);
+		Assert.notNull(sqlSessionTemplate, "[Assertion failed] - this argument is required; it must not be null");
 	}
 
 	@Override
