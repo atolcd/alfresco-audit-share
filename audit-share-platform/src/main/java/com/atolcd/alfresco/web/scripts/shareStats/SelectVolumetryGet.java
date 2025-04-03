@@ -61,8 +61,8 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(sqlSessionTemplate);
-		Assert.notNull(siteService);
+		Assert.notNull(sqlSessionTemplate, "[Assertion failed] - this argument is required; it must not be null");
+		Assert.notNull(siteService, "[Assertion failed] - this argument is required; it must not be null");
 	}
 
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {

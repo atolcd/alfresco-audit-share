@@ -65,7 +65,7 @@ public class AuditShareScriptExtension extends BaseProcessorExtension implements
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    Assert.notNull(util);
+    Assert.notNull(util, "[Assertion failed] - this argument is required; it must not be null");
   }
 
   public boolean isMemberOfGroups(String groupIds) {

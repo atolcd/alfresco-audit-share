@@ -71,10 +71,10 @@ public class UpdateAuditPost extends DeclarativeWebScript implements Initializin
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.sqlSessionTemplate);
-		Assert.notNull(this.nodeService);
-		Assert.notNull(this.siteService);
-		Assert.notNull(this.wsSelectAudits);
+		Assert.notNull(this.sqlSessionTemplate, "[Assertion failed] - this argument is required; it must not be null");
+		Assert.notNull(this.nodeService, "[Assertion failed] - this argument is required; it must not be null");
+		Assert.notNull(this.siteService, "[Assertion failed] - this argument is required; it must not be null");
+		Assert.notNull(this.wsSelectAudits, "[Assertion failed] - this argument is required; it must not be null");
 	}
 
 	@Override
