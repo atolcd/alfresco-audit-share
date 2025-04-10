@@ -11,6 +11,9 @@ SGBD supportés :
 ### Added
 - Traduction brésiliennes
 
+### Fixed
+- Erreur lors du parsing du nom de la page principale d'un wiki
+
 ## [2.2.0] - 2024-01-09
 ### Changed
 - Migration SDK 4.6 et compatibilité Alfresco 7.4.1
