@@ -29,7 +29,7 @@
       <type>amp</type>
     </dependency>
     <!-- Uncomment this dependency if you already have the AMP in your M2_HOME folder
-         or see the documentation for 3rd party amps installation: https://docs.alfresco.com/content-services/latest/develop/sdk/#installing3rdpartyamps
+        or see the documentation for 3rd party amps installation: https://docs.alfresco.com/content-services/latest/develop/sdk/#installing3rdpartyamps
     <dependency>
       <groupId>de.fmaul</groupId>
       <artifactId>javascript-console-share</artifactId>
