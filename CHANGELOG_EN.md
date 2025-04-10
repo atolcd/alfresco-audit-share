@@ -8,7 +8,9 @@ Supported DBMS:
 - DB2
 
 
-## [Unreleased]
+## [2.2.0] - 2025-04-10
+### Refactor
+- Refactoring branch tags
 
 ## [2.1.4] - 2024-01-29
 ### Fixed

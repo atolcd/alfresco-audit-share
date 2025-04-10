@@ -8,7 +8,9 @@ SGBD supportés :
 - DB2
 
 
-## [Unreleased]
+## [2.2.0] - 2025-04-10
+### Refactor
+- Refactorisation des tags de branche
 
 ## [2.1.4] - 2024-01-29
 ### Fixed
