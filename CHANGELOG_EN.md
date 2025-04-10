@@ -11,6 +11,9 @@ Supported DBMS:
 ### Added
 - Brazilian translations
 
+### Fixed
+- Parsing error of the wiki main page name
+
 ## [2.2.0] - 2024-01-09
 ### Changed
 - SDK 4.7 and Alfresco 23.1 Compatibility
