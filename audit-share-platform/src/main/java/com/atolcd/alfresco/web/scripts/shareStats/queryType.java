@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -18,5 +18,5 @@
 package com.atolcd.alfresco.web.scripts.shareStats;
 
 public enum queryType {
-	read, created, deleted, updated, mostread, mostupdated;
+  read, created, deleted, updated, mostread, mostupdated;
 }

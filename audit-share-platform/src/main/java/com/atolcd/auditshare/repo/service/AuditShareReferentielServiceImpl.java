@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -57,6 +57,7 @@ public class AuditShareReferentielServiceImpl implements AuditShareReferentielSe
     this.nodeService = nodeService;
   }
 
+  @Override
   public List<Group> parseRefentielForNodeUUID(String id) {
     InputStream xmlStream = null;
     try {
@@ -84,6 +85,7 @@ public class AuditShareReferentielServiceImpl implements AuditShareReferentielSe
     return Collections.emptyList();
   }
 
+  @Override
   public List<Group> parseReferentielGroups(InputStream file) {
     ReferentielGroups referentiel = new ReferentielGroups();
     logger.info("Début du parsing du référentiel des groupes");
@@ -93,7 +95,7 @@ public class AuditShareReferentielServiceImpl implements AuditShareReferentielSe
       Unmarshaller unmarshaller = jc.createUnmarshaller();
       referentiel = (ReferentielGroups) unmarshaller.unmarshal(file);
 
-      if(logger.isInfoEnabled()) {
+      if (logger.isInfoEnabled()) {
         logger.info("Parsing du référentiel des groupes d'utilisateurs [OK]");
         logger.info("Nombre de groupes : " + referentiel.getGroups().size());
       }

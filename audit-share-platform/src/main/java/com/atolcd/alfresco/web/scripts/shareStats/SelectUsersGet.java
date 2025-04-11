@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -46,21 +46,21 @@ import com.atolcd.alfresco.helper.PermissionsHelper;
 
 public class SelectUsersGet extends DeclarativeWebScript implements InitializingBean {
   // Logger
-  private static final Log logger = LogFactory.getLog(SelectUsersGet.class);
+  private static final Log    logger                 = LogFactory.getLog(SelectUsersGet.class);
 
-  private SqlSessionTemplate sqlSessionTemplate;
-  private NodeService nodeService;
-  private SiteService siteService;
-  private AuthorityService authorityService;
-  private Long memberQnameId = null;
-  private Long personQnameId = null;
-  private Long containerQnameId = null;
+  private SqlSessionTemplate  sqlSessionTemplate;
+  private NodeService         nodeService;
+  private SiteService         siteService;
+  private AuthorityService    authorityService;
+  private Long                memberQnameId          = null;
+  private Long                personQnameId          = null;
+  private Long                containerQnameId       = null;
 
   private static final String SELECT_CONNECTED_USERS = "alfresco.atolcd.audit.selectConnectedUsers";
-  private static final String SELECT_QNAME_ID = "alfresco.atolcd.audit.selectQNameId";
-  private static final String SELECT_SITES_MEMBERS = "alfresco.atolcd.audit.selectSiteMember";
+  private static final String SELECT_QNAME_ID        = "alfresco.atolcd.audit.selectQNameId";
+  private static final String SELECT_SITES_MEMBERS   = "alfresco.atolcd.audit.selectSiteMember";
 
-  private static final String PARAM_GROUPS = "groups";
+  private static final String PARAM_GROUPS           = "groups";
 
   public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
     this.sqlSessionTemplate = sqlSessionTemplate;
@@ -89,7 +89,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
   @Override
   protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
     try {
-      Map<String, Object> model = new HashMap<String, Object>();
+      Map<String, Object> model = new HashMap<>();
       if (PermissionsHelper.isAuthorized(req)) {
         if (this.sqlSessionTemplate != null) {
           String type = req.getParameter("type");
@@ -125,7 +125,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 
   public List<String> selectConnectedUsers(AuditQueryParameters params, AtolAuthorityParameters atolAuthorityParameters) {
     // When the groups members list is empty, return an empty list without executing the query.
-    if (params !=null && params.getGroupsMembers() != null && params.getGroupsMembers().isEmpty()) {
+    if (params != null && params.getGroupsMembers() != null && params.getGroupsMembers().isEmpty()) {
       return Collections.emptyList();
     }
 
@@ -155,7 +155,8 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 
   public Set<String> selectNeverConnectedUsers(AuditQueryParameters auditQueryParameters, AtolAuthorityParameters atolAuthorityParameters) {
     // When the groups members list is empty, return an empty HashSet without executing the query.
-    if (auditQueryParameters != null && auditQueryParameters.getGroupsMembers() != null && auditQueryParameters.getGroupsMembers().isEmpty()) {
+    if (auditQueryParameters != null && auditQueryParameters.getGroupsMembers() != null
+        && auditQueryParameters.getGroupsMembers().isEmpty()) {
       return Collections.emptySet();
     }
 
@@ -163,7 +164,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 
     Set<String> usersSet;
     if (auditQueryParameters != null && auditQueryParameters.getGroupsMembers() != null) {
-      usersSet = new HashSet<String>(auditQueryParameters.getGroupsMembers());
+      usersSet = new HashSet<>(auditQueryParameters.getGroupsMembers());
     } else {
       usersSet = this.selectSiteMembers(atolAuthorityParameters);
     }
@@ -181,7 +182,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
     atolAuthorityParameters.setPersonQnameId(getContainerQnameId());
     List<String> groups = this.sqlSessionTemplate.selectList(SELECT_SITES_MEMBERS, atolAuthorityParameters);
 
-    Set<String> usersSet = new HashSet<String>(users.size());
+    Set<String> usersSet = new HashSet<>(users.size());
     usersSet.addAll(users);
     for (String group : groups) {
       if (group.startsWith("GROUP_")) {
@@ -193,7 +194,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
   }
 
   public List<String> getGroupsMembers(String groups) {
-    Set<String> groupsMembers = new HashSet<String>();
+    Set<String> groupsMembers = new HashSet<>();
     if (groups != null) {
       String[] groupsToken = groups.split(",");
       for (String group : groupsToken) {
@@ -208,7 +209,7 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
     if (groupsMembers.isEmpty()) {
       return Collections.emptyList();
     } else {
-      return new ArrayList<String>(groupsMembers);
+      return new ArrayList<>(groupsMembers);
     }
   }
 

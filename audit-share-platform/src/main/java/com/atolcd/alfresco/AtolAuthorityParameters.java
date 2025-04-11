@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -24,49 +24,49 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class AtolAuthorityParameters {
-	private long memberQnameId = 0;
-	private long personQnameId = 0;
-	private List<String> groupNames = null;
+  private long         memberQnameId = 0;
+  private long         personQnameId = 0;
+  private List<String> groupNames    = null;
 
-	public AtolAuthorityParameters() {
-		groupNames = new ArrayList<String>();
-	}
+  public AtolAuthorityParameters() {
+    groupNames = new ArrayList<>();
+  }
 
-	public long getMemberQnameId() {
-		return memberQnameId;
-	}
+  public long getMemberQnameId() {
+    return memberQnameId;
+  }
 
-	public void setMemberQnameId(long memberQnameId) {
-		this.memberQnameId = memberQnameId;
-	}
+  public void setMemberQnameId(long memberQnameId) {
+    this.memberQnameId = memberQnameId;
+  }
 
-	public long getPersonQnameId() {
-		return personQnameId;
-	}
+  public long getPersonQnameId() {
+    return personQnameId;
+  }
 
-	public void setPersonQnameId(long personQnameId) {
-		this.personQnameId = personQnameId;
-	}
+  public void setPersonQnameId(long personQnameId) {
+    this.personQnameId = personQnameId;
+  }
 
-	public List<String> getGroupNames() {
-		return groupNames;
-	}
+  public List<String> getGroupNames() {
+    return groupNames;
+  }
 
-	public void setGroupNames(List<String> groupNames) {
-		this.groupNames = groupNames;
-	}
+  public void setGroupNames(List<String> groupNames) {
+    this.groupNames = groupNames;
+  }
 
-	public void setSite(String siteName) {
-		groupNames.add("GROUP_site_" + siteName + "_SiteManager");
-		groupNames.add("GROUP_site_" + siteName + "_SiteCollaborator");
-		groupNames.add("GROUP_site_" + siteName + "_SiteContributor");
-		groupNames.add("GROUP_site_" + siteName + "_SiteConsumer");
-	}
+  public void setSite(String siteName) {
+    groupNames.add("GROUP_site_" + siteName + "_SiteManager");
+    groupNames.add("GROUP_site_" + siteName + "_SiteCollaborator");
+    groupNames.add("GROUP_site_" + siteName + "_SiteContributor");
+    groupNames.add("GROUP_site_" + siteName + "_SiteConsumer");
+  }
 
-	public String toJSON() throws JSONException {
-		JSONObject jsonResult = new JSONObject();
-		jsonResult.put("groupNames", groupNames);
+  public String toJSON() throws JSONException {
+    JSONObject jsonResult = new JSONObject();
+    jsonResult.put("groupNames", groupNames);
 
-		return jsonResult.toString();
-	}
+    return jsonResult.toString();
+  }
 }
