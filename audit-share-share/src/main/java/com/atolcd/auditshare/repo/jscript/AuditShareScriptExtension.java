@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -20,8 +20,6 @@ package com.atolcd.auditshare.repo.jscript;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-
-import jakarta.servlet.http.HttpSession;
 
 import org.alfresco.web.extensibility.SlingshotEvaluatorUtil;
 import org.alfresco.web.site.SlingshotUserFactory;
@@ -48,6 +46,8 @@ import org.springframework.extensions.webscripts.connector.Credentials;
 import org.springframework.extensions.webscripts.connector.Response;
 import org.springframework.extensions.webscripts.processor.BaseProcessorExtension;
 import org.springframework.util.Assert;
+
+import jakarta.servlet.http.HttpSession;
 
 public class AuditShareScriptExtension extends BaseProcessorExtension implements InitializingBean {
   private static final Log       logger                                    = LogFactory.getLog(AuditShareScriptExtension.class);

@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -27,9 +27,9 @@ import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.MalformedNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
+import org.alfresco.service.namespace.NamespaceService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -46,9 +46,9 @@ import com.atolcd.alfresco.AtolVolumetryEntry;
 import com.atolcd.alfresco.AuditEntry;
 
 public class InsertAuditPost extends DeclarativeWebScript implements InitializingBean {
-  public static final String INSERT_ENTRY           = "alfresco.atolcd.audit.insert.insertEntry";
-  public static final String INSERT_VOLUMETRY       = "alfresco.atolcd.audit.insert.insertVolumetry";
-  public static final String INSERT_VOLUMETRY_MULTI = "alfresco.atolcd.audit.insert.insertVolumetryMulti";
+  public static final String  INSERT_ENTRY           = "alfresco.atolcd.audit.insert.insertEntry";
+  public static final String  INSERT_VOLUMETRY       = "alfresco.atolcd.audit.insert.insertVolumetry";
+  public static final String  INSERT_VOLUMETRY_MULTI = "alfresco.atolcd.audit.insert.insertVolumetryMulti";
 
   private static final String SITE_TO_FIND           = "/service";
   public static final String  SITE_REPOSITORY        = "_repository";
@@ -89,7 +89,7 @@ public class InsertAuditPost extends DeclarativeWebScript implements Initializin
   @Override
   protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
     // Map that will be passed to the template
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
     model.put(MODEL_SUCCESS, false);
     try {
       // Check for the sqlMapClientTemplate Bean

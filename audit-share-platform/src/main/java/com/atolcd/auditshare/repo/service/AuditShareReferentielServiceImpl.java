@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -21,9 +21,6 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.Unmarshaller;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -34,6 +31,9 @@ import org.slf4j.LoggerFactory;
 
 import com.atolcd.auditshare.repo.xml.Group;
 import com.atolcd.auditshare.repo.xml.ReferentielGroups;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Unmarshaller;
 
 public class AuditShareReferentielServiceImpl implements AuditShareReferentielService {
 
@@ -58,6 +58,7 @@ public class AuditShareReferentielServiceImpl implements AuditShareReferentielSe
     this.nodeService = nodeService;
   }
 
+  @Override
   public List<Group> parseRefentielForNodeUUID(String id) {
     InputStream xmlStream = null;
     try {
@@ -85,6 +86,7 @@ public class AuditShareReferentielServiceImpl implements AuditShareReferentielSe
     return Collections.emptyList();
   }
 
+  @Override
   public List<Group> parseReferentielGroups(InputStream file) {
     ReferentielGroups referentiel = new ReferentielGroups();
     logger.info("Début du parsing du référentiel des groupes");
@@ -94,7 +96,7 @@ public class AuditShareReferentielServiceImpl implements AuditShareReferentielSe
       Unmarshaller unmarshaller = jc.createUnmarshaller();
       referentiel = (ReferentielGroups) unmarshaller.unmarshal(file);
 
-      if(logger.isInfoEnabled()) {
+      if (logger.isInfoEnabled()) {
         logger.info("Parsing du référentiel des groupes d'utilisateurs [OK]");
         logger.info("Nombre de groupes : {}", referentiel.getGroups().size());
       }

@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -49,10 +49,11 @@ public class ShareStatsUtils extends BaseTemplateProcessorExtension implements I
     this.siteService = siteService;
   }
 
+  @Override
   public void afterPropertiesSet() throws Exception {
-    Assert.notNull(nodeService, "There must be a NodeService");
-    Assert.notNull(personService, "There must be a PersonService");
-    Assert.notNull(siteService, "There must be a SiteService");
+    Assert.notNull(nodeService);
+    Assert.notNull(personService);
+    Assert.notNull(siteService);
   }
 
   public String getPersonFullName(String username) {
