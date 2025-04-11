@@ -52,7 +52,7 @@ public class PermissionsHelper implements InitializingBean {
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    Assert.notNull(siteService);
+    Assert.notNull(siteService, "There must be a siteService");
   }
 
   public static boolean isAuthorized(WebScriptRequest req) {

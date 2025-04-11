@@ -67,9 +67,9 @@ public class SelectNodeTypesGet extends DeclarativeWebScript implements Initiali
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    Assert.notNull(this.sqlSessionTemplate);
-    Assert.notNull(this.namespaceService);
-    Assert.notNull(this.dictionaryService);
+    Assert.notNull(this.sqlSessionTemplate, "There must be a sqlSessionTemplate");
+    Assert.notNull(this.namespaceService, "There must be a namespaceService");
+    Assert.notNull(this.dictionaryService, "There must be a dictionaryService");
   }
 
   @Override

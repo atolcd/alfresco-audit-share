@@ -8,6 +8,9 @@ SGBD supportés :
 - DB2
 
 ## [2.2.1] - 2025-04-10
+### Changed
+- Compatibilité Alfresco 23.4
+
 ### Added
 - Traduction brésiliennes
 

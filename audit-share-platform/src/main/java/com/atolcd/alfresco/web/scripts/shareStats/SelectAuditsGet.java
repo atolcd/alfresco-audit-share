@@ -101,8 +101,8 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    Assert.notNull(this.sqlSessionTemplate);
-    Assert.notNull(this.nodeService);
+    Assert.notNull(this.sqlSessionTemplate, "sqlSessionTemplate must not be null");
+    Assert.notNull(this.nodeService, "nodeService must not be null");
   }
 
   @Override

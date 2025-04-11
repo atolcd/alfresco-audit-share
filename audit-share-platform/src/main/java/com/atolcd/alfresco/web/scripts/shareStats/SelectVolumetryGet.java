@@ -61,10 +61,11 @@ public class SelectVolumetryGet extends DeclarativeWebScript implements Initiali
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(sqlSessionTemplate);
-		Assert.notNull(siteService);
+		Assert.notNull(sqlSessionTemplate, "There must be a sqlSessionTemplate");
+		Assert.notNull(siteService, "There must be a siteService");
 	}
 
+	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		try {
 			Long calculateTime = System.currentTimeMillis();

@@ -97,10 +97,10 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    Assert.notNull(wsSelectAudits);
-    Assert.notNull(siteService);
-    Assert.notNull(auditShareReferentielService);
-    Assert.notNull(authorityService);
+    Assert.notNull(wsSelectAudits, "There must be a wsSelectAudits");
+    Assert.notNull(siteService, "There must be a siteService");
+    Assert.notNull(auditShareReferentielService, "There must be a auditShareReferentielService");
+    Assert.notNull(authorityService, "There must be a authorityService");
   }
 
   @Override

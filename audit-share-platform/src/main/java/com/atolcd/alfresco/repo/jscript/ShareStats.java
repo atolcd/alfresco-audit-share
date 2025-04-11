@@ -108,11 +108,11 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    Assert.notNull(siteService);
-    Assert.notNull(searchService);
-    Assert.notNull(wsInsertAudits);
-    Assert.notNull(auditShareReferentielService);
-    Assert.notNull(sqlSessionTemplate);
+    Assert.notNull(siteService, "siteService must not be null");
+    Assert.notNull(searchService, "searchService must not be null");
+    Assert.notNull(wsInsertAudits, "wsInsertAudits must not be null");
+    Assert.notNull(auditShareReferentielService, "auditShareReferentielService must not be null");
+    Assert.notNull(sqlSessionTemplate, "sqlSessionTemplate must not be null");
   }
 
   public List<Group> getReferentiel(String refGroup) {

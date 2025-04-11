@@ -9,7 +9,7 @@
 
   <parent>
     <groupId>com.atolcd.alfresco</groupId>
-    <artifactId>auditshare-23X</artifactId>
+    <artifactId>auditshare-234X</artifactId>
     <version>2.2.1</version>
   </parent>
 
@@ -19,10 +19,10 @@
   <dependencies>
     <dependency>
       <groupId>com.atolcd.alfresco</groupId>
-      <artifactId>auditshare-23X-share</artifactId>
+      <artifactId>auditshare-234X-share</artifactId>
       <version>2.2.1</version>
     </dependency>
-    <!-- TEMPORARY COMMENT : Check Pull Request - Alfresco Content Services 23.1 compatibility : https://github.com/OrderOfTheBee/ootbee-support-tools/pull/215 -->
+    <!-- TEMPORARY COMMENT : Check Pull Request - Alfresco Content Services 23.4 compatibility : https://github.com/OrderOfTheBee/ootbee-support-tools/pull/215 -->
     <!-- <dependency>
       <groupId>org.orderofthebee.support-tools</groupId>
       <artifactId>support-tools-share</artifactId>

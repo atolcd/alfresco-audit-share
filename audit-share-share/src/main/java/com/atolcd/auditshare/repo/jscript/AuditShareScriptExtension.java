@@ -65,7 +65,7 @@ public class AuditShareScriptExtension extends BaseProcessorExtension implements
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    Assert.notNull(util);
+    Assert.notNull(util, "SlingshotEvaluatorUtil must be set");
   }
 
   public boolean isMemberOfGroups(String groupIds) {

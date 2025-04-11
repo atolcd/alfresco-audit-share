@@ -80,10 +80,10 @@ public class SelectUsersGet extends DeclarativeWebScript implements Initializing
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    Assert.notNull(this.sqlSessionTemplate);
-    Assert.notNull(this.nodeService);
-    Assert.notNull(this.siteService);
-    Assert.notNull(this.authorityService);
+    Assert.notNull(this.sqlSessionTemplate, "There must be a sqlSessionTemplate");
+    Assert.notNull(this.nodeService, "There must be a nodeService");
+    Assert.notNull(this.siteService, "There must be a siteService");
+    Assert.notNull(this.authorityService, "there must be an authorityService");
   }
 
   @Override

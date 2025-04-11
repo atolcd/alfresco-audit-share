@@ -36,7 +36,7 @@ public class SearchHelper implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(searchService);
+		Assert.notNull(searchService, "There must be a searchService");
 	}
 
 	/**

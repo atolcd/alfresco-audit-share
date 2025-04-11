@@ -117,7 +117,7 @@ services:
 #      - activemq
 
   activemq:
-    image: ${docker.activemq.image}:${activemq.version}
+    image: ${docker.activemq.image}:${docker.activemq.version}
     ports:
       - 8161:8161 # Web Console
       - 5672:5672 # AMQP

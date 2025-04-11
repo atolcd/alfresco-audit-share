@@ -8,6 +8,9 @@ Supported DBMS:
 - DB2
 
 ## [2.2.1] - 2025-04-10
+### Changed
+- Alfresco 23.4 Compatibility
+
 ### Added
 - Brazilian translations
 
