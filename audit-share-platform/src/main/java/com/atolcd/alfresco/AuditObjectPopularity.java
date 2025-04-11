@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -18,62 +18,62 @@
 package com.atolcd.alfresco;
 
 public class AuditObjectPopularity {
-	private int popularity;
-	private String auditObject; // 'audit_object' database field
-	private String objectName;
-	private String objectDisplayName;
-	private String auditSite;
-	private String siteComponent;
+  private int    popularity;
+  private String auditObject;      // 'audit_object' database field
+  private String objectName;
+  private String objectDisplayName;
+  private String auditSite;
+  private String siteComponent;
 
-	public AuditObjectPopularity() {
+  public AuditObjectPopularity() {
 
-	}
+  }
 
-	public int getPopularity() {
-		return popularity;
-	}
+  public int getPopularity() {
+    return popularity;
+  }
 
-	public void setPopularity(int popularity) {
-		this.popularity = popularity;
-	}
+  public void setPopularity(int popularity) {
+    this.popularity = popularity;
+  }
 
-	public String getAuditObject() {
-		return auditObject;
-	}
+  public String getAuditObject() {
+    return auditObject;
+  }
 
-	public void setAuditObject(String auditObject) {
-		this.auditObject = auditObject;
-	}
+  public void setAuditObject(String auditObject) {
+    this.auditObject = auditObject;
+  }
 
-	public String getObjectName() {
-		return objectName;
-	}
+  public String getObjectName() {
+    return objectName;
+  }
 
-	public void setObjectName(String objectName) {
-		this.objectName = objectName;
-	}
+  public void setObjectName(String objectName) {
+    this.objectName = objectName;
+  }
 
-	public String getObjectDisplayName() {
-		return objectDisplayName;
-	}
+  public String getObjectDisplayName() {
+    return objectDisplayName;
+  }
 
-	public void setObjectDisplayName(String objectDisplayName) {
-		this.objectDisplayName = objectDisplayName;
-	}
+  public void setObjectDisplayName(String objectDisplayName) {
+    this.objectDisplayName = objectDisplayName;
+  }
 
-	public String getAuditSite() {
-		return auditSite;
-	}
+  public String getAuditSite() {
+    return auditSite;
+  }
 
-	public void setAuditSite(String auditSite) {
-		this.auditSite = auditSite;
-	}
+  public void setAuditSite(String auditSite) {
+    this.auditSite = auditSite;
+  }
 
-	public String getSiteComponent() {
-		return siteComponent;
-	}
+  public String getSiteComponent() {
+    return siteComponent;
+  }
 
-	public void setSiteComponent(String siteComponent) {
-		this.siteComponent = siteComponent;
-	}
+  public void setSiteComponent(String siteComponent) {
+    this.siteComponent = siteComponent;
+  }
 }

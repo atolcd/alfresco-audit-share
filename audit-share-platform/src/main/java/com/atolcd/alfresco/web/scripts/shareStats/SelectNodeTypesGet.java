@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -75,7 +75,7 @@ public class SelectNodeTypesGet extends DeclarativeWebScript implements Initiali
   @Override
   protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
     try {
-      Map<String, Object> model = new HashMap<String, Object>();
+      Map<String, Object> model = new HashMap<>();
       if (PermissionsHelper.isAuthorized(req)) {
         // Check for the sqlMapClientTemplate Bean
         if (this.sqlSessionTemplate != null) {
@@ -106,7 +106,7 @@ public class SelectNodeTypesGet extends DeclarativeWebScript implements Initiali
     logger.info("Performing " + query + " ... ");
 
     if (auditNodeTypeList != null && !auditNodeTypeList.isEmpty()) {
-      List<AuditNodeType> res = new ArrayList<AuditNodeType>(auditNodeTypeList.size());
+      List<AuditNodeType> res = new ArrayList<>(auditNodeTypeList.size());
       for (AuditNodeType auditNodeType : auditNodeTypeList) {
         if (auditNodeType != null) {
           String myNodeType = auditNodeType.getNodeTypeValue();

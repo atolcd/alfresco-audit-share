@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -40,107 +40,106 @@ import com.atolcd.alfresco.AuditEntry;
 import com.atolcd.alfresco.helper.SearchHelper;
 
 public class UpdateAuditPost extends DeclarativeWebScript implements InitializingBean {
-	// SqlMapClientTemplate for MyBatis calls
-	private SqlSessionTemplate sqlSessionTemplate;
-	private NodeService nodeService;
-	private SiteService siteService;
-	private SelectAuditsGet wsSelectAudits;
+  // SqlMapClientTemplate for MyBatis calls
+  private SqlSessionTemplate  sqlSessionTemplate;
+  private NodeService         nodeService;
+  private SiteService         siteService;
+  private SelectAuditsGet     wsSelectAudits;
 
-	// MyBatis query ids
-	private static final String UPDATE_AUDIT_OBJECT = "alfresco.atolcd.audit.updateAuditEntry";
-	private static final String MODEL_SUCCESS = "success";
+  // MyBatis query ids
+  private static final String UPDATE_AUDIT_OBJECT = "alfresco.atolcd.audit.updateAuditEntry";
+  private static final String MODEL_SUCCESS       = "success";
 
-	// Logger
-	private static final Log logger = LogFactory.getLog(UpdateAuditPost.class);
+  // Logger
+  private static final Log    logger              = LogFactory.getLog(UpdateAuditPost.class);
 
-	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-		this.sqlSessionTemplate = sqlSessionTemplate;
-	}
+  public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+    this.sqlSessionTemplate = sqlSessionTemplate;
+  }
 
-	public void setNodeService(NodeService nodeService) {
-		this.nodeService = nodeService;
-	}
+  public void setNodeService(NodeService nodeService) {
+    this.nodeService = nodeService;
+  }
 
-	public void setSiteService(SiteService siteService) {
-		this.siteService = siteService;
-	}
+  public void setSiteService(SiteService siteService) {
+    this.siteService = siteService;
+  }
 
-	public void setWsSelectAudits(SelectAuditsGet wsSelectAudits) {
-		this.wsSelectAudits = wsSelectAudits;
-	}
+  public void setWsSelectAudits(SelectAuditsGet wsSelectAudits) {
+    this.wsSelectAudits = wsSelectAudits;
+  }
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.sqlSessionTemplate, "There must be a sqlSessionTemplate");
-		Assert.notNull(this.nodeService, "There must be a nodeService");
-		Assert.notNull(this.siteService, "There must be a siteService");
-		Assert.notNull(this.wsSelectAudits, "There must be a wsSelectAudits");
-	}
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    Assert.notNull(this.sqlSessionTemplate, "There must be a sqlSessionTemplate");
+    Assert.notNull(this.nodeService, "There must be a nodeService");
+    Assert.notNull(this.siteService, "There must be a siteService");
+    Assert.notNull(this.wsSelectAudits, "There must be a wsSelectAudits");
+  }
 
-	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		Map<String, Object> model = new HashMap<String, Object>();
+  @Override
+  protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    Map<String, Object> model = new HashMap<>();
 
-		// TODO: To be implemented for an administration interface
+    // TODO: To be implemented for an administration interface
 
-		model.put(MODEL_SUCCESS, true);
-		return model;
-	}
+    model.put(MODEL_SUCCESS, true);
+    return model;
+  }
 
-	public void updateAuditEntries() {
-		List<AuditEntry> list = wsSelectAudits.selectEntriesToUpdate();
-		updateAuditObjet(list);
-	}
+  public void updateAuditEntries() {
+    List<AuditEntry> list = wsSelectAudits.selectEntriesToUpdate();
+    updateAuditObjet(list);
+  }
 
-	public void updateAuditObjet(List<AuditEntry> auditEntries) {
-		for (AuditEntry auditEntry : auditEntries) {
-			NodeRef container = siteService.getContainer(auditEntry.getAuditSite(), auditEntry.getAuditAppName());
-			if (container != null) {
-				NodeRef child = getAuditNodeRef(container, auditEntry);
-				if (child != null) {
-					auditEntry.setAuditObject(child.toString());
-					sqlSessionTemplate.update(UPDATE_AUDIT_OBJECT, auditEntry);
-				}
-			}
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Audits successfully updated.");
-		}
-	}
+  public void updateAuditObjet(List<AuditEntry> auditEntries) {
+    for (AuditEntry auditEntry : auditEntries) {
+      NodeRef container = siteService.getContainer(auditEntry.getAuditSite(), auditEntry.getAuditAppName());
+      if (container != null) {
+        NodeRef child = getAuditNodeRef(container, auditEntry);
+        if (child != null) {
+          auditEntry.setAuditObject(child.toString());
+          sqlSessionTemplate.update(UPDATE_AUDIT_OBJECT, auditEntry);
+        }
+      }
+    }
+    if (logger.isDebugEnabled()) {
+      logger.debug("Audits successfully updated.");
+    }
+  }
 
-	/**
-	 * Retrieves NodeRef of the node audited from his container. When creating
-	 * an item, it is not possible to extract his NodeRef directly.
-	 * 
-	 * @param container
-	 *            NodeRef of the node container
-	 * @param auditEntry
-	 *            AuditEntry object
-	 * @return NodeRef
-	 */
-	public NodeRef getAuditNodeRef(NodeRef container, AuditEntry auditEntry) {
-		NodeRef nodeRef = null;
-		NodeRef child;
-		switch (AuditAppEnum.valueOf(auditEntry.getAuditAppName())) {
-		case wiki:
-			nodeRef = nodeService.getChildByName(container, ContentModel.ASSOC_CONTAINS, auditEntry.getAuditObject());
-			break;
-		case blog:
-		case discussions:
-			child = SearchHelper.getFirstFromQuery("+PARENT:\"" + container.toString() + "\" +@cm\\:title:\"" + auditEntry.getAuditObject() + "\"");
-			if (child != null) {
-				nodeRef = child;
-			}
-			break;
-		case links:
-			child = SearchHelper.getFirstFromQuery("+PARENT:\"" + container.toString() + "\" +@lnk\\:title:\"" + auditEntry.getAuditObject() + "\"");
-			if (child != null) {
-				nodeRef = child;
-			}
-			break;
-		default:
-			break;
-		}
-		return nodeRef;
-	}
+  /**
+   * Retrieves NodeRef of the node audited from his container. When creating an item, it is not possible to extract his NodeRef directly.
+   * 
+   * @param container NodeRef of the node container
+   * @param auditEntry AuditEntry object
+   * @return NodeRef
+   */
+  public NodeRef getAuditNodeRef(NodeRef container, AuditEntry auditEntry) {
+    NodeRef nodeRef = null;
+    NodeRef child;
+    switch (AuditAppEnum.valueOf(auditEntry.getAuditAppName())) {
+      case wiki:
+        nodeRef = nodeService.getChildByName(container, ContentModel.ASSOC_CONTAINS, auditEntry.getAuditObject());
+        break;
+      case blog:
+      case discussions:
+        child = SearchHelper
+            .getFirstFromQuery("+PARENT:\"" + container.toString() + "\" +@cm\\:title:\"" + auditEntry.getAuditObject() + "\"");
+        if (child != null) {
+          nodeRef = child;
+        }
+        break;
+      case links:
+        child = SearchHelper
+            .getFirstFromQuery("+PARENT:\"" + container.toString() + "\" +@lnk\\:title:\"" + auditEntry.getAuditObject() + "\"");
+        if (child != null) {
+          nodeRef = child;
+        }
+        break;
+      default:
+        break;
+    }
+    return nodeRef;
+  }
 }

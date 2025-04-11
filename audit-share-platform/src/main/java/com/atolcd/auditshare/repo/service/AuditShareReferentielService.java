@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -24,7 +24,7 @@ import com.atolcd.auditshare.repo.xml.Group;
 
 public interface AuditShareReferentielService {
 
-  public static String auditShareReferentielNodeUUID = "auditshare-user-connections-groups";
+  public static final String auditShareReferentielNodeUUID = "auditshare-user-connections-groups";
 
   public List<Group> parseReferentielGroups(InputStream file);
 

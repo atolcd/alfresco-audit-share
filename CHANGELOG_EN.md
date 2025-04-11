@@ -7,6 +7,10 @@ Supported DBMS:
 - SQL Server
 - DB2
 
+## [Unreleased]
+### refactor
+- Refactoring java classes
+
 ## [2.2.1] - 2025-04-10
 ### Changed
 - Alfresco 23.4 Compatibility

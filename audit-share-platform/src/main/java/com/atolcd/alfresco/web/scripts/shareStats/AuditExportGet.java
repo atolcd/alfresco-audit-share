@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -55,16 +55,16 @@ import com.csvreader.CsvWriter;
 
 public class AuditExportGet extends AbstractWebScript implements InitializingBean {
   // Logger
-  private static final Log logger = LogFactory.getLog(AuditExportGet.class);
+  private static final Log             logger           = LogFactory.getLog(AuditExportGet.class);
 
-  private static final String MESSAGE_CSV_DATE = "csv.date";
-  private static final String MODEL_VALUES = "values";
-  private static final String PARAM_GROUPS = "groups";
+  private static final String          MESSAGE_CSV_DATE = "csv.date";
+  private static final String          MODEL_VALUES     = "values";
+  private static final String          PARAM_GROUPS     = "groups";
 
-  private SelectAuditsGet  wsSelectAudits;
-  private SiteService      siteService;
-  private SysAdminParams   sysAdminParams;
-  private AuthorityService authorityService;
+  private SelectAuditsGet              wsSelectAudits;
+  private SiteService                  siteService;
+  private SysAdminParams               sysAdminParams;
+  private AuthorityService             authorityService;
   private AuditShareReferentielService auditShareReferentielService;
 
   public void setSysAdminParams(SysAdminParams sysAdminParams) {
@@ -111,7 +111,7 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
         Charset charset = Charset.forName("UTF-8"); // ISO-8859-1
         CsvWriter csv = new CsvWriter(baos, ',', charset);
 
-        Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<>();
         AuditQueryParameters params = wsSelectAudits.buildParametersFromRequest(req);
 
         if (logger.isInfoEnabled()) {
@@ -145,7 +145,6 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
   }
 
   /**
-   *
    * @param model Model for template rendering
    * @param csv CsvWriter object used to add results into the model
    * @param params Audit query parameters
@@ -167,7 +166,7 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
       List<List<AuditCount>> auditCountsLists = (List<List<AuditCount>>) model.get("dates");
 
       // XXX: for the moment, no more than 3 actions per graphic per export
-      Map<String, Integer> actions = new HashMap<String, Integer>(3);
+      Map<String, Integer> actions = new HashMap<>(3);
       getAllActions(actions, auditCountsLists);
 
       String[] slicedDates = params.getSlicedDates().split(",");
@@ -179,8 +178,9 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
       // Put selected groups in parentheses
       if ("users-count".equals(type) && (req.getParameter(PARAM_GROUPS) != null && !req.getParameter(PARAM_GROUPS).isEmpty())) {
         String[] groupsToken = req.getParameter(PARAM_GROUPS).split(",");
-        List<String> libelles = new ArrayList<String>();
-        List<Group> groups = auditShareReferentielService.parseRefentielForNodeUUID(AuditShareReferentielService.auditShareReferentielNodeUUID);
+        List<String> libelles = new ArrayList<>();
+        List<Group> groups = auditShareReferentielService
+            .parseRefentielForNodeUUID(AuditShareReferentielService.auditShareReferentielNodeUUID);
 
         for (String group : groupsToken) {
           for (Group myGroup : groups) {
@@ -201,7 +201,8 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
 
         String selectedGroups = StringUtils.join(libelles, ",");
 
-        csv.writeRecord(new String[] { I18NUtil.getMessage(MESSAGE_CSV_DATE), I18NUtil.getMessage("csv." + type) + " (" + selectedGroups + ")" });
+        csv.writeRecord(
+            new String[] { I18NUtil.getMessage(MESSAGE_CSV_DATE), I18NUtil.getMessage("csv." + type) + " (" + selectedGroups + ")" });
 
       } else {
         csv.writeRecord(new String[] { I18NUtil.getMessage(MESSAGE_CSV_DATE), I18NUtil.getMessage("csv." + type) });
@@ -244,7 +245,6 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
   }
 
   /**
-   *
    * @param csv CsvWriter object used to write results
    * @param auditCounts Audit results
    * @param date Date
@@ -272,10 +272,8 @@ public class AuditExportGet extends AbstractWebScript implements InitializingBea
   }
 
   /**
-   *
    * @param timestamp Date timestamp
    * @param dateInterval Date interval
-   *
    * @return Date String
    */
   public String getStringDate(long timestamp, String dateInterval) {
