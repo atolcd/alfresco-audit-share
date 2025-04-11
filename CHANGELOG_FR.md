@@ -7,6 +7,10 @@ SGBD supportés :
 - SQL Server
 - DB2
 
+## [Unreleased]
+### refactor
+- Refactoring des classes java
+
 ## [2.2.1] - 2025-04-10
 ### Added
 - Traduction brésiliennes

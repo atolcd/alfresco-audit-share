@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -28,44 +28,42 @@ import org.springframework.util.Assert;
 
 public class SearchHelper implements InitializingBean {
 
-	private static SearchService searchService;
+  private static SearchService searchService;
 
-	public void setSearchService(SearchService searchService) {
-		SearchHelper.searchService = searchService;
-	}
+  public void setSearchService(SearchService searchService) {
+    SearchHelper.searchService = searchService;
+  }
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(searchService);
-	}
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    Assert.notNull(searchService);
+  }
 
-	/**
-	 * Execute Lucene query and return the first result (NodeRef). Return null
-	 * if there is no result
-	 * 
-	 * @param query
-	 *            String Lucene query
-	 * @return NodeRef
-	 */
-	static public NodeRef getFirstFromQuery(String query) {
-		NodeRef nodeRef = null;
-		SearchParameters sp = new SearchParameters();
-		sp.addStore(new StoreRef("workspace://SpacesStore"));
-		sp.setLanguage(SearchService.LANGUAGE_LUCENE);
-		sp.setQuery(query);
-		ResultSet results = null;
+  /**
+   * Execute Lucene query and return the first result (NodeRef). Return null if there is no result
+   *
+   * @param query String Lucene query
+   * @return NodeRef
+   */
+  static public NodeRef getFirstFromQuery(String query) {
+    NodeRef nodeRef = null;
+    SearchParameters sp = new SearchParameters();
+    sp.addStore(new StoreRef("workspace://SpacesStore"));
+    sp.setLanguage(SearchService.LANGUAGE_LUCENE);
+    sp.setQuery(query);
+    ResultSet results = null;
 
-		try {
-			results = searchService.query(sp);
-			if (results.length() > 0) {
-				ResultSetRow row = results.getRow(0);
-				nodeRef = row.getNodeRef();
-			}
-		} finally {
-			if (results != null) {
-				results.close();
-			}
-		}
-		return nodeRef;
-	}
+    try {
+      results = searchService.query(sp);
+      if (results.length() > 0) {
+        ResultSetRow row = results.getRow(0);
+        nodeRef = row.getNodeRef();
+      }
+    } finally {
+      if (results != null) {
+        results.close();
+      }
+    }
+    return nodeRef;
+  }
 }

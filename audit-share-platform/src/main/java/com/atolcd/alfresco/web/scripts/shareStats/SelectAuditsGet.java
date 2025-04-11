@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -54,30 +54,30 @@ import com.atolcd.alfresco.helper.PermissionsHelper;
 
 public class SelectAuditsGet extends DeclarativeWebScript implements InitializingBean {
   // Logger
-  private static final Log logger = LogFactory.getLog(SelectAuditsGet.class);
+  private static final Log   logger                    = LogFactory.getLog(SelectAuditsGet.class);
 
   // SqlMapClientTemplate for MyBatis calls
   private SqlSessionTemplate sqlSessionTemplate;
-  private NodeService nodeService;
-  private SiteService siteService;
-  private int limitMostReadOrUpdate;
+  private NodeService        nodeService;
+  private SiteService        siteService;
+  private int                limitMostReadOrUpdate;
 
-  public static final String SELECT_BY_VIEW = "alfresco.atolcd.audit.selectByRead";
-  public static final String SELECT_BY_CREATED = "alfresco.atolcd.audit.selectByCreated";
-  public static final String SELECT_BY_UPDATED = "alfresco.atolcd.audit.selectByUpdated";
-  public static final String SELECT_BY_DELETED = "alfresco.atolcd.audit.selectByDeleted";
-  public static final String SELECT_BY_MOSTREAD = "alfresco.atolcd.audit.special-queries.selectByMostRead";
-  public static final String SELECT_BY_MOSTUPDATED = "alfresco.atolcd.audit.special-queries.selectByMostUpdated";
-  public static final String SELECT_TO_UPDATE = "alfresco.atolcd.audit.selectEntriesToUpdate";
+  public static final String SELECT_BY_VIEW            = "alfresco.atolcd.audit.selectByRead";
+  public static final String SELECT_BY_CREATED         = "alfresco.atolcd.audit.selectByCreated";
+  public static final String SELECT_BY_UPDATED         = "alfresco.atolcd.audit.selectByUpdated";
+  public static final String SELECT_BY_DELETED         = "alfresco.atolcd.audit.selectByDeleted";
+  public static final String SELECT_BY_MOSTREAD        = "alfresco.atolcd.audit.special-queries.selectByMostRead";
+  public static final String SELECT_BY_MOSTUPDATED     = "alfresco.atolcd.audit.special-queries.selectByMostUpdated";
+  public static final String SELECT_TO_UPDATE          = "alfresco.atolcd.audit.selectEntriesToUpdate";
 
-  static final QName TYPE_DATALIST = QName.createQName("http://www.alfresco.org/model/datalist/1.0", "dataList");
-  static final QName TYPE_CALENDAR_EVENT = QName.createQName("http://www.alfresco.org/model/calendar", "calendarEvent");
-  static final QName PROP_CALENDAR_EVENT_WHAT = QName.createQName("http://www.alfresco.org/model/calendar", "whatEvent");
-  static final QName TYPE_LINK = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "link");
-  static final QName PROP_LINK_TITLE = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "title");
+  static final QName         TYPE_DATALIST             = QName.createQName("http://www.alfresco.org/model/datalist/1.0", "dataList");
+  static final QName         TYPE_CALENDAR_EVENT       = QName.createQName("http://www.alfresco.org/model/calendar", "calendarEvent");
+  static final QName         PROP_CALENDAR_EVENT_WHAT  = QName.createQName("http://www.alfresco.org/model/calendar", "whatEvent");
+  static final QName         TYPE_LINK                 = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "link");
+  static final QName         PROP_LINK_TITLE           = QName.createQName("http://www.alfresco.org/model/linksmodel/1.0", "title");
 
-  static final String MODEL_DATES_VARIABLE = "dates";
-  static final String MODEL_POPULARITY_VARIABLE = "popularity";
+  static final String        MODEL_DATES_VARIABLE      = "dates";
+  static final String        MODEL_POPULARITY_VARIABLE = "popularity";
 
   public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
     this.sqlSessionTemplate = sqlSessionTemplate;
@@ -108,7 +108,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
   @Override
   protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
     try {
-      Map<String, Object> model = new HashMap<String, Object>();
+      Map<String, Object> model = new HashMap<>();
       if (PermissionsHelper.isAuthorized(req)) {
         // Check for the sqlMapClientTemplate Bean
         if (this.sqlSessionTemplate != null) {
@@ -117,7 +117,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
           String type = req.getParameter("type");
           String stringLimit = req.getParameter("limit");
 
-          //Check if limit exist
+          // Check if limit exist
           if (stringLimit != null && !stringLimit.isEmpty()) {
             this.limitMostReadOrUpdate = Integer.parseInt(stringLimit);
           }
@@ -143,28 +143,27 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
     }
   }
 
-  public void checkForQuery(Map<String, Object> model, AuditQueryParameters params, String type) throws SQLException,
-      JSONException {
+  public void checkForQuery(Map<String, Object> model, AuditQueryParameters params, String type) throws SQLException, JSONException {
     switch (queryType.valueOf(type)) {
-    case read:
-      model.put(MODEL_DATES_VARIABLE, selectByDate(params, SELECT_BY_VIEW));
-      break;
-    case created:
-      model.put(MODEL_DATES_VARIABLE, selectByDate(params, SELECT_BY_CREATED));
-      break;
-    case deleted:
-      model.put(MODEL_DATES_VARIABLE, selectByDate(params, SELECT_BY_DELETED));
-      break;
-    case updated:
-      model.put(MODEL_DATES_VARIABLE, selectByDate(params, SELECT_BY_UPDATED));
-      break;
-    case mostread:
-      model.put(MODEL_POPULARITY_VARIABLE, selectByPopularity(params, SELECT_BY_MOSTREAD));
-      break;
-    case mostupdated:
-    default:
-      model.put(MODEL_POPULARITY_VARIABLE, selectByPopularity(params, SELECT_BY_MOSTUPDATED));
-      break;
+      case read:
+        model.put(MODEL_DATES_VARIABLE, selectByDate(params, SELECT_BY_VIEW));
+        break;
+      case created:
+        model.put(MODEL_DATES_VARIABLE, selectByDate(params, SELECT_BY_CREATED));
+        break;
+      case deleted:
+        model.put(MODEL_DATES_VARIABLE, selectByDate(params, SELECT_BY_DELETED));
+        break;
+      case updated:
+        model.put(MODEL_DATES_VARIABLE, selectByDate(params, SELECT_BY_UPDATED));
+        break;
+      case mostread:
+        model.put(MODEL_POPULARITY_VARIABLE, selectByPopularity(params, SELECT_BY_MOSTREAD));
+        break;
+      case mostupdated:
+      default:
+        model.put(MODEL_POPULARITY_VARIABLE, selectByPopularity(params, SELECT_BY_MOSTUPDATED));
+        break;
     }
   }
 
@@ -206,7 +205,7 @@ public class SelectAuditsGet extends DeclarativeWebScript implements Initializin
 
   public List<List<AuditCount>> selectByDate(AuditQueryParameters params, String query) {
     String[] dates = params.getSlicedDates().split(",");
-    List<List<AuditCount>> auditCount = new ArrayList<List<AuditCount>>();
+    List<List<AuditCount>> auditCount = new ArrayList<>();
     for (int i = 0; i < dates.length - 1; i++) {
       params.setDateFrom(dates[i]);
       params.setDateTo(dates[i + 1]);

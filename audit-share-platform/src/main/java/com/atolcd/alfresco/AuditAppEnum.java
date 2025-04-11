@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -18,5 +18,5 @@
 package com.atolcd.alfresco;
 
 public enum AuditAppEnum {
-	blog, calendar, dashboard, discussions, document, links, members, wiki
+  blog, calendar, dashboard, discussions, document, links, members, wiki
 }

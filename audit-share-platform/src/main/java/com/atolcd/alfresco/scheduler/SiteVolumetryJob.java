@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -38,18 +38,17 @@ public class SiteVolumetryJob extends AbstractScheduledLockedJob implements Stat
     JobDataMap jobData = context.getJobDetail().getJobDataMap();
     Object executerObj = jobData.get("jobExecuter");
     if (executerObj == null || !(executerObj instanceof SiteVolumetryJobExecuter)) {
-        throw new AlfrescoRuntimeException(
-                "SiteVolumetryJob data must contain valid 'Executer' reference");
+      throw new AlfrescoRuntimeException("SiteVolumetryJob data must contain valid 'Executer' reference");
     }
     final SiteVolumetryJobExecuter jobExecuter = (SiteVolumetryJobExecuter) executerObj;
     AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Object>() {
       public Object doWork() throws Exception {
-        logger.info("Start volumetry : "+new Date());
+        logger.info("Start volumetry : " + new Date());
         jobExecuter.execute();
-        logger.info("End volumetry : "+new Date());
+        logger.info("End volumetry : " + new Date());
         return null;
       }
-  }, AuthenticationUtil.getSystemUserName());
+    }, AuthenticationUtil.getSystemUserName());
   }
 
 }

@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -52,7 +52,7 @@ import org.springframework.util.Assert;
 public class AuditShareScriptExtension extends BaseProcessorExtension implements InitializingBean {
   private static final Log       logger                                    = LogFactory.getLog(AuditShareScriptExtension.class);
   public static final String     AUDITSHARE_CACHE_KEY                      = "AlfAuditShareKey";
-  public static final long       AUDITSHARE_CACHE_VALIDITY                 = 2 * 60 * 60 * 1000; // two hours
+  public static final long       AUDITSHARE_CACHE_VALIDITY                 = 2 * 60 * 60 * 1000;                                // two hours
   public static final String     AUDITSHARE_CACHE_DATE_KEY                 = "date";
   public static final String     AUDITSHARE_CACHE_IS_MANAGER_SITE_LIST_KEY = "sites";
   public static final String     WEBSCRIPT_SITE_LIST_URL                   = "/share-stats/site/list-sites?role=SiteManager";

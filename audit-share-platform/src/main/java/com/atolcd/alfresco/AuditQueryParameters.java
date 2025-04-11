@@ -1,4 +1,4 @@
-/*
+/*--
  * Copyright (C) 2018 Atol Conseils et Développements.
  * http://www.atolcd.com/
  *
@@ -113,7 +113,7 @@ public class AuditQueryParameters {
   public void setAppNames(String appNames) {
     if (appNames != null) {
       String[] appNamesToken = appNames.split(",");
-      this.appNames = new ArrayList<String>(appNamesToken.length);
+      this.appNames = new ArrayList<>(appNamesToken.length);
       for (String token : appNamesToken) {
         this.appNames.add(token);
       }
@@ -135,7 +135,7 @@ public class AuditQueryParameters {
   public void setActionNames(String actionNames) {
     if (actionNames != null) {
       String[] actionNamesToken = actionNames.split(",");
-      this.actionNames = new ArrayList<String>(actionNamesToken.length);
+      this.actionNames = new ArrayList<>(actionNamesToken.length);
       for (String token : actionNamesToken) {
         this.actionNames.add(token);
       }
@@ -157,7 +157,7 @@ public class AuditQueryParameters {
   public void setUserIds(String userIds) {
     if (userIds != null) {
       String[] userIdsToken = userIds.split(",");
-      this.userIds = new ArrayList<String>(userIdsToken.length);
+      this.userIds = new ArrayList<>(userIdsToken.length);
       for (String token : userIdsToken) {
         this.userIds.add(token);
       }
@@ -235,7 +235,7 @@ public class AuditQueryParameters {
   public void setNodeTypes(String nodeTypes) {
     if (nodeTypes != null) {
       String[] nodeTypesToken = nodeTypes.split(",");
-      this.nodeTypes = new ArrayList<String>(nodeTypesToken.length);
+      this.nodeTypes = new ArrayList<>(nodeTypesToken.length);
       for (String token : nodeTypesToken) {
         this.nodeTypes.add(token);
       }
@@ -257,7 +257,7 @@ public class AuditQueryParameters {
   public void setGroupsMembers(String groupsMembers) {
     if (groupsMembers != null) {
       String[] groupsMembersToken = groupsMembers.split(",");
-      this.groupsMembers = new ArrayList<String>(groupsMembersToken.length);
+      this.groupsMembers = new ArrayList<>(groupsMembersToken.length);
       for (String token : groupsMembersToken) {
         this.groupsMembers.add(token);
       }
