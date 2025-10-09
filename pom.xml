@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.atolcd.alfresco</groupId>
-  <artifactId>auditshare-251X</artifactId>
+  <artifactId>auditshare-252X</artifactId>
   <version>2.2.2-SNAPSHOT</version>
   <name>AuditShare</name>
   <description>Alfresco and Share modules - AuditShare</description>
@@ -22,10 +23,10 @@
     <!-- Properties used in dependency declarations, you don't need to change these -->
     <alfresco.groupId>org.alfresco</alfresco.groupId>
     <alfresco.bomDependencyArtifactId>acs-packaging</alfresco.bomDependencyArtifactId>
-    <alfresco.platform.version>25.1.0</alfresco.platform.version>
+    <alfresco.platform.version>25.2.0</alfresco.platform.version>
     <alfresco.platform.docker.user>alfresco</alfresco.platform.docker.user>
-    <alfresco.share.version>25.1.0.46</alfresco.share.version>
-    <alfresco.share.docker.version>25.1.0</alfresco.share.docker.version>
+    <alfresco.share.version>25.2.0.46</alfresco.share.version>
+    <alfresco.share.docker.version>25.2.0</alfresco.share.docker.version>
 
     <!-- Docker Enterprise images -->
     <docker.acs.image>quay.io/alfresco/alfresco-content-repository</docker.acs.image>
@@ -52,8 +53,9 @@
     <acs.port>8080</acs.port>
     <acs.debug.port>8888</acs.debug.port>
     <postgres.port>5555</postgres.port>
-    <!-- This parameter is only required for those cases in which ACS is not exposed in http://localhost:8080/alfresco (i.e. Windows Docker) -->
-    <test.acs.endpoint.path/>
+    <!-- This parameter is only required for those cases in which ACS is not exposed in
+    http://localhost:8080/alfresco (i.e. Windows Docker) -->
+    <test.acs.endpoint.path />
 
     <!-- Pour le build jenkins -->
     <java.version>17</java.version>
@@ -94,7 +96,10 @@
   </dependencies>
   <dependencyManagement>
     <dependencies>
-      <!-- This will import the dependencyManagement for all artifacts in the selected Alfresco platform. NOTE: You still need to define dependencies in your POM, but you can omit version as it's enforced by this dependencyManagement. NOTE: It defaults to the latest version this SDK pom has been tested with, but alfresco version can/should be overridden in your project's pom -->
+      <!-- This will import the dependencyManagement for all artifacts in the selected Alfresco
+      platform. NOTE: You still need to define dependencies in your POM, but you can omit version as
+      it's enforced by this dependencyManagement. NOTE: It defaults to the latest version this SDK
+      pom has been tested with, but alfresco version can/should be overridden in your project's pom -->
       <dependency>
         <groupId>${alfresco.groupId}</groupId>
         <artifactId>${alfresco.bomDependencyArtifactId}</artifactId>
@@ -102,7 +107,8 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <!-- Redefine the following Share dependencies as they have different version numbers than platform. They are defined in alfresco-platform-distribution... -->
+      <!-- Redefine the following Share dependencies as they have different version numbers than
+      platform. They are defined in alfresco-platform-distribution... -->
       <dependency>
         <groupId>${alfresco.groupId}</groupId>
         <artifactId>share</artifactId>
@@ -135,7 +141,8 @@
                     Build an AMP if 3rd party libs are needed by the extensions
                     JARs are the default artifact produced in your modules, if you want to build an amp for each module
                     you have to enable this plugin and inspect the src/main/assembly.xml file if you want to customize
-                    the layout of your AMP. The end result is that Maven will produce both a JAR file and an AMP with your
+                    the layout of your AMP. The end result is that Maven will produce both a JAR file and an AMP with
+        your
                     module.
                 -->
         <plugin>

@@ -12,6 +12,7 @@ SGBD supportés :
 - Refactoring des classes java
 ### Changed
 - Compatibilité Alfresco 25.1
+- Compatibilité Alfresco 25.2
 
 ## [2.2.1] - 2025-04-10
 ### Changed
