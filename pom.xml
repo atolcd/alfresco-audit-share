@@ -3,7 +3,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.atolcd.alfresco</groupId>
-  <artifactId>auditshare-234X</artifactId>
+  <artifactId>auditshare-251X</artifactId>
   <version>2.2.2-SNAPSHOT</version>
   <name>AuditShare</name>
   <description>Alfresco and Share modules - AuditShare</description>
@@ -22,10 +22,10 @@
     <!-- Properties used in dependency declarations, you don't need to change these -->
     <alfresco.groupId>org.alfresco</alfresco.groupId>
     <alfresco.bomDependencyArtifactId>acs-packaging</alfresco.bomDependencyArtifactId>
-    <alfresco.platform.version>23.4.1</alfresco.platform.version>
+    <alfresco.platform.version>25.1.0</alfresco.platform.version>
     <alfresco.platform.docker.user>alfresco</alfresco.platform.docker.user>
-    <alfresco.share.version>23.4.0.46</alfresco.share.version>
-    <alfresco.share.docker.version>23.4.1</alfresco.share.docker.version>
+    <alfresco.share.version>25.1.0.46</alfresco.share.version>
+    <alfresco.share.docker.version>25.1.0</alfresco.share.docker.version>
 
     <!-- Docker Enterprise images -->
     <docker.acs.image>quay.io/alfresco/alfresco-content-repository</docker.acs.image>
@@ -39,7 +39,7 @@
     <docker.activemq.image>alfresco/alfresco-activemq</docker.activemq.image>
 
     <!-- Alfresco search service -->
-    <alfresco.ass.version>2.0.12</alfresco.ass.version>
+    <alfresco.ass.version>2.0.16</alfresco.ass.version>
 
     <!-- ActiveMQ -->
     <activemq.version>5.18.6</activemq.version>
@@ -59,7 +59,7 @@
     <java.version>17</java.version>
 
     <!-- AMP modules -->
-    <support-tools.version>1.2.1.0</support-tools.version>
+    <support-tools.version>1.2.3.0</support-tools.version>
 
     <keystore.settings>
       -Dencryption.keystore.type=JCEKS

@@ -9,7 +9,7 @@
 
   <parent>
     <groupId>com.atolcd.alfresco</groupId>
-    <artifactId>auditshare-234X</artifactId>
+    <artifactId>auditshare-251X</artifactId>
     <version>2.2.2-SNAPSHOT</version>
   </parent>
 
@@ -19,17 +19,16 @@
   <dependencies>
     <dependency>
       <groupId>com.atolcd.alfresco</groupId>
-      <artifactId>auditshare-234X-share</artifactId>
+      <artifactId>auditshare-251X-share</artifactId>
       <version>2.2.2-SNAPSHOT</version>
     </dependency>
-    <!-- TEMPORARY COMMENT : Check Pull Request - Alfresco Content Services 23.4 compatibility : https://github.com/OrderOfTheBee/ootbee-support-tools/pull/215 -->
-    <!-- <dependency>
+    <dependency>
       <groupId>org.orderofthebee.support-tools</groupId>
       <artifactId>support-tools-share</artifactId>
       <version>${support-tools.version}</version>
       <classifier>amp</classifier>
       <type>amp</type>
-    </dependency> -->
+    </dependency>
     <!-- Uncomment this dependency if you already have the AMP in your M2_HOME folder
         or see the documentation for 3rd party amps installation: https://docs.alfresco.com/content-services/latest/develop/sdk/#installing3rdpartyamps
     <dependency>

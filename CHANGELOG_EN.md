@@ -10,6 +10,8 @@ Supported DBMS:
 ## [Unreleased]
 ### refactor
 - Refactoring java classes
+### Changed
+- Alfresco 25.1 Compatibility
 
 ## [2.2.1] - 2025-04-10
 ### Changed
