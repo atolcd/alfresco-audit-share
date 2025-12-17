@@ -13,6 +13,7 @@ SGBD supportés :
 ### Changed
 - Compatibilité Alfresco 25.1
 - Compatibilité Alfresco 25.2
+- Compatibilité Alfresco 25.3
 
 ## [2.2.1] - 2025-04-10
 ### Changed
