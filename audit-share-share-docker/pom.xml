@@ -9,7 +9,7 @@
 
   <parent>
     <groupId>com.atolcd.alfresco</groupId>
-    <artifactId>auditshare-253X</artifactId>
+    <artifactId>auditshare-25X</artifactId>
     <version>2.2.2-SNAPSHOT</version>
   </parent>
 
@@ -19,7 +19,7 @@
   <dependencies>
     <dependency>
       <groupId>com.atolcd.alfresco</groupId>
-      <artifactId>auditshare-253X-share</artifactId>
+      <artifactId>auditshare-${alfresco.compatibility.version}-share</artifactId>
       <version>2.2.2-SNAPSHOT</version>
     </dependency>
     <dependency>

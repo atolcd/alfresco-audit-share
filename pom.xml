@@ -4,7 +4,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.atolcd.alfresco</groupId>
-  <artifactId>auditshare-253X</artifactId>
+  <artifactId>auditshare-25X</artifactId>
   <version>2.2.2-SNAPSHOT</version>
   <name>AuditShare</name>
   <description>Alfresco and Share modules - AuditShare</description>
@@ -27,6 +27,7 @@
     <alfresco.platform.docker.user>alfresco</alfresco.platform.docker.user>
     <alfresco.share.version>25.3.0.56</alfresco.share.version>
     <alfresco.share.docker.version>25.3.0</alfresco.share.docker.version>
+    <alfresco.compatibility.version>25X</alfresco.compatibility.version>
 
     <!-- Docker Enterprise images -->
     <docker.acs.image>quay.io/alfresco/alfresco-content-repository</docker.acs.image>
