@@ -44,7 +44,7 @@
     <alfresco.ass.version>2.0.16</alfresco.ass.version>
 
     <!-- ActiveMQ -->
-    <activemq.version>5.18.6</activemq.version>
+    <activemq.version>5.19.6</activemq.version>
     <docker.activemq.version>5.18.6-jre17-rockylinux8</docker.activemq.version>
 
     <!-- Environment configuration properties -->
