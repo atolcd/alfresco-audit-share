@@ -11,22 +11,22 @@
   <packaging>pom</packaging>
 
   <prerequisites>
-    <maven>3.3.0</maven>
+    <maven>3.8.0</maven>
   </prerequisites>
 
   <properties>
     <!-- Alfresco Maven Plugin version to use -->
-    <alfresco.sdk.version>4.8.0</alfresco.sdk.version>
+    <alfresco.sdk.version>4.16.0</alfresco.sdk.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Properties used in dependency declarations, you don't need to change these -->
     <alfresco.groupId>org.alfresco</alfresco.groupId>
     <alfresco.bomDependencyArtifactId>acs-packaging</alfresco.bomDependencyArtifactId>
-    <alfresco.platform.version>25.3.0</alfresco.platform.version>
+    <alfresco.platform.version>25.4.0</alfresco.platform.version>
     <alfresco.platform.docker.user>alfresco</alfresco.platform.docker.user>
-    <alfresco.share.version>25.3.0.56</alfresco.share.version>
-    <alfresco.share.docker.version>25.3.0</alfresco.share.docker.version>
+    <alfresco.share.version>25.4.0.61</alfresco.share.version>
+    <alfresco.share.docker.version>25.4.0</alfresco.share.docker.version>
     <alfresco.compatibility.version>25X</alfresco.compatibility.version>
 
     <!-- Docker Enterprise images -->

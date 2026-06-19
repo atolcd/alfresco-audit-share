@@ -8,8 +8,13 @@ Supported DBMS:
 - DB2
 
 ## [Unreleased]
-### refactor
+### Changed
+- SDK 4.16 and Alfresco 25.4 Compatibility
+
+## [2.2.2] - 2026-03-26
+### Refactor
 - Refactoring java classes
+
 ### Changed
 - Alfresco 25.1 Compatibility
 - Alfresco 25.2 Compatibility

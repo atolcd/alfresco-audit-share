@@ -8,8 +8,13 @@ SGBD supportés :
 - DB2
 
 ## [Unreleased]
-### refactor
+### Changed
+- Migration SDK 4.16 et compatibilité Alfresco 25.4
+
+## [2.2.2] - 2026-03-26
+### Refactor
 - Refactoring des classes java
+
 ### Changed
 - Compatibilité Alfresco 25.1
 - Compatibilité Alfresco 25.2
