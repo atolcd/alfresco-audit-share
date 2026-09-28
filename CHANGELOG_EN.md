@@ -8,6 +8,8 @@ Supported DBMS:
 - DB2
 
 ## [Unreleased]
+
+## [2.2.3] - 2026-06-19
 ### Changed
 - SDK 4.16 and Alfresco 25.4 Compatibility
 
