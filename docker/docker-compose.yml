@@ -36,7 +36,7 @@ services:
       - audit-share-postgres
 
   audit-share-postgres:
-    image: postgres:15.4
+    image: postgres:16.6
     environment:
       POSTGRES_DB: alfresco
       POSTGRES_USER: alfresco
@@ -66,7 +66,7 @@ services:
       - audit-share-ass-volume:/opt/alfresco-search-services/data
 
   transform-core-aio:
-    image: client-docker-registry.atolcd.com/atolcd/hyland-base-images/transform-core:5.2.0-2.1.0
+    image: alfresco/alfresco-transform-core-aio:5.2.5
     environment:
       JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
       ACTIVEMQ_URL: "nio://activemq:61616"

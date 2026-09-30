@@ -12,25 +12,25 @@ start() {
     docker volume create audit-share-acs-volume
     docker volume create audit-share-db-volume
     docker volume create audit-share-ass-volume
-    docker-compose -f "$COMPOSE_FILE_PATH" up --build -d
+    docker compose -f "$COMPOSE_FILE_PATH" up --build -d
 }
 
 start_share() {
-    docker-compose -f "$COMPOSE_FILE_PATH" up --build -d audit-share-share
+    docker compose -f "$COMPOSE_FILE_PATH" up --build -d audit-share-share
 }
 
 start_acs() {
-    docker-compose -f "$COMPOSE_FILE_PATH" up --build -d audit-share-acs
+    docker compose -f "$COMPOSE_FILE_PATH" up --build -d audit-share-acs
 }
 
 start_ass() {
     docker volume create audit-share-ass-volume
-    docker-compose -f "$COMPOSE_FILE_PATH" up --build -d audit-share-ass
+    docker compose -f "$COMPOSE_FILE_PATH" up --build -d audit-share-ass
 }
 
 down() {
     if [ -f "$COMPOSE_FILE_PATH" ]; then
-        docker-compose -f "$COMPOSE_FILE_PATH" down
+        docker compose -f "$COMPOSE_FILE_PATH" down
     fi
 }
 
@@ -41,8 +41,8 @@ purge() {
 }
 
 purge_ass() {
-    docker-compose -f "$COMPOSE_FILE_PATH" kill audit-share-ass
-    yes | docker-compose -f "$COMPOSE_FILE_PATH" rm -f audit-share-ass
+    docker compose -f "$COMPOSE_FILE_PATH" kill audit-share-ass
+    yes | docker compose -f "$COMPOSE_FILE_PATH" rm -f audit-share-ass
     docker volume rm -f audit-share-ass-volume
 }
 
@@ -51,35 +51,35 @@ build() {
 }
 
 build_share() {
-    docker-compose -f "$COMPOSE_FILE_PATH" kill audit-share-share
-    yes | docker-compose -f "$COMPOSE_FILE_PATH" rm -f audit-share-share
+    docker compose -f "$COMPOSE_FILE_PATH" kill audit-share-share
+    yes | docker compose -f "$COMPOSE_FILE_PATH" rm -f audit-share-share
     $MVN_EXEC clean package -pl audit-share-share,audit-share-share-docker
 }
 
 build_acs() {
-    docker-compose -f "$COMPOSE_FILE_PATH" kill audit-share-acs
-    yes | docker-compose -f "$COMPOSE_FILE_PATH" rm -f audit-share-acs
+    docker compose -f "$COMPOSE_FILE_PATH" kill audit-share-acs
+    yes | docker compose -f "$COMPOSE_FILE_PATH" rm -f audit-share-acs
     $MVN_EXEC clean package -pl audit-share-platform,audit-share-platform-docker
 }
 
 tail() {
-    docker-compose -f "$COMPOSE_FILE_PATH" logs -f
+    docker compose -f "$COMPOSE_FILE_PATH" logs -f
 }
 
 tail_acs() {
-    docker-compose -f "$COMPOSE_FILE_PATH" logs -f audit-share-acs
+    docker compose -f "$COMPOSE_FILE_PATH" logs -f audit-share-acs
 }
 
 tail_share() {
-    docker-compose -f "$COMPOSE_FILE_PATH" logs -f audit-share-share
+    docker compose -f "$COMPOSE_FILE_PATH" logs -f audit-share-share
 }
 
 tail_ass() {
-    docker-compose -f "$COMPOSE_FILE_PATH" logs -f audit-share-ass
+    docker compose -f "$COMPOSE_FILE_PATH" logs -f audit-share-ass
 }
 
 tail_all() {
-    docker-compose -f "$COMPOSE_FILE_PATH" logs --tail="all"
+    docker compose -f "$COMPOSE_FILE_PATH" logs --tail="all"
 }
 
 ssh_acs() {

@@ -8,6 +8,7 @@ Supported DBMS:
 - DB2
 
 ## [Unreleased]
+- Alfresco 26.1 Compatibility
 
 ## [2.2.3] - 2026-06-19
 ### Changed
