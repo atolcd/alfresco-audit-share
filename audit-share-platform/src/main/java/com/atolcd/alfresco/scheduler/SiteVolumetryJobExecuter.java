@@ -19,6 +19,7 @@ package com.atolcd.alfresco.scheduler;
 
 import java.util.Date;
 
+import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.site.SiteService;
 import org.apache.commons.logging.Log;
@@ -34,6 +35,7 @@ public class SiteVolumetryJobExecuter {
   private InsertAuditPost  wsInsertAudits;
   protected SiteService    siteService;
   protected SearchService  searchService;
+  protected FileFolderService fileFolderService;
   protected int            batchSize;
 
   public SiteService getSiteService() {
@@ -52,6 +54,10 @@ public class SiteVolumetryJobExecuter {
     this.searchService = searchService;
   }
 
+  public void setFileFolderService(FileFolderService fileFolderService) {
+    this.fileFolderService = fileFolderService;
+  }
+
   public void setWsInsertAudits(InsertAuditPost wsInsertAudits) {
     this.wsInsertAudits = wsInsertAudits;
   }
@@ -67,6 +73,7 @@ public class SiteVolumetryJobExecuter {
   public void execute() {
     ShareStats shareStats = new ShareStats();
     shareStats.setSearchService(searchService);
+    shareStats.setFileFolderService(fileFolderService);
     shareStats.setWsInsertAudits(wsInsertAudits);
     shareStats.setSiteService(siteService);
     shareStats.setBatchSize(batchSize);

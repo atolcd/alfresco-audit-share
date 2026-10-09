@@ -17,15 +17,14 @@
  */
 package com.atolcd.alfresco.repo.jscript;
 
-import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.alfresco.model.ContentModel;
-import org.alfresco.repo.domain.node.ContentDataWithId;
 import org.alfresco.repo.jscript.BaseScopableProcessorExtension;
+import org.alfresco.service.cmr.model.FileFolderService;
+import org.alfresco.service.cmr.model.FileInfo;
+import org.alfresco.service.cmr.repository.ContentData;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.LimitBy;
 import org.alfresco.service.cmr.search.ResultSet;
@@ -59,6 +58,7 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
   private InsertAuditPost              wsInsertAudits;
   private SiteService                  siteService;
   private SearchService                searchService;
+  private FileFolderService            fileFolderService;
   private int                          batchSize;
   // SqlMapClientTemplate for MyBatis calls
   private SqlSessionTemplate           sqlSessionTemplate;
@@ -80,6 +80,10 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
 
   public void setSearchService(SearchService searchService) {
     this.searchService = searchService;
+  }
+
+  public void setFileFolderService(FileFolderService fileFolderService) {
+    this.fileFolderService = fileFolderService;
   }
 
   public int getBatchSize() {
@@ -110,6 +114,7 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
   public void afterPropertiesSet() throws Exception {
     Assert.notNull(siteService, "siteService must not be null");
     Assert.notNull(searchService, "searchService must not be null");
+    Assert.notNull(fileFolderService, "fileFolderService must not be null");
     Assert.notNull(wsInsertAudits, "wsInsertAudits must not be null");
     Assert.notNull(auditShareReferentielService, "auditShareReferentielService must not be null");
     Assert.notNull(sqlSessionTemplate, "sqlSessionTemplate must not be null");
@@ -255,9 +260,8 @@ public class ShareStats extends BaseScopableProcessorExtension implements Initia
 
         for (ResultSetRow rsr : rs) {
           // Useful to avoid nullpointer at the following line
-          @SuppressWarnings("unused")
-          Map<String, Serializable> mapValue = rsr.getValues();
-          ContentDataWithId docContent = (ContentDataWithId) rsr.getValue(ContentModel.PROP_CONTENT);
+          FileInfo docInfos = fileFolderService.getFileInfo(rsr.getNodeRef());
+          ContentData docContent = docInfos != null ? docInfos.getContentData() : null;
           if (docContent != null) {
             totalSize = totalSize + docContent.getSize();
             nbFile++;

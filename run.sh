@@ -11,7 +11,10 @@ fi
 start() {
     docker volume create audit-share-acs-volume
     docker volume create audit-share-db-volume
-    docker volume create audit-share-ass-volume
+    docker volume create audit-share-es-volume
+    docker volume create audit-share-amq_conf
+    docker volume create audit-share-amq_data
+    docker volume create audit-share-amq_logs
     docker compose -f "$COMPOSE_FILE_PATH" up --build -d
 }
 
@@ -23,9 +26,9 @@ start_acs() {
     docker compose -f "$COMPOSE_FILE_PATH" up --build -d audit-share-acs
 }
 
-start_ass() {
-    docker volume create audit-share-ass-volume
-    docker compose -f "$COMPOSE_FILE_PATH" up --build -d audit-share-ass
+start_es() {
+    docker volume create audit-share-es-volume
+    docker compose -f "$COMPOSE_FILE_PATH" up --build -d audit-share-es
 }
 
 down() {
@@ -37,13 +40,16 @@ down() {
 purge() {
     docker volume rm -f audit-share-acs-volume
     docker volume rm -f audit-share-db-volume
-    docker volume rm -f audit-share-ass-volume
+    docker volume rm -f audit-share-es-volume
+    docker volume rm -f audit-share-amq_conf
+    docker volume rm -f audit-share-amq_data
+    docker volume rm -f audit-share-amq_logs
 }
 
-purge_ass() {
-    docker compose -f "$COMPOSE_FILE_PATH" kill audit-share-ass
-    yes | docker compose -f "$COMPOSE_FILE_PATH" rm -f audit-share-ass
-    docker volume rm -f audit-share-ass-volume
+purge_es() {
+    docker compose -file "$COMPOSE_FILE_PATH" kill elasticsearch
+    yes | docker compose -f "$COMPOSE_FILE_PATH" rm -f elasticsearch
+    docker volume rm -f form-extras-es-volume
 }
 
 build() {
@@ -90,8 +96,10 @@ ssh_share() {
     docker exec -it docker_audit-share-share_1 /bin/bash
 }
 
-ssh_ass() {
-    docker exec -it docker_audit-share-ass_1 /bin/bash
+reindexing() {
+    docker compose down -f "$COMPOSE_FILE_PATH" reindexing
+    docker compose -f "$COMPOSE_FILE_PATH" up -d reindexing
+    docker compose -f "$COMPOSE_FILE_PATH" logs -f reindexing
 }
 
 case "$1" in
@@ -133,9 +141,6 @@ case "$1" in
   tail_share)
     tail_share
     ;;
-  tail_ass)
-    tail_ass
-    ;;
   reload_share)
     build_share
     start_share
@@ -155,11 +160,9 @@ case "$1" in
   ssh_share)
     ssh_share
     ;;
-  reindex_ass)
-    purge_ass
-    start_ass
-    tail_ass
+  reindex_es)
+    reindexing
     ;;
   *)
-    echo "Usage: $0 {build_start|start|stop|restart|reset|purge|tail|tail_acs|tail_share|tail_ass|reload_share|reload_acs|ssh_acs|ssh_ass|ssh_share|reindex_ass}"
+    echo "Usage: $0 {build_start|start|stop|restart|reset|purge|tail|tail_acs|tail_share|reload_share|reload_acs|ssh_acs|ssh_share|reindex_es}"
 esac

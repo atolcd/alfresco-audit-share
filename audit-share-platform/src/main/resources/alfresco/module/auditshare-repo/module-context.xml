@@ -142,6 +142,9 @@
     <property name="searchService">
       <ref bean="SearchService" />
     </property>
+    <property name="fileFolderService">
+      <ref bean="FileFolderService" />
+    </property>
     <property name="batchSize">
       <value>${share.stats.sites.volumetry.batchSize}</value>
     </property>

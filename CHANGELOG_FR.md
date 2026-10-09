@@ -8,6 +8,10 @@ SGBD supportés :
 - DB2
 
 ## [Unreleased]
+- Compatibilité Alfresco 26.2
+
+## [2.2.5] - 2026-10-07
+### Changed
 - Compatibilité Alfresco 26.1
 
 ## [2.2.3] - 2026-06-19
