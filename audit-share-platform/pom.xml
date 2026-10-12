@@ -9,7 +9,7 @@
   <parent>
     <groupId>com.atolcd.alfresco</groupId>
     <artifactId>auditshare-26X</artifactId>
-    <version>2.2.5-SNAPSHOT</version>
+    <version>2.2.6-SNAPSHOT</version>
   </parent>
 
   <properties>
